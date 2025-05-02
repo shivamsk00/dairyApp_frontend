@@ -1,0 +1,66 @@
+.formContainer{
+    width: 100%;
+    max-width: 500px;
+    height: 500px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    border-radius: 10px;
+    box-sizing: 0 0 10px black;
+}
+
+.loginText{
+    font-size: 40px;
+    font-weight: bold;
+    color: #444;
+}
+
+.inputBox{
+    width: 100%;
+    padding: 0 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+}
+
+.inputBox input{
+    width: 100%;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 0 20px;
+    outline: none;
+
+}
+
+.buttonBox{
+    width: 100%;
+    height: 40px;
+    padding: 0 30px;
+  }
+  
+  .buttonBox button{
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background-color: rgb(4, 148, 231);
+    font-size: 20px;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3 linear;
+  }
+
+  .buttonBox button:hover{
+    background-color: rgb(1, 42, 119);
+  }
+
+  .errorText {
+    color: red;
+    font-size: 13px;
+    margin-top: 4px;
+  }
