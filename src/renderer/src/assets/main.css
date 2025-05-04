@@ -20,16 +20,24 @@
   width: 100%;
   height: 100vh;
   background-color: rgb(51, 51, 51);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .mainContainer {
   width: 100%;
-  height: calc(100vh - 100px);
-  background-color: rgb(39, 22, 3);
+  height: 100vh;
+  /* background-color: #d0e4e5; */
+  background-color: #fff;
   display: flex;
   transition:
     all 0,
     3s linear;
+  padding: 20px;
+  flex-direction: column;
+  overflow-y: scroll;
 }
 
 /* LAYOUT CONTAINER STYLING END */
@@ -38,29 +46,48 @@
 .headerContainer {
   width: 100%;
   height: 50px;
-  background-color: #f3f3f3;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
 }
+
+.searchBox{
+  width: 300px;
+  height: 40px;
+  background-color: #F3F4EF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border:1px solid #e9e9e9;
+  padding: 0 20px;
+  gap: 10px;
+}
+
+.searchBox input{
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+
 /* HEADER CONTAINER STYLING END */
 
 /* SIDEBAR CONTAINER STYLING START */
 .sidebarContainer {
-  width: 100px;
+  width: 400px;
   height: 100%;
-  background-color: rgb(3, 1, 109);
+  background-color: #d0e4e5;
   transition: all 0.3s linear;
-  overflow: hidden;
-}
-
-.sidebarContainer.active {
-  width: 250px;
+  overflow-y:auto;
+  border-right: 1px solid rgb(179, 179, 179);
 }
 
 .sideBarProfileBox {
-  width: 100%;
+  width: 90%;
   height: 150px;
-  background-color: rgb(255, 255, 255);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,46 +95,37 @@
   gap: 20px;
 }
 
-.profileImgBox {
-  width: 80px;
-  height: 80px;
-  overflow: hidden;
-  border-radius: 50%;
-  border: 1px solid black;
+.sideBarProfileBox img {
+ width: 100%;
+ height: 100px;
 }
 
-.profileImgBox img {
+.sidebarListBox {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  padding: 10px;
 }
 
-.profileDetailsBox {
+
+
+.sidebarList {
   display: flex;
   flex-direction: column;
-  color: #000;
+  gap: 20px;
 }
 
-.profileDetailsBox h4 {
-  font-weight: bold;
-}
-
-.menuContainer{
-  width: 100%;
+.sidebarListItem {
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
-  flex-direction: column;
-  /* align-items: center;
-  justify-content: center; */
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 5px;
+}
+.sidebarListItem.active{
+  background-color: #0c828c;
+  color: #fff;
 }
 
-.list{
-  width: 100%;
-  display: flex;
 
-  background-color: red;
-  /* align-self: flex-start; */
-}
 /* SIDEBAR CONTAINER STYLING END */
-
-

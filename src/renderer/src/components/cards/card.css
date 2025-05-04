@@ -1,0 +1,26 @@
+.customCard {
+  box-shadow: 0 0 6px rgba(56, 56, 56, 0.253);
+  border-radius: 5px;
+  padding: 15px;
+  display: flex;
+}
+
+.cardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.cardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cardLeft h1 {
+  font-size: 30px;
+  font-weight: bold;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}

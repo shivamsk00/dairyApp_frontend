@@ -7,14 +7,13 @@ import Footer from './Footer';
 const Layout = () => {
   return (
     <div className='layoutContainer'>
-      <Header />
+      <Sidbar />
       <div className='mainContainer'>
-        <Sidbar />
+        <Header />
         <Outlet />
       </div>
-      <Footer />
     </div>
   );
 };
 
-export default Layout
+export default Layout 
