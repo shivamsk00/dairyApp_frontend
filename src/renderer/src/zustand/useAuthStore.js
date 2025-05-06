@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import api from './axiosConfig'  // 👈 yeh updated hai
+import api from './axiosConfig'
 
 const useAuthStore = create((set) => ({
   user: JSON.parse(localStorage.getItem('user')) || null,
@@ -7,26 +7,52 @@ const useAuthStore = create((set) => ({
   loading: false,
   error: null,
 
-  login: async (email, password) => {
-    set({ loading: true, error: null });
+  login: async ({ email, password }) => {
+    set({ loading: true, error: null })
     try {
-      const res = await api.post('/login', { email, password }); // 👈 axios ki jagah api
-      const { token, user } = res.data;
+      const loginData = {
+        email,
+        password
+      }
+      // Simulated user (you can replace with API call)
+      const res = await api.post('/login-admin', loginData)
+      console.log('res', res.data)
+      localStorage.setItem('token', res.data.token)
+      localStorage.setItem('user', JSON.stringify(res.data.admin))
 
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
-
-      set({ user, token, loading: false });
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return res.data
     } catch (err) {
-      set({ error: 'Invalid credentials', loading: false });
+      set({ error: 'Invalid credentials', loading: false })
     }
   },
 
-  logout: () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    set({ user: null, token: null });
-  }
-}));
+  logout: async () => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/logout')
+      console.log('logoout response', res.data)
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      set({ user: null, token: null, loading: false })
+      return res.data
+    } catch (error) {
+      console.log('ERROR IN LOGOUT API ', error)
+      set({ error: error, loading: false })
+    }
+  },
 
-export default useAuthStore;
+  changePassword: async (changePasswordData) => {
+    set({ loading: true })
+    try {
+      const res = await api.post('/change-password', changePasswordData)
+
+      set({ loading: false })
+      return res.data
+    } catch (error) {
+      console.log('ERROR IN CHANGE PASSWORD', error)
+    }
+  }
+}))
+
+export default useAuthStore

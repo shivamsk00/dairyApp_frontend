@@ -7,18 +7,18 @@ import {
     flexRender,
     createColumnHelper,
 } from '@tanstack/react-table';
-import { FaPen, FaTrashAlt, FaUser } from 'react-icons/fa';
+import { FaDotCircle, FaEye, FaPen, FaTrashAlt, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
 const data = [
-    { id: 1, name: 'Ramesh', phone: '9876543210', pan: "ADER672864" },
-    { id: 2, name: 'Suresh', phone: '9123456780', pan: "ADER672864" },
-    { id: 3, name: 'Mahesh', phone: '9812345678', pan: "ADER672864" },
-    { id: 4, name: 'Amit', phone: '9012345678', pan: "ADER672864" },
-    { id: 5, name: 'Anil', phone: '9823456781', pan: "ADER672864" },
-    { id: 6, name: 'Vijay', phone: '9934567890', pan: "ADER672864" },
+    { id: 1, name: 'Ramesh', phone: '9876543210', pan: "ADER672864", status: "active" },
+    { id: 2, name: 'Suresh', phone: '9123456780', pan: "ADER672864", status: "active" },
+    { id: 3, name: 'Mahesh', phone: '9812345678', pan: "ADER672864", status: "deactive" },
+    { id: 4, name: 'Amit', phone: '9012345678', pan: "ADER672864", status: "active" },
+    { id: 5, name: 'Anil', phone: '9823456781', pan: "ADER672864", status: "active" },
+    { id: 6, name: 'Vijay', phone: '9934567890', pan: "ADER672864", status: "deactive" },
 ];
 
 const CustomerList = () => {
@@ -42,14 +42,30 @@ const CustomerList = () => {
             cell: info => info.getValue(),
         }),
         columnHelper.accessor('pan', {
-            header: 'Pan',
+            header: 'Pan Card',
             cell: info => info.getValue(),
+        }),
+        columnHelper.display({
+            id: "status",
+            header: 'Status',
+            cell: ({ row }) => (
+                <div className="flex gap-3 justify-start items-center">
+                    <FaDotCircle color={row.original.status === "active" ? 'green' : 'red'} />
+                    <h1> {row.original.status}</h1>
+                </div>
+            ),
         }),
         columnHelper.display({
             id: 'actions',
             header: 'Actions',
             cell: ({ row }) => (
                 <div className="flex gap-2">
+                    <button
+                        className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                        onClick={() => alert(`Viewing ${row.original.name}`)}
+                    >
+                       <FaEye />
+                    </button>
                     <button
                         className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                         onClick={() => alert(`Viewing ${row.original.name}`)}
@@ -64,7 +80,10 @@ const CustomerList = () => {
                     </button>
                 </div>
             )
-        }),
+        }
+
+
+        ),
     ];
 
     const table = useReactTable({

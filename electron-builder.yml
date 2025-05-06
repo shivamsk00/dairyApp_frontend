@@ -12,6 +12,8 @@ asarUnpack:
   - resources/**
 win:
   executableName: dairyapp
+  sign: false
+
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

@@ -30,8 +30,7 @@
 :root {
   --btn-color: #0c828c;
   --bg-color: #d0e4e5;
-  --text-color:#fff;
-
+  --text-color: #fff;
 }
 
 *,
@@ -51,8 +50,13 @@ a {
   color: black;
 }
 
-button{
+button {
   background-color: #0c828c;
+  transition: 0.3s linear;
+}
+
+button:hover{
+  background-color: #09656d;
 }
 
 body {

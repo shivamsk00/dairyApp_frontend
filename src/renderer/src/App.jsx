@@ -1,7 +1,7 @@
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 import Login from './pages/auth/Login'
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Layout from './components/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
@@ -15,12 +15,11 @@ import PaymentLedgerPage from './pages/paymetLedger/PaymentLedgerPage';
 import ReportsPage from './pages/report/ReportsPage';
 import InventoryPage from './pages/inventory/InventoryPage';
 import AddCustomerPage from './pages/customer/AddCustomerPage';
+import ChangePassword from './pages/auth/ChangePassword';
 
 function App() {
-
-
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
 
@@ -44,12 +43,11 @@ function App() {
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="settings" element={<Setting />} />
           <Route path="addCustomer" element={<AddCustomerPage />} />
+          <Route path="changePassword" element={<ChangePassword />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
-
-
 }
 
-export default App
+export default App;

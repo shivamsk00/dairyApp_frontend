@@ -21,7 +21,7 @@ const Sidbar = () => {
       <div className="sidebarListBox">
         <ul className="sidebarList">
           <NavLink
-            to="/dashboard"
+            to="/"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
@@ -62,7 +62,7 @@ const Sidbar = () => {
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
-            <FaArrowTrendUp /> <span>Suppliers / Farmers</span>
+            <FaArrowTrendUp /> <span>Suppliers / Customer</span>
           </NavLink>
 
           <NavLink
@@ -110,14 +110,14 @@ const Sidbar = () => {
             <FaGear /> <span>Settings</span>
           </NavLink>
 
-          <NavLink
-            to="/logout"
+          {/* <NavLink
+            to="#"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
             <FaArrowRightFromBracket /> <span>Logout</span>
-          </NavLink>
+          </NavLink> */}
         </ul>
       </div>
 

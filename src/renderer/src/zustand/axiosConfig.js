@@ -1,17 +1,17 @@
 // axiosConfig.js
-import axios from 'axios';
+import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://yourapi.com', // 🟡 Yaha tumhari real API base URL daalo
-});
+  baseURL: 'https://dairy.islamicloves.com/api/' // 🟡 Yaha tumhari real API base URL daalo
+})
 
 // 🛡️ Token auto set karne ke liye interceptor
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`
   }
-  return config;
-});
+  return config
+})
 
-export default api;
+export default api

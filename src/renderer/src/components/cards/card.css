@@ -17,8 +17,8 @@
   gap: 10px;
 }
 .cardLeft h1 {
-  font-size: 30px;
-  font-weight: bold;
+  font-size: 25px;
+  font-weight: 400;
   display: flex;
   gap: 10px;
   align-items: center;
