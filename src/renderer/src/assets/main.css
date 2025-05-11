@@ -78,28 +78,33 @@
 }
 
 .headerProfileBox {
+  cursor: pointer;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 10px;
+}
+.headerProfileBox img {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  cursor: pointer;
-}
-.headerProfileBox img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
+  border: 1px solid black;
 }
 
 .profileCard {
   position: absolute;
   width: 200px;
   right: 0;
-  transform:scale(0) translateY(60px) ;
+  transform: scale(0) translateY(60px);
   /* visibility: hidden; */
   transition: 0.2s linear;
 }
 
 .profileCard.active {
-  transform:scale(1) translateY(0px) ;
+  transform: scale(1) translateY(0px);
   /* visibility: visible; */
 }
 /* HEADER CONTAINER STYLING END */

@@ -1,22 +1,29 @@
 import { create } from 'zustand'
 import api from './axiosConfig'
 
+// Safe JSON parse function
+const safeParse = (value) => {
+  try {
+    return value ? JSON.parse(value) : null
+  } catch (e) {
+    console.error('Invalid JSON in localStorage:', value)
+    return null
+  }
+}
+
 const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem('user')) || null,
-  token: localStorage.getItem('token') || null,
+  user: safeParse(localStorage.getItem('user')) || {},
+  token: localStorage.getItem('token') || '',
   loading: false,
   error: null,
 
   login: async ({ email, password }) => {
     set({ loading: true, error: null })
     try {
-      const loginData = {
-        email,
-        password
-      }
-      // Simulated user (you can replace with API call)
+      const loginData = { email, password }
       const res = await api.post('/login-admin', loginData)
-      console.log('res', res.data)
+      console.log('jjkjhgfjf', res)
+
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.admin))
 
@@ -24,6 +31,8 @@ const useAuthStore = create((set) => ({
       return res.data
     } catch (err) {
       set({ error: 'Invalid credentials', loading: false })
+
+      return err.response.data
     }
   },
 
@@ -31,14 +40,14 @@ const useAuthStore = create((set) => ({
     set({ loading: true, error: null })
     try {
       const res = await api.post('/logout')
-      console.log('logoout response', res.data)
+
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       set({ user: null, token: null, loading: false })
       return res.data
     } catch (error) {
-      console.log('ERROR IN LOGOUT API ', error)
-      set({ error: error, loading: false })
+      console.error('ERROR IN LOGOUT API', error)
+      set({ error, loading: false })
     }
   },
 
@@ -46,11 +55,11 @@ const useAuthStore = create((set) => ({
     set({ loading: true })
     try {
       const res = await api.post('/change-password', changePasswordData)
-
       set({ loading: false })
       return res.data
     } catch (error) {
-      console.log('ERROR IN CHANGE PASSWORD', error)
+      console.error('ERROR IN CHANGE PASSWORD', error)
+      set({ loading: false, error: 'Password change failed' })
     }
   }
 }))

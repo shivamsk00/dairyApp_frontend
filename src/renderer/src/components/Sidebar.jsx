@@ -74,6 +74,15 @@ const Sidbar = () => {
             <FaChartBar /> <span>Rate Chart</span>
           </NavLink>
 
+           <NavLink
+            to="/snfchart"
+            className={({ isActive }) =>
+              isActive ? 'sidebarListItem active' : 'sidebarListItem'
+            }
+          >
+            <FaChartBar /> <span>SNF Chart</span>
+          </NavLink>
+
           <NavLink
             to="/ledger"
             className={({ isActive }) =>

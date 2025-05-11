@@ -6,11 +6,13 @@ import profile from "../assets/profile.png"
 import useAuthStore from '../zustand/useAuthStore'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { MdEmail } from 'react-icons/md'
 
 const Header = () => {
     const [isToggleMenu, setIsToggleMenu] = useState(false)
     const logout = useAuthStore(state => state.logout)
     const loading = useAuthStore(state => state.loading)
+    const user = useAuthStore(state => state.user)
     const nav = useNavigate()
 
 
@@ -44,7 +46,10 @@ const Header = () => {
             </div>
             <div className="userProfile" >
                 <div className="headerProfileBox" onClick={() => setIsToggleMenu(!isToggleMenu)}>
+                    <h2 className='flex items-center justify-center gap-2'><MdEmail className='text-blue-500' size={25} /> {user.email}</h2>
                     <img src={profile} alt="" />
+
+
                 </div>
                 <div className={isToggleMenu ? `profileCard active flex flex-col  p-5 bg-white shadow-lg gap-3 border` : `profileCard flex flex-col  p-5 bg-white shadow-lg gap-3 border`}>
                     <button onClick={() => {

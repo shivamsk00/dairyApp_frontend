@@ -16,6 +16,7 @@ import ReportsPage from './pages/report/ReportsPage';
 import InventoryPage from './pages/inventory/InventoryPage';
 import AddCustomerPage from './pages/customer/AddCustomerPage';
 import ChangePassword from './pages/auth/ChangePassword';
+import SnfChartPage from './pages/snfchart/SnfChartPage';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="settings" element={<Setting />} />
           <Route path="addCustomer" element={<AddCustomerPage />} />
           <Route path="changePassword" element={<ChangePassword />} />
+           <Route path="snfchart" element={<SnfChartPage />} />
         </Route>
       </Routes>
     </HashRouter>

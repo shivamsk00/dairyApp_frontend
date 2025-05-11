@@ -71,7 +71,7 @@ const Login = () => {
             password: loginState.password
         });
 
-        if (res.status) {
+        if (res.status_code == 200) {
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -85,7 +85,21 @@ const Login = () => {
 
             });
             nav('/');
+        }else if(res.status_code == 401){
+            toast(res.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
+
+            });
         }
+
 
         console.log("in login page =====>", res)
     };
