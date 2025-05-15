@@ -71,7 +71,7 @@ const Login = () => {
             password: loginState.password
         });
 
-        if (res.status_code == 200) {
+        if (res.status == true) {
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -85,7 +85,7 @@ const Login = () => {
 
             });
             nav('/');
-        }else if(res.status_code == 401){
+        }else if(res.status == false){
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
