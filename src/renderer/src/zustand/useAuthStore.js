@@ -22,7 +22,7 @@ const useAuthStore = create((set) => ({
     try {
       const loginData = { email, password }
       const res = await api.post('/login-admin', loginData)
-      console.log('jjkjhgfjf', res)
+      console.log('Login response', res)
 
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.admin))
@@ -44,6 +44,7 @@ const useAuthStore = create((set) => ({
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       set({ user: null, token: null, loading: false })
+      console.log('res====>', res)
       return res.data
     } catch (error) {
       console.error('ERROR IN LOGOUT API', error)

@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import useHomeStore from '../../zustand/useHomeStore';
 
 const Chart = ({ formValues, trigger }) => {
+
+     const snfChartDataFetch = useHomeStore(state => state.snfChartDataFetch)
+
+
+
      const clrValues = Array.from({ length: 9 }, (_, i) => 22 + i); // 22 to 30
      const fatValues = Array.from({ length: 71 }, (_, i) => (3.0 + i * 0.1).toFixed(1)); // 3.0 to 10.0
 
@@ -20,6 +26,23 @@ const Chart = ({ formValues, trigger }) => {
           });
           setSnfTable(table);
      }, [formValues, trigger]); // recalculate when formValues or trigger changes
+
+
+     const fetchSnfData = async () => {
+          try {
+               const res = await snfChartDataFetch(snfTable);
+               console.log("response snf response",)
+
+          } catch (error) {
+
+          }
+     }
+
+
+     useEffect(() => {
+          fetchSnfData()
+
+     }, [])
 
      return (
           <section className="p-6 bg-gray-50">
