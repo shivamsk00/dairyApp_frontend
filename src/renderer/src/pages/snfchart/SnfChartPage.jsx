@@ -20,8 +20,7 @@ const SnfChartPage = () => {
 
      const handleSave = (e) => {
           e.preventDefault();
-          setSaveTrigger((prev) => prev + 1); // trigger Chart to recalculate
-          alert(`Saved!\nA: ${formValues.A}, B: ${formValues.B}, C: ${formValues.C}`);
+          setSaveTrigger(prev => prev + 1); // trigger Chart update
      };
 
      const handleReset = () => {

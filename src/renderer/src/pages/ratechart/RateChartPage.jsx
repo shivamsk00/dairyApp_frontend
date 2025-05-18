@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './ratechart.css';
-import useHomeStore from '../../zustand/useHomeStore,js';
+import useHomeStore from '../../zustand/useHomeStore';
+
 
 
 // Constants
@@ -24,6 +25,7 @@ const initialData = FAT_VALUES.map(fat => ({
 const RateChartPage = () => {
   const [rateData, setRateData] = useState(initialData);
   const rateChartDataFetch = useHomeStore(state => state.rateChartDataFetch);
+  const fetchRateChartData = useHomeStore(state => state.fetchRateChartData); // new zustand method
 
   const handleChange = (fatIndex, snfIndex, value) => {
     const updated = [...rateData];
@@ -37,17 +39,58 @@ const RateChartPage = () => {
         fat: row.fat,
         snfRates: row.snfRates.map(cell => ({
           snf: cell.snf,
-          rate: cell.rate !== '' ? parseFloat(cell.rate) : '', // optionally convert to number
+          rate: cell.rate !== '' ? parseFloat(cell.rate) : '',
         })),
       }));
 
-      await rateChartDataFetch({ rateData: cleanedData });
-      alert('Rates saved successfully!');
+      const updatedData = await rateChartDataFetch({ rateData: cleanedData });
+
+      if (updatedData) {
+        // Transform API response into the same format used by frontend
+        const transformedData = updatedData.map(item => ({
+          fat: parseFloat(item.fat),
+          snfRates: SNF_VALUES.map(snf => {
+            const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
+            return {
+              snf,
+              rate: item[key] ?? '',
+            };
+          }),
+        }));
+
+        setRateData(transformedData);
+        alert('Rates saved and updated!');
+      } else {
+        alert('Failed to fetch updated data.');
+      }
     } catch (error) {
       console.error('Error saving rate chart:', error);
       alert('Error saving rates.');
     }
   };
+
+  // Data show in Frontend table
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await fetchRateChartData();
+      if (data) {
+        const transformedData = data.map(item => ({
+          fat: parseFloat(item.fat),
+          snfRates: SNF_VALUES.map(snf => {
+            const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
+            return {
+              snf,
+              rate: item[key] ?? '',
+            };
+          }),
+        }));
+
+        setRateData(transformedData);
+      }
+    };
+
+    loadData();
+  }, []);
 
   return (
     <div className="rateChartContainer">
@@ -62,7 +105,7 @@ const RateChartPage = () => {
               <tr>
                 <th>FAT / SNF</th>
                 {SNF_VALUES.map(snf => (
-                  <th key={snf}>{snf}</th>
+                  <th key={snf}>{snf.toFixed(1)}</th>
                 ))}
               </tr>
             </thead>

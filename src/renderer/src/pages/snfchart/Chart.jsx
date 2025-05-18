@@ -30,19 +30,37 @@ const Chart = ({ formValues, trigger }) => {
 
      const fetchSnfData = async () => {
           try {
-               const res = await snfChartDataFetch(snfTable);
-               console.log("response snf response",)
+               const transformedData = fatValues.map((fat, rowIdx) => {
+                    const row = { fat: parseFloat(fat) };
+                    clrValues.forEach((clr, colIdx) => {
+                         row[`clr_${clr}`] = parseFloat(snfTable[rowIdx][colIdx]);
+                    });
+                    return row;
+               });
 
+               await snfChartDataFetch(transformedData);
+
+               // ✅ Show alert here after successful save
+               alert('SNF chart is updated successfully.');
           } catch (error) {
-
+               console.error('Error sending SNF data:', error);
+               alert('Failed to update SNF chart.');
           }
-     }
+     };
+
+
 
 
      useEffect(() => {
           fetchSnfData()
 
      }, [])
+
+     useEffect(() => {
+          if (trigger > 0) {
+               fetchSnfData();
+          }
+     }, [trigger]);
 
      return (
           <section className="p-6 bg-gray-50">
