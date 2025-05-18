@@ -41,7 +41,7 @@ const Chart = ({ formValues, trigger }) => {
                await snfChartDataFetch(transformedData);
 
                // ✅ Show alert here after successful save
-               alert('SNF chart is updated successfully.');
+               alert('SNF Formula & chart are updated successfully.');
           } catch (error) {
                console.error('Error sending SNF data:', error);
                alert('Failed to update SNF chart.');
@@ -51,10 +51,10 @@ const Chart = ({ formValues, trigger }) => {
 
 
 
-     useEffect(() => {
-          fetchSnfData()
+     // useEffect(() => {
+     //      fetchSnfData()
 
-     }, [])
+     // }, [])
 
      useEffect(() => {
           if (trigger > 0) {

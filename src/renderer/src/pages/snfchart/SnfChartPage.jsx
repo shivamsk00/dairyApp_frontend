@@ -41,8 +41,7 @@ const SnfChartPage = () => {
                     document.querySelector('iframe')?.contentWindow?.postMessage('triggerFetch', '*');
                }, 0);
 
-               // ✅ 4. Show success alert
-               alert(`SNF chart and formula updated successfully.`);
+
           } catch (error) {
                alert('Failed to update SNF formula or chart.');
           }
@@ -56,20 +55,20 @@ const SnfChartPage = () => {
           });
      };
      // Latest values for Snf Formulas
-      useEffect(() => {
-    const fetchFormula = async () => {
-      const data = await getSnfFormulaData();
-      if (data) {
-        setFormValues({
-          A: data.A,
-          B: data.B,
-          C: data.C,
-        });
-      }
-    };
+     useEffect(() => {
+          const fetchFormula = async () => {
+               const data = await getSnfFormulaData();
+               if (data) {
+                    setFormValues({
+                         A: data.A,
+                         B: data.B,
+                         C: data.C,
+                    });
+               }
+          };
 
-    fetchFormula();
-  }, []);
+          fetchFormula();
+     }, []);
 
      return (
           <>
