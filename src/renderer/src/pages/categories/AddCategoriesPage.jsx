@@ -2,23 +2,42 @@ import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import CommonBackButton from '../../components/CommonBackButton';
+import useHomeStore from '../../zustand/useHomeStore';
 
 const AddCategoriesPage = () => {
     const [categoryName, setCategoryName] = useState('');
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const addCategory = useHomeStore(state => state.addCategory)
 
     const navigate = useNavigate();
 
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
         if (!categoryName.trim()) {
             setError('Category name is required');
             return;
         }
+        const categoryData = {
+            name: categoryName
+        }
 
-        // Simulate successful add
-        setError('');
-        setShowSuccessModal(true);
+        try {
+            const res = await addCategory(categoryData);
+            console.log("add category response", res)
+            if (res.status_code == 200) {
+                // Simulate successful add
+                setError('');
+                setShowSuccessModal(true);
+            }else if(res.sta){
+                
+            }
+        } catch (error) {
+
+        }
+
+
+
+
     };
 
     const handleModalClose = () => {
@@ -29,7 +48,7 @@ const AddCategoriesPage = () => {
     return (
         <div className="p-6 w-full min-h-screen bg-gray-50 relative">
             {/* Styled Back Arrow */}
-           <CommonBackButton heading={"Add Category"} />
+            <CommonBackButton heading={"Add Category"} />
 
             <div className="max-w-2xl w-full mx-auto bg-white p-6 rounded shadow mt-12">
                 <h2 className="text-2xl font-bold mb-6">Add New Category</h2>

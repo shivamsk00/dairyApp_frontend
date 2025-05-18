@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useHomeStore from '../../zustand/useHomeStore';
 
 const CategoriesPage = () => {
+
+    const fetchCategory = useHomeStore(state => state.fetchCategory)
+
+
     const nav = useNavigate()
-    const [categories, setCategories] = useState([
-        { id: 1, name: 'Dairy Products', active: true },
-        { id: 2, name: 'Bakery Items', active: false },
-    ]);
+    const [categories, setCategories] = useState([]);
 
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [modalType, setModalType] = useState(null); // 'toggle', 'delete', 'edit'
@@ -35,10 +37,34 @@ const CategoriesPage = () => {
         closeModal();
     };
 
-    const handleEdit = () => {
+    const handleEdit = async() => {
         // You can extend this to submit the edit form
+        try {
+            
+        } catch (error) {
+            
+        }
         closeModal();
     };
+
+    const fetchCategoryData = async () => {
+        try {
+            const res = await fetchCategory();
+            console.log("response print fetch category data", res)
+            setCategories(res.data)
+
+        } catch (error) {
+
+        }
+    }
+
+    useEffect(() => {
+        fetchCategoryData()
+    }, [])
+
+
+
+
 
     return (
         <div className="p-4">
@@ -68,8 +94,8 @@ const CategoriesPage = () => {
                                     <button
                                         onClick={() => openModal('toggle', category)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium ${category.active
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-red-100 text-red-700'
                                             }`}
                                     >
                                         {category.active ? 'Active' : 'Inactive'}
