@@ -17,6 +17,8 @@ import InventoryPage from './pages/inventory/InventoryPage';
 import AddCustomerPage from './pages/customer/AddCustomerPage';
 import ChangePassword from './pages/auth/ChangePassword';
 import SnfChartPage from './pages/snfchart/SnfChartPage';
+import CategoreisPage from './pages/categories/CategoreisPage';
+import AddCategoriesPage from './pages/categories/AddCategoriesPage';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="category" element={<CategoreisPage />} />
+          <Route path="addcategory" element={<AddCategoriesPage />} />
           <Route path="customer" element={<CustomerPage />} />
           <Route path="milkcollection" element={<MilkCollectionPage />} />
           <Route path="milksales" element={<MilkSalesPage />} />

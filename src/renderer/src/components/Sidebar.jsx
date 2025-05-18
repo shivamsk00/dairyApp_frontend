@@ -28,6 +28,14 @@ const Sidbar = () => {
           >
             <MdOutlineDashboard /><span>Dashboard</span>
           </NavLink>
+          <NavLink
+            to="/category"
+            className={({ isActive }) =>
+              isActive ? 'sidebarListItem active' : 'sidebarListItem'
+            }
+          >
+            <MdOutlineDashboard /><span>Categories</span>
+          </NavLink>
 
           <NavLink
             to="/customer"

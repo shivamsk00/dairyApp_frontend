@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "./customer.css"
 import { FaArrowLeft } from 'react-icons/fa';
+import CommonBackButton from '../../components/CommonBackButton';
 const AddCustomerPage = () => {
     const navigate = useNavigate();
     const [form, setForm] = useState({
@@ -28,7 +29,7 @@ const AddCustomerPage = () => {
 
     return (
         <div className="w-full p-4 addCustomerContainer">
-            <div className="flex justify-start items-center mb-4 gap-3">
+            {/* <div className="flex justify-start items-center mb-4 gap-3">
                 <button
 
                     onClick={() => navigate(-1)} // or navigate('/customers')
@@ -37,7 +38,8 @@ const AddCustomerPage = () => {
                     <FaArrowLeft />
                 </button>
                 <h2 className="text-2xl font-bold">Add New Customer</h2>
-            </div>
+            </div> */}
+            <CommonBackButton heading={"Add Cutomer"} />
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 w-full space-y-4">
 
                 {/* Name and Phone */}

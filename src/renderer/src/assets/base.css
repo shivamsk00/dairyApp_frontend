@@ -55,7 +55,7 @@ button {
   transition: 0.3s linear;
 }
 
-button:hover{
+button:hover {
   background-color: #09656d;
 }
 
@@ -80,4 +80,14 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.commonBackButton {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 8px 20px;
+  color: white;
+  border-radius: 8px;
 }
