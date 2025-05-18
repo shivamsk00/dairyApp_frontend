@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Chart from './Chart';
+import useHomeStore from '../../zustand/useHomeStore';
 
 const SnfChartPage = () => {
      const [formValues, setFormValues] = useState({
@@ -9,7 +10,8 @@ const SnfChartPage = () => {
      });
 
      const [saveTrigger, setSaveTrigger] = useState(0);
-
+     const snfFormulaDataFetch = useHomeStore(state => state.snfFormulaDataFetch);
+     const getSnfFormulaData = useHomeStore(state => state.getSnfFormulaData);
      const handleChange = (e) => {
           const { name, value } = e.target;
           setFormValues({
@@ -18,9 +20,32 @@ const SnfChartPage = () => {
           });
      };
 
-     const handleSave = (e) => {
+     const handleSave = async (e) => {
           e.preventDefault();
-          setSaveTrigger(prev => prev + 1); // trigger Chart update
+
+          const formulaData = [
+               { A: parseFloat(formValues.A) },
+               { B: parseFloat(formValues.B) },
+               { C: parseFloat(formValues.C) },
+          ];
+
+          try {
+               // ✅ 1. Save SNF formula to backend
+               await snfFormulaDataFetch(formulaData);
+
+               // ✅ 2. Trigger SNF chart data generation
+               setSaveTrigger(prev => prev + 1); // will trigger Chart component to recalculate
+
+               // ✅ 3. Optionally send postMessage or reload iframe if needed
+               setTimeout(() => {
+                    document.querySelector('iframe')?.contentWindow?.postMessage('triggerFetch', '*');
+               }, 0);
+
+               // ✅ 4. Show success alert
+               alert(`SNF chart and formula updated successfully.`);
+          } catch (error) {
+               alert('Failed to update SNF formula or chart.');
+          }
      };
 
      const handleReset = () => {
@@ -30,6 +55,21 @@ const SnfChartPage = () => {
                C: 0.66,
           });
      };
+     // Latest values for Snf Formulas
+      useEffect(() => {
+    const fetchFormula = async () => {
+      const data = await getSnfFormulaData();
+      if (data) {
+        setFormValues({
+          A: data.A,
+          B: data.B,
+          C: data.C,
+        });
+      }
+    };
+
+    fetchFormula();
+  }, []);
 
      return (
           <>
