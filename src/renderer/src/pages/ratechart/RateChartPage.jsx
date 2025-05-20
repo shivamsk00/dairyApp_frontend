@@ -70,27 +70,55 @@ const RateChartPage = () => {
   };
 
   // Data show in Frontend table
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     const data = await fetchRateChartData();
+  //     if (data) {
+  //       const transformedData = data.map(item => ({
+  //         fat: parseFloat(item.fat),
+  //         snfRates: SNF_VALUES.map(snf => {
+  //           const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
+  //           return {
+  //             snf,
+  //             rate: item[key] ?? '',
+  //           };
+  //         }),
+  //       }));
+
+  //       setRateData(transformedData);
+  //     }
+  //   };
+
+  //   loadData();
+  // }, []);
+
+
   useEffect(() => {
-    const loadData = async () => {
-      const data = await fetchRateChartData();
-      if (data) {
-        const transformedData = data.map(item => ({
-          fat: parseFloat(item.fat),
-          snfRates: SNF_VALUES.map(snf => {
-            const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
-            return {
-              snf,
-              rate: item[key] ?? '',
-            };
-          }),
-        }));
+  const loadData = async () => {
+    const data = await fetchRateChartData();
+    console.log("Fetched data from backend:", data);
 
-        setRateData(transformedData);
-      }
-    };
+    // Merge backend data with full FAT list
+    const mergedData = FAT_VALUES.map(fatValue => {
+      const matched = data?.find(item => parseFloat(item.fat) === fatValue);
 
-    loadData();
-  }, []);
+      return {
+        fat: fatValue,
+        snfRates: SNF_VALUES.map(snf => {
+          const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
+          return {
+            snf,
+            rate: matched ? matched[key] ?? '' : '', // If no value, show blank
+          };
+        }),
+      };
+    });
+
+    setRateData(mergedData);
+  };
+
+  loadData();
+}, []);
 
   return (
     <div className="rateChartContainer">

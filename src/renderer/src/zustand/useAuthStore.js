@@ -35,6 +35,53 @@ const useAuthStore = create((set) => ({
       return err.response.data
     }
   },
+  register: async (adminData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/create-admin', adminData)
+      console.log('admin created', res)
+
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return res.data
+    } catch (error) {
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return err.response.data
+    }
+  },
+  otpVerify: async (verifyData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/verify-otp', verifyData)
+      console.log('admin created', res)
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+    } catch (error) {
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return err.response.data
+    }
+  },
+  sendOtpForgotPassword: async (email) => {
+    console.log('email in send otp forgot pass ', email)
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/send-otp-forget-password', email)
+      console.log('admin send otp for forgot password', res)
+      return res.data
+    } catch (error) {
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return err.response.data
+    }
+  },
+  changeForgotPassword: async (newPasswordData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/forget-password', newPasswordData)
+      console.log('admin forgot pasword', res)
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+    } catch (error) {
+      set({ user: res.data.admin, token: res.data.token, loading: false })
+      return err.response.data
+    }
+  },
 
   logout: async () => {
     set({ loading: true, error: null })

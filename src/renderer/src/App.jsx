@@ -19,12 +19,18 @@ import ChangePassword from './pages/auth/ChangePassword';
 import SnfChartPage from './pages/snfchart/SnfChartPage';
 import CategoreisPage from './pages/categories/CategoreisPage';
 import AddCategoriesPage from './pages/categories/AddCategoriesPage';
+import Register from './pages/auth/Register';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import SetForgotPasswordPage from './pages/auth/SetForgotPasswordPage';
 
 function App() {
   return (
     <HashRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot_password" element={<ForgotPasswordPage />} />
+        <Route path="/set_forgot_password" element={<SetForgotPasswordPage />} />
 
         <Route
           path="/"

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import "./auth.css";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../zustand/useAuthStore';
 import { toast } from 'react-toastify';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Login = () => {
     const nav = useNavigate();
@@ -10,6 +11,7 @@ const Login = () => {
     const loading = useAuthStore(state => state.loading);
     const user = useAuthStore(state => state.user);
     const token = useAuthStore(state => state.token);
+    const [showPassword, setShowPassword] = useState(false);
 
 
     const [loginState, setLoginState] = useState({
@@ -71,7 +73,7 @@ const Login = () => {
             password: loginState.password
         });
 
-        if (res.status == true) {
+        if (res.status_code == 200) {
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -85,7 +87,7 @@ const Login = () => {
 
             });
             nav('/');
-        }else if(res.status == false){
+        } else if (res.status == false) {
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -121,14 +123,35 @@ const Login = () => {
                 </div>
 
                 <div className="inputBox">
-                    <input
-                        type="password"
-                        placeholder="Enter your password"
-                        name="password"
-                        value={loginState.password}
-                        onChange={handleChange}
-                    />
+                    <div className="passwordInputWrapper" style={{ position: 'relative' }}>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your password"
+                            name="password"
+                            value={loginState.password}
+                            onChange={handleChange}
+                            style={{ paddingRight: '40px' }}
+                        />
+                        <span
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                cursor: 'pointer',
+                                color: '#999'
+                            }}
+                        >
+                            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </span>
+                    </div>
                     {errors.password && <p className="errorText">{errors.password}</p>}
+                    <div style={{ textAlign: 'right', marginTop: '4px' }}>
+                        <Link to="/forgot_password" className="text-blue-600 hover:underline text-sm">
+                            Forgot password?
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="checkBox">
@@ -145,6 +168,12 @@ const Login = () => {
                     <button disabled={loading} onClick={handleLogin}>
                         {loading ? "Loading..." : "Login"}
                     </button>
+                </div>
+                <div className="mt-4 text-center">
+                    <span className="text-gray-600">Don't have an account?</span>{' '}
+                    <Link to="/register" className="text-blue-600 hover:underline font-medium">
+                        Register
+                    </Link>
                 </div>
             </div>
         </div>

@@ -20,7 +20,7 @@ const Header = () => {
         const res = await logout()
         console.log("------>", res)
 
-        if (res.status) {
+        if (res.status_code == 200) {
 
             toast(res.message, {
                 position: "top-right",
