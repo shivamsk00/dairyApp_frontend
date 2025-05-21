@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./customer.css"
+import "./customer.css";
 import { FaArrowLeft } from 'react-icons/fa';
 import CommonBackButton from '../../components/CommonBackButton';
+import useHomeStore from '../../zustand/useHomeStore';
+
 const AddCustomerPage = () => {
+    const [error, setError] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const navigate = useNavigate();
+
+    const addCustomer = useHomeStore(state => state.addCustomer);
+
     const [form, setForm] = useState({
         name: '',
-        phone: '',
+        mobile: '',
         email: '',
         address: '',
         city: '',
         pincode: '',
-        contact: '',
+        contact_person: '',
         designation: '',
-        pan: '',
+        pan_number: '',
         state: '',
     });
 
@@ -22,26 +29,70 @@ const AddCustomerPage = () => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Customer Data:", form);
+        setError('');
+
+        try {
+            const response = await addCustomer(form);
+            console.log("API Response:", response);
+
+            if (response && response.message === "Customer added successfully") {
+                setShowSuccessModal(true);
+
+                // Optional: Clear the form
+                setForm({
+                    name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    city: '',
+                    pincode: '',
+                    contact: '',
+                    designation: '',
+                    pan: '',
+                    state: '',
+                });
+
+                // Navigate to /customer after 2 seconds
+                setTimeout(() => {
+                    navigate('/customer');
+                }, 2000);
+            } else {
+                setError(response?.message || 'Failed to add customer. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error adding customer:', error);
+            setError('An unexpected error occurred.');
+        }
     };
+
+
 
     return (
         <div className="w-full p-4 addCustomerContainer">
-            {/* <div className="flex justify-start items-center mb-4 gap-3">
-                <button
+            <CommonBackButton heading={"Add Customer"} />
 
-                    onClick={() => navigate(-1)} // or navigate('/customers')
-                    className="addUserBackBtn"
-                >
-                    <FaArrowLeft />
-                </button>
-                <h2 className="text-2xl font-bold">Add New Customer</h2>
-            </div> */}
-            <CommonBackButton heading={"Add Cutomer"} />
+            {error && (
+                <div className="text-red-600 font-medium mb-4">{error}</div>
+            )}
+
+            {showSuccessModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 shadow-md text-center space-y-4">
+                        <h2 className="text-xl font-semibold text-green-600">Customer Added Successfully</h2>
+                        <button
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            onClick={() => navigate('/customer')}
+                        >
+                            Go to Customer List
+                        </button>
+                    </div>
+                </div>
+            )}
+
+
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 w-full space-y-4">
-
                 {/* Name and Phone */}
                 <div className="w-full flex flex-col md:flex-row gap-4">
                     <div className="w-full">
@@ -63,8 +114,8 @@ const AddCustomerPage = () => {
                         </label>
                         <input
                             type="text"
-                            name="phone"
-                            value={form.phone}
+                            name="mobile"
+                            value={form.mobile}
                             onChange={handleChange}
                             required
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
@@ -122,8 +173,8 @@ const AddCustomerPage = () => {
                         <label className="block text-sm font-medium text-gray-700">Contact Person</label>
                         <input
                             type="text"
-                            name="contact"
-                            value={form.contact}
+                            name="contact_person"
+                            value={form.contact_person}
                             onChange={handleChange}
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />
@@ -142,8 +193,8 @@ const AddCustomerPage = () => {
                         <label className="block text-sm font-medium text-gray-700">PAN Number</label>
                         <input
                             type="text"
-                            name="pan"
-                            value={form.pan}
+                            name="pan_number"
+                            value={form.pan_number}
                             onChange={handleChange}
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />
@@ -163,9 +214,8 @@ const AddCustomerPage = () => {
                 {/* Submit */}
                 <div className="w-full">
                     <button
-
                         type="submit"
-                        className="w-full addUserBtn text-white py-2 px-4 rounded "
+                        className="w-full addUserBtn text-white py-2 px-4 rounded"
                     >
                         Add Customer
                     </button>
