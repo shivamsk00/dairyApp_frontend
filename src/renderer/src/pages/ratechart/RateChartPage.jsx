@@ -7,7 +7,7 @@ import useHomeStore from '../../zustand/useHomeStore';
 // Constants
 const SNF_VALUES = [8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0];
 const FAT_VALUES = [
-  3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1,
+ 3.0,3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1,
   4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0, 5.1,
   5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1,
   6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 7.0, 7.1,
@@ -42,6 +42,10 @@ const RateChartPage = () => {
           rate: cell.rate !== '' ? parseFloat(cell.rate) : '',
         })),
       }));
+
+      console.log("clenateData", cleanedData)
+
+      // return
 
       const updatedData = await rateChartDataFetch({ rateData: cleanedData });
 

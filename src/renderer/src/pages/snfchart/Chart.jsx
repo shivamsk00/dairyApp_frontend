@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 
 const Chart = ({ formValues, trigger }) => {
-
-     const snfChartDataFetch = useHomeStore(state => state.snfChartDataFetch)
-
-
+     const snfChartDataFetch = useHomeStore(state => state.snfChartDataFetch);
 
      const clrValues = Array.from({ length: 9 }, (_, i) => 22 + i); // 22 to 30
      const fatValues = Array.from({ length: 71 }, (_, i) => (3.0 + i * 0.1).toFixed(1)); // 3.0 to 10.0
@@ -14,47 +11,48 @@ const Chart = ({ formValues, trigger }) => {
 
      const calculateSnf = (clr, fat, A, B, C) => {
           const snf = (clr / A) + (B * fat) + Number(C);
-          return (Math.round(snf * 10) / 10).toFixed(1); // round to one decimal, always show .0
+          return (Math.round(snf * 10) / 10).toFixed(1); // round to one decimal
      };
 
+     // Recalculate SNF table whenever formula values or trigger change
      useEffect(() => {
+          // Prevent calculation if formula values are invalid
+          if (
+               isNaN(formValues.A) ||
+               isNaN(formValues.B) ||
+               isNaN(formValues.C)
+          ) {
+               setSnfTable([]); // Reset table if formula is invalid
+               return;
+          }
+
           const table = fatValues.map(fat => {
                return clrValues.map(clr => {
                     const snf = calculateSnf(clr, parseFloat(fat), formValues.A, formValues.B, formValues.C);
                     return snf;
                });
           });
-          setSnfTable(table);
-     }, [formValues, trigger]); // recalculate when formValues or trigger changes
 
+          setSnfTable(table);
+     }, [formValues, trigger]);
 
      const fetchSnfData = async () => {
           try {
                const transformedData = fatValues.map((fat, rowIdx) => {
                     const row = { fat: parseFloat(fat) };
                     clrValues.forEach((clr, colIdx) => {
-                         row[`clr_${clr}`] = parseFloat(snfTable[rowIdx][colIdx]);
+                         row[`clr_${clr}`] = parseFloat(snfTable[rowIdx]?.[colIdx] ?? 0);
                     });
                     return row;
                });
 
                await snfChartDataFetch(transformedData);
-
-               // ✅ Show alert here after successful save
                alert('SNF Formula & chart are updated successfully.');
           } catch (error) {
                console.error('Error sending SNF data:', error);
                alert('Failed to update SNF chart.');
           }
      };
-
-
-
-
-     // useEffect(() => {
-     //      fetchSnfData()
-
-     // }, [])
 
      useEffect(() => {
           if (trigger > 0) {
@@ -83,7 +81,8 @@ const Chart = ({ formValues, trigger }) => {
                                         <td className="px-6 py-4 text-sm text-gray-800">{fat}</td>
                                         {clrValues.map((clr, colIdx) => (
                                              <td key={clr} className="px-6 py-4 text-sm text-gray-800 text-center">
-                                                  {snfTable[rowIdx]?.[colIdx]}
+                                                  {/* ✅ Avoid undefined value warning */}
+                                                  {snfTable[rowIdx]?.[colIdx] ?? ''}
                                              </td>
                                         ))}
                                    </tr>

@@ -148,7 +148,7 @@ const CategoriesPage = () => {
         try {
             const res = await fetchCategory();
             console.log("response print fetch category data", res)
-            setCategories(res.data)
+            setCategories(res.data.data)
 
 
         } catch (error) {

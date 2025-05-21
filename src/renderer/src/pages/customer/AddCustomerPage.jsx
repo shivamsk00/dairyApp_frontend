@@ -34,10 +34,10 @@ const AddCustomerPage = () => {
         setError('');
 
         try {
-            const response = await addCustomer(form);
-            console.log("API Response:", response);
+            const res = await addCustomer(form);
+            console.log("API Response:", res);
 
-            if (response && response.message === "Customer added successfully") {
+            if (res.status_code == 200) {
                 setShowSuccessModal(true);
 
                 // Optional: Clear the form
@@ -55,11 +55,9 @@ const AddCustomerPage = () => {
                 });
 
                 // Navigate to /customer after 2 seconds
-                setTimeout(() => {
-                    navigate('/customer');
-                }, 2000);
+                navigate('/customer');
             } else {
-                setError(response?.message || 'Failed to add customer. Please try again.');
+                setError(res?.message || 'Failed to add customer. Please try again.');
             }
         } catch (error) {
             console.error('Error adding customer:', error);

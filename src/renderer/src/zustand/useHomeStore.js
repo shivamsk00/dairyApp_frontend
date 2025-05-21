@@ -12,7 +12,7 @@ const useHomeStore = create((set) => ({
     try {
       const token = localStorage.getItem('token')
       const res = await api.post('/snf-chart/save', { data: snfData })
-      console.log('response save snf data', res)
+      console.log('response save snf data return', res)
       return res.data
     } catch (error) {
       console.log('ERROR IN SNF CHART DATA', error)
@@ -59,6 +59,7 @@ const useHomeStore = create((set) => ({
   getSnfFormulaData: async () => {
     try {
       const res = await api.get('/snf-formula/latest')
+      console.log('snf ', res)
       return res.data.data // should return { A: ..., B: ..., C: ... }
     } catch (error) {
       console.error('Failed to fetch SNF formula', error)
@@ -116,7 +117,7 @@ const useHomeStore = create((set) => ({
   // updateCategoryStatus
   deleteCategory: async (categroy_id) => {
     try {
-      const res = await api.post(`/update-status-category/${categroy_id}`)
+      const res = await api.post(`/delete-product-category/${categroy_id}`)
       return res.data
     } catch (error) {
       console.log('Error product category add:', error)

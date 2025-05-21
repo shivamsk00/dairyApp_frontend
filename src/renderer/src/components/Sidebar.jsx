@@ -61,7 +61,7 @@ const Sidbar = () => {
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
-            <FaMoneyBillTrendUp /> <span>Milk Sales</span>
+            <FaMoneyBillTrendUp /> <span>Milk Dispatch</span>
           </NavLink>
 
           <NavLink
@@ -70,7 +70,7 @@ const Sidbar = () => {
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
-            <FaArrowTrendUp /> <span>Suppliers / Customer</span>
+            <FaArrowTrendUp /> <span>Open Milk Sale</span>
           </NavLink>
 
           <NavLink
