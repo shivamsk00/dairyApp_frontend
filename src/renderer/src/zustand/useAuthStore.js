@@ -35,7 +35,7 @@ const useAuthStore = create((set) => ({
       return err.response.data
     }
   },
-  register: async (adminData) => {
+  register_sendOtp: async (adminData) => {
     set({ loading: true, error: null })
     try {
       const res = await api.post('/create-admin', adminData)
@@ -44,19 +44,24 @@ const useAuthStore = create((set) => ({
       set({ user: res.data.admin, token: res.data.token, loading: false })
       return res.data
     } catch (error) {
-      set({ user: res.data.admin, token: res.data.token, loading: false })
-      return err.response.data
+      set({ loading: false })
+      return error.response.data
     }
   },
-  otpVerify: async (verifyData) => {
+
+  register_otpVerify: async (verifyData) => {
     set({ loading: true, error: null })
     try {
       const res = await api.post('/verify-otp', verifyData)
       console.log('admin created', res)
-      set({ user: res.data.admin, token: res.data.token, loading: false })
+      set({ loading: false })
+      localStorage.setItem('rememberEmail',"")
+      return res.data
     } catch (error) {
-      set({ user: res.data.admin, token: res.data.token, loading: false })
+      set({ loading: false })
       return err.response.data
+    } finally {
+      set({ loading: false })
     }
   },
   sendOtpForgotPassword: async (email) => {
@@ -65,37 +70,28 @@ const useAuthStore = create((set) => ({
     try {
       const res = await api.post('/send-otp-forget-password', email)
       console.log('admin send otp for forgot password', res)
+      set({ loading: false, error: null })
       return res.data
     } catch (error) {
-      set({ user: res.data.admin, token: res.data.token, loading: false })
+      set({ loading: false })
       return err.response.data
+    } finally {
+      set({ loading: false })
     }
   },
+  // CHAN
   changeForgotPassword: async (newPasswordData) => {
     set({ loading: true, error: null })
     try {
       const res = await api.post('/forget-password', newPasswordData)
       console.log('admin forgot pasword', res)
-      set({ user: res.data.admin, token: res.data.token, loading: false })
-    } catch (error) {
-      set({ user: res.data.admin, token: res.data.token, loading: false })
-      return err.response.data
-    }
-  },
-
-  logout: async () => {
-    set({ loading: true, error: null })
-    try {
-      const res = await api.post('/logout')
-
-      localStorage.removeItem('user')
-      localStorage.removeItem('token')
-      set({ user: null, token: null, loading: false })
-      console.log('res====>', res)
+      set({ loading: false })
       return res.data
     } catch (error) {
-      console.error('ERROR IN LOGOUT API', error)
-      set({ error, loading: false })
+      set({ loading: false })
+      return err.response.data
+    } finally {
+      set({ loading: false })
     }
   },
 
@@ -108,6 +104,21 @@ const useAuthStore = create((set) => ({
     } catch (error) {
       console.error('ERROR IN CHANGE PASSWORD', error)
       set({ loading: false, error: 'Password change failed' })
+    }
+  },
+
+  logout: async () => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/logout')
+
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      set({ user: null, token: null, loading: false })
+      return res.data
+    } catch (error) {
+      console.error('ERROR IN LOGOUT API', error)
+      set({ error, loading: false })
     }
   }
 }))

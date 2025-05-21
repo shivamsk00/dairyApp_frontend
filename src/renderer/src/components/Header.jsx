@@ -34,10 +34,10 @@ const Header = () => {
                 type: 'success'
 
             });
+
+
         }
     }
-
-
     return (
         <div className='headerContainer'>
             <div className="searchBox">
@@ -56,6 +56,8 @@ const Header = () => {
                         nav("/changePassword")
                         setIsToggleMenu(false)
                     }} className='px-2 py-2 text-white rounded-md text-sm'>Change password</button>
+
+
                     <button onClick={handleLogout} className='bg-red-600 text-white px-2 py-1 rounded-md text-sm'>{
                         loading ? "Please wait..." : "Log out"
                     } </button>

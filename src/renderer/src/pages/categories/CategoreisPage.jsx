@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
 
 const CategoriesPage = () => {
 
-    const fetchCategory = useHomeStore(state => state.fetchCategory)
+    const fetchCategory = useHomeStore(state => state.fetchCategory);
+    const updateCategoryStatus = useHomeStore(state => state.updateCategoryStatus);
+    const updateCategory = useHomeStore(state => state.updateCategory);
 
 
     const nav = useNavigate()
     const [categories, setCategories] = useState([]);
 
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categoryEdit, setCategoryEdit] = useState('')
     const [modalType, setModalType] = useState(null); // 'toggle', 'delete', 'edit'
 
     const openModal = (type, category) => {
         setSelectedCategory(category);
         setModalType(type);
+        setCategoryEdit(category.name)
     };
 
     const closeModal = () => {
@@ -23,13 +28,56 @@ const CategoriesPage = () => {
         setModalType(null);
     };
 
-    const handleToggleStatus = () => {
-        setCategories((prev) =>
-            prev.map((cat) =>
-                cat.id === selectedCategory.id ? { ...cat, active: !cat.active } : cat
-            )
-        );
-        closeModal();
+    // UPDATE CATEGORY STATUS
+    const handleToggleStatus = async () => {
+        try {
+            const res = await updateCategoryStatus(selectedCategory.id);
+            console.log("status update", res)
+            if (res.status_code == 200) {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
+
+                });
+                closeModal();
+                fetchCategoryData()
+            } else {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+                });
+            }
+        } catch (error) {
+            toast(error, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
+
+            });
+
+        }
+
     };
 
     const handleDelete = () => {
@@ -37,14 +85,63 @@ const CategoriesPage = () => {
         closeModal();
     };
 
-    const handleEdit = async() => {
-        // You can extend this to submit the edit form
+
+    // CATEGORY UPDATE
+    const handleEdit = async () => {
+
+        console.log("categoryEdit", categoryEdit)
+        console.log("selectedCategory", selectedCategory)
         try {
-            
+            const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
+            // console.log("edit category ", res)
+            if (res.status_code == 200) {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
+
+                });
+                closeModal();
+                fetchCategoryData()
+
+            } else {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+                });
+
+            }
+
         } catch (error) {
-            
+            console.log("ERROR IN CATEGORY UPDATE", error);
+            toast(error, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
+
+            });
+
         }
-        closeModal();
     };
 
     const fetchCategoryData = async () => {
@@ -53,7 +150,20 @@ const CategoriesPage = () => {
             console.log("response print fetch category data", res)
             setCategories(res.data)
 
+
         } catch (error) {
+            toast(error, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
+
+            });
 
         }
     }
@@ -93,12 +203,12 @@ const CategoriesPage = () => {
                                 <td className="py-3 px-4">
                                     <button
                                         onClick={() => openModal('toggle', category)}
-                                        className={`px-3 py-1 rounded-full text-sm font-medium ${category.active
+                                        className={`px-3 py-1 rounded-full text-sm font-medium ${category.status == 1
                                             ? 'bg-green-100 text-green-700'
                                             : 'bg-red-100 text-red-700'
                                             }`}
                                     >
-                                        {category.active ? 'Active' : 'Inactive'}
+                                        {category.status == 1 ? 'Active' : 'Inactive'}
                                     </button>
                                 </td>
                                 <td className="py-3 px-4 space-x-2">
@@ -188,7 +298,8 @@ const CategoriesPage = () => {
                                 <input
                                     type="text"
                                     className="w-full border p-2 rounded mb-4"
-                                    defaultValue={selectedCategory.name}
+                                    defaultValue={categoryEdit}
+                                    onChange={(e) => setCategoryEdit(e.target.value)}
                                 />
                                 <div className="flex justify-end gap-2">
                                     <button

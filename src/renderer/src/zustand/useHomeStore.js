@@ -68,12 +68,16 @@ const useHomeStore = create((set) => ({
 
   // Add Category
   addCategory: async (categoryData) => {
+    set({ loading: true })
     try {
       const res = await api.post('/product-category-submit', categoryData)
+      set({ loading: false })
       return res.data
     } catch (error) {
       console.log('Error product category add:', error)
       return null
+    } finally {
+      set({ loading: false })
     }
   },
   // fetchCategory
@@ -86,13 +90,46 @@ const useHomeStore = create((set) => ({
       return null
     }
   },
-  // updateCategory
-  updateCategory: async (id) => {
+  // updateCategoryStatus
+  updateCategoryStatus: async (categroy_id) => {
     try {
-      const res = await api.get(`/edit-product-category/${id}`)
+      const res = await api.post(`/update-status-category/${categroy_id}`)
       return res.data
     } catch (error) {
-      console.log('Error product updateCategory:', error)
+      console.log('Error product category status update:', error)
+      return null
+    }
+  },
+  // updateCategoryStatus
+  updateCategory: async (categroy_id, categoryData) => {
+    console.log('categroy_id', categroy_id)
+    console.log('categoryData', categoryData)
+    try {
+      const res = await api.post(`/update-product-category/${categroy_id}`, categoryData)
+      console.log('response in update cate', res)
+      return res.data
+    } catch (error) {
+      console.log('Error product category update:', error)
+      return null
+    }
+  },
+  // updateCategoryStatus
+  deleteCategory: async (categroy_id) => {
+    try {
+      const res = await api.post(`/update-status-category/${categroy_id}`)
+      return res.data
+    } catch (error) {
+      console.log('Error product category add:', error)
+      return null
+    }
+  },
+  // Add Customer
+  addCustomer: async (customerData) => {
+    try {
+      const res = await api.post('/customer-submit', customerData)
+      return res.data
+    } catch (error) {
+      console.log('Error Customer add:', error)
       return null
     }
   }

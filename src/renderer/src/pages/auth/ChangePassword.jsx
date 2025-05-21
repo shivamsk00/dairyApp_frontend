@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 
 const ChangePassword = () => {
     const nav = useNavigate();
+      const saveEmail = localStorage.getItem('rememberEmail')
     const passChange = useAuthStore(state => state.changePassword)
 
     const [formData, setFormData] = useState({

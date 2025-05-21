@@ -3,14 +3,16 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import CommonBackButton from '../../components/CommonBackButton';
 import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
 
 const AddCategoriesPage = () => {
     const [categoryName, setCategoryName] = useState('');
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const addCategory = useHomeStore(state => state.addCategory)
+    const loading = useHomeStore(state => state.loading)
 
-    const navigate = useNavigate();
+    const nav = useNavigate();
 
     const handleAddCategory = async () => {
         if (!categoryName.trim()) {
@@ -25,14 +27,39 @@ const AddCategoriesPage = () => {
             const res = await addCategory(categoryData);
             console.log("add category response", res)
             if (res.status_code == 200) {
+                toast(res.message || "Category Add Successfully", {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
+
+                });
                 // Simulate successful add
+                nav("/category")
                 setError('');
                 setShowSuccessModal(true);
-            }else if(res.sta){
-                
+            } else {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+                });
+
             }
         } catch (error) {
-
+            console.log("ERROR IN CATEGORY CREATE", error)
         }
 
 
@@ -69,10 +96,14 @@ const AddCategoriesPage = () => {
                 {/* Add Button (Bottom Left) */}
                 <div className="flex justify-start">
                     <button
+                        disabled={loading}
                         onClick={handleAddCategory}
-                        className=" text-white py-2 px-6 rounded "
+                        className={loading ? `text-white py-2 px-6 rounded bg-gray-600` : `text-white py-2 px-6 rounded `}
                     >
-                        Add Category
+                        {
+                            loading ? "Please wait.." : "Add Category"
+                        }
+
                     </button>
                 </div>
             </div>

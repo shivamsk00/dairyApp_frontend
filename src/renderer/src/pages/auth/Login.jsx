@@ -76,7 +76,7 @@ const Login = () => {
         if (res.status_code == 200) {
             toast(res.message, {
                 position: "top-right",
-                autoClose: 5000,
+                autoClose: 2000,
                 hideProgressBar: false,
                 closeOnClick: false,
                 pauseOnHover: true,
@@ -90,7 +90,7 @@ const Login = () => {
         } else if (res.status == false) {
             toast(res.message, {
                 position: "top-right",
-                autoClose: 5000,
+                autoClose: 2000,
                 hideProgressBar: false,
                 closeOnClick: false,
                 pauseOnHover: true,

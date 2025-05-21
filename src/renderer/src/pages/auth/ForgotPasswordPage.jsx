@@ -10,6 +10,7 @@ const ForgotPasswordPage = () => {
     const [email, setEmail] = useState(saveEmail);
     const [error, setError] = useState('');
     const sendOtpForgotPassword = useAuthStore(state => state.sendOtpForgotPassword)
+    const loading = useAuthStore(state => state.loading)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -19,17 +20,27 @@ const ForgotPasswordPage = () => {
         }
 
         try {
-            const res = await sendOtpForgotPassword({email});
+            const res = await sendOtpForgotPassword({ email });
             console.log("response forgot pass", res)
             if (res.status_code == 200) {
                 // await axios.post('/forgot-password', { email });
                 toast.success(res.message);
                 setEmail('');
-                nav("/set_forgot_password", { state: { email } });
+                nav("/set_forgot_password", { state: { email, res_otp: res.otp } });
             }
 
         } catch (err) {
-            toast.error('Something went wrong');
+            toast.error({
+                 position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
+            });
         }
     };
 
@@ -55,10 +66,11 @@ const ForgotPasswordPage = () => {
 
                     <div className="mb-4">
                         <button
+                            disabled={loading}
                             type="submit"
                             className="w-full  text-white font-medium py-3 rounded-lg transition duration-200"
                         >
-                            Send Reset Link
+                            {loading ? "Please wait..." : "Send OTP"}
                         </button>
                     </div>
                 </form>

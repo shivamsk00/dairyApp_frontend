@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { IoEyeOffSharp, IoEyeSharp } from 'react-icons/io5';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../zustand/useAuthStore';
+import { toast } from 'react-toastify';
 
 const Register = () => {
+    const nav = useNavigate()
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -18,8 +20,9 @@ const Register = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [timer, setTimer] = useState(600); // 10 minutes in seconds
-    const register = useAuthStore(state => state.register)
-    const otpVerify = useAuthStore(state => state.otpVerify)
+    const register_sendOtp = useAuthStore(state => state.register_sendOtp)
+    const register_otpVerify = useAuthStore(state => state.register_otpVerify)
+    const loading = useAuthStore(state => state.loading)
 
     useEffect(() => {
         let interval;
@@ -92,7 +95,7 @@ const Register = () => {
             "password": formData.confirmPassword
         }
 
-        const res = await register(otpGetData);
+        const res = await register_sendOtp(otpGetData);
         console.log("otp data response", res)
 
 
@@ -119,11 +122,38 @@ const Register = () => {
             "otp": formData.otp
         }
         try {
-          const res = await otpVerify(createAdminData)
+            const res = await register_otpVerify(createAdminData)
             console.log("create admin successfully", res)
+            if (res.status_code == 200) {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
+
+                });
+
+                nav("/login")
+            }
 
         } catch (error) {
+            toast(error, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                type: 'error'
 
+            });
         }
 
         // TODO: API call to register
@@ -159,6 +189,7 @@ const Register = () => {
                             name="phone"
                             placeholder="Phone"
                             value={formData.phone}
+                            maxLength={10}
                             onChange={handleChange}
                             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -235,10 +266,16 @@ const Register = () => {
 
                     { }
                     <button
+                        disabled={loading}
                         type="submit"
                         className="w-full  text-white py-2 px-4 rounded-md  transition duration-200"
                     >
-                        {otpSent ? 'Register' : 'Send OTP'}
+                        {
+                            loading ? "Please wait..." : (
+                                otpSent ? 'Register' : 'Send OTP'
+                            )
+                        }
+
                     </button>
                 </form>
 
