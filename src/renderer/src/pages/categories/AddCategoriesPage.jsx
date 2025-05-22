@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CommonBackButton from '../../components/CommonBackButton';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
+import CustomToast from '../../helper/costomeToast';
 
 const AddCategoriesPage = () => {
     const [categoryName, setCategoryName] = useState('');
@@ -28,32 +29,12 @@ const AddCategoriesPage = () => {
             const res = await addCategory(categoryData);
             console.log("add category response", res);
             if (res.status_code === 200) {
-                toast(res.message || "Category added successfully", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'success'
-                });
+                CustomToast.success(res.message)
                 nav("/category");
                 setError('');
                 setShowSuccessModal(true);
             } else {
-                toast(res.message || "Something went wrong", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'error'
-                });
+                CustomToast.error(res.message)
             }
         } catch (error) {
             console.error("ERROR IN CATEGORY CREATE", error);

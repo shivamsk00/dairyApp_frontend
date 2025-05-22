@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useHomeStore from '../../zustand/useHomeStore';
+import CommonBackButton from '../../components/CommonBackButton';
+import CustomToast from '../../helper/costomeToast';
 
 const EditCustomerPage = () => {
     const location = useLocation();
@@ -56,33 +58,11 @@ const EditCustomerPage = () => {
         try {
             const res = await updateCustomer(customer.id, customerData);
             if (res.status_code == 200) {
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'success'
-
-                });
+                CustomToast.success(res.message)
 
                 navigate('/customer');
             } else {
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'error'
-
-                });
+                CustomToast.error(res.message)
             }
         } catch (err) {
             toast.error('Error updating customer');
@@ -91,6 +71,7 @@ const EditCustomerPage = () => {
 
     return (
         <div className="w-full px-4 sm:px-8 py-10 bg-gray-100 min-h-screen">
+            <CommonBackButton heading={"Cutomer Edit"} />
             <div className="max-w-5xl mx-auto bg-white p-6 sm:p-10 rounded-lg shadow-lg">
                 <h1 className="text-2xl font-semibold mb-6 text-center">Edit Customer</h1>
 

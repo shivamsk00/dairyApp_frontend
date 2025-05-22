@@ -171,15 +171,23 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
-  getMilkRate: async (fat, clr, sfn) => {
+  getMilkRate: async (fat, clr, snf) => {
     try {
       const res = await api.get(`/milk-rate-fetch-by-fat-snf-clr`, {
         params: {
           fat: fat,
-          clr: clr,
-          snf: sfn
+          clr: clr || '',
+          snf: snf || ''
         }
       })
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  submitMilkCollection: async (milkCollectionData) => {
+    try {
+      const res = await api.post('/milk-collection-submit', milkCollectionData)
       return res.data
     } catch (error) {
       return error.response.data

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
+import { FaEye, FaPen } from 'react-icons/fa';
+import { FaTrashCan } from 'react-icons/fa6';
+import CustomToast from '../../helper/costomeToast';
 
 const DailyMilkCollectionPage = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
+    const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
     const getMilkRate = useHomeStore(state => state.getMilkRate);
 
     const [milkType, setMilkType] = useState('cow');
@@ -29,6 +33,7 @@ const DailyMilkCollectionPage = () => {
             const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
             console.log('Customer response:', res);
             if (res.status_code == 200) {
+                CustomToast.success(res.message)
                 setForm((prev) => ({
                     ...prev,
                     name: res.data.name || '',
@@ -37,17 +42,7 @@ const DailyMilkCollectionPage = () => {
                 }));
             } else {
 
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'error'
-                });
+               CustomToast.error(res.message)
                 setForm((prev) => ({
                     ...prev,
                     name: '',
@@ -65,48 +60,48 @@ const DailyMilkCollectionPage = () => {
             }));
         }
     };
-    const getBaseRateFetch = async () => {
-        const fat = form.fat?.trim();
-        const clr = form.clr?.trim();
-        const snf = form.snf?.trim();
 
-        if (!fat || !clr || !snf) return;
 
-        try {
-            const res = await getMilkRate(fat, clr, snf);
-            console.log("milk rate fetch", res)
-            if (res.status_code == 200) {
-                setForm(prev => ({
-                    ...prev,
-                    fat: res.fat || prev.fat,
-                    clr: res.clr || prev.clr,
-                    snf: res.snf || prev.snf,
-                    baseRate: res.rate || '',
-                }));
-            }
-        } catch (error) {
-            console.error("Error fetching milk rate:", error);
-        }
-    };
-
-    // Debounced fetch on account number input
     useEffect(() => {
         const timeout = setTimeout(() => {
-            if (form.fat) {
+            const fat = form.fat?.trim();
+            const clr = form.clr?.trim();
+            const snf = form.snf;
+
+            // Jab fat ho aur clr ya snf me se koi ek ho
+            if (fat && (clr || snf)) {
+                const getBaseRateFetch = async () => {
+                    try {
+                        const res = await getMilkRate(fat, clr, snf);
+                        console.log("milk rate fetch", res);
+                        if (res.status_code == 200) {
+                            setForm(prev => ({
+                                ...prev,
+                                fat: res.fat || prev.fat,
+                                clr: res.clr || prev.clr,
+                                snf: res.snf || prev.snf,
+                                baseRate: res.rate || '',
+                            }));
+                        } else {
+                            setForm(prev => ({
+                                ...prev,
+                                fat: res.fat || prev.fat,
+                                clr: res.clr || prev.clr,
+                                snf: res.snf || prev.snf,
+                                baseRate: res.rate || '',
+                            }));
+                        }
+                    } catch (error) {
+                        console.error("Error fetching milk rate:", error);
+                    }
+                };
+
                 getBaseRateFetch();
-            } else {
-                setForm((prev) => ({
-                    ...prev,
-                    name: '',
-                    spouse: '',
-                    mobile: '',
-                }));
             }
-        }, 500); // wait 500ms after user stops typing
+        }, 500);
 
-        return () => clearTimeout(timeout); // cleanup on next input
-    }, [form.fat]);
-
+        return () => clearTimeout(timeout);
+    }, [form.fat]); // ✅ sirf fat input hone par chalega
 
 
 
@@ -119,8 +114,8 @@ const DailyMilkCollectionPage = () => {
         const b = parseFloat(baseRate) || 0;
         const o = parseFloat(otherPrice) || 0;
         const q = parseFloat(quantity) || 0;
-        const rate = (f + s) * b + o;
-        const amount = rate * q;
+        const rate = q * b;
+        const amount = rate + o;
 
         setForm((prev) => ({
             ...prev,
@@ -156,24 +151,35 @@ const DailyMilkCollectionPage = () => {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setCollections((prev) => [...prev, { milkType, ...form }]);
-        setForm({
-            accountNo: '',
-            name: '',
-            spouse: '',
-            mobile: '',
-            quantity: '',
-            clr: '',
-            fat: '',
-            snf: '',
-            baseRate: '',
-            otherPrice: '',
-            rate: '',
-            amount: '',
-        });
+        try {
+            const res = await submitMilkCollection();
+            if (res.status_code == 200) {
+
+            }
+        } catch (error) {
+
+        }
+
+        // setCollections((prev) => [...prev, { milkType, ...form }]);
+        // setForm({
+        //     accountNo: '',
+        //     name: '',
+        //     spouse: '',
+        //     mobile: '',
+        //     quantity: '',
+        //     clr: '',
+        //     fat: '',
+        //     snf: '',
+        //     baseRate: '',
+        //     otherPrice: '',
+        //     rate: '',
+        //     amount: '',
+        // });
     };
+
+
 
     const handleRemove = (index) => {
         setCollections(prev => prev.filter((_, i) => i !== index));
@@ -254,7 +260,7 @@ const DailyMilkCollectionPage = () => {
                 <button
                     type="submit"
                     disabled={isDisabled}
-                    className={`mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`mt-6 w-full  text-white py-2 rounded  transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     Submit Collection
                 </button>
@@ -288,33 +294,33 @@ const DailyMilkCollectionPage = () => {
                             ) : (
                                 collections.map((item, i) => (
                                     <tr key={i}>
-                                        <td className="border px-2 py-1 text-sm">{item.milkType}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.accountNo}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.name}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.quantity}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.fat}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.snf}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.rate}</td>
-                                        <td className="border px-2 py-1 text-sm">{item.amount}</td>
-                                        <td className="border px-2 py-1 text-sm">
-                                            <div className="flex gap-2">
+                                        <td className="border px-2 py-1 text-sm text-center">{item.milkType}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.accountNo}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.name}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.quantity}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.fat}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.snf}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.rate}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">{item.amount}</td>
+                                        <td className="border px-2 py-1 text-sm text-center">
+                                            <div className="flex gap-2 items-center justify-center">
                                                 <button
                                                     className="px-2 py-1 text-xs bg-green-500 text-white rounded"
                                                     onClick={() => alert(`Viewing: ${item.accountNo}`)}
                                                 >
-                                                    View
+                                                    <FaEye size={15} />
                                                 </button>
                                                 <button
                                                     className="px-2 py-1 text-xs bg-yellow-500 text-white rounded"
                                                     onClick={() => alert(`Editing: ${item.accountNo}`)}
                                                 >
-                                                    Edit
+                                                    <FaPen />
                                                 </button>
                                                 <button
                                                     className="px-2 py-1 text-xs bg-red-600 text-white rounded"
                                                     onClick={() => handleRemove(i)}
                                                 >
-                                                    Remove
+                                                    <FaTrashCan />
                                                 </button>
                                             </div>
                                         </td>

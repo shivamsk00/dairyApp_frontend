@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import useHomeStore from '../../zustand/useHomeStore';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { toast } from 'react-toastify';
+import CustomToast from '../../helper/costomeToast';
 
 const columnHelper = createColumnHelper();
 
@@ -52,46 +53,14 @@ const CustomerList = () => {
         try {
             const res = await deleteCustomer(customerToDelete?.id);
             if (res.status_code == 200) {
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'success'
-
-                });
+                CustomToast.success(res.message)
                 fetchAllCustomerData();
             } else {
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'error'
+                CustomToast.error(res.message)
 
-                });
             }
         } catch (error) {
-            toast(error.response.message, {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                type: 'error'
-
-            });
+            CustomToast.error(res.message)
             console.log("ERROR IN DELETE FUN IN CUSTOMER LIST", error);
         } finally {
             setIsConfirmOpen(false); ``

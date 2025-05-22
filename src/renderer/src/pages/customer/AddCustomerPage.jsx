@@ -5,6 +5,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import CommonBackButton from '../../components/CommonBackButton';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
+import CustomToast from '../../helper/costomeToast';
 
 const AddCustomerPage = () => {
     const [error, setError] = useState('');
@@ -54,33 +55,11 @@ const AddCustomerPage = () => {
                     pan_number: '',
                     state: '',
                 });
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'success'
-
-                });
+                CustomToast.success(res.message)
                 // Navigate to /customer after 2 seconds
                 navigate('/customer');
             } else {
-                toast(res.message, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: 'error'
-
-                });
+                CustomToast.error(res.message)
             }
         } catch (error) {
             console.error('Error adding customer:', error);
