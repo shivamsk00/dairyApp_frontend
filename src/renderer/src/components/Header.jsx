@@ -65,9 +65,9 @@ const Header = () => {
                     <img src={profile} alt="Profile" className="w-10 h-10 rounded-full border" />
                 </div>
 
-                {/* Dropdown Modal */}
                 {isToggleMenu && (
                     <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-xl p-4 border z-50 flex flex-col gap-3">
+
                         <button
                             onClick={() => {
                                 nav("/changePassword");
@@ -76,6 +76,22 @@ const Header = () => {
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-sm transition"
                         >
                             Change Password
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                localStorage.clear(); // ✅ Local storage cleared
+                                toast.success("Clear Previouse data", {
+                                    position: "top-right",
+                                    autoClose: 3000,
+                                    theme: "dark"
+                                });
+                                setIsToggleMenu(false);
+                                nav("login")
+                            }}
+                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm transition"
+                        >
+                            Remove Account
                         </button>
 
                         <button

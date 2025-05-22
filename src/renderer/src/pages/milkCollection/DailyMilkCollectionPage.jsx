@@ -4,15 +4,22 @@ import { toast } from 'react-toastify';
 import { FaEye, FaPen } from 'react-icons/fa';
 import { FaTrashCan } from 'react-icons/fa6';
 import CustomToast from '../../helper/costomeToast';
+import { IoMdCloseCircle } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
 
 const DailyMilkCollectionPage = () => {
+    const nav = useNavigate()
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
+    const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
     const getMilkRate = useHomeStore(state => state.getMilkRate);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     const [milkType, setMilkType] = useState('cow');
+    const [shiftValue, setShiftValue] = useState('morning');
     const [form, setForm] = useState({
-        accountNo: '',
+        customer_account_number: '',
         name: '',
         spouse: '',
         mobile: '',
@@ -20,13 +27,15 @@ const DailyMilkCollectionPage = () => {
         clr: '',
         fat: '',
         snf: '',
-        baseRate: '',
-        otherPrice: '',
+        base_rate: '',
+        other_price: '0',
         rate: '',
         amount: '',
+        milk_type: milkType
     });
     const [collections, setCollections] = useState([]);
 
+    // FETCH ALL CUSTOMER
     const fetchCustomerDetailByAccountNumber = async (accountNo) => {
         console.log('Fetching customer details for:', accountNo);
         try {
@@ -62,57 +71,67 @@ const DailyMilkCollectionPage = () => {
     };
 
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            const fat = form.fat?.trim();
-            const clr = form.clr?.trim();
-            const snf = form.snf;
 
-            // Jab fat ho aur clr ya snf me se koi ek ho
-            if (fat && (clr || snf)) {
+    // 
+    useEffect(() => {
+        const fat = form.fat?.trim();
+        const clr = form.clr?.trim();
+        const snf = form.snf?.trim();
+
+        if ((clr || snf) && fat) {
+            const timeout = setTimeout(() => {
                 const getBaseRateFetch = async () => {
                     try {
                         const res = await getMilkRate(fat, clr, snf);
                         console.log("milk rate fetch", res);
-                        if (res.status_code == 200) {
-                            setForm(prev => ({
-                                ...prev,
-                                fat: res.fat || prev.fat,
-                                clr: res.clr || prev.clr,
-                                snf: res.snf || prev.snf,
-                                baseRate: res.rate || '',
-                            }));
-                        } else {
-                            setForm(prev => ({
-                                ...prev,
-                                fat: res.fat || prev.fat,
-                                clr: res.clr || prev.clr,
-                                snf: res.snf || prev.snf,
-                                baseRate: res.rate || '',
-                            }));
+
+                        setForm(prev => ({
+                            ...prev,
+                            fat: res.fat || "",
+                            clr: res.clr || "",
+                            snf: res.snf || "",
+                            base_rate: res.rate || '',
+                        }));
+
+                        if(res.fat && res.clr && res.snf ){
+                            CustomToast.success("SNF CLR AND FAT FOUND")
                         }
+                        if(res.fat == '' ){
+                            CustomToast.warn("FAT not found")
+                        }
+                        if(res.clr == '' ){
+                            CustomToast.warn("CLR not found")
+                        }
+                        if(res.snf == '' ){
+                            CustomToast.warn("SNF not found")
+                        }
+                        if(res.rate == '' ){
+                            CustomToast.warn("RATE not found")
+                        }
+
+
                     } catch (error) {
                         console.error("Error fetching milk rate:", error);
                     }
                 };
 
                 getBaseRateFetch();
-            }
-        }, 500);
+            }, 500);
 
-        return () => clearTimeout(timeout);
-    }, [form.fat]); // ✅ sirf fat input hone par chalega
+            return () => clearTimeout(timeout);
+        }
+    }, [form.clr, form.snf, form.fat]);
 
 
 
 
     // Calculate rate and amount automatically
     useEffect(() => {
-        const { fat, snf, baseRate, otherPrice, quantity } = form;
+        const { fat, snf, base_rate, other_price, quantity } = form;
         const f = parseFloat(fat) || 0;
         const s = parseFloat(snf) || 0;
-        const b = parseFloat(baseRate) || 0;
-        const o = parseFloat(otherPrice) || 0;
+        const b = parseFloat(base_rate) || 0;
+        const o = parseFloat(other_price) || 0;
         const q = parseFloat(quantity) || 0;
         const rate = q * b;
         const amount = rate + o;
@@ -122,14 +141,14 @@ const DailyMilkCollectionPage = () => {
             rate: rate.toFixed(2),
             amount: amount.toFixed(2),
         }));
-    }, [form.fat, form.snf, form.baseRate, form.otherPrice, form.quantity]);
+    }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity]);
 
 
     // Debounced fetch on account number input
     useEffect(() => {
         const timeout = setTimeout(() => {
-            if (form.accountNo) {
-                fetchCustomerDetailByAccountNumber(form.accountNo);
+            if (form.customer_account_number) {
+                fetchCustomerDetailByAccountNumber(form.customer_account_number);
             } else {
                 setForm((prev) => ({
                     ...prev,
@@ -141,43 +160,82 @@ const DailyMilkCollectionPage = () => {
         }, 500); // wait 500ms after user stops typing
 
         return () => clearTimeout(timeout); // cleanup on next input
-    }, [form.accountNo]);
+    }, [form.customer_account_number]);
 
 
 
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+
+        setForm(prev => {
+            let updated = { ...prev, [name]: value };
+
+            if (name === "clr") {
+                updated.snf = ""; // CLR input hua → SNF clear
+            } else if (name === "snf") {
+                updated.clr = ""; // SNF input hua → CLR clear
+            }
+
+            return updated;
+        });
     };
 
     const handleSubmit = async (e) => {
+        console.log("form value", form)
         e.preventDefault();
         try {
-            const res = await submitMilkCollection();
+            const res = await submitMilkCollection(form);
+            console.log("submited milk collection response", res)
             if (res.status_code == 200) {
+                CustomToast.success(res.message)
 
+            } else {
+
+                CustomToast.error(res.message)
+                setForm({
+                    customer_account_number: '',
+                    name: '',
+                    spouse: '',
+                    mobile: '',
+                    quantity: '',
+                    clr: '',
+                    fat: '',
+                    snf: '',
+                    base_rate: '',
+                    other_price: '0',
+                    rate: '',
+                    amount: '',
+                    milk_type: ''
+                })
             }
         } catch (error) {
+            CustomToast.success(error)
 
         }
 
-        // setCollections((prev) => [...prev, { milkType, ...form }]);
-        // setForm({
-        //     accountNo: '',
-        //     name: '',
-        //     spouse: '',
-        //     mobile: '',
-        //     quantity: '',
-        //     clr: '',
-        //     fat: '',
-        //     snf: '',
-        //     baseRate: '',
-        //     otherPrice: '',
-        //     rate: '',
-        //     amount: '',
-        // });
     };
+
+    const fetchMilkCollectionDetails = async () => {
+        try {
+            const res = await getMilkCollectionRecord()
+            console.log("milk collection data fetch success", res)
+            if (res.status_code == 200) {
+                CustomToast.success(res.message);
+                setCollections(res.data.data)
+            } else {
+                CustomToast.error(res.message);
+
+            }
+
+        } catch (error) {
+
+        }
+    }
+
+    useEffect(() => {
+        fetchMilkCollectionDetails()
+    }, [])
 
 
 
@@ -188,164 +246,19 @@ const DailyMilkCollectionPage = () => {
     const isDisabled = !form.name; // Disable if customer data not loaded
 
     return (
-        // <div className="w-full p-4">
-        //     <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
-        //     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-5xl mx-auto">
-        //         {/* Milk Type Selection */}
-        //         <div className="flex gap-6 items-center mb-6">
-        //             <label className="font-semibold">Milk Type:</label>
-        //             {['cow', 'buffalo', 'other'].map((type) => (
-        //                 <label key={type} className="flex items-center gap-1 capitalize">
-        //                     <input
-        //                         type="radio"
-        //                         name="milkType"
-        //                         value={type}
-        //                         checked={milkType === type}
-        //                         onChange={() => setMilkType(type)}
-        //                     />
-        //                     {type}
-        //                 </label>
-        //             ))}
-        //         </div>
-
-        //         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        //             {/* Customer Info */}
-        //             <div className="space-y-4">
-        //                 {[{ name: 'accountNo', label: 'Account No' },
-        //                 { name: 'name', label: 'Name' },
-        //                 { name: 'spouse', label: 'Spouse' },
-        //                 { name: 'mobile', label: 'Mobile' },
-        //                 ].map(({ name, label }) => (
-        //                     <div key={name}>
-        //                         <label className="block text-sm font-medium">{label}</label>
-        //                         <input
-        //                             type="text"
-        //                             name={name}
-        //                             value={form[name]}
-        //                             onChange={handleChange}
-        //                             disabled={name !== 'accountNo' && isDisabled}
-        //                             className="mt-1 w-full border rounded px-3 py-2"
-        //                         />
-        //                     </div>
-        //                 ))}
-        //             </div>
-
-        //             {/* Milk Info */}
-        //             <div className="grid grid-cols-2 gap-4">
-        //                 {[{ name: 'quantity', label: 'Quantity (Ltr)' },
-        //                 { name: 'clr', label: 'CLR' },
-        //                 { name: 'fat', label: 'FAT (%)' },
-        //                 { name: 'snf', label: 'SNF (%)' },
-        //                 { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
-        //                 { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
-        //                 { name: 'rate', label: 'Rate (Auto)', readOnly: true },
-        //                 { name: 'amount', label: 'Amount (Auto)', readOnly: true },
-        //                 ].map(({ name, label, readOnly }) => (
-        //                     <div key={name}>
-        //                         <label className="block text-sm font-medium">{label}</label>
-        //                         <input
-        //                             type="number"
-        //                             name={name}
-        //                             value={form[name]}
-        //                             onChange={handleChange}
-        //                             readOnly={readOnly}
-        //                             disabled={isDisabled}
-        //                             className="mt-1 w-full border rounded px-3 py-2"
-        //                         />
-        //                     </div>
-        //                 ))}
-        //             </div>
-        //         </div>
-
-        //         <button
-        //             type="submit"
-        //             disabled={isDisabled}
-        //             className={`mt-6 w-full  text-white py-2 rounded  transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        //         >
-        //             Submit Collection
-        //         </button>
-        //     </form>
-
-        //     {/* Submitted Table */}
-        //     <div className="mt-8 max-w-5xl mx-auto">
-        //         <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
-        //         <div className="overflow-x-auto">
-        //             <table className="min-w-full border border-gray-300">
-        //                 <thead className="bg-gray-100">
-        //                     <tr>
-        //                         <th className="border px-2 py-1 text-sm">Milk Type</th>
-        //                         <th className="border px-2 py-1 text-sm">Account No</th>
-        //                         <th className="border px-2 py-1 text-sm">Name</th>
-        //                         <th className="border px-2 py-1 text-sm">Quantity</th>
-        //                         <th className="border px-2 py-1 text-sm">FAT</th>
-        //                         <th className="border px-2 py-1 text-sm">SNF</th>
-        //                         <th className="border px-2 py-1 text-sm">Rate</th>
-        //                         <th className="border px-2 py-1 text-sm">Amount</th>
-        //                         <th className="border px-2 py-1 text-sm">Action</th>
-        //                     </tr>
-        //                 </thead>
-        //                 <tbody>
-        //                     {collections.length === 0 ? (
-        //                         <tr>
-        //                             <td colSpan="9" className="text-center text-gray-500 py-4">
-        //                                 Data not available
-        //                             </td>
-        //                         </tr>
-        //                     ) : (
-        //                         collections.map((item, i) => (
-        //                             <tr key={i}>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.milkType}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.accountNo}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.name}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.quantity}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.fat}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.snf}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.rate}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">{item.amount}</td>
-        //                                 <td className="border px-2 py-1 text-sm text-center">
-        //                                     <div className="flex gap-2 items-center justify-center">
-        //                                         <button
-        //                                             className="px-2 py-1 text-xs bg-green-500 text-white rounded"
-        //                                             onClick={() => alert(`Viewing: ${item.accountNo}`)}
-        //                                         >
-        //                                             <FaEye size={15} />
-        //                                         </button>
-        //                                         <button
-        //                                             className="px-2 py-1 text-xs bg-yellow-500 text-white rounded"
-        //                                             onClick={() => alert(`Editing: ${item.accountNo}`)}
-        //                                         >
-        //                                             <FaPen />
-        //                                         </button>
-        //                                         <button
-        //                                             className="px-2 py-1 text-xs bg-red-600 text-white rounded"
-        //                                             onClick={() => handleRemove(i)}
-        //                                         >
-        //                                             <FaTrashCan />
-        //                                         </button>
-        //                                     </div>
-        //                                 </td>
-        //                             </tr>
-        //                         ))
-        //                     )}
-        //                 </tbody>
-        //             </table>
-        //         </div>
-        //     </div>
-        // </div>
-
-
         <div className="w-full p-4">
             <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
 
             {/* Grid for Form and Receipt */}
             <div className="grid md:grid-cols-2 gap-10 w-full mx-auto">
                 {/* === Left: Milk Collection Form === */}
-                <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full"
-                    style={{ width: '100%' }}>
-                    {/* Milk Type */}
-                    <div className="mb-4">
-                        <label className="font-semibold block mb-2">Milk Type:</label>
-                        <div className="flex gap-4">
+                {/* === Left: Milk Collection Form === */}
+                <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full" style={{ width: '100%' }}>
+                    {/* Milk Type & Shift in a row */}
+                    <div className="mb-4 flex flex-col gap-8 items-start">
+                        {/* Milk Type */}
+                        <div className="flex gap-4 items-center">
+                            <label className="font-semibold block mr-2">Milk Type:</label>
                             {['cow', 'buffalo', 'other'].map((type) => (
                                 <label key={type} className="capitalize flex items-center gap-1">
                                     <input
@@ -359,33 +272,87 @@ const DailyMilkCollectionPage = () => {
                                 </label>
                             ))}
                         </div>
+
+                        {/* Shift */}
+                        <div className="flex gap-4 items-center">
+                            <label className="font-semibold block mr-2">Shift:</label>
+                            {['morning', 'evening'].map((shift) => (
+                                <label key={shift} className="capitalize flex items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="shift"
+                                        value={shift}
+                                        checked={shiftValue === shift}
+                                        onChange={() => setShiftValue(shift)}
+                                    />
+                                    {shift}
+                                </label>
+                            ))}
+                        </div>
                     </div>
+
+
+
+
 
                     {/* Milk + Customer Info */}
                     <div className="grid grid-cols-2 gap-4">
                         {[
-                            { name: 'accountNo', label: 'Account No' },
+                            { name: 'customer_account_number', label: 'Account No' },
                             { name: 'name', label: 'Name' },
                             { name: 'spouse', label: 'Spouse' },
                             { name: 'mobile', label: 'Mobile' },
-                            { name: 'quantity', label: 'Quantity (Ltr)' },
-                            { name: 'clr', label: 'CLR' },
                             { name: 'fat', label: 'FAT (%)' },
-                            { name: 'snf', label: 'SNF (%)' },
-                            { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
-                            { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
+                            { name: 'quantity', label: 'Quantity (Ltr)' },
+                        ].map(({ name, label }) => (
+                            <div key={name}>
+                                <label className="block text-sm font-medium">{label}</label>
+                                <input
+                                    type={name === 'mobile' || name === 'customer_account_number' || name === "name" || name === "spouse" ? 'text' : 'number'}
+                                    name={name}
+                                    value={form[name]}
+                                    onChange={handleChange}
+                                    disabled={isDisabled && name !== 'customer_account_number'}
+                                    className="mt-1 w-full border rounded px-3 py-2"
+                                />
+                            </div>
+                        ))}
+
+                        {/* CLR & SNF in same row */}
+                        <div className="col-span-2 grid grid-cols-2 gap-4">
+                            {[
+                                { name: 'clr', label: 'CLR' },
+                                { name: 'snf', label: 'SNF (%)' },
+                            ].map(({ name, label }) => (
+                                <div key={name}>
+                                    <label className="block text-sm font-medium">{label}</label>
+                                    <input
+                                        type="number"
+                                        name={name}
+                                        value={form[name]}
+                                        onChange={handleChange}
+                                        disabled={isDisabled && name !== 'customer_account_number'}
+                                        className="mt-1 w-full border rounded px-3 py-2"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {[
+                            { name: 'base_rate', label: 'Base Rate (₹/Ltr)' },
+                            { name: 'other_price', label: 'Other Price (₹/Ltr)' },
                             { name: 'rate', label: 'Rate (Auto)', readOnly: true },
                             { name: 'amount', label: 'Amount (Auto)', readOnly: true },
                         ].map(({ name, label, readOnly }) => (
                             <div key={name}>
                                 <label className="block text-sm font-medium">{label}</label>
                                 <input
-                                    type={name === 'mobile' || name === 'accountNo' ? 'text' : 'number'}
+                                    type="number"
                                     name={name}
                                     value={form[name]}
                                     onChange={handleChange}
                                     readOnly={readOnly}
-                                    disabled={isDisabled && name !== 'accountNo'}
+                                    disabled={isDisabled && name !== 'customer_account_number'}
                                     className="mt-1 w-full border rounded px-3 py-2"
                                 />
                             </div>
@@ -395,28 +362,36 @@ const DailyMilkCollectionPage = () => {
                     <button
                         type="submit"
                         disabled={isDisabled}
-                        className={`mt-6 w-full bg-blue-600 text-white py-2 rounded ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`mt-6 w-full text-white py-2 rounded ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                     >
                         Submit Collection
                     </button>
                 </form>
-
                 {/* === Right: Customer Receipt Preview === */}
-                <div className="bg-gray-50 p-6 rounded shadow-md border h-fit"
-                    style={{ width: '100%' }}>
+                <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
-                    <div className="space-y-2 text-sm">
-                        <p><strong>Milk Type:</strong> {milkType || '-'}</p>
-                        <p><strong>Account No:</strong> {form.accountNo || '-'}</p>
-                        <p><strong>Name:</strong> {form.name || '-'}</p>
-                        <p><strong>Spouse:</strong> {form.spouse || '-'}</p>
-                        <p><strong>Mobile:</strong> {form.mobile || '-'}</p>
-                        <p><strong>Quantity:</strong> {form.quantity || '-'} Ltr</p>
-                        <p><strong>FAT:</strong> {form.fat || '-'}</p>
-                        <p><strong>SNF:</strong> {form.snf || '-'}</p>
-                        <p><strong>Rate:</strong> ₹{form.rate || '-'}</p>
-                        <p><strong>Amount:</strong> ₹{form.amount || '-'}</p>
-                    </div>
+
+                    <table className="w-full text-sm text-left border border-gray-300">
+                        <tbody>
+                            {[
+                                ['Milk Type', milkType || '-'],
+                                ['Account No', form.customer_account_number || '-'],
+                                ['Name', form.name || '-'],
+                                ['Spouse', form.spouse || '-'],
+                                ['Mobile', form.mobile || '-'],
+                                ['Quantity', form.quantity ? `${form.quantity} Ltr` : '-'],
+                                ['FAT', form.fat || '-'],
+                                ['SNF', form.snf || '-'],
+                                ['Rate', form.rate ? `₹${form.rate}` : '-'],
+                                ['Amount', form.amount ? `₹${form.amount}` : '-'],
+                            ].map(([label, value]) => (
+                                <tr key={label} className="border-b hover:bg-gray-50">
+                                    <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
+                                    <td className="px-4 py-2">{value}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -440,18 +415,26 @@ const DailyMilkCollectionPage = () => {
                             ) : (
                                 collections.map((item, i) => (
                                     <tr key={i}>
-                                        <td className="border px-2 py-1 text-center">{item.milkType}</td>
-                                        <td className="border px-2 py-1 text-center">{item.accountNo}</td>
+                                        <td className="border px-2 py-1 text-center">{item.milk_type}</td>
+                                        <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
                                         <td className="border px-2 py-1 text-center">{item.name}</td>
                                         <td className="border px-2 py-1 text-center">{item.quantity}</td>
                                         <td className="border px-2 py-1 text-center">{item.fat}</td>
                                         <td className="border px-2 py-1 text-center">{item.snf}</td>
-                                        <td className="border px-2 py-1 text-center">{item.rate}</td>
-                                        <td className="border px-2 py-1 text-center">{item.amount}</td>
+                                        <td className="border px-2 py-1 text-center">{item.base_rate}</td>
+                                        <td className="border px-2 py-1 text-center">{(item.base_rate * item.quantity).toFixed(2)}</td>
                                         <td className="border px-2 py-1 text-center">
                                             <div className="flex gap-2 justify-center">
-                                                <button className="bg-green-500 text-white px-2 py-1 rounded text-xs"><FaEye size={14} /></button>
-                                                <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
+                                                <button
+                                                    className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                                                    onClick={() => {
+                                                        setSelectedCustomer(item);
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                >
+                                                    <FaEye size={14} />
+                                                </button>
+                                                <button onClick={() => nav("/editMilkCollection", { state: { milkData: item } })} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
                                                 <button onClick={() => handleRemove(i)} className="bg-red-600 text-white px-2 py-1 rounded text-xs"><FaTrashCan size={14} /></button>
                                             </div>
                                         </td>
@@ -462,6 +445,63 @@ const DailyMilkCollectionPage = () => {
                     </table>
                 </div>
             </div>
+
+            {isModalOpen && selectedCustomer && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">
+                            Milk Collection Details
+                        </h2>
+
+                        {/* Close Button */}
+                        {/* <div
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute bg-white top-4 right-4 text-xxl cursor-pointer"
+                            title="Close"
+                        >
+                            <IoMdCloseCircle size={30} />
+                        </div> */}
+
+                        {/* Milk Collection Info Table */}
+                        <table className="w-full text-sm text-left border border-gray-200">
+                            <tbody>
+                                {[
+                                    ['Name', selectedCustomer.name],
+                                    ['Mobile', selectedCustomer.mobile],
+                                    ['Spouse', selectedCustomer.spouse],
+                                    ['Account Number', selectedCustomer.customer_account_number],
+                                    ['Milk Type', selectedCustomer.milk_type],
+                                    ['Quantity (Ltr)', selectedCustomer.quantity],
+                                    ['FAT (%)', selectedCustomer.fat],
+                                    ['SNF (%)', selectedCustomer.snf],
+                                    ['CLR', selectedCustomer.clr],
+                                    ['Base Rate (₹)', selectedCustomer.base_rate],
+                                    ['Other Price (₹)', selectedCustomer.other_price],
+                                    ['Rate (Base + Other)', (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price)).toFixed(2)],
+                                    ['Amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
+                                    ['Created At', new Date(selectedCustomer.created_at).toLocaleString()],
+                                ].map(([label, value]) => (
+                                    <tr key={label} className="border-b hover:bg-gray-50">
+                                        <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
+                                        <td className="px-4 py-2">{value}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        {/* Close Button */}
+                        <div className="mt-6 text-right">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
 
     );

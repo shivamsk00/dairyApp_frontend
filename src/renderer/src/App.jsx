@@ -23,6 +23,7 @@ import Register from './pages/auth/Register';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import SetForgotPasswordPage from './pages/auth/SetForgotPasswordPage';
 import EditCustomerPage from './pages/customer/EditCustomerPage';
+import EditMilkCollectionPage from './pages/milkCollection/EditMilkCollectionPage';
 
 function App() {
   return (
@@ -46,7 +47,10 @@ function App() {
           <Route path="category" element={<CategoreisPage />} />
           <Route path="addcategory" element={<AddCategoriesPage />} />
           <Route path="customer" element={<CustomerPage />} />
+
           <Route path="milkcollection" element={<MilkCollectionPage />} />
+          <Route path="editMilkCollection" element={<EditMilkCollectionPage />} />
+
           <Route path="milksales" element={<MilkSalesPage />} />
           <Route path="suppliers" element={<SupliersPage />} />
           <Route path="ratechart" element={<RateChartPage />} />

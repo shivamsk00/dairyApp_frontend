@@ -210,13 +210,13 @@ const CustomerList = () => {
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">Customer Details</h2>
 
-                        <div
+                        {/* <div
                             onClick={() => setIsModalOpen(false)}
                             className="absolute bg-white top-4 right-4 text-xxl cursor-pointer"
                             title="Close"
                         >
                             <IoMdCloseCircle size={30} />
-                        </div>
+                        </div> */}
 
                         <table className="w-full text-sm text-left border border-gray-200">
                             <tbody>
@@ -247,7 +247,7 @@ const CustomerList = () => {
                         <div className="mt-6 text-right">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className=" text-white px-5 py-2 rounded transition"
+                                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
                             >
                                 Close
                             </button>

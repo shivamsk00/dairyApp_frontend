@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../zustand/useAuthStore';
 import { toast } from 'react-toastify';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import CustomToast from '../../helper/costomeToast';
 
 const Login = () => {
     const nav = useNavigate();
@@ -74,36 +75,11 @@ const Login = () => {
         });
 
         if (res.status_code == 200) {
-            toast(res.message, {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                type: 'success'
-
-            });
+            CustomToast.success(res.message)
             nav('/');
-        } else if (res.status == false) {
-            toast(res.message, {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                type: 'error'
-
-            });
+        } else {
+            CustomToast.error(res.message)
         }
-
-
-        console.log("in login page =====>", res)
     };
 
     return (

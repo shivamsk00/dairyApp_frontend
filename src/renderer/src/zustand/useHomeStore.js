@@ -160,7 +160,7 @@ const useHomeStore = create((set) => ({
     }
   },
 
-  // ================MILK COLLECTION =======================
+  // ================MILK COLLECTION API =======================
   fetchCustomerDetailsByAccount: async (account_number) => {
     try {
       const res = await api.get(
@@ -186,8 +186,40 @@ const useHomeStore = create((set) => ({
     }
   },
   submitMilkCollection: async (milkCollectionData) => {
+    console.log('milkCollectionData', milkCollectionData)
     try {
       const res = await api.post('/milk-collection-submit', milkCollectionData)
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  getMilkCollectionRecord: async (milkCollectionData) => {
+    console.log('milkCollectionData', milkCollectionData)
+    try {
+      const res = await api.get('/all-milk-collection', milkCollectionData)
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  getMilkCollectionRecord: async (milkCollectionData) => {
+    console.log('milkCollectionData', milkCollectionData)
+    try {
+      const res = await api.get('/all-milk-collection', milkCollectionData)
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  editMilkCollectionDetail: async (milk_collection_id, milkCollectionData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(
+        `/update-milk-collection/${milk_collection_id}`,
+        milkCollectionData
+      )
+      // set({loading:false})
       return res.data
     } catch (error) {
       return error.response.data
