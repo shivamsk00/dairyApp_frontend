@@ -8,6 +8,7 @@ const CategoriesPage = () => {
     const fetchCategory = useHomeStore(state => state.fetchCategory);
     const updateCategoryStatus = useHomeStore(state => state.updateCategoryStatus);
     const updateCategory = useHomeStore(state => state.updateCategory);
+    const deleteCategory = useHomeStore(state => state.deleteCategory);
 
 
     const nav = useNavigate()
@@ -80,9 +81,42 @@ const CategoriesPage = () => {
 
     };
 
-    const handleDelete = () => {
-        setCategories((prev) => prev.filter((cat) => cat.id !== selectedCategory.id));
-        closeModal();
+    const handleDelete = async () => {
+        try {
+            const res = await deleteCategory(selectedCategory.id);
+            if (res.status_code == 200) {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
+
+                });
+                fetchCategoryData()
+                closeModal()
+            } else {
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+                });
+            }
+
+        } catch (error) {
+            console.log("ERROR IN CATEGORY DELETE FUNCTION", error)
+        }
     };
 
 
@@ -174,8 +208,6 @@ const CategoriesPage = () => {
 
 
 
-
-
     return (
         <div className="p-4">
             {/* Header */}
@@ -188,7 +220,7 @@ const CategoriesPage = () => {
 
             {/* Table */}
             <div className="overflow-x-auto">
-                <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+                <table className="min-w-full  shadow-md rounded-lg overflow-hidden">
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="text-left py-3 px-4 font-semibold text-sm">Category Name</th>

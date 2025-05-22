@@ -124,14 +124,65 @@ const useHomeStore = create((set) => ({
       return null
     }
   },
-  // Add Customer
+
+  // ===============CUSTOMER CRUD API ==========================
+
   addCustomer: async (customerData) => {
     try {
       const res = await api.post('/customer-submit', customerData)
       return res.data
     } catch (error) {
-      console.log('Error Customer add:', error)
-      return null
+      return err.response.data
+    }
+  },
+  getAllCustomer: async () => {
+    try {
+      const res = await api.get('/all-customer')
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  updateCustomer: async (customer_id, customerData) => {
+    try {
+      const res = await api.post(`/update-customer/${customer_id}`, customerData)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  deleteCustomer: async (customer_id) => {
+    try {
+      const res = await api.post(`delete-customer/${customer_id}`)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+
+  // ================MILK COLLECTION =======================
+  fetchCustomerDetailsByAccount: async (account_number) => {
+    try {
+      const res = await api.get(
+        `/fetch-cumstomer-detail-by-account-number?account_number=${account_number}`
+      )
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  getMilkRate: async (fat, clr, sfn) => {
+    try {
+      const res = await api.get(`/milk-rate-fetch-by-fat-snf-clr`, {
+        params: {
+          fat: fat,
+          clr: clr,
+          snf: sfn
+        }
+      })
+      return res.data
+    } catch (error) {
+      return error.response.data
     }
   }
 }))

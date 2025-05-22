@@ -22,6 +22,7 @@ import AddCategoriesPage from './pages/categories/AddCategoriesPage';
 import Register from './pages/auth/Register';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import SetForgotPasswordPage from './pages/auth/SetForgotPasswordPage';
+import EditCustomerPage from './pages/customer/EditCustomerPage';
 
 function App() {
   return (
@@ -53,7 +54,10 @@ function App() {
           <Route path="reports" element={<ReportsPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="settings" element={<Setting />} />
+
           <Route path="addCustomer" element={<AddCustomerPage />} />
+          <Route path="editCustomer" element={<EditCustomerPage />} />
+
           <Route path="changePassword" element={<ChangePassword />} />
            <Route path="snfchart" element={<SnfChartPage />} />
         </Route>

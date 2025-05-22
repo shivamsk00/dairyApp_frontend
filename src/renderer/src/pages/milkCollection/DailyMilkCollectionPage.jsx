@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-
-const dummyCustomers = {
-    '1001': { name: 'Ramesh', spouse: 'Sita', mobile: '9876543210' },
-    '1002': { name: 'Suresh', spouse: 'Gita', mobile: '8765432109' },
-    '1003': { name: 'Naresh', spouse: 'Rita', mobile: '7654321098' },
-};
+import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
 
 const DailyMilkCollectionPage = () => {
+    const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
+    const getMilkRate = useHomeStore(state => state.getMilkRate);
+
     const [milkType, setMilkType] = useState('cow');
     const [form, setForm] = useState({
         accountNo: '',
@@ -24,6 +23,95 @@ const DailyMilkCollectionPage = () => {
     });
     const [collections, setCollections] = useState([]);
 
+    const fetchCustomerDetailByAccountNumber = async (accountNo) => {
+        console.log('Fetching customer details for:', accountNo);
+        try {
+            const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
+            console.log('Customer response:', res);
+            if (res.status_code == 200) {
+                setForm((prev) => ({
+                    ...prev,
+                    name: res.data.name || '',
+                    spouse: res.data.spouse || '',
+                    mobile: res.data.mobile || '',
+                }));
+            } else {
+
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+                });
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    spouse: '',
+                    mobile: '',
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching customer details:', error);
+            setForm((prev) => ({
+                ...prev,
+                name: '',
+                spouse: '',
+                mobile: '',
+            }));
+        }
+    };
+    const getBaseRateFetch = async () => {
+        const fat = form.fat?.trim();
+        const clr = form.clr?.trim();
+        const snf = form.snf?.trim();
+
+        if (!fat || !clr || !snf) return;
+
+        try {
+            const res = await getMilkRate(fat, clr, snf);
+            console.log("milk rate fetch", res)
+            if (res.status_code == 200) {
+                setForm(prev => ({
+                    ...prev,
+                    fat: res.fat || prev.fat,
+                    clr: res.clr || prev.clr,
+                    snf: res.snf || prev.snf,
+                    baseRate: res.rate || '',
+                }));
+            }
+        } catch (error) {
+            console.error("Error fetching milk rate:", error);
+        }
+    };
+
+    // Debounced fetch on account number input
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (form.fat) {
+                getBaseRateFetch();
+            } else {
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    spouse: '',
+                    mobile: '',
+                }));
+            }
+        }, 500); // wait 500ms after user stops typing
+
+        return () => clearTimeout(timeout); // cleanup on next input
+    }, [form.fat]);
+
+
+
+
+
+    // Calculate rate and amount automatically
     useEffect(() => {
         const { fat, snf, baseRate, otherPrice, quantity } = form;
         const f = parseFloat(fat) || 0;
@@ -41,22 +129,27 @@ const DailyMilkCollectionPage = () => {
         }));
     }, [form.fat, form.snf, form.baseRate, form.otherPrice, form.quantity]);
 
+
+    // Debounced fetch on account number input
     useEffect(() => {
-        const customer = dummyCustomers[form.accountNo];
-        if (customer) {
-            setForm((prev) => ({
-                ...prev,
-                ...customer,
-            }));
-        } else {
-            setForm((prev) => ({
-                ...prev,
-                name: '',
-                spouse: '',
-                mobile: '',
-            }));
-        }
+        const timeout = setTimeout(() => {
+            if (form.accountNo) {
+                fetchCustomerDetailByAccountNumber(form.accountNo);
+            } else {
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    spouse: '',
+                    mobile: '',
+                }));
+            }
+        }, 500); // wait 500ms after user stops typing
+
+        return () => clearTimeout(timeout); // cleanup on next input
     }, [form.accountNo]);
+
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -86,7 +179,7 @@ const DailyMilkCollectionPage = () => {
         setCollections(prev => prev.filter((_, i) => i !== index));
     };
 
-    const isDisabled = !dummyCustomers[form.accountNo];
+    const isDisabled = !form.name; // Disable if customer data not loaded
 
     return (
         <div className="w-full p-4">
@@ -108,16 +201,14 @@ const DailyMilkCollectionPage = () => {
                         </label>
                     ))}
                 </div>
-                <h3> DUMMY ACCOUNT NUMBER(1001, 1002, 1003)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Left Column - Customer Info */}
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Customer Info */}
                     <div className="space-y-4">
-                        {[
-                            { name: 'accountNo', label: 'Account No' },
-                            { name: 'name', label: 'Name' },
-                            { name: 'spouse', label: 'Spouse' },
-                            { name: 'mobile', label: 'Mobile' },
+                        {[{ name: 'accountNo', label: 'Account No' },
+                        { name: 'name', label: 'Name' },
+                        { name: 'spouse', label: 'Spouse' },
+                        { name: 'mobile', label: 'Mobile' },
                         ].map(({ name, label }) => (
                             <div key={name}>
                                 <label className="block text-sm font-medium">{label}</label>
@@ -133,17 +224,16 @@ const DailyMilkCollectionPage = () => {
                         ))}
                     </div>
 
-                    {/* Right Column - Milk Info */}
+                    {/* Milk Info */}
                     <div className="grid grid-cols-2 gap-4">
-                        {[
-                            { name: 'quantity', label: 'Quantity (Ltr)' },
-                            { name: 'clr', label: 'CLR' },
-                            { name: 'fat', label: 'FAT (%)' },
-                            { name: 'snf', label: 'SNF (%)' },
-                            { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
-                            { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
-                            { name: 'rate', label: 'Rate (Auto)', readOnly: true },
-                            { name: 'amount', label: 'Amount (Auto)', readOnly: true },
+                        {[{ name: 'quantity', label: 'Quantity (Ltr)' },
+                        { name: 'clr', label: 'CLR' },
+                        { name: 'fat', label: 'FAT (%)' },
+                        { name: 'snf', label: 'SNF (%)' },
+                        { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
+                        { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
+                        { name: 'rate', label: 'Rate (Auto)', readOnly: true },
+                        { name: 'amount', label: 'Amount (Auto)', readOnly: true },
                         ].map(({ name, label, readOnly }) => (
                             <div key={name}>
                                 <label className="block text-sm font-medium">{label}</label>
@@ -164,14 +254,13 @@ const DailyMilkCollectionPage = () => {
                 <button
                     type="submit"
                     disabled={isDisabled}
-                    className={`mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                    className={`mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     Submit Collection
                 </button>
             </form>
 
-            {/* Table after submission */}
+            {/* Submitted Table */}
             <div className="mt-8 max-w-5xl mx-auto">
                 <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
                 <div className="overflow-x-auto">

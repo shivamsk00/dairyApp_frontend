@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import CommonBackButton from '../../components/CommonBackButton';
 import useHomeStore from '../../zustand/useHomeStore';
@@ -9,25 +8,27 @@ const AddCategoriesPage = () => {
     const [categoryName, setCategoryName] = useState('');
     const [error, setError] = useState('');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const addCategory = useHomeStore(state => state.addCategory)
-    const loading = useHomeStore(state => state.loading)
+
+    const addCategory = useHomeStore(state => state.addCategory);
+    const loading = useHomeStore(state => state.loading);
 
     const nav = useNavigate();
 
-    const handleAddCategory = async () => {
+    const handleAddCategory = async (e) => {
+        e.preventDefault(); // Prevent form default submit behavior
+
         if (!categoryName.trim()) {
             setError('Category name is required');
             return;
         }
-        const categoryData = {
-            name: categoryName
-        }
+
+        const categoryData = { name: categoryName };
 
         try {
             const res = await addCategory(categoryData);
-            console.log("add category response", res)
-            if (res.status_code == 200) {
-                toast(res.message || "Category Add Successfully", {
+            console.log("add category response", res);
+            if (res.status_code === 200) {
+                toast(res.message || "Category added successfully", {
                     position: "top-right",
                     autoClose: 2000,
                     hideProgressBar: false,
@@ -37,14 +38,12 @@ const AddCategoriesPage = () => {
                     progress: undefined,
                     theme: "dark",
                     type: 'success'
-
                 });
-                // Simulate successful add
-                nav("/category")
+                nav("/category");
                 setError('');
                 setShowSuccessModal(true);
             } else {
-                toast(res.message, {
+                toast(res.message || "Something went wrong", {
                     position: "top-right",
                     autoClose: 2000,
                     hideProgressBar: false,
@@ -54,17 +53,11 @@ const AddCategoriesPage = () => {
                     progress: undefined,
                     theme: "dark",
                     type: 'error'
-
                 });
-
             }
         } catch (error) {
-            console.log("ERROR IN CATEGORY CREATE", error)
+            console.error("ERROR IN CATEGORY CREATE", error);
         }
-
-
-
-
     };
 
     const handleModalClose = () => {
@@ -74,38 +67,35 @@ const AddCategoriesPage = () => {
 
     return (
         <div className="p-6 w-full min-h-screen bg-gray-50 relative">
-            {/* Styled Back Arrow */}
-            <CommonBackButton heading={"Add Category"} />
+            <CommonBackButton heading="Add Category" />
 
             <div className="max-w-2xl w-full mx-auto bg-white p-6 rounded shadow mt-12">
                 <h2 className="text-2xl font-bold mb-6">Add New Category</h2>
 
-                {/* Input Field */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Category Name</label>
-                    <input
-                        type="text"
-                        value={categoryName}
-                        onChange={(e) => setCategoryName(e.target.value)}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter category name"
-                    />
-                    {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
-                </div>
+                {/* FORM */}
+                <form onSubmit={handleAddCategory}>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1">Category Name</label>
+                        <input
+                            type="text"
+                            value={categoryName}
+                            onChange={(e) => setCategoryName(e.target.value)}
+                            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter category name"
+                        />
+                        {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+                    </div>
 
-                {/* Add Button (Bottom Left) */}
-                <div className="flex justify-start">
-                    <button
-                        disabled={loading}
-                        onClick={handleAddCategory}
-                        className={loading ? `text-white py-2 px-6 rounded bg-gray-600` : `text-white py-2 px-6 rounded `}
-                    >
-                        {
-                            loading ? "Please wait.." : "Add Category"
-                        }
-
-                    </button>
-                </div>
+                    <div className="flex justify-start">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`py-2 px-6 rounded text-white ${loading && 'bg-gray-600'}`}
+                        >
+                            {loading ? "Please wait.." : "Add Category"}
+                        </button>
+                    </div>
+                </form>
             </div>
 
             {/* Success Modal */}

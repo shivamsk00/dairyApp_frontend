@@ -5,8 +5,6 @@ const CustomerPage = () => {
   return (
     <div>
       <CustomerList />
-
-
     </div>
   )
 }

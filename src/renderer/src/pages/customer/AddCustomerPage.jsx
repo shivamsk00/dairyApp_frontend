@@ -4,6 +4,7 @@ import "./customer.css";
 import { FaArrowLeft } from 'react-icons/fa';
 import CommonBackButton from '../../components/CommonBackButton';
 import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
 
 const AddCustomerPage = () => {
     const [error, setError] = useState('');
@@ -43,21 +44,43 @@ const AddCustomerPage = () => {
                 // Optional: Clear the form
                 setForm({
                     name: '',
-                    phone: '',
+                    mobile: '',
                     email: '',
                     address: '',
                     city: '',
                     pincode: '',
-                    contact: '',
+                    contact_person: '',
                     designation: '',
-                    pan: '',
+                    pan_number: '',
                     state: '',
                 });
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'success'
 
+                });
                 // Navigate to /customer after 2 seconds
                 navigate('/customer');
             } else {
-                setError(res?.message || 'Failed to add customer. Please try again.');
+                toast(res.message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+                });
             }
         } catch (error) {
             console.error('Error adding customer:', error);
@@ -111,6 +134,7 @@ const AddCustomerPage = () => {
                             Phone <span className='text-red-600 text-xl'>*</span>
                         </label>
                         <input
+                            maxLength={10}
                             type="text"
                             name="mobile"
                             value={form.mobile}
@@ -170,6 +194,7 @@ const AddCustomerPage = () => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Contact Person</label>
                         <input
+                            maxLength={10}
                             type="text"
                             name="contact_person"
                             value={form.contact_person}
