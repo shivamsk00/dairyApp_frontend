@@ -86,12 +86,12 @@ const CategoriesPage = () => {
         try {
             const res = await deleteCategory(selectedCategory.id);
             if (res.status_code == 200) {
-               CustomToast.success(res.message)
-               fetchCategoryData()
-               closeModal()
+                CustomToast.success(res.message)
+                fetchCategoryData()
+                closeModal()
             } else {
                 CustomToast.error(res.message)
-             
+
             }
 
         } catch (error) {

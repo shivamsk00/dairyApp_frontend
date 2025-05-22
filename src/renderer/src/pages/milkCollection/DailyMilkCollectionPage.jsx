@@ -42,7 +42,7 @@ const DailyMilkCollectionPage = () => {
                 }));
             } else {
 
-               CustomToast.error(res.message)
+                CustomToast.error(res.message)
                 setForm((prev) => ({
                     ...prev,
                     name: '',
@@ -188,140 +188,271 @@ const DailyMilkCollectionPage = () => {
     const isDisabled = !form.name; // Disable if customer data not loaded
 
     return (
+        // <div className="w-full p-4">
+        //     <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
+        //     <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-5xl mx-auto">
+        //         {/* Milk Type Selection */}
+        //         <div className="flex gap-6 items-center mb-6">
+        //             <label className="font-semibold">Milk Type:</label>
+        //             {['cow', 'buffalo', 'other'].map((type) => (
+        //                 <label key={type} className="flex items-center gap-1 capitalize">
+        //                     <input
+        //                         type="radio"
+        //                         name="milkType"
+        //                         value={type}
+        //                         checked={milkType === type}
+        //                         onChange={() => setMilkType(type)}
+        //                     />
+        //                     {type}
+        //                 </label>
+        //             ))}
+        //         </div>
+
+        //         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        //             {/* Customer Info */}
+        //             <div className="space-y-4">
+        //                 {[{ name: 'accountNo', label: 'Account No' },
+        //                 { name: 'name', label: 'Name' },
+        //                 { name: 'spouse', label: 'Spouse' },
+        //                 { name: 'mobile', label: 'Mobile' },
+        //                 ].map(({ name, label }) => (
+        //                     <div key={name}>
+        //                         <label className="block text-sm font-medium">{label}</label>
+        //                         <input
+        //                             type="text"
+        //                             name={name}
+        //                             value={form[name]}
+        //                             onChange={handleChange}
+        //                             disabled={name !== 'accountNo' && isDisabled}
+        //                             className="mt-1 w-full border rounded px-3 py-2"
+        //                         />
+        //                     </div>
+        //                 ))}
+        //             </div>
+
+        //             {/* Milk Info */}
+        //             <div className="grid grid-cols-2 gap-4">
+        //                 {[{ name: 'quantity', label: 'Quantity (Ltr)' },
+        //                 { name: 'clr', label: 'CLR' },
+        //                 { name: 'fat', label: 'FAT (%)' },
+        //                 { name: 'snf', label: 'SNF (%)' },
+        //                 { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
+        //                 { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
+        //                 { name: 'rate', label: 'Rate (Auto)', readOnly: true },
+        //                 { name: 'amount', label: 'Amount (Auto)', readOnly: true },
+        //                 ].map(({ name, label, readOnly }) => (
+        //                     <div key={name}>
+        //                         <label className="block text-sm font-medium">{label}</label>
+        //                         <input
+        //                             type="number"
+        //                             name={name}
+        //                             value={form[name]}
+        //                             onChange={handleChange}
+        //                             readOnly={readOnly}
+        //                             disabled={isDisabled}
+        //                             className="mt-1 w-full border rounded px-3 py-2"
+        //                         />
+        //                     </div>
+        //                 ))}
+        //             </div>
+        //         </div>
+
+        //         <button
+        //             type="submit"
+        //             disabled={isDisabled}
+        //             className={`mt-6 w-full  text-white py-2 rounded  transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        //         >
+        //             Submit Collection
+        //         </button>
+        //     </form>
+
+        //     {/* Submitted Table */}
+        //     <div className="mt-8 max-w-5xl mx-auto">
+        //         <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
+        //         <div className="overflow-x-auto">
+        //             <table className="min-w-full border border-gray-300">
+        //                 <thead className="bg-gray-100">
+        //                     <tr>
+        //                         <th className="border px-2 py-1 text-sm">Milk Type</th>
+        //                         <th className="border px-2 py-1 text-sm">Account No</th>
+        //                         <th className="border px-2 py-1 text-sm">Name</th>
+        //                         <th className="border px-2 py-1 text-sm">Quantity</th>
+        //                         <th className="border px-2 py-1 text-sm">FAT</th>
+        //                         <th className="border px-2 py-1 text-sm">SNF</th>
+        //                         <th className="border px-2 py-1 text-sm">Rate</th>
+        //                         <th className="border px-2 py-1 text-sm">Amount</th>
+        //                         <th className="border px-2 py-1 text-sm">Action</th>
+        //                     </tr>
+        //                 </thead>
+        //                 <tbody>
+        //                     {collections.length === 0 ? (
+        //                         <tr>
+        //                             <td colSpan="9" className="text-center text-gray-500 py-4">
+        //                                 Data not available
+        //                             </td>
+        //                         </tr>
+        //                     ) : (
+        //                         collections.map((item, i) => (
+        //                             <tr key={i}>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.milkType}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.accountNo}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.name}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.quantity}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.fat}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.snf}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.rate}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">{item.amount}</td>
+        //                                 <td className="border px-2 py-1 text-sm text-center">
+        //                                     <div className="flex gap-2 items-center justify-center">
+        //                                         <button
+        //                                             className="px-2 py-1 text-xs bg-green-500 text-white rounded"
+        //                                             onClick={() => alert(`Viewing: ${item.accountNo}`)}
+        //                                         >
+        //                                             <FaEye size={15} />
+        //                                         </button>
+        //                                         <button
+        //                                             className="px-2 py-1 text-xs bg-yellow-500 text-white rounded"
+        //                                             onClick={() => alert(`Editing: ${item.accountNo}`)}
+        //                                         >
+        //                                             <FaPen />
+        //                                         </button>
+        //                                         <button
+        //                                             className="px-2 py-1 text-xs bg-red-600 text-white rounded"
+        //                                             onClick={() => handleRemove(i)}
+        //                                         >
+        //                                             <FaTrashCan />
+        //                                         </button>
+        //                                     </div>
+        //                                 </td>
+        //                             </tr>
+        //                         ))
+        //                     )}
+        //                 </tbody>
+        //             </table>
+        //         </div>
+        //     </div>
+        // </div>
+
+
         <div className="w-full p-4">
             <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md max-w-5xl mx-auto">
-                {/* Milk Type Selection */}
-                <div className="flex gap-6 items-center mb-6">
-                    <label className="font-semibold">Milk Type:</label>
-                    {['cow', 'buffalo', 'other'].map((type) => (
-                        <label key={type} className="flex items-center gap-1 capitalize">
-                            <input
-                                type="radio"
-                                name="milkType"
-                                value={type}
-                                checked={milkType === type}
-                                onChange={() => setMilkType(type)}
-                            />
-                            {type}
-                        </label>
-                    ))}
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Customer Info */}
-                    <div className="space-y-4">
-                        {[{ name: 'accountNo', label: 'Account No' },
-                        { name: 'name', label: 'Name' },
-                        { name: 'spouse', label: 'Spouse' },
-                        { name: 'mobile', label: 'Mobile' },
-                        ].map(({ name, label }) => (
-                            <div key={name}>
-                                <label className="block text-sm font-medium">{label}</label>
-                                <input
-                                    type="text"
-                                    name={name}
-                                    value={form[name]}
-                                    onChange={handleChange}
-                                    disabled={name !== 'accountNo' && isDisabled}
-                                    className="mt-1 w-full border rounded px-3 py-2"
-                                />
-                            </div>
-                        ))}
+            {/* Grid for Form and Receipt */}
+            <div className="grid md:grid-cols-2 gap-10 w-full mx-auto">
+                {/* === Left: Milk Collection Form === */}
+                <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full"
+                    style={{ width: '100%' }}>
+                    {/* Milk Type */}
+                    <div className="mb-4">
+                        <label className="font-semibold block mb-2">Milk Type:</label>
+                        <div className="flex gap-4">
+                            {['cow', 'buffalo', 'other'].map((type) => (
+                                <label key={type} className="capitalize flex items-center gap-1">
+                                    <input
+                                        type="radio"
+                                        name="milkType"
+                                        value={type}
+                                        checked={milkType === type}
+                                        onChange={() => setMilkType(type)}
+                                    />
+                                    {type}
+                                </label>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Milk Info */}
+                    {/* Milk + Customer Info */}
                     <div className="grid grid-cols-2 gap-4">
-                        {[{ name: 'quantity', label: 'Quantity (Ltr)' },
-                        { name: 'clr', label: 'CLR' },
-                        { name: 'fat', label: 'FAT (%)' },
-                        { name: 'snf', label: 'SNF (%)' },
-                        { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
-                        { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
-                        { name: 'rate', label: 'Rate (Auto)', readOnly: true },
-                        { name: 'amount', label: 'Amount (Auto)', readOnly: true },
+                        {[
+                            { name: 'accountNo', label: 'Account No' },
+                            { name: 'name', label: 'Name' },
+                            { name: 'spouse', label: 'Spouse' },
+                            { name: 'mobile', label: 'Mobile' },
+                            { name: 'quantity', label: 'Quantity (Ltr)' },
+                            { name: 'clr', label: 'CLR' },
+                            { name: 'fat', label: 'FAT (%)' },
+                            { name: 'snf', label: 'SNF (%)' },
+                            { name: 'baseRate', label: 'Base Rate (₹/Ltr)' },
+                            { name: 'otherPrice', label: 'Other Price (₹/Ltr)' },
+                            { name: 'rate', label: 'Rate (Auto)', readOnly: true },
+                            { name: 'amount', label: 'Amount (Auto)', readOnly: true },
                         ].map(({ name, label, readOnly }) => (
                             <div key={name}>
                                 <label className="block text-sm font-medium">{label}</label>
                                 <input
-                                    type="number"
+                                    type={name === 'mobile' || name === 'accountNo' ? 'text' : 'number'}
                                     name={name}
                                     value={form[name]}
                                     onChange={handleChange}
                                     readOnly={readOnly}
-                                    disabled={isDisabled}
+                                    disabled={isDisabled && name !== 'accountNo'}
                                     className="mt-1 w-full border rounded px-3 py-2"
                                 />
                             </div>
                         ))}
                     </div>
+
+                    <button
+                        type="submit"
+                        disabled={isDisabled}
+                        className={`mt-6 w-full bg-blue-600 text-white py-2 rounded ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        Submit Collection
+                    </button>
+                </form>
+
+                {/* === Right: Customer Receipt Preview === */}
+                <div className="bg-gray-50 p-6 rounded shadow-md border h-fit"
+                    style={{ width: '100%' }}>
+                    <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
+                    <div className="space-y-2 text-sm">
+                        <p><strong>Milk Type:</strong> {milkType || '-'}</p>
+                        <p><strong>Account No:</strong> {form.accountNo || '-'}</p>
+                        <p><strong>Name:</strong> {form.name || '-'}</p>
+                        <p><strong>Spouse:</strong> {form.spouse || '-'}</p>
+                        <p><strong>Mobile:</strong> {form.mobile || '-'}</p>
+                        <p><strong>Quantity:</strong> {form.quantity || '-'} Ltr</p>
+                        <p><strong>FAT:</strong> {form.fat || '-'}</p>
+                        <p><strong>SNF:</strong> {form.snf || '-'}</p>
+                        <p><strong>Rate:</strong> ₹{form.rate || '-'}</p>
+                        <p><strong>Amount:</strong> ₹{form.amount || '-'}</p>
+                    </div>
                 </div>
+            </div>
 
-                <button
-                    type="submit"
-                    disabled={isDisabled}
-                    className={`mt-6 w-full  text-white py-2 rounded  transition ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                    Submit Collection
-                </button>
-            </form>
-
-            {/* Submitted Table */}
-            <div className="mt-8 max-w-5xl mx-auto">
+            {/* === Bottom Table === */}
+            <div className="mt-8 w-full">
                 <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full border border-gray-300">
+                    <table className="min-w-full border border-gray-300 text-sm">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="border px-2 py-1 text-sm">Milk Type</th>
-                                <th className="border px-2 py-1 text-sm">Account No</th>
-                                <th className="border px-2 py-1 text-sm">Name</th>
-                                <th className="border px-2 py-1 text-sm">Quantity</th>
-                                <th className="border px-2 py-1 text-sm">FAT</th>
-                                <th className="border px-2 py-1 text-sm">SNF</th>
-                                <th className="border px-2 py-1 text-sm">Rate</th>
-                                <th className="border px-2 py-1 text-sm">Amount</th>
-                                <th className="border px-2 py-1 text-sm">Action</th>
+                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'Rate', 'Amount', 'Action'].map(header => (
+                                    <th key={header} className="border px-2 py-1">{header}</th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
                             {collections.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" className="text-center text-gray-500 py-4">
-                                        Data not available
-                                    </td>
+                                    <td colSpan="9" className="text-center text-gray-500 py-4">Data not available</td>
                                 </tr>
                             ) : (
                                 collections.map((item, i) => (
                                     <tr key={i}>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.milkType}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.accountNo}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.name}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.quantity}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.fat}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.snf}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.rate}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">{item.amount}</td>
-                                        <td className="border px-2 py-1 text-sm text-center">
-                                            <div className="flex gap-2 items-center justify-center">
-                                                <button
-                                                    className="px-2 py-1 text-xs bg-green-500 text-white rounded"
-                                                    onClick={() => alert(`Viewing: ${item.accountNo}`)}
-                                                >
-                                                    <FaEye size={15} />
-                                                </button>
-                                                <button
-                                                    className="px-2 py-1 text-xs bg-yellow-500 text-white rounded"
-                                                    onClick={() => alert(`Editing: ${item.accountNo}`)}
-                                                >
-                                                    <FaPen />
-                                                </button>
-                                                <button
-                                                    className="px-2 py-1 text-xs bg-red-600 text-white rounded"
-                                                    onClick={() => handleRemove(i)}
-                                                >
-                                                    <FaTrashCan />
-                                                </button>
+                                        <td className="border px-2 py-1 text-center">{item.milkType}</td>
+                                        <td className="border px-2 py-1 text-center">{item.accountNo}</td>
+                                        <td className="border px-2 py-1 text-center">{item.name}</td>
+                                        <td className="border px-2 py-1 text-center">{item.quantity}</td>
+                                        <td className="border px-2 py-1 text-center">{item.fat}</td>
+                                        <td className="border px-2 py-1 text-center">{item.snf}</td>
+                                        <td className="border px-2 py-1 text-center">{item.rate}</td>
+                                        <td className="border px-2 py-1 text-center">{item.amount}</td>
+                                        <td className="border px-2 py-1 text-center">
+                                            <div className="flex gap-2 justify-center">
+                                                <button className="bg-green-500 text-white px-2 py-1 rounded text-xs"><FaEye size={14} /></button>
+                                                <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
+                                                <button onClick={() => handleRemove(i)} className="bg-red-600 text-white px-2 py-1 rounded text-xs"><FaTrashCan size={14} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -332,6 +463,7 @@ const DailyMilkCollectionPage = () => {
                 </div>
             </div>
         </div>
+
     );
 };
 
