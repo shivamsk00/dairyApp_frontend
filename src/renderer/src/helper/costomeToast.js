@@ -10,7 +10,7 @@ const CustomToast = {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      theme: "dark",
+      theme: "colored",
     }),
 
   error: (message, position = "top-right") =>
@@ -21,7 +21,7 @@ const CustomToast = {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      theme: "dark",
+      theme: "colored",
     }),
 
   info: (message, position = "top-right") =>
@@ -32,7 +32,7 @@ const CustomToast = {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      theme: "dark",
+      theme: "colored",
     }),
 
   warn: (message, position = "top-right") =>
@@ -43,7 +43,7 @@ const CustomToast = {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      theme: "dark",
+      theme: "colored",
     }),
 };
 

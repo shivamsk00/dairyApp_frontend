@@ -5,7 +5,11 @@ import useHomeStore from '../../zustand/useHomeStore';
 
 
 // Constants
-const SNF_VALUES = [8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0];
+// const SNF_VALUES = [8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0];
+const SNF_VALUES = [];
+for (let i = 6.8; i <= 10.0; i += 0.1) {
+  SNF_VALUES.push(parseFloat(i.toFixed(1)));
+}
 const FAT_VALUES = [
  3.0,3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1,
   4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0, 5.1,
@@ -124,47 +128,109 @@ const RateChartPage = () => {
   loadData();
 }, []);
 
-  return (
-    <div className="rateChartContainer">
-      <div className="snfChartBox">
-        <div className='saveBtn'>
-          <button onClick={handleSave}>Save</button>
-        </div>
-        <h1 className="chartTitle">SNF Rate Chart</h1>
-        <div className="tableWrapper">
-          <table className="snfChartTable">
-            <thead>
-              <tr>
-                <th>FAT / SNF</th>
-                {SNF_VALUES.map(snf => (
-                  <th key={snf}>{snf.toFixed(1)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rateData.map((row, fatIndex) => (
-                <tr key={fatIndex}>
-                  <td>{row.fat}</td>
-                  {row.snfRates.map((cell, snfIndex) => (
-                    <td key={snfIndex}>
-                      <input
-                        type="text"
-                        value={cell.rate}
-                        onChange={(e) =>
-                          handleChange(fatIndex, snfIndex, e.target.value)
-                        }
-                        className="editableInput"
-                      />
-                    </td>
-                  ))}
-                </tr>
+return (
+  <div className="h-screen flex flex-col p-4">
+  {/* Save button and header */}
+  <div className="flex justify-end mb-2">
+    <button
+      onClick={handleSave}
+      className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+    >
+      Save
+    </button>
+  </div>
+  <h1 className="text-xl font-bold mb-2">SNF Rate Chart</h1>
+
+  {/* Scrollable Table Container */}
+  <div className="flex-1 overflow-auto border border-gray-300 rounded">
+    <div className="min-w-max"> {/* horizontal scroll wrapper */}
+      <table className="border-collapse text-sm min-w-full">
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
+            <th className="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 z-20">
+              FAT / SNF
+            </th>
+            {SNF_VALUES.map((snf) => (
+              <th
+                key={snf}
+                className="border border-gray-300 px-2 py-1 text-center"
+              >
+                {snf.toFixed(1)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rateData.map((row, fatIndex) => (
+            <tr key={fatIndex}>
+              <td className="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium z-10">
+                {row.fat}
+              </td>
+              {row.snfRates.map((cell, snfIndex) => (
+                <td key={snfIndex} className="border border-gray-300 px-2 py-1">
+                  <input
+                    type="text"
+                    value={cell.rate}
+                    onChange={(e) =>
+                      handleChange(fatIndex, snfIndex, e.target.value)
+                    }
+                    className="w-16 text-sm text-center text-white border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 bg-slate-400 focus:ring-blue-400"
+                  />
+                </td>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+</div>
+);
+
+
+  
+// return (
+  //   <div className="rateChartContainer">
+  //     <div className="snfChartBox">
+  //       <div className='saveBtn'>
+  //         <button onClick={handleSave}>Save</button>
+  //       </div>
+  //       <h1 className="chartTitle">SNF Rate Chart</h1>
+  //       <div className="tableWrapper">
+  //         <table className="snfChartTable">
+  //           <thead>
+  //             <tr>
+  //               <th>FAT / SNF</th>
+  //               {SNF_VALUES.map(snf => (
+  //                 <th key={snf}>{snf.toFixed(1)}</th>
+  //               ))}
+  //             </tr>
+  //           </thead>
+  //           <tbody>
+  //             {rateData.map((row, fatIndex) => (
+  //               <tr key={fatIndex}>
+  //                 <td>{row.fat}</td>
+  //                 {row.snfRates.map((cell, snfIndex) => (
+  //                   <td key={snfIndex}>
+  //                     <input
+  //                       type="text"
+  //                       value={cell.rate}
+  //                       onChange={(e) =>
+  //                         handleChange(fatIndex, snfIndex, e.target.value)
+  //                       }
+  //                       className="editableInput"
+  //                     />
+  //                   </td>
+  //                 ))}
+  //               </tr>
+  //             ))}
+  //           </tbody>
+  //         </table>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 };
+
 
 export default RateChartPage;

@@ -96,6 +96,22 @@ const EditMilkCollectionPage = () => {
           </select>
         </div>
 
+        {/* Shift */}
+        <div className="col-span-2">
+          <label className="block font-semibold mb-1">Shift:</label>
+          <select
+            name="shift"
+            value={form.shift}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="">Select shift</option>
+            <option value="morning">Morning</option>
+            <option value="evening">Evening</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+
         {/* Account No */}
         <div>
           <label className="block font-semibold mb-1">Account No:</label>

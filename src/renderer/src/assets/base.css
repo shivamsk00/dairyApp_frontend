@@ -28,7 +28,8 @@
 } */
 
 :root {
-  --btn-color: #0c828c;
+  /* --btn-color: #0c828c; */
+  --btn-color: #0E1462;
   --bg-color: #d0e4e5;
   --text-color: #fff;
 }
@@ -51,12 +52,12 @@ a {
 }
 
 button {
-  background-color: #0c828c;
-  transition: 0.3s linear;
+  background-color: var(--btn-color);
+  transition: 0.2s linear;
 }
 
 button:hover {
-  background-color: #09656d;
+  background-color: #363885;
 }
 
 body {

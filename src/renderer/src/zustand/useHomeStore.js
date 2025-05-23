@@ -224,7 +224,18 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return error.response.data
     }
-  }
+  },
+  deleteMilkCollection: async (milk_collection_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(
+        `/delete-milk-collection/${milk_collection_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
 }))
 
 export default useHomeStore

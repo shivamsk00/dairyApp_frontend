@@ -12,9 +12,12 @@ const DailyMilkCollectionPage = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
     const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
+    const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
     const getMilkRate = useHomeStore(state => state.getMilkRate);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [deleteId, setDeleteId] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const [milkType, setMilkType] = useState('cow');
     const [shiftValue, setShiftValue] = useState('morning');
@@ -31,13 +34,14 @@ const DailyMilkCollectionPage = () => {
         other_price: '0',
         rate: '',
         amount: '',
-        milk_type: milkType
+        milk_type: milkType,
+        shift: shiftValue
     });
     const [collections, setCollections] = useState([]);
 
     // FETCH ALL CUSTOMER
     const fetchCustomerDetailByAccountNumber = async (accountNo) => {
-        console.log('Fetching customer details for:', accountNo);
+        // console.log('Fetching customer details for:', accountNo);
         try {
             const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
             console.log('Customer response:', res);
@@ -93,20 +97,20 @@ const DailyMilkCollectionPage = () => {
                             base_rate: res.rate || '',
                         }));
 
-                        if(res.fat && res.clr && res.snf ){
-                            CustomToast.success("SNF CLR AND FAT FOUND")
+                        if (res.fat && res.clr && res.snf) {
+                            CustomToast.success("SNF CLR AND FAT FOUND", "top-center")
                         }
-                        if(res.fat == '' ){
-                            CustomToast.warn("FAT not found")
+                        if (res.fat == '') {
+                            CustomToast.warn("FAT not found", "top-center")
                         }
-                        if(res.clr == '' ){
-                            CustomToast.warn("CLR not found")
+                        if (res.clr == '') {
+                            CustomToast.warn("CLR not found", "top-center")
                         }
-                        if(res.snf == '' ){
-                            CustomToast.warn("SNF not found")
+                        if (res.snf == '') {
+                            CustomToast.warn("SNF not found", "top-center")
                         }
-                        if(res.rate == '' ){
-                            CustomToast.warn("RATE not found")
+                        if (res.rate == '') {
+                            CustomToast.warn("RATE not found", "top-center")
                         }
 
 
@@ -116,7 +120,7 @@ const DailyMilkCollectionPage = () => {
                 };
 
                 getBaseRateFetch();
-            }, 500);
+            }, 1000);
 
             return () => clearTimeout(timeout);
         }
@@ -189,10 +193,6 @@ const DailyMilkCollectionPage = () => {
             console.log("submited milk collection response", res)
             if (res.status_code == 200) {
                 CustomToast.success(res.message)
-
-            } else {
-
-                CustomToast.error(res.message)
                 setForm({
                     customer_account_number: '',
                     name: '',
@@ -208,6 +208,11 @@ const DailyMilkCollectionPage = () => {
                     amount: '',
                     milk_type: ''
                 })
+                fetchMilkCollectionDetails()
+            } else {
+
+                CustomToast.error(res.message || res.errors)
+
             }
         } catch (error) {
             CustomToast.success(error)
@@ -221,7 +226,7 @@ const DailyMilkCollectionPage = () => {
             const res = await getMilkCollectionRecord()
             console.log("milk collection data fetch success", res)
             if (res.status_code == 200) {
-                CustomToast.success(res.message);
+                // CustomToast.success(res.message);
                 setCollections(res.data.data)
             } else {
                 CustomToast.error(res.message);
@@ -239,8 +244,19 @@ const DailyMilkCollectionPage = () => {
 
 
 
-    const handleRemove = (index) => {
-        setCollections(prev => prev.filter((_, i) => i !== index));
+    const handleRemove = async (id) => {
+        try {
+            const res = await deleteMilkCollection(id);
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                fetchMilkCollectionDetails()
+            } else {
+                CustomToast.success(res.message)
+
+            }
+        } catch (error) {
+
+        }
     };
 
     const isDisabled = !form.name; // Disable if customer data not loaded
@@ -362,7 +378,7 @@ const DailyMilkCollectionPage = () => {
                     <button
                         type="submit"
                         disabled={isDisabled}
-                        className={`mt-6 w-full text-white py-2 rounded ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        className={`mt-6 w-full text-white py-2 rounded ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                     >
                         Submit Collection
                     </button>
@@ -402,7 +418,7 @@ const DailyMilkCollectionPage = () => {
                     <table className="min-w-full border border-gray-300 text-sm">
                         <thead className="bg-gray-100">
                             <tr>
-                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'Rate', 'Amount', 'Action'].map(header => (
+                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Amount', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
                                 ))}
                             </tr>
@@ -421,6 +437,7 @@ const DailyMilkCollectionPage = () => {
                                         <td className="border px-2 py-1 text-center">{item.quantity}</td>
                                         <td className="border px-2 py-1 text-center">{item.fat}</td>
                                         <td className="border px-2 py-1 text-center">{item.snf}</td>
+                                        <td className="border px-2 py-1 text-center">{item.shift}</td>
                                         <td className="border px-2 py-1 text-center">{item.base_rate}</td>
                                         <td className="border px-2 py-1 text-center">{(item.base_rate * item.quantity).toFixed(2)}</td>
                                         <td className="border px-2 py-1 text-center">
@@ -435,7 +452,15 @@ const DailyMilkCollectionPage = () => {
                                                     <FaEye size={14} />
                                                 </button>
                                                 <button onClick={() => nav("/editMilkCollection", { state: { milkData: item } })} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
-                                                <button onClick={() => handleRemove(i)} className="bg-red-600 text-white px-2 py-1 rounded text-xs"><FaTrashCan size={14} /></button>
+                                                <button
+                                                    onClick={() => {
+                                                        setDeleteId(item.id);
+                                                        setShowConfirmModal(true);
+                                                    }}
+                                                    className="bg-red-600 text-white px-2 py-1 rounded text-xs"
+                                                >
+                                                    <FaTrashCan size={14} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -496,6 +521,33 @@ const DailyMilkCollectionPage = () => {
                                 className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
                             >
                                 Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showConfirmModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-sm">
+                        <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+                        <p className="text-sm text-gray-700 mb-6">Are you sure you want to delete this item?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleRemove(deleteId);
+                                    setShowConfirmModal(false);
+                                    setDeleteId(null);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>
