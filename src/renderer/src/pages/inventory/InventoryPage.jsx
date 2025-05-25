@@ -5,9 +5,11 @@ import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
 import CategoryTable from './CategoryTable';
+import StockTable from './StockTable';
+import ProductTable from './ProductTable';
 
 const InventoryPage = () => {
- const [inventoryType, setInventoryType] = useState('Categories');
+  const [inventoryType, setInventoryType] = useState('Categories');
   const nav = useNavigate()
 
 
@@ -47,11 +49,15 @@ const InventoryPage = () => {
         </div>
       </div>
 
-    
+
       {
-        inventoryType==='Categories' ? <CategoryTable /> : null
+        inventoryType === 'Categories' ? <CategoryTable /> : inventoryType === "Stocks" ? (
+          <StockTable />
+        ) : (
+          <ProductTable />
+        )
       }
-     
+
     </div>
   );
 };
