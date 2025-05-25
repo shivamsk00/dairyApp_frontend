@@ -142,7 +142,7 @@ return (
   <h1 className="text-xl font-bold mb-2">SNF Rate Chart</h1>
 
   {/* Scrollable Table Container */}
-  <div className="flex-1 overflow-auto border border-gray-300 rounded">
+  <div className="overflow-auto border border-gray-500 rounded">
     <div className="min-w-max"> {/* horizontal scroll wrapper */}
       <table className="border-collapse text-sm min-w-full">
         <thead className="bg-gray-100 sticky top-0 z-10">

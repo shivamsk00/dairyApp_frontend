@@ -3,9 +3,10 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
+let mainWindow // 👈 global main window
+
 function createWindow() {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -26,8 +27,6 @@ function createWindow() {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -35,40 +34,108 @@ function createWindow() {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+// ✅ Child window (modal or child of main)
+function createChildWindow() {
+  const childWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    parent: mainWindow, // 👈 makes it a child
+    modal: true, // 👈 modal true hai
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    childWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/child`)
+  } else {
+    childWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+}
+
+// ✅ Second independent window
+// function createSecondWindow() {
+//   const secondWindow = new BrowserWindow({
+//     width: 700,
+//     height: 500,
+//     // show: false,
+
+//     webPreferences: {
+//       preload: join(__dirname, '../preload/index.js'),
+//       sandbox: false
+//     }
+//   })
+
+//   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+//     // ✅ Dev mode
+//     secondWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/milk-collection`)
+//   } else {
+//     // ✅ Prod mode using HashRouter
+//     secondWindow.loadFile(join(__dirname, '../renderer/index.html'))
+//     secondWindow.webContents.once('did-finish-load', () => {
+//       secondWindow.webContents.executeJavaScript(`
+//         location.hash = '/milk-collection';
+//       `)
+//     })
+//   }
+// }
+
+function createSecondWindow() {
+  const secondWindow = new BrowserWindow({
+    width: 700,
+    height: 500,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  // Notify when closed
+  secondWindow.on('closed', () => {
+    mainWindow?.webContents.send('second-window-closed')
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    secondWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/milk-collection`)
+  } else {
+    secondWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    secondWindow.webContents.once('did-finish-load', () => {
+      secondWindow.webContents.executeJavaScript(`
+        window.history.pushState({}, '', '/milk-collection');
+        window.dispatchEvent(new Event('popstate'));
+      `)
+    })
+  }
+}
+
+// ✅ App ready
 app.whenReady().then(() => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // ✅ IPC listeners
+  ipcMain.on('open-child-window', () => {
+    createChildWindow()
+  })
+
+  ipcMain.on('open-second-window', () => {
+    createSecondWindow()
+  })
 
   createWindow()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// ✅ Quit when all windows are closed
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  if (process.platform !== 'darwin') app.quit()
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

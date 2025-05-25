@@ -1,12 +1,14 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  openChildWindow: () => ipcRenderer.send('open-child-window'),
+  openSecondWindow: () => ipcRenderer.send('open-second-window'),
+  onSecondWindowClosed: (callback) => ipcRenderer.on('second-window-closed', callback)
+}
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+// Expose APIs to renderer safely
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)

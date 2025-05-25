@@ -276,15 +276,18 @@ const DailyMilkCollectionPage = () => {
                         <div className="flex gap-4 items-center">
                             <label className="font-semibold block mr-2">Milk Type:</label>
                             {['cow', 'buffalo', 'other'].map((type) => (
-                                <label key={type} className="capitalize flex items-center gap-1">
+                                <label key={type} className="relative">
                                     <input
                                         type="radio"
                                         name="milkType"
                                         value={type}
                                         checked={milkType === type}
                                         onChange={() => setMilkType(type)}
+                                        className="peer hidden"
                                     />
-                                    {type}
+                                    <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-blue-100">
+                                        {type}
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -293,19 +296,24 @@ const DailyMilkCollectionPage = () => {
                         <div className="flex gap-4 items-center">
                             <label className="font-semibold block mr-2">Shift:</label>
                             {['morning', 'evening'].map((shift) => (
-                                <label key={shift} className="capitalize flex items-center gap-1">
+                                <label key={shift} className="relative">
                                     <input
                                         type="radio"
                                         name="shift"
                                         value={shift}
                                         checked={shiftValue === shift}
                                         onChange={() => setShiftValue(shift)}
+                                        className="peer hidden"
                                     />
-                                    {shift}
+                                    <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 hover:bg-green-100">
+                                        {shift}
+                                    </span>
                                 </label>
                             ))}
                         </div>
                     </div>
+
+
 
 
 

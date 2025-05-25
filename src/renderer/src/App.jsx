@@ -24,6 +24,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import SetForgotPasswordPage from './pages/auth/SetForgotPasswordPage';
 import EditCustomerPage from './pages/customer/EditCustomerPage';
 import EditMilkCollectionPage from './pages/milkCollection/EditMilkCollectionPage';
+import MilkCollectionNewWin from './milkCollection/MilkCollectionNewWin';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+
           <Route path="category" element={<CategoreisPage />} />
           <Route path="addcategory" element={<AddCategoriesPage />} />
           <Route path="customer" element={<CustomerPage />} />
@@ -63,8 +65,9 @@ function App() {
           <Route path="editCustomer" element={<EditCustomerPage />} />
 
           <Route path="changePassword" element={<ChangePassword />} />
-           <Route path="snfchart" element={<SnfChartPage />} />
+          <Route path="snfchart" element={<SnfChartPage />} />
         </Route>
+        <Route path="milk-collection" element={<MilkCollectionPage />} />
       </Routes>
     </HashRouter>
   );

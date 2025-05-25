@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import useToggleStore from '../zustand/useToggleStore'
 import { loginBg, sideBarMenuList } from '../constant/constant'
 import { MdOutlineDashboard } from "react-icons/md";
@@ -8,11 +8,27 @@ import { FaArrowRightFromBracket, FaArrowTrendUp, FaGear, FaMoneyBillTrendUp } f
 import { PiFarm, PiFarmFill } from 'react-icons/pi';
 import { NavLink } from 'react-router-dom';
 import dairyLogo from "../assets/dairyLogo.png"
-
+import { useLocation } from 'react-router-dom'
 
 
 const Sidbar = () => {
+  const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false)
   const isMenu = useToggleStore(state => state.isMenu)
+  const [activeItem, setActiveItem] = useState(null)
+
+  const location = useLocation()
+
+  useEffect(() => {
+    window.api?.onSecondWindowClosed?.(() => {
+      setIsSecondWindowOpen(false)
+      setActiveItem(null)
+    })
+  }, [])
+
+
+  const handleClick = () => {
+    window.api.openChildWindow() // 👈 yaha se call karega
+  }
   return (
     <div className={'sidebarContainer '}>
       <div className='sideBarProfileBox'>
@@ -37,6 +53,20 @@ const Sidbar = () => {
             <MdOutlineDashboard /><span>Categories</span>
           </NavLink>
 
+          {/* <button className='text-white' onClick={handleClick}>Open child win</button> */}
+          {/* <button className='text-white' onClick={() => window.api.openSecondWindow()}>Open Second Window</button> */}
+
+          {/* <NavLink
+            // to="/milk-collection"
+            onClick={() => window.api.openSecondWindow()}
+            className={({ isActive }) =>
+              isActive ? 'sidebarListItem active' : 'sidebarListItem'
+            }
+          >
+
+          </NavLink> */}
+
+
           <NavLink
             to="/customer"
             className={({ isActive }) =>
@@ -46,15 +76,42 @@ const Sidbar = () => {
             <FaUser /> <span>Customers</span>
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/milkcollection"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
             <GiHeavyCollar /> <span>Milk Collection</span>
-          </NavLink>
+          </NavLink> */}
 
+          <li
+            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
+            onClick={() => {
+              if (isSecondWindowOpen) return
+              window.api.openSecondWindow()
+              setIsSecondWindowOpen(true)
+              setActiveItem('milk-dispatch-new')
+            }}
+            style={{
+              pointerEvents: isSecondWindowOpen ? 'none' : 'auto',
+              opacity: isSecondWindowOpen ? 0.5 : 1
+            }}
+          >
+            <GiHeavyCollar /> <span>Milk Collection</span>
+          </li>
+
+
+          {/* <li
+            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
+            onClick={() => {
+              window.api.openSecondWindow()
+              setActiveItem('milk-dispatch-new')
+            }}
+          >
+            <FaMoneyBillTrendUp />
+            <span>Milk Dispatch (New)</span>
+          </li> */}
           <NavLink
             to="/milksales"
             className={({ isActive }) =>
@@ -82,7 +139,7 @@ const Sidbar = () => {
             <FaChartBar /> <span>Rate Chart</span>
           </NavLink>
 
-           <NavLink
+          <NavLink
             to="/snfchart"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
