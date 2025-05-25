@@ -1,9 +1,59 @@
-import React from 'react'
+
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
+import CustomToast from '../../helper/costomeToast';
+import CategoryTable from './CategoryTable';
 
 const InventoryPage = () => {
-  return (
-    <div>InventoryPage</div>
-  )
-}
+ const [inventoryType, setInventoryType] = useState('Categories');
+  const nav = useNavigate()
 
-export default InventoryPage
+
+  return (
+    <div className="p-4">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex gap-4 items-center">
+          {/* <label className="font-semibold block mr-2">Pages:</label> */}
+          {['Categories', 'Stocks', 'Products'].map((type) => (
+            <label key={type} className="relative">
+              <input
+                type="radio"
+                name="inventoryType"
+                value={type}
+                checked={inventoryType === type}
+                onChange={() => setInventoryType(type)}
+                className="peer hidden"
+              />
+              <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-blue-100">
+                {type}
+              </span>
+            </label>
+          ))}
+        </div>
+        <div className="flex justify-center items-center mb-4 gap-2">
+
+          <button onClick={() => nav("/addcategory")} className=" text-white px-4 py-2 rounded ">
+            Add Category
+          </button>
+          <button onClick={() => nav("/addcategory")} className=" text-white px-4 py-2 rounded ">
+            Add Stock
+          </button>
+          <button onClick={() => nav("/addcategory")} className=" text-white px-4 py-2 rounded ">
+            Add Product
+          </button>
+        </div>
+      </div>
+
+    
+      {
+        inventoryType==='Categories' ? <CategoryTable /> : null
+      }
+     
+    </div>
+  );
+};
+
+export default InventoryPage;

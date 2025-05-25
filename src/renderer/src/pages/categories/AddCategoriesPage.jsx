@@ -30,7 +30,7 @@ const AddCategoriesPage = () => {
             console.log("add category response", res);
             if (res.status_code === 200) {
                 CustomToast.success(res.message)
-                nav("/category");
+                nav(-1);
                 setError('');
                 setShowSuccessModal(true);
             } else {
