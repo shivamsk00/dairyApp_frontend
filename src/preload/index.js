@@ -5,7 +5,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
-  onSecondWindowClosed: (callback) => ipcRenderer.on('second-window-closed', callback)
+  onSecondWindowClosed: (callback) => ipcRenderer.on('second-window-closed', callback),
+  openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
+  onCutomerWindowClosed: (callback) => ipcRenderer.on('customer-win-close', callback)
 }
 
 // Expose APIs to renderer safely

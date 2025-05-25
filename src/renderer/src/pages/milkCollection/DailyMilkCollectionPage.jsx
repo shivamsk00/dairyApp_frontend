@@ -269,128 +269,231 @@ const DailyMilkCollectionPage = () => {
             <div className="grid md:grid-cols-2 gap-10 w-full mx-auto">
                 {/* === Left: Milk Collection Form === */}
                 {/* === Left: Milk Collection Form === */}
-                <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full" style={{ width: '100%' }}>
+                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 rounded shadow-md w-full" style={{ width: '100%' }}>
                     {/* Milk Type & Shift in a row */}
-                    <div className="mb-4 flex flex-col gap-8 items-start">
+                    <div className="mb-4 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
                         {/* Milk Type */}
-                        <div className="flex gap-4 items-center">
-                            <label className="font-semibold block mr-2">Milk Type:</label>
-                            {['cow', 'buffalo', 'other'].map((type) => (
-                                <label key={type} className="relative">
-                                    <input
-                                        type="radio"
-                                        name="milkType"
-                                        value={type}
-                                        checked={milkType === type}
-                                        onChange={() => setMilkType(type)}
-                                        className="peer hidden"
-                                    />
-                                    <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-blue-100">
-                                        {type}
-                                    </span>
-                                </label>
-                            ))}
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
+                            <label className="font-semibold block mb-2 sm:mb-0 sm:mr-2">Milk Type:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {['cow', 'buffalo', 'other'].map((type) => (
+                                    <label key={type} className="relative">
+                                        <input
+                                            type="radio"
+                                            name="milkType"
+                                            value={type}
+                                            checked={milkType === type}
+                                            onChange={() => setMilkType(type)}
+                                            className="peer hidden"
+                                        />
+                                        <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
+                                            {type}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Shift */}
-                        <div className="flex gap-4 items-center">
-                            <label className="font-semibold block mr-2">Shift:</label>
-                            {['morning', 'evening'].map((shift) => (
-                                <label key={shift} className="relative">
-                                    <input
-                                        type="radio"
-                                        name="shift"
-                                        value={shift}
-                                        checked={shiftValue === shift}
-                                        onChange={() => setShiftValue(shift)}
-                                        className="peer hidden"
-                                    />
-                                    <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 hover:bg-green-100">
-                                        {shift}
-                                    </span>
-                                </label>
-                            ))}
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
+                            <label className="font-semibold block mb-2 sm:mb-0 sm:mr-2">Shift:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {['morning', 'evening'].map((shift) => (
+                                    <label key={shift} className="relative">
+                                        <input
+                                            type="radio"
+                                            name="shift"
+                                            value={shift}
+                                            checked={shiftValue === shift}
+                                            onChange={() => setShiftValue(shift)}
+                                            className="peer hidden"
+                                        />
+                                        <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
+                                            {shift}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
                     </div>
-
-
-
-
-
-
 
                     {/* Milk + Customer Info */}
-                    <div className="grid grid-cols-2 gap-4">
-                        {[
-                            { name: 'customer_account_number', label: 'Account No' },
-                            { name: 'name', label: 'Name' },
-                            { name: 'spouse', label: 'Spouse' },
-                            { name: 'mobile', label: 'Mobile' },
-                            { name: 'fat', label: 'FAT (%)' },
-                            { name: 'quantity', label: 'Quantity (Ltr)' },
-                        ].map(({ name, label }) => (
-                            <div key={name}>
-                                <label className="block text-sm font-medium">{label}</label>
+                    <div className="flex flex-col gap-4 mb-3 bg-slate-300 p-3 rounded-lg">
+                        {/* Row 1: Account No & Quantity */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium " >Account No</label>
                                 <input
-                                    type={name === 'mobile' || name === 'customer_account_number' || name === "name" || name === "spouse" ? 'text' : 'number'}
-                                    name={name}
-                                    value={form[name]}
+                                    type="text"
+                                    name="customer_account_number"
+                                    value={form.customer_account_number}
                                     onChange={handleChange}
-                                    disabled={isDisabled && name !== 'customer_account_number'}
-                                    className="mt-1 w-full border rounded px-3 py-2"
+                                    // Always enabled
+                                    className=" w-full border rounded py-1 px-4 mt-1 "
                                 />
                             </div>
-                        ))}
-
-                        {/* CLR & SNF in same row */}
-                        <div className="col-span-2 grid grid-cols-2 gap-4">
-                            {[
-                                { name: 'clr', label: 'CLR' },
-                                { name: 'snf', label: 'SNF (%)' },
-                            ].map(({ name, label }) => (
-                                <div key={name}>
-                                    <label className="block text-sm font-medium">{label}</label>
-                                    <input
-                                        type="number"
-                                        name={name}
-                                        value={form[name]}
-                                        onChange={handleChange}
-                                        disabled={isDisabled && name !== 'customer_account_number'}
-                                        className="mt-1 w-full border rounded px-3 py-2"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-
-                        {[
-                            { name: 'base_rate', label: 'Base Rate (₹/Ltr)' },
-                            { name: 'other_price', label: 'Other Price (₹/Ltr)' },
-                            { name: 'rate', label: 'Rate (Auto)', readOnly: true },
-                            { name: 'amount', label: 'Amount (Auto)', readOnly: true },
-                        ].map(({ name, label, readOnly }) => (
-                            <div key={name}>
-                                <label className="block text-sm font-medium">{label}</label>
+                            <div>
+                                <label className="block text-sm font-medium ">Quantity (Ltr)</label>
                                 <input
                                     type="number"
-                                    name={name}
-                                    value={form[name]}
+                                    name="quantity"
+                                    value={form.quantity}
                                     onChange={handleChange}
-                                    readOnly={readOnly}
-                                    disabled={isDisabled && name !== 'customer_account_number'}
-                                    className="mt-1 w-full border rounded px-3 py-2"
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Row 2: Name & FAT */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium ">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium ">FAT (%)</label>
+                                <input
+                                    type="number"
+                                    name="fat"
+                                    value={form.fat}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 3: Mobile & CLR */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium ">Mobile</label>
+                                <input
+                                    type="text"
+                                    name="mobile"
+                                    value={form.mobile}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium ">CLR</label>
+                                <input
+                                    type="number"
+                                    name="clr"
+                                    value={form.clr}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 4: Spouse & SNF */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium ">Spouse</label>
+                                <input
+                                    type="text"
+                                    name="spouse"
+                                    value={form.spouse}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium ">SNF (%)</label>
+                                <input
+                                    type="number"
+                                    name="snf"
+                                    value={form.snf}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <button
+                    {/* Rate & Price Section */}
+                    <div className="mt-2  bg-orange-800 shadow-xl p-4 rounded border border-gray-400">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-white">Base Rate (₹/Ltr)</label>
+                                <input
+                                    type="number"
+                                    name="base_rate"
+                                    value={form.base_rate}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white">Other Price (₹/Ltr)</label>
+                                <input
+                                    type="number"
+                                    name="other_price"
+                                    value={form.other_price}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    className=" w-full border rounded py-1 px-4 bg-orange-100 "
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white">Rate (Auto)</label>
+                                <input
+                                    type="number"
+                                    name="rate"
+                                    value={form.rate}
+                                    readOnly
+                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white">Amount (Auto)</label>
+                                <input
+                                    type="number"
+                                    name="amount"
+                                    value={form.amount}
+                                    readOnly
+                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                />
+                            </div>
+                        </div>
+
+
+                    </div>
+                    {/* Submit Button */}
+                    <div className="mt-1">
+                        <input
+                            type="submit"
+                            disabled={isDisabled}
+                            className={`mt-6 w-24 text-white py-1 rounded  bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
+                            value={'Submit'}
+                        />
+
+
+                    </div>
+
+
+                </form>
+                {/* <button
                         type="submit"
                         disabled={isDisabled}
                         className={`mt-6 w-full text-white py-2 rounded ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                     >
                         Submit Collection
-                    </button>
-                </form>
+                    </button> */}
                 {/* === Right: Customer Receipt Preview === */}
                 <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>

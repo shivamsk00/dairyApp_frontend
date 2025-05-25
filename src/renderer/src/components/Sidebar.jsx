@@ -100,6 +100,21 @@ const Sidbar = () => {
           >
             <GiHeavyCollar /> <span>Milk Collection</span>
           </li>
+          <li
+            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
+            onClick={() => {
+              if (isSecondWindowOpen) return
+              window.api.openCusomerWindow()
+              setIsSecondWindowOpen(true)
+              setActiveItem('milk-dispatch-new')
+            }}
+            style={{
+              pointerEvents: isSecondWindowOpen ? 'none' : 'auto',
+              opacity: isSecondWindowOpen ? 0.5 : 1
+            }}
+          >
+            <GiHeavyCollar /> <span>Customer Collection</span>
+          </li>
 
 
           {/* <li

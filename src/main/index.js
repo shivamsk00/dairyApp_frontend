@@ -85,6 +85,8 @@ function createSecondWindow() {
   const secondWindow = new BrowserWindow({
     width: 700,
     height: 500,
+    autoHideMenuBar: true,      // Hides menu bar
+    menuBarVisible: false,      // Completely disables it
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -109,6 +111,45 @@ function createSecondWindow() {
   }
 }
 
+
+
+
+// CUSTOMER COLLECTION WIN
+function customerCollection() {
+  const customerCollectionWin = new BrowserWindow({
+    width: 700,
+    height: 500,
+    autoHideMenuBar: true,      // Hides menu bar
+    menuBarVisible: false,      // Completely disables it
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  // Notify when closed
+  customerCollectionWin.on('closed', () => {
+    mainWindow?.webContents.send('customer-win-close')
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    customerCollectionWin.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/customer-collection`)
+  } else {
+    customerCollectionWin.loadFile(join(__dirname, '../renderer/index.html'))
+    customerCollectionWin.webContents.once('did-finish-load', () => {
+      customerCollectionWin.webContents.executeJavaScript(`
+        window.history.pushState({}, '', '/customer-collection');
+        window.dispatchEvent(new Event('popstate'));
+      `)
+    })
+  }
+}
+
+
+
+
+
+
 // ✅ App ready
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
@@ -126,6 +167,11 @@ app.whenReady().then(() => {
 
   ipcMain.on('open-second-window', () => {
     createSecondWindow()
+  })
+
+  // CUSTOMER WINDOW OPEN 
+  ipcMain.on('open-cutomer-win', () => {
+    customerCollection()
   })
 
   createWindow()

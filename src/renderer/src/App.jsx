@@ -25,6 +25,7 @@ import SetForgotPasswordPage from './pages/auth/SetForgotPasswordPage';
 import EditCustomerPage from './pages/customer/EditCustomerPage';
 import EditMilkCollectionPage from './pages/milkCollection/EditMilkCollectionPage';
 import MilkCollectionNewWin from './milkCollection/MilkCollectionNewWin';
+import CustomerCollection from './pages/milkCollection/CustomerCollection';
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
           <Route path="snfchart" element={<SnfChartPage />} />
         </Route>
         <Route path="milk-collection" element={<MilkCollectionPage />} />
+        <Route path="customer-collection" element={<CustomerCollection />} />
       </Routes>
     </HashRouter>
   );
