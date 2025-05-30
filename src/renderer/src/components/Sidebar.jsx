@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom'
 
 const Sidbar = () => {
   const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false)
+  const [isCustomerCollectionOpen, setIsCustomerCollectionOpen] = useState(false)
   const isMenu = useToggleStore(state => state.isMenu)
   const [activeItem, setActiveItem] = useState(null)
 
@@ -26,11 +27,19 @@ const Sidbar = () => {
   }, [])
 
 
+  useEffect(() => {
+    window.api?.onCutomerWindowClosed?.(() => {
+      setIsCustomerCollectionOpen(false)
+      setActiveItem(null)
+    })
+  }, [])
+
+
   const handleClick = () => {
     window.api.openChildWindow() // 👈 yaha se call karega
   }
   return (
-    <div className={'sidebarContainer '}>
+    <div className={'sidebarContainer'}>
       <div className='sideBarProfileBox'>
         <img src={dairyLogo} />
       </div>
@@ -44,14 +53,14 @@ const Sidbar = () => {
           >
             <MdOutlineDashboard /><span>Dashboard</span>
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/category"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
             <MdOutlineDashboard /><span>Categories</span>
-          </NavLink>
+          </NavLink> */}
 
           {/* <button className='text-white' onClick={handleClick}>Open child win</button> */}
           {/* <button className='text-white' onClick={() => window.api.openSecondWindow()}>Open Second Window</button> */}
@@ -76,57 +85,37 @@ const Sidbar = () => {
             <FaUser /> <span>Customers</span>
           </NavLink>
 
-          {/* <NavLink
-            to="/milkcollection"
-            className={({ isActive }) =>
-              isActive ? 'sidebarListItem active' : 'sidebarListItem'
-            }
-          >
-            <GiHeavyCollar /> <span>Milk Collection</span>
-          </NavLink> */}
 
           <li
-            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
+            className={activeItem === 'milk-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
             onClick={() => {
               if (isSecondWindowOpen) return
               window.api.openSecondWindow()
               setIsSecondWindowOpen(true)
-              setActiveItem('milk-dispatch-new')
+              setActiveItem('milk-collection')
             }}
             style={{
-              pointerEvents: isSecondWindowOpen ? 'none' : 'auto',
               opacity: isSecondWindowOpen ? 0.5 : 1
             }}
           >
             <GiHeavyCollar /> <span>Milk Collection</span>
           </li>
           <li
-            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
+            className={activeItem === 'customer-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
             onClick={() => {
-              if (isSecondWindowOpen) return
+              if (isCustomerCollectionOpen) return
               window.api.openCusomerWindow()
-              setIsSecondWindowOpen(true)
-              setActiveItem('milk-dispatch-new')
+              setIsCustomerCollectionOpen(true)
+              setActiveItem('customer-collection')
             }}
             style={{
-              pointerEvents: isSecondWindowOpen ? 'none' : 'auto',
-              opacity: isSecondWindowOpen ? 0.5 : 1
+              pointerEvents: isCustomerCollectionOpen ? 'none' : 'cursor',
+              opacity: isCustomerCollectionOpen ? 0.5 : 1
             }}
           >
             <GiHeavyCollar /> <span>Customer Collection</span>
           </li>
 
-
-          {/* <li
-            className={activeItem === 'milk-dispatch-new' ? 'sidebarListItem active' : 'sidebarListItem'}
-            onClick={() => {
-              window.api.openSecondWindow()
-              setActiveItem('milk-dispatch-new')
-            }}
-          >
-            <FaMoneyBillTrendUp />
-            <span>Milk Dispatch (New)</span>
-          </li> */}
           <NavLink
             to="/milksales"
             className={({ isActive }) =>

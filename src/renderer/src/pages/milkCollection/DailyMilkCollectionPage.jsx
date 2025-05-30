@@ -487,14 +487,7 @@ const DailyMilkCollectionPage = () => {
 
 
                 </form>
-                {/* <button
-                        type="submit"
-                        disabled={isDisabled}
-                        className={`mt-6 w-full text-white py-2 rounded ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
-                    >
-                        Submit Collection
-                    </button> */}
-                {/* === Right: Customer Receipt Preview === */}
+             
                 <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
 

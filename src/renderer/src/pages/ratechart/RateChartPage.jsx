@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import './ratechart.css';
 import useHomeStore from '../../zustand/useHomeStore';
+import CustomToast from '../../helper/costomeToast';
 
 
 
 // Constants
 // const SNF_VALUES = [8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 9.0];
 const SNF_VALUES = [];
-for (let i = 6.8; i <= 10.0; i += 0.1) {
+for (let i = 7.5; i <= 9.0; i += 0.1) {
   SNF_VALUES.push(parseFloat(i.toFixed(1)));
 }
 const FAT_VALUES = [
- 3.0,3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1,
+  3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1,
   4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0, 5.1,
   5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6.0, 6.1,
   6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 7.0, 7.1,
@@ -67,13 +68,15 @@ const RateChartPage = () => {
         }));
 
         setRateData(transformedData);
-        alert('Rates saved and updated!');
+        CustomToast.success("Rates saved and updated!")
       } else {
-        alert('Failed to fetch updated data.');
+        // alert('Failed to fetch updated data.');
+        CustomToast.error("Failed to fetch updated data.")
+
       }
     } catch (error) {
-      console.error('Error saving rate chart:', error);
-      alert('Error saving rates.');
+      // console.error('Error saving rate chart:', error);
+      // alert('Error saving rates.');
     }
   };
 
@@ -102,94 +105,94 @@ const RateChartPage = () => {
 
 
   useEffect(() => {
-  const loadData = async () => {
-    const data = await fetchRateChartData();
-    console.log("Fetched data from backend:", data);
+    const loadData = async () => {
+      const data = await fetchRateChartData();
+      console.log("Fetched data from backend:", data);
 
-    // Merge backend data with full FAT list
-    const mergedData = FAT_VALUES.map(fatValue => {
-      const matched = data?.find(item => parseFloat(item.fat) === fatValue);
+      // Merge backend data with full FAT list
+      const mergedData = FAT_VALUES.map(fatValue => {
+        const matched = data?.find(item => parseFloat(item.fat) === fatValue);
 
-      return {
-        fat: fatValue,
-        snfRates: SNF_VALUES.map(snf => {
-          const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
-          return {
-            snf,
-            rate: matched ? matched[key] ?? '' : '', // If no value, show blank
-          };
-        }),
-      };
-    });
+        return {
+          fat: fatValue,
+          snfRates: SNF_VALUES.map(snf => {
+            const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
+            return {
+              snf,
+              rate: matched ? matched[key] ?? '' : '', // If no value, show blank
+            };
+          }),
+        };
+      });
 
-    setRateData(mergedData);
-  };
+      setRateData(mergedData);
+    };
 
-  loadData();
-}, []);
+    loadData();
+  }, []);
 
-return (
-  <div className="h-screen flex flex-col p-4">
-  {/* Save button and header */}
-  <div className="flex justify-end mb-2">
-    <button
-      onClick={handleSave}
-      className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
-    >
-      Save
-    </button>
-  </div>
-  <h1 className="text-xl font-bold mb-2">SNF Rate Chart</h1>
+  return (
+    <div className="h-[93%] flex flex-col p-4">
+      {/* Save button and header */}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+        >
+          Save
+        </button>
+      </div>
+      <h1 className="text-xl font-bold mb-2">SNF Rate Chart</h1>
 
-  {/* Scrollable Table Container */}
-  <div className="overflow-auto border border-gray-500 rounded">
-    <div className="min-w-max"> {/* horizontal scroll wrapper */}
-      <table className="border-collapse text-sm min-w-full">
-        <thead className="bg-gray-100 sticky top-0 z-10">
-          <tr>
-            <th className="sticky left-0 bg-gray-100 border border-gray-300 px-2 py-1 z-20">
-              FAT / SNF
-            </th>
-            {SNF_VALUES.map((snf) => (
-              <th
-                key={snf}
-                className="border border-gray-300 px-2 py-1 text-center"
-              >
-                {snf.toFixed(1)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rateData.map((row, fatIndex) => (
-            <tr key={fatIndex}>
-              <td className="sticky left-0 bg-white border border-gray-300 px-2 py-1 font-medium z-10">
-                {row.fat}
-              </td>
-              {row.snfRates.map((cell, snfIndex) => (
-                <td key={snfIndex} className="border border-gray-300 px-2 py-1">
-                  <input
-                    type="text"
-                    value={cell.rate}
-                    onChange={(e) =>
-                      handleChange(fatIndex, snfIndex, e.target.value)
-                    }
-                    className="w-16 text-sm text-center text-white border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-2 bg-slate-400 focus:ring-blue-400"
-                  />
-                </td>
+      {/* Scrollable Table Container */}
+      <div className="overflow-auto border border-gray-500 rounded">
+        <div className="min-w-max"> {/* horizontal scroll wrapper */}
+          <table className="border-collapse text-sm min-w-full">
+            <thead className="bg-gray-100 sticky top-0 z-10">
+              <tr>
+                <th className="sticky left-0  text-white border bg-slate-500 border-gray-300 px-2 py-1 z-20">
+                  FAT / SNF
+                </th>
+                {SNF_VALUES.map((snf) => (
+                  <th
+                    key={snf}
+                    className="border border-gray-300 px-2 py-1 text-center bg-slate-500 text-white"
+                  >
+                    {snf.toFixed(1)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className='bg-slate-700' >
+              {rateData.map((row, fatIndex) => (
+                <tr key={fatIndex}>
+                  <td className="sticky left-0 bg-slate-500 text-white text-center border border-gray-300 px-2 py-1 font-medium z-10">
+                    {row.fat}
+                  </td>
+                  {row.snfRates.map((cell, snfIndex) => (
+                    <td key={snfIndex} className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={cell.rate}
+                        onChange={(e) =>
+                          handleChange(fatIndex, snfIndex, e.target.value)
+                        }
+                        className=" text-sm text-center text-white  rounded px-1 py-2 focus:outline-none focus:ring-2 bg-slate-700 focus:ring-blue-400"
+                      />
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-);
+  );
 
 
-  
-// return (
+
+  // return (
   //   <div className="rateChartContainer">
   //     <div className="snfChartBox">
   //       <div className='saveBtn'>

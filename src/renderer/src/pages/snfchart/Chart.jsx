@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
+import CustomToast from '../../helper/costomeToast';
 
 const Chart = ({ formValues, trigger }) => {
      const snfChartDataFetch = useHomeStore(state => state.snfChartDataFetch);
@@ -46,11 +47,16 @@ const Chart = ({ formValues, trigger }) => {
                     return row;
                });
 
-               await snfChartDataFetch(transformedData);
-               alert('SNF Formula & chart are updated successfully.');
+               const res = await snfChartDataFetch(transformedData);
+               if(res.status_code == 200){
+
+                    CustomToast.success(res.message)
+               }else{
+                    CustomToast.error(res.message)
+               }
           } catch (error) {
                console.error('Error sending SNF data:', error);
-               alert('Failed to update SNF chart.');
+               CustomToast.error("Failed to update SNF chart.'")
           }
      };
 

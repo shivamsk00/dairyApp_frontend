@@ -104,7 +104,7 @@ function createSecondWindow() {
     secondWindow.loadFile(join(__dirname, '../renderer/index.html'))
     secondWindow.webContents.once('did-finish-load', () => {
       secondWindow.webContents.executeJavaScript(`
-        window.history.pushState({}, '', '/milk-collection');
+        window.history.pushState({}, '', '/#/milk-collection');
         window.dispatchEvent(new Event('popstate'));
       `)
     })
@@ -138,7 +138,7 @@ function customerCollection() {
     customerCollectionWin.loadFile(join(__dirname, '../renderer/index.html'))
     customerCollectionWin.webContents.once('did-finish-load', () => {
       customerCollectionWin.webContents.executeJavaScript(`
-        window.history.pushState({}, '', '/customer-collection');
+        window.history.pushState({}, '', '/#/customer-collection');
         window.dispatchEvent(new Event('popstate'));
       `)
     })

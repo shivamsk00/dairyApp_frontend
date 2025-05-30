@@ -26,6 +26,8 @@ import EditCustomerPage from './pages/customer/EditCustomerPage';
 import EditMilkCollectionPage from './pages/milkCollection/EditMilkCollectionPage';
 import MilkCollectionNewWin from './milkCollection/MilkCollectionNewWin';
 import CustomerCollection from './pages/milkCollection/CustomerCollection';
+import AddProductPage from './pages/inventory/AddProductPage';
+import EditProductPage from './pages/inventory/editProductPage';
 
 function App() {
   return (
@@ -67,6 +69,9 @@ function App() {
 
           <Route path="changePassword" element={<ChangePassword />} />
           <Route path="snfchart" element={<SnfChartPage />} />
+          <Route path="AddProductPage" element={<AddProductPage />} />
+          <Route path="editProduct" element={<EditProductPage />} />
+
         </Route>
         <Route path="milk-collection" element={<MilkCollectionPage />} />
         <Route path="customer-collection" element={<CustomerCollection />} />

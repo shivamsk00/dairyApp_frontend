@@ -49,7 +49,7 @@ const useHomeStore = create((set) => ({
     try {
       const token = localStorage.getItem('token')
       const res = await api.post('/snf-formula/save', { data: snfFormulaData })
-      console.log('response save snf data', res)
+      return res.data
     } catch (error) {
       console.log('ERROR IN SNF FORMULA DATA', error)
     }
@@ -228,14 +228,81 @@ const useHomeStore = create((set) => ({
   deleteMilkCollection: async (milk_collection_id) => {
     try {
       // set({loading:true})
-      const res = await api.post(
-        `/delete-milk-collection/${milk_collection_id}`)
+      const res = await api.post(`/delete-milk-collection/${milk_collection_id}`)
       // set({loading:false})
       return res.data
     } catch (error) {
       return error.response.data
     }
   },
+
+  // ADD PRODUCT API
+  addProduct: async (productData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/product-submit`, productData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // FETCH ALL PRODUCT API
+  allProductGet: async () => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/all-product`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  // UPDATE PRODUCT STATUS API
+  updateProductStatus: async (product_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/update-status-product/${product_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // FETCH EDIT PRODUCT API
+  editProductDetailsFetch: async (product_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/edit-product/${product_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // UPDATE PRODUCT STATUS API
+  updateProduct: async (productData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/update-product`, productData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // DELETE PRODUCT API
+  deleteProduct: async (product_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/delete-product/${product_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  }
 }))
 
 export default useHomeStore
