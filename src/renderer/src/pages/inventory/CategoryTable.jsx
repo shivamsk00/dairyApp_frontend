@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
+import { FaEye, FaPen } from 'react-icons/fa';
+import { FaTrashCan } from 'react-icons/fa6';
+import { navigateTo } from '../../helper/navigation';
 
 const CategoryTable = () => {
      const fetchCategory = useHomeStore(state => state.fetchCategory);
@@ -11,7 +14,7 @@ const CategoryTable = () => {
      const deleteCategory = useHomeStore(state => state.deleteCategory);
 
 
-     
+
      const [categories, setCategories] = useState([]);
 
      const [selectedCategory, setSelectedCategory] = useState(null);
@@ -160,7 +163,7 @@ const CategoryTable = () => {
      const fetchCategoryData = async () => {
           try {
                const res = await fetchCategory();
-               console.log("response print fetch category data", res)
+               console.log("response print fetch category data", res.data.data)
                setCategories(res.data.data)
 
 
@@ -188,7 +191,7 @@ const CategoryTable = () => {
      return (
           <>
                {/* Table */}
-               <div className="overflow-x-auto">
+               {/* <div className="overflow-x-auto">
                     <table className="min-w-full  shadow-md rounded-lg overflow-hidden">
                          <thead className="bg-gray-100">
                               <tr>
@@ -230,7 +233,86 @@ const CategoryTable = () => {
                               ))}
                          </tbody>
                     </table>
-               </div>
+               </div> */}
+
+               return (
+               <>
+                    {/* Table */}
+
+
+                    {/* === Bottom Table === */}
+                    <div className="mt-8 w-full">
+                         <h3 className="text-xl font-semibold mb-4">Product Data</h3>
+                         <div className="overflow-x-auto">
+                              <table className="min-w-full border border-gray-300 text-sm">
+                                   <thead className="bg-gray-100">
+                                        <tr>
+                                             {['Sr No.', 'Category Name', 'Status', 'Action'].map(header => (
+                                                  <th key={header} className="border px-2 py-1">{header}</th>
+                                             ))}
+                                        </tr>
+                                   </thead>
+                                   <tbody>
+                                        {categories.length === 0 ? (
+                                             <tr>
+                                                  <td colSpan="9" className="text-center text-gray-500 py-4">Data not available</td>
+                                             </tr>
+                                        ) : (
+                                             categories.map((item, i) => (
+                                                  <tr key={i}>
+                                                       <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                                       <td className="border px-2 py-1 text-center">{item.name}</td>
+                                                       <td className="border px-2 py-1 text-center">
+                                                            <button
+                                                                 onClick={() => openModal('toggle', item)}
+                                                                 className={`px-3 py-1 rounded-full text-sm font-medium ${item.status == 1
+                                                                      ? 'bg-green-100 text-green-700'
+                                                                      : 'bg-red-100 text-red-700'
+                                                                      }`}
+                                                            >
+                                                                 {item.status == 1 ? 'Active' : 'Inactive'}
+                                                            </button>
+                                                       </td>
+
+                                                       <td className="border px-2 py-1 text-center">
+                                                            <div className="flex gap-2 justify-center">
+                                                                 <button
+                                                                      className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                                                                      onClick={() => {
+                                                                          openModal('edit', item)
+                                                                      }}
+                                                                 >
+                                                                      <FaEye size={14} />
+                                                                 </button>
+                                                              
+                                                                 <button
+                                                                      onClick={() => {
+                                                                           openModal("delete", item)
+                                                                      }}
+                                                                      className="bg-red-600 text-white px-2 py-1 rounded text-xs"
+                                                                 >
+                                                                      <FaTrashCan size={14} />
+                                                                 </button>
+                                                            </div>
+                                                       </td>
+                                                  </tr>
+                                             ))
+                                        )}
+                                   </tbody>
+                              </table>
+                         </div>
+                    </div>
+
+
+                    
+
+
+
+
+
+
+               </>
+               )
 
 
 

@@ -282,10 +282,10 @@ const useHomeStore = create((set) => ({
     }
   },
   // UPDATE PRODUCT STATUS API
-  updateProduct: async (productData) => {
+  updateProduct: async (product_id, productData) => {
     try {
       // set({loading:true})
-      const res = await api.post(`/update-product`, productData)
+      const res = await api.post(`/update-product/${product_id}`, productData)
       // set({loading:false})
       return res.data
     } catch (error) {
@@ -297,6 +297,66 @@ const useHomeStore = create((set) => ({
     try {
       // set({loading:true})
       const res = await api.post(`/delete-product/${product_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  // ========================== STOCK API =============================== //
+
+  // add Product stock api
+  addProductStock: async (stockData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/product-stock-submit`, stockData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  // get all Product stock api
+  getAllProductStock: async () => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/all-product-stock`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // get all Product stock for Edit api
+  getEditProductStockData: async (productStock_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/edit-product-stock/${productStock_id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  // Update Product stock for Edit api
+  updateProductStock: async (productStock_id, productStockData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/update-product-stock/${productStock_id}`, productStockData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // Delete Product stock for Edit api
+  deleteProductStock: async (productStock_id, productStockData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/delete-product-stock/${productStock_id}`, productStockData)
       // set({loading:false})
       return res.data
     } catch (error) {

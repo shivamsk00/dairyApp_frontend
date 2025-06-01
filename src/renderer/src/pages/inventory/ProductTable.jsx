@@ -193,7 +193,7 @@ const ProductTable = () => {
 
       {/* === Bottom Table === */}
       <div className="mt-8 w-full">
-        <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
+        <h3 className="text-xl font-semibold mb-4">Product Data</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full border border-gray-300 text-sm">
             <thead className="bg-gray-100">
@@ -242,8 +242,7 @@ const ProductTable = () => {
                         <button onClick={() => nav("/editProduct", { state: { productId: item.id } })} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
                         <button
                           onClick={() => {
-                            // setDeleteId(item.id);
-                            setShowConfirmModal(true);
+                            openModal("delete", item)
                           }}
                           className="bg-red-600 text-white px-2 py-1 rounded text-xs"
                         >
@@ -354,7 +353,7 @@ const ProductTable = () => {
                 </h2>
                 <p className="mb-6">
                   Are you sure you want to delete{' '}
-                  <strong>{selectedCategory.name}</strong>?
+                  <strong>{selectedProduct.name}</strong>?
                 </p>
                 <div className="flex justify-end gap-2">
                   <button
@@ -373,32 +372,7 @@ const ProductTable = () => {
               </>
             )}
 
-            {/* EDIT MODAL */}
-            {modalType === 'edit' && (
-              <>
-                <h2 className="text-lg font-semibold mb-4">Edit Category</h2>
-                <input
-                  type="text"
-                  className="w-full border p-2 rounded mb-4"
-                  defaultValue={categoryEdit}
-                  onChange={(e) => setCategoryEdit(e.target.value)}
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    className="px-4 py-2 rounded bg-gray-300"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded bg-green-600 text-white"
-                    onClick={handleEdit}
-                  >
-                    Save
-                  </button>
-                </div>
-              </>
-            )}
+
           </div>
         </div>
       )}

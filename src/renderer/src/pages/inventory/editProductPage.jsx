@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import CommonBackButton from '../../components/CommonBackButton';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const EditProductPage = () => {
+  const nav = useNavigate()
   const { state } = useLocation();
   const { productId } = state
   const fetchCategory = useHomeStore(state => state.fetchCategory);
@@ -22,6 +23,7 @@ const EditProductPage = () => {
   });
 
   const handleChange = (e) => {
+
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -33,6 +35,7 @@ const EditProductPage = () => {
     try {
       const res = await editProductDetailsFetch(productId)
       console.log("print product edit data", res.data)
+
 
       const productCategory = categories.find(cate => cate.id == res.data.category_id)
       console.log("productCategory", productCategory)
@@ -68,14 +71,29 @@ const EditProductPage = () => {
     fetchProductEditData()
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedProduct = {
-      ...formData,
-      unit: `${formData.unitValue} ${formData.unitType}`,
-    };
-    console.log("Updated product data:", updatedProduct);
-    // Call update API here
+    try {
+      const combinedUnit = `${formData.unitValue} ${formData.unitType}`;
+      const finalData = { ...formData, unit: combinedUnit };
+
+      const productData = {
+        "category_id": finalData.category,
+        "name": finalData.name,
+        "unit": finalData.unit,
+        "price": finalData.price
+      }
+      const res = await updateProduct(productId, productData)
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+        nav(-1)
+        console.log("update data ", res)
+      }
+    } catch (error) {
+      console.log("ERROR IN UPDATE PRODUCT", error)
+    }
+
+
   };
 
   return (

@@ -7,10 +7,20 @@ import CustomToast from '../../helper/costomeToast';
 import CategoryTable from './CategoryTable';
 import StockTable from './StockTable';
 import ProductTable from './ProductTable';
+import { navigateTo } from '../../helper/navigation';
 
 const InventoryPage = () => {
   const [inventoryType, setInventoryType] = useState('Categories');
-  const nav = useNavigate()
+  const remberSelectedTable = (type) => {
+    localStorage.setItem("seletedTableBtn", type)
+    setInventoryType(type)
+  }
+
+  useEffect(() => {
+    const selectedBtn = localStorage.getItem("seletedTableBtn") || "Categories"
+    setInventoryType(selectedBtn)
+
+  }, [inventoryType])
 
 
   return (
@@ -26,7 +36,7 @@ const InventoryPage = () => {
                 name="inventoryType"
                 value={type}
                 checked={inventoryType === type}
-                onChange={() => setInventoryType(type)}
+                onChange={() => remberSelectedTable(type)}
                 className="peer hidden"
               />
               <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-blue-100">
@@ -37,13 +47,13 @@ const InventoryPage = () => {
         </div>
         <div className="flex justify-center items-center mb-4 gap-2">
 
-          <button onClick={() => nav("/addcategory")} className=" text-white px-4 py-2 rounded ">
+          <button onClick={() => navigateTo("/addcategory")} className=" text-white px-4 py-2 rounded ">
             Add Category
           </button>
-          <button onClick={() => nav("/addcategory")} className=" text-white px-4 py-2 rounded ">
+          <button onClick={() => navigateTo("/addStock")} className=" text-white px-4 py-2 rounded ">
             Add Stock
           </button>
-          <button onClick={() => nav("/AddProductPage")} className=" text-white px-4 py-2 rounded ">
+          <button onClick={() => navigateTo("/AddProductPage")} className=" text-white px-4 py-2 rounded ">
             Add Product
           </button>
         </div>

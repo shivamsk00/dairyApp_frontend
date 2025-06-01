@@ -3,235 +3,316 @@ import { useNavigate } from 'react-router-dom';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
+import { FaEye, FaPen } from 'react-icons/fa';
+import { FaTrashCan } from 'react-icons/fa6';
 
 const StockTable = () => {
+     const nav = useNavigate()
+     const allProductGet = useHomeStore(state => state.allProductGet)
+     const getAllProductStock = useHomeStore(state => state.getAllProductStock)
+     const updateProductStatus = useHomeStore(state => state.updateProductStatus)
+     const deleteProductStock = useHomeStore(state => state.deleteProductStock)
+     const [modalType, setModalType] = useState(null); // 'toggle', 'delete', 'edit'
+     const [products, setProducts] = useState([])
+     const [selectedProduct, setSelectedProduct] = useState(null)
+     const [productEdit, setProductEdit] = useState(null)
+     const [isModalOpen, setIsModalOpen] = useState(false);
+     const [StockData, setStockData] = useState([]);
 
-      const fetchCategory = useHomeStore(state => state.fetchCategory);
-          const updateCategoryStatus = useHomeStore(state => state.updateCategoryStatus);
-          const updateCategory = useHomeStore(state => state.updateCategory);
-          const deleteCategory = useHomeStore(state => state.deleteCategory);
-     
-     
-          
-          const [categories, setCategories] = useState([]);
-     
-          const [selectedCategory, setSelectedCategory] = useState(null);
-          const [categoryEdit, setCategoryEdit] = useState('')
-          const [modalType, setModalType] = useState(null); // 'toggle', 'delete', 'edit'
-     
-          const openModal = (type, category) => {
-               setSelectedCategory(category);
-               setModalType(type);
-               setCategoryEdit(category.name)
-          };
-     
-          const closeModal = () => {
-               setSelectedCategory(null);
-               setModalType(null);
-          };
-     
-          // UPDATE CATEGORY STATUS
-          const handleToggleStatus = async () => {
-               try {
-                    const res = await updateCategoryStatus(selectedCategory.id);
-                    console.log("status update", res)
-                    if (res.status_code == 200) {
-                         toast(res.message, {
-                              position: "top-right",
-                              autoClose: 2000,
-                              hideProgressBar: false,
-                              closeOnClick: false,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "dark",
-                              type: 'success'
-     
-                         });
-                         closeModal();
-                         fetchCategoryData()
-                    } else {
-                         toast(res.message, {
-                              position: "top-right",
-                              autoClose: 2000,
-                              hideProgressBar: false,
-                              closeOnClick: false,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "dark",
-                              type: 'error'
-     
-                         });
-                    }
-               } catch (error) {
-                    toast(error, {
-                         position: "top-right",
-                         autoClose: 2000,
-                         hideProgressBar: false,
-                         closeOnClick: false,
-                         pauseOnHover: true,
-                         draggable: true,
-                         progress: undefined,
-                         theme: "dark",
-                         type: 'error'
-     
-                    });
-     
+
+     const productStockAllDataFetch = async () => {
+          try {
+               const res = await getAllProductStock();
+               if (res.status_code == 200) {
+
+                    console.log("fetch all product stock====>", res.data.data)
+                    setStockData(res.data.data)
                }
-     
-          };
-     
-          const handleDelete = async () => {
-               try {
-                    const res = await deleteCategory(selectedCategory.id);
-                    if (res.status_code == 200) {
-                         CustomToast.success(res.message)
-                         fetchCategoryData()
-                         closeModal()
-                    } else {
-                         CustomToast.error(res.message)
-     
-                    }
-     
-               } catch (error) {
-                    console.log("ERROR IN CATEGORY DELETE FUNCTION", error)
-               }
-          };
-     
-     
-          // CATEGORY UPDATE
-          const handleEdit = async () => {
-     
-               console.log("categoryEdit", categoryEdit)
-               console.log("selectedCategory", selectedCategory)
-               try {
-                    const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
-                    // console.log("edit category ", res)
-                    if (res.status_code == 200) {
-                         toast(res.message, {
-                              position: "top-right",
-                              autoClose: 2000,
-                              hideProgressBar: false,
-                              closeOnClick: false,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "dark",
-                              type: 'success'
-     
-                         });
-                         closeModal();
-                         fetchCategoryData()
-     
-                    } else {
-                         toast(res.message, {
-                              position: "top-right",
-                              autoClose: 2000,
-                              hideProgressBar: false,
-                              closeOnClick: false,
-                              pauseOnHover: true,
-                              draggable: true,
-                              progress: undefined,
-                              theme: "dark",
-                              type: 'error'
-     
-                         });
-     
-                    }
-     
-               } catch (error) {
-                    console.log("ERROR IN CATEGORY UPDATE", error);
-                    toast(error, {
-                         position: "top-right",
-                         autoClose: 2000,
-                         hideProgressBar: false,
-                         closeOnClick: false,
-                         pauseOnHover: true,
-                         draggable: true,
-                         progress: undefined,
-                         theme: "dark",
-                         type: 'error'
-     
-                    });
-     
-               }
-          };
-     
-          const fetchCategoryData = async () => {
-               try {
-                    const res = await fetchCategory();
-                    console.log("response print fetch category data", res)
-                    setCategories(res.data.data)
-     
-     
-               } catch (error) {
-                    toast(error, {
-                         position: "top-right",
-                         autoClose: 2000,
-                         hideProgressBar: false,
-                         closeOnClick: false,
-                         pauseOnHover: true,
-                         draggable: true,
-                         progress: undefined,
-                         theme: "dark",
-                         type: 'error'
-     
-                    });
-     
-               }
+
+
+          } catch (error) {
+               console.log("ERROR IN FETCH ALL PRODUCT ", error)
+
           }
-     
-          useEffect(() => {
-               fetchCategoryData()
-          }, [])
-     
-  return (
-     <>
-        {/* Table */}
-               <div className="overflow-x-auto">
-                    <table className="min-w-full  shadow-md rounded-lg overflow-hidden">
-                         <thead className="bg-gray-100">
-                              <tr>
-                                   <th className="text-left py-3 px-4 font-semibold text-sm">Category Name</th>
-                                   <th className="text-left py-3 px-4 font-semibold text-sm">Status</th>
-                                   <th className="text-left py-3 px-4 font-semibold text-sm">Actions</th>
-                              </tr>
-                         </thead>
-                         <tbody>
-                              {categories.map((category) => (
-                                   <tr key={category.id} className="border-b hover:bg-gray-50">
-                                        <td className="py-3 px-4">{category.name}</td>
-                                        <td className="py-3 px-4">
-                                             <button
-                                                  onClick={() => openModal('toggle', category)}
-                                                  className={`px-3 py-1 rounded-full text-sm font-medium ${category.status == 1
-                                                       ? 'bg-green-100 text-green-700'
-                                                       : 'bg-red-100 text-red-700'
-                                                       }`}
-                                             >
-                                                  {category.status == 1 ? 'Active' : 'Inactive'}
-                                             </button>
-                                        </td>
-                                        <td className="py-3 px-4 space-x-2">
-                                             <button
-                                                  onClick={() => openModal('edit', category)}
-                                                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm"
-                                             >
-                                                  Edit
-                                             </button>
-                                             <button
-                                                  onClick={() => openModal('delete', category)}
-                                                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                                             >
-                                                  Delete
-                                             </button>
-                                        </td>
+     }
+
+     useEffect(() => {
+          productStockAllDataFetch()
+     }, [])
+
+
+
+
+
+
+     const openModal = (type, product) => {
+          console.log("product", product)
+          setSelectedProduct(product);
+          setModalType(type);
+          setProductEdit(product.name)
+     };
+
+     const closeModal = () => {
+          setSelectedProduct(null);
+          setModalType(null);
+     };
+
+
+
+     // UPDATE CATEGORY STATUS
+     const handleToggleStatus = async () => {
+          try {
+               const res = await updateProductStatus(selectedProduct.id);
+               console.log("status update", res)
+               if (res.status_code == 200) {
+                    toast(res.message, {
+                         position: "top-right",
+                         autoClose: 2000,
+                         hideProgressBar: false,
+                         closeOnClick: false,
+                         pauseOnHover: true,
+                         draggable: true,
+                         progress: undefined,
+                         theme: "dark",
+                         type: 'success'
+
+                    });
+                    closeModal();
+                    // fetchCategoryData()
+                    productAllDataFetch()
+               } else {
+                    toast(res.message, {
+                         position: "top-right",
+                         autoClose: 2000,
+                         hideProgressBar: false,
+                         closeOnClick: false,
+                         pauseOnHover: true,
+                         draggable: true,
+                         progress: undefined,
+                         theme: "dark",
+                         type: 'error'
+
+                    });
+               }
+          } catch (error) {
+               toast(error, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+               });
+
+          }
+
+     };
+
+     const handleDelete = async () => {
+          try {
+               const res = await deleteProductStock(selectedProduct.id);
+               if (res.status_code == 200) {
+                    CustomToast.success(res.message)
+                    closeModal();
+                    productStockAllDataFetch()
+               } else {
+                    CustomToast.error(res.message)
+
+               }
+
+          } catch (error) {
+               console.log("ERROR IN CATEGORY DELETE FUNCTION", error)
+          }
+     };
+
+
+     // CATEGORY UPDATE
+     const handleEdit = async () => {
+
+          console.log("productEdit", productEdit)
+
+          console.log("selectedProduct", selectedProduct)
+          try {
+               const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
+               // console.log("edit category ", res)
+               if (res.status_code == 200) {
+                    toast(res.message, {
+                         position: "top-right",
+                         autoClose: 2000,
+                         hideProgressBar: false,
+                         closeOnClick: false,
+                         pauseOnHover: true,
+                         draggable: true,
+                         progress: undefined,
+                         theme: "dark",
+                         type: 'success'
+
+                    });
+                    closeModal();
+                    fetchCategoryData()
+
+               } else {
+                    toast(res.message, {
+                         position: "top-right",
+                         autoClose: 2000,
+                         hideProgressBar: false,
+                         closeOnClick: false,
+                         pauseOnHover: true,
+                         draggable: true,
+                         progress: undefined,
+                         theme: "dark",
+                         type: 'error'
+
+                    });
+
+               }
+
+          } catch (error) {
+               console.log("ERROR IN CATEGORY UPDATE", error);
+               toast(error, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: 'error'
+
+               });
+
+          }
+     };
+
+
+
+     return (
+          <>
+               {/* Table */}
+
+
+               {/* === Bottom Table === */}
+               <div className="mt-8 w-full">
+                    <h3 className="text-xl font-semibold mb-4">Product Data</h3>
+                    <div className="overflow-x-auto">
+                         <table className="min-w-full border border-gray-300 text-sm">
+                              <thead className="bg-gray-100">
+                                   <tr>
+                                        {['Sr No.', 'Product Name', 'Quantity', 'Stock Type', 'Status', 'Action'].map(header => (
+                                             <th key={header} className="border px-2 py-1">{header}</th>
+                                        ))}
                                    </tr>
-                              ))}
-                         </tbody>
-                    </table>
+                              </thead>
+                              <tbody>
+                                   {StockData.length === 0 ? (
+                                        <tr>
+                                             <td colSpan="9" className="text-center text-gray-500 py-4">Data not available</td>
+                                        </tr>
+                                   ) : (
+                                        StockData.map((item, i) => (
+                                             <tr key={i}>
+                                                  <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                                  <td className="border px-2 py-1 text-center">{item?.product?.name || <span className='text-red-600 font-medium'>Product Removed</span>}</td>
+                                                  <td className="border px-2 py-1 text-center">{item.quantity}</td>
+                                                  <td className="border px-2 py-1 text-center">{item.stock_type}</td>
+                                                  <td className="border px-2 py-1 text-center">
+                                                       <button
+                                                            onClick={() => openModal('toggle', item)}
+                                                            className={`px-3 py-1 rounded-full text-sm font-medium ${item.status == 1
+                                                                 ? 'bg-green-100 text-green-700'
+                                                                 : 'bg-red-100 text-red-700'
+                                                                 }`}
+                                                       >
+                                                            {item.status == 1 ? 'Active' : 'Inactive'}
+                                                       </button>
+                                                  </td>
+
+                                                  <td className="border px-2 py-1 text-center">
+                                                       <div className="flex gap-2 justify-center">
+                                                            <button
+                                                                 className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                                                                 onClick={() => {
+                                                                      setSelectedProduct(item);
+                                                                      setIsModalOpen(true);
+                                                                 }}
+                                                            >
+                                                                 <FaEye size={14} />
+                                                            </button>
+                                                            <button onClick={() => nav("/editStock", { state: { stockId: item.id } })} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
+                                                            <button
+                                                                 onClick={() => {
+                                                                      openModal("delete", item)
+                                                                 }}
+                                                                 className="bg-red-600 text-white px-2 py-1 rounded text-xs"
+                                                            >
+                                                                 <FaTrashCan size={14} />
+                                                            </button>
+                                                       </div>
+                                                  </td>
+                                             </tr>
+                                        ))
+                                   )}
+                              </tbody>
+                         </table>
+                    </div>
                </div>
+
+
+               {isModalOpen && setSelectedProduct && (
+                    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                         <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
+                              <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">
+                                   Product Details
+                              </h2>
+
+                              {/* Close Button */}
+                              {/* <div
+                            onClick={() => setIsModalOpen(false)}
+                            className="absolute bg-white top-4 right-4 text-xxl cursor-pointer"
+                            title="Close"
+                        >
+                            <IoMdCloseCircle size={30} />
+                        </div> */}
+
+                              {/* Milk Collection Info Table */}
+                              <table className="w-full text-sm text-left border border-gray-200">
+                                   <tbody>
+                                        {[
+                                             ['Product Name', selectedProduct.product.name],
+                                             ['Quantity', selectedProduct.quantity],
+                                             ['Stock Type', `${selectedProduct.stock_type}`],
+                                             // ['Unit', selectedProduct.unit],
+                                             // ['Stocks', selectedProduct.stocks.length],
+                                             ['Status', selectedProduct.status == 1 ? <span className='text-green-700 font-bold'>Active</span> : <span className='text-red-700 font-bold'>Inactive</span>],
+                                             ['Created At', new Date(selectedProduct.created_at).toLocaleString()],
+                                        ].map(([label, value]) => (
+                                             <tr key={label} className="border-b hover:bg-gray-50">
+                                                  <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
+                                                  <td className="px-4 py-2">{value}</td>
+                                             </tr>
+                                        ))}
+                                   </tbody>
+                              </table>
+
+                              {/* Close Button */}
+                              <div className="mt-6 text-right">
+                                   <button
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                                   >
+                                        Close
+                                   </button>
+                              </div>
+                         </div>
+                    </div>
+               )}
+
+
 
 
 
@@ -245,9 +326,9 @@ const StockTable = () => {
                                         <h2 className="text-lg font-semibold mb-4">Change Status</h2>
                                         <p className="mb-6">
                                              Are you sure you want to mark{' '}
-                                             <strong>{selectedCategory.name}</strong> as{' '}
+                                             <strong>{selectedProduct.name}</strong> as{' '}
                                              <strong>
-                                                  {selectedCategory.active ? 'Inactive' : 'Active'}
+                                                  {selectedProduct.active ? 'Inactive' : 'Active'}
                                              </strong>
                                              ?
                                         </p>
@@ -276,7 +357,7 @@ const StockTable = () => {
                                         </h2>
                                         <p className="mb-6">
                                              Are you sure you want to delete{' '}
-                                             <strong>{selectedCategory.name}</strong>?
+                                             <strong>{selectedProduct.product.name}</strong>?
                                         </p>
                                         <div className="flex justify-end gap-2">
                                              <button
@@ -295,37 +376,12 @@ const StockTable = () => {
                                    </>
                               )}
 
-                              {/* EDIT MODAL */}
-                              {modalType === 'edit' && (
-                                   <>
-                                        <h2 className="text-lg font-semibold mb-4">Edit Category</h2>
-                                        <input
-                                             type="text"
-                                             className="w-full border p-2 rounded mb-4"
-                                             defaultValue={categoryEdit}
-                                             onChange={(e) => setCategoryEdit(e.target.value)}
-                                        />
-                                        <div className="flex justify-end gap-2">
-                                             <button
-                                                  className="px-4 py-2 rounded bg-gray-300"
-                                                  onClick={closeModal}
-                                             >
-                                                  Cancel
-                                             </button>
-                                             <button
-                                                  className="px-4 py-2 rounded bg-green-600 text-white"
-                                                  onClick={handleEdit}
-                                             >
-                                                  Save
-                                             </button>
-                                        </div>
-                                   </>
-                              )}
+
                          </div>
                     </div>
                )}
-     </>
-  )
+          </>
+     )
 }
 
 export default StockTable

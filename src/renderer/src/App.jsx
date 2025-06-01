@@ -1,7 +1,7 @@
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 import Login from './pages/auth/Login'
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Layout from './components/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
@@ -28,10 +28,17 @@ import MilkCollectionNewWin from './milkCollection/MilkCollectionNewWin';
 import CustomerCollection from './pages/milkCollection/CustomerCollection';
 import AddProductPage from './pages/inventory/AddProductPage';
 import EditProductPage from './pages/inventory/editProductPage';
+import NavigatorSetter from './helper/NavigatorSetter';
+import AddStockPage from './pages/inventory/AddStockPage';
+import EditeStockPage from './pages/inventory/EditeStockPage';
 
 function App() {
+
+
+
   return (
     <HashRouter>
+      <NavigatorSetter /> {/* 👈 Set navigator once here */}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -52,10 +59,8 @@ function App() {
           <Route path="category" element={<CategoreisPage />} />
           <Route path="addcategory" element={<AddCategoriesPage />} />
           <Route path="customer" element={<CustomerPage />} />
-
           <Route path="milkcollection" element={<MilkCollectionPage />} />
           <Route path="editMilkCollection" element={<EditMilkCollectionPage />} />
-
           <Route path="milksales" element={<MilkSalesPage />} />
           <Route path="suppliers" element={<SupliersPage />} />
           <Route path="ratechart" element={<RateChartPage />} />
@@ -63,16 +68,18 @@ function App() {
           <Route path="reports" element={<ReportsPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="settings" element={<Setting />} />
-
           <Route path="addCustomer" element={<AddCustomerPage />} />
           <Route path="editCustomer" element={<EditCustomerPage />} />
-
           <Route path="changePassword" element={<ChangePassword />} />
           <Route path="snfchart" element={<SnfChartPage />} />
           <Route path="AddProductPage" element={<AddProductPage />} />
           <Route path="editProduct" element={<EditProductPage />} />
+          {/* product stock  */}
+          <Route path="addStock" element={<AddStockPage />} />
+          <Route path="editStock" element={<EditeStockPage />} />
 
         </Route>
+
         <Route path="milk-collection" element={<MilkCollectionPage />} />
         <Route path="customer-collection" element={<CustomerCollection />} />
       </Routes>

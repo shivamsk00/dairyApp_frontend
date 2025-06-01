@@ -1,20 +1,22 @@
+
+
+
 import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import CommonBackButton from '../../components/CommonBackButton';
 import { goBack } from '../../helper/navigation';
 
-const AddProductPage = () => {
-    const fetchCategory = useHomeStore(state => state.fetchCategory);
-    const addProduct = useHomeStore(state => state.addProduct);
+const AddStockPage = () => {
+    const allProductGet = useHomeStore(state => state.allProductGet);
+    const addProductStock = useHomeStore(state => state.addProductStock);
     const [categories, setCategories] = useState([]);
 
     const [formData, setFormData] = useState({
-        category: '',
-        name: '',
-        unitValue: '',
-        unitType: '',
-        price: '',
+        product_id: '',
+        stock_type: '',
+        quantity: '',
+        date: '',
     });
 
     const handleChange = (e) => {
@@ -24,12 +26,12 @@ const AddProductPage = () => {
         }));
     };
 
-    const getAllCategory = async () => {
+    const getAllProductData = async () => {
         try {
-            const res = await fetchCategory();
+            const res = await allProductGet();
             if (res.status_code == 200) {
                 setCategories(res.data.data); // Assuming array in res.data.data
-                console.log("Fetched categories", res.data.data);
+                console.log("Fetched All product get ", res.data.data);
             } else {
                 CustomToast.error(res.message);
             }
@@ -39,33 +41,30 @@ const AddProductPage = () => {
     };
 
     useEffect(() => {
-        getAllCategory();
+        getAllProductData();
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const combinedUnit = `${formData.unitValue} ${formData.unitType}`;
-        const finalData = { ...formData, unit: combinedUnit };
 
         const productData = {
-            "category_id": finalData.category,
-            "name": finalData.name,
-            "unit": finalData.unit,
-            "price": finalData.price
+            "product_id": formData.product_id,
+            "stock_type": formData.stock_type,
+            "quantity": formData.quantity,
+            "date": formData.date
         }
 
         try {
-            const res = await addProduct(productData);
+            const res = await addProductStock(productData);
             if (res.status_code == 200) {
                 CustomToast.success(res.message);
 
                 goBack()
                 setFormData({
-                    category: '',
-                    name: '',
-                    unitValue: '',
-                    unitType: '',
-                    price: '',
+                    product_id: '',
+                    stock_type: '',
+                    quantity: '',
+                    date: '',
                 })
             } else {
 
@@ -83,24 +82,24 @@ const AddProductPage = () => {
         <>
 
             <div className="w-full px-4 md:px-6 py-3 text-left">
-                <CommonBackButton heading="Add Product" />
+                <CommonBackButton heading="Add Product Stock" />
             </div>
             <div className="w-full px-4 md:px-6 lg:w-1/2 mx-auto py-6 shadow-xl m-3 rounded-lg bg-slate-700">
-                <h2 className="text-2xl font-bold mb-6 text-white">Add Product</h2>
+                <h2 className="text-2xl font-bold mb-6 text-white">Add Product Stock</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6 w-full">
                     {/* Row 1: Category and Product Name */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block mb-1 font-medium text-white">Category</label>
+                            <label className="block mb-1 font-medium text-white">Product Name</label>
                             <select
-                                name="category"
-                                value={formData.category}
+                                name="product_id"
+                                value={formData.product_id}
                                 onChange={handleChange}
                                 required
                                 className="w-full border border-gray-300 rounded px-3 py-2"
                             >
-                                <option value="">Select Category</option>
+                                <option value="">Select Product</option>
                                 {categories.map((category) => (
                                     <option key={category.id} value={category.id}>
                                         {category.name}
@@ -110,11 +109,11 @@ const AddProductPage = () => {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium text-white">Product Name</label>
+                            <label className="block mb-1 font-medium text-white">Stock Quantity</label>
                             <input
                                 type="text"
-                                name="name"
-                                value={formData.name}
+                                name="quantity"
+                                value={formData.quantity}
                                 onChange={handleChange}
                                 required
                                 className="w-full border border-gray-300 rounded px-3 py-2"
@@ -125,44 +124,31 @@ const AddProductPage = () => {
                     {/* Row 2: Product Unit and Price */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block mb-1 font-medium text-white">Product Unit</label>
-                            <div className="flex gap-2">
-                                {/* Unit Quantity */}
-                                <input
-                                    type="number"
-                                    name="unitValue"
-                                    placeholder="e.g., 1, 500"
-                                    value={formData.unitValue}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-1/2 border border-gray-300 rounded px-3 py-2"
-                                />
-
-                                {/* Unit Type */}
+                            <label className="block mb-1 font-medium text-white">Stock IN/OUT</label>
+                            <div className="flex">
                                 <select
-                                    name="unitType"
-                                    value={formData.unitType}
+                                    name="stock_type"
+                                    value={formData.stock_type}
                                     onChange={handleChange}
                                     required
-                                    className="w-1/2 border border-gray-300 rounded px-3 py-2"
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
                                 >
                                     <option value="">Select Unit</option>
-                                    <option value="Ltr">Ltr</option>
-                                    <option value="KG">KG</option>
-                                    <option value="gm">gm</option>
-                                    <option value="ml">ml</option>
+                                    <option value="IN">IN</option>
+                                    <option value="OUT">OUT</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium text-white">Product Price</label>
+                            <label className="block mb-1 font-medium text-white">Entry Date</label>
                             <input
-                                type="number"
-                                name="price"
-                                value={formData.price}
+                                type="date"
+                                name="date"
+                                value={formData.date}
                                 onChange={handleChange}
                                 required
+                                max={new Date().toISOString().split("T")[0]} // 👈 Prevent future date
                                 className="w-full border border-gray-300 rounded px-3 py-2"
                             />
                         </div>
@@ -184,4 +170,4 @@ const AddProductPage = () => {
     );
 };
 
-export default AddProductPage;
+export default AddStockPage;
