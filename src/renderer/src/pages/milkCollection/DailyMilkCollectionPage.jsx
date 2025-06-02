@@ -24,7 +24,7 @@ const DailyMilkCollectionPage = () => {
     const [form, setForm] = useState({
         customer_account_number: '',
         name: '',
-        spouse: '',
+        careof: '',
         mobile: '',
         quantity: '',
         clr: '',
@@ -50,7 +50,7 @@ const DailyMilkCollectionPage = () => {
                 setForm((prev) => ({
                     ...prev,
                     name: res.data.name || '',
-                    spouse: res.data.spouse || '',
+                    careof: res.data.careof || '',
                     mobile: res.data.mobile || '',
                 }));
             } else {
@@ -59,7 +59,7 @@ const DailyMilkCollectionPage = () => {
                 setForm((prev) => ({
                     ...prev,
                     name: '',
-                    spouse: '',
+                    careof: '',
                     mobile: '',
                 }));
             }
@@ -68,7 +68,7 @@ const DailyMilkCollectionPage = () => {
             setForm((prev) => ({
                 ...prev,
                 name: '',
-                spouse: '',
+                careof: '',
                 mobile: '',
             }));
         }
@@ -157,7 +157,7 @@ const DailyMilkCollectionPage = () => {
                 setForm((prev) => ({
                     ...prev,
                     name: '',
-                    spouse: '',
+                    careof: '',
                     mobile: '',
                 }));
             }
@@ -196,7 +196,7 @@ const DailyMilkCollectionPage = () => {
                 setForm({
                     customer_account_number: '',
                     name: '',
-                    spouse: '',
+                    careof: '',
                     mobile: '',
                     quantity: '',
                     clr: '',
@@ -397,14 +397,14 @@ const DailyMilkCollectionPage = () => {
                             </div>
                         </div>
 
-                        {/* Row 4: Spouse & SNF */}
+                        {/* Row 4: careof & SNF */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium ">Spouse</label>
+                                <label className="block text-sm font-medium ">Care of</label>
                                 <input
                                     type="text"
-                                    name="spouse"
-                                    value={form.spouse}
+                                    name="careof"
+                                    value={form.careof}
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
@@ -497,7 +497,7 @@ const DailyMilkCollectionPage = () => {
                                 ['Milk Type', milkType || '-'],
                                 ['Account No', form.customer_account_number || '-'],
                                 ['Name', form.name || '-'],
-                                ['Spouse', form.spouse || '-'],
+                                ['careof', form.careof || '-'],
                                 ['Mobile', form.mobile || '-'],
                                 ['Quantity', form.quantity ? `${form.quantity} Ltr` : '-'],
                                 ['FAT', form.fat || '-'],
@@ -597,7 +597,7 @@ const DailyMilkCollectionPage = () => {
                                 {[
                                     ['Name', selectedCustomer.name],
                                     ['Mobile', selectedCustomer.mobile],
-                                    ['Spouse', selectedCustomer.spouse],
+                                    ['careof', selectedCustomer.careof],
                                     ['Account Number', selectedCustomer.customer_account_number],
                                     ['Milk Type', selectedCustomer.milk_type],
                                     ['Quantity (Ltr)', selectedCustomer.quantity],
