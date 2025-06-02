@@ -18,7 +18,7 @@ const DailyMilkCollectionPage = () => {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-
+    const [selectedDate, setSelectedDate] = useState('');
     const [milkType, setMilkType] = useState('cow');
     const [shiftValue, setShiftValue] = useState('morning');
     const [form, setForm] = useState({
@@ -33,9 +33,10 @@ const DailyMilkCollectionPage = () => {
         base_rate: '',
         other_price: '0',
         rate: '',
-        amount: '',
+        total_amount: '',
         milk_type: milkType,
-        shift: shiftValue
+        shift: shiftValue,
+        date: ""
     });
     const [collections, setCollections] = useState([]);
 
@@ -129,7 +130,7 @@ const DailyMilkCollectionPage = () => {
 
 
 
-    // Calculate rate and amount automatically
+    // Calculate rate and total_amount automatically
     useEffect(() => {
         const { fat, snf, base_rate, other_price, quantity } = form;
         const f = parseFloat(fat) || 0;
@@ -138,12 +139,12 @@ const DailyMilkCollectionPage = () => {
         const o = parseFloat(other_price) || 0;
         const q = parseFloat(quantity) || 0;
         const rate = q * b;
-        const amount = rate + o;
+        const total_amount = rate + o;
 
         setForm((prev) => ({
             ...prev,
             rate: rate.toFixed(2),
-            amount: amount.toFixed(2),
+            total_amount: total_amount.toFixed(2),
         }));
     }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity]);
 
@@ -205,8 +206,9 @@ const DailyMilkCollectionPage = () => {
                     base_rate: '',
                     other_price: '0',
                     rate: '',
-                    amount: '',
-                    milk_type: ''
+                    total_amount: '',
+                    milk_type: '',
+                    date: ''
                 })
                 fetchMilkCollectionDetails()
             } else {
@@ -295,7 +297,7 @@ const DailyMilkCollectionPage = () => {
                         </div>
 
                         {/* Shift */}
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
+                        {/* <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
                             <label className="font-semibold block mb-2 sm:mb-0 sm:mr-2">Shift:</label>
                             <div className="flex flex-wrap gap-2">
                                 {['morning', 'evening'].map((shift) => (
@@ -313,6 +315,46 @@ const DailyMilkCollectionPage = () => {
                                         </span>
                                     </label>
                                 ))}
+                            </div>
+                        </div> */}
+
+
+                        {/* DATE + SHIFT SELECTION */}
+                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-3 rounded border border-gray-400 w-full lg:w-auto">
+
+                            {/* DATE INPUT */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                <label className="font-semibold">Date:</label>
+                                <input
+                                    type="date"
+                                    value={form.date}
+                                    name="date"
+                                    onChange={handleChange}
+                                    max={new Date().toISOString().split('T')[0]} // max = today
+                                    className="px-3 py-1 rounded border border-gray-400 text-gray-700 bg-white"
+                                />
+                            </div>
+
+                            {/* SHIFT RADIO BUTTONS */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                <label className="font-semibold">Shift:</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['morning', 'evening'].map((shift) => (
+                                        <label key={shift} className="relative">
+                                            <input
+                                                type="radio"
+                                                name="shift"
+                                                value={shift}
+                                                checked={shiftValue === shift}
+                                                onChange={() => setShiftValue(shift)}
+                                                className="peer hidden"
+                                            />
+                                            <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
+                                                {shift}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -460,11 +502,11 @@ const DailyMilkCollectionPage = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-white">Amount (Auto)</label>
+                                <label className="block text-sm font-medium text-white">total_amount (Auto)</label>
                                 <input
                                     type="number"
-                                    name="amount"
-                                    value={form.amount}
+                                    name="total_amount"
+                                    value={form.total_amount}
                                     readOnly
                                     className=" w-full border rounded py-1 px-4 bg-orange-100"
                                 />
@@ -487,7 +529,7 @@ const DailyMilkCollectionPage = () => {
 
 
                 </form>
-             
+
                 <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
 
@@ -503,7 +545,7 @@ const DailyMilkCollectionPage = () => {
                                 ['FAT', form.fat || '-'],
                                 ['SNF', form.snf || '-'],
                                 ['Rate', form.rate ? `₹${form.rate}` : '-'],
-                                ['Amount', form.amount ? `₹${form.amount}` : '-'],
+                                ['total_amount', form.total_total_amount ? `₹${form.total_total_amount}` : '-'],
                             ].map(([label, value]) => (
                                 <tr key={label} className="border-b hover:bg-gray-50">
                                     <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
@@ -522,7 +564,7 @@ const DailyMilkCollectionPage = () => {
                     <table className="min-w-full border border-gray-300 text-sm">
                         <thead className="bg-gray-100">
                             <tr>
-                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Amount', 'Action'].map(header => (
+                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'total_amount', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
                                 ))}
                             </tr>
@@ -607,7 +649,7 @@ const DailyMilkCollectionPage = () => {
                                     ['Base Rate (₹)', selectedCustomer.base_rate],
                                     ['Other Price (₹)', selectedCustomer.other_price],
                                     ['Rate (Base + Other)', (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price)).toFixed(2)],
-                                    ['Amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
+                                    ['total_amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
                                     ['Created At', new Date(selectedCustomer.created_at).toLocaleString()],
                                 ].map(([label, value]) => (
                                     <tr key={label} className="border-b hover:bg-gray-50">

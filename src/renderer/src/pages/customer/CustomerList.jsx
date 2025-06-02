@@ -80,15 +80,12 @@ const CustomerList = () => {
             header: 'Phone',
             cell: info => info.getValue(),
         }),
-        columnHelper.accessor('pan_number', {
-            header: 'Pan Card',
-            cell: info => info.getValue(),
-        }),
+    
         columnHelper.display({
             id: "status",
             header: 'Status',
             cell: ({ row }) => (
-                <div className="flex gap-3 justify-start items-center">
+                <div className="flex gap-3 text-center justify-start items-center">
                     <FaDotCircle color={row.original.status == 1 ? 'green' : 'red'} />
                     <h1>{row.original.status == 1 ? 'Active' : 'Inactive'}</h1>
                 </div>
@@ -98,7 +95,7 @@ const CustomerList = () => {
             id: 'actions',
             header: 'Actions',
             cell: ({ row }) => (
-                <div className="flex gap-2">
+                <div className="flex items-center justify-center text-center gap-2">
                     <button
                         className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition"
                         onClick={() => {
@@ -171,7 +168,7 @@ const CustomerList = () => {
                             {table.getRowModel().rows.map(row => (
                                 <tr key={row.id} className="hover:bg-gray-50">
                                     {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="px-4 py-2 border">
+                                        <td key={cell.id} className="px-4 py-2 border text-center">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
