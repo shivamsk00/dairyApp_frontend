@@ -8,6 +8,7 @@ import { IoMdCloseCircle } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import EditCustomerModal from '../customer/EditCustomerPage';
 import EditMilkCollectionModal from './EditMilkCollectionPage';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 
 const DailyMilkCollectionPage = () => {
     const nav = useNavigate()
@@ -25,6 +26,11 @@ const DailyMilkCollectionPage = () => {
     const [milkType, setMilkType] = useState('cow');
     const [shiftValue, setShiftValue] = useState('morning');
     const [isEditeModal, setIsEditeModal] = useState(false)
+    const [collections, setCollections] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [maxPageButtons, setMaxPageButtons] = useState(5);
+    const [currentTime, setCurrentTime] = useState(new Date());
     const [form, setForm] = useState({
         customer_account_number: '',
         name: '',
@@ -42,7 +48,6 @@ const DailyMilkCollectionPage = () => {
         shift: "",
         date: today
     });
-    const [collections, setCollections] = useState([]);
 
     // FETCH ALL CUSTOMER
     const fetchCustomerDetailByAccountNumber = async (accountNo) => {
@@ -229,22 +234,21 @@ const DailyMilkCollectionPage = () => {
 
     };
 
-    const fetchMilkCollectionDetails = async () => {
+    const fetchMilkCollectionDetails = async (page = 1) => {
         try {
-            const res = await getMilkCollectionRecord()
-            console.log("milk collection data fetch success", res)
+            const res = await getMilkCollectionRecord(page);
+            console.log("milk collection data fetch success", res);
             if (res.status_code == 200) {
-                // CustomToast.success(res.message);
-                setCollections(res.data.data)
+                setCollections(res.data.data);
+                setCurrentPage(res.data.current_page);
+                setTotalPages(res.data.last_page);
             } else {
                 CustomToast.error(res.message);
-
             }
-
         } catch (error) {
-
+            console.error("Error fetching data:", error);
         }
-    }
+    };
 
     useEffect(() => {
         fetchMilkCollectionDetails()
@@ -267,14 +271,103 @@ const DailyMilkCollectionPage = () => {
         }
     };
 
+
+
+    // REDNDER BUTTONS 
+    const renderPageButtons = () => {
+        const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+        const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+        const pages = [];
+        for (let i = groupStart; i <= groupEnd; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchMilkCollectionDetails(i)}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        return (
+            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+                {/* Previous Page Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    <MdArrowBackIos size={18} />
+                </button>
+
+                {/* Page Number Buttons */}
+                {pages}
+
+                {/* Next Page Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    <MdArrowForwardIos size={18} />
+                </button>
+            </div>
+        );
+    };
+
+
+
+
+
+
+
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000); // updates every second
+
+        return () => clearInterval(timer); // cleanup on unmount
+    }, []);
+
+
+
+
+
+    const formattedDateTime = currentTime.toLocaleString('en-IN', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+    });
+
+
+
+
     const isDisabled = !form.name; // Disable if customer data not loaded
 
     return (
-        <div className="w-full p-4">
-            <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
+        <div className="w-full">
+
+            <div className="w-full flex items-center justify-between border-b border-gray-200 px-4 py-3 mb-4 bg-blue-950 shadow-sm">
+                <h1 className="text-lg sm:text-xl font-semibold text-white">
+                    Daily Milk Collection
+                </h1>
+                <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+                    <div className="inline-block bg-blue-50 border border-blue-300 text-blue-700 px-4 py-1 rounded-lg shadow-lg text-lg sm:text-sm font-medium tracking-wide">
+                        {formattedDateTime}
+                    </div>
+                </div>
+            </div>
 
             {/* Grid for Form and Receipt */}
-            <div className="grid md:grid-cols-2 gap-10 w-full mx-auto">
+            <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4 ">
                 {/* === Left: Milk Collection Form === */}
                 {/* === Left: Milk Collection Form === */}
                 <form onSubmit={handleSubmit} className="bg-slate-800 p-3 rounded shadow-md w-full" style={{ width: '100%' }}>
@@ -573,7 +666,7 @@ const DailyMilkCollectionPage = () => {
                     <table className="min-w-full border border-gray-300 text-sm">
                         <thead className="bg-blue-600 text-white">
                             <tr>
-                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Total Amount', 'Action'].map(header => (
+                                {['SR NO.', 'Date', 'Milk Type', 'AC No', 'Name', 'QTY', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Total Amount', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
                                 ))}
                             </tr>
@@ -591,6 +684,8 @@ const DailyMilkCollectionPage = () => {
                                         key={i}
                                         className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
                                     >
+                                        <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                        <td className="border px-2 py-1 text-center">{item.date}</td>
                                         <td className="border px-2 py-1 text-center">{item.milk_type}</td>
                                         <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
                                         <td className="border px-2 py-1 text-center">{item.name}</td>
@@ -638,8 +733,10 @@ const DailyMilkCollectionPage = () => {
                             )}
                         </tbody>
                     </table>
+
                 </div>
             </div>
+                    {renderPageButtons()}
 
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">

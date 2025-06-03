@@ -135,9 +135,9 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
-  getAllCustomer: async () => {
+  getAllCustomer: async (page) => {
     try {
-      const res = await api.get('/all-customer')
+      const res = await api.get(`/all-customer?page=${page}`)
       return res.data
     } catch (error) {
       return err.response.data
@@ -194,19 +194,9 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
-  getMilkCollectionRecord: async (milkCollectionData) => {
-    console.log('milkCollectionData', milkCollectionData)
+  getMilkCollectionRecord: async (page) => {
     try {
-      const res = await api.get('/all-milk-collection', milkCollectionData)
-      return res.data
-    } catch (error) {
-      return error.response.data
-    }
-  },
-  getMilkCollectionRecord: async (milkCollectionData) => {
-    console.log('milkCollectionData', milkCollectionData)
-    try {
-      const res = await api.get('/all-milk-collection', milkCollectionData)
+      const res = await api.get(`/all-milk-collection?page=${page}`)
       return res.data
     } catch (error) {
       return error.response.data

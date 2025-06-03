@@ -13,6 +13,7 @@ import useHomeStore from '../../zustand/useHomeStore';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 
 const columnHelper = createColumnHelper();
 
@@ -27,17 +28,29 @@ const CustomerList = () => {
 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [customerToDelete, setCustomerToDelete] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [maxPageButtons, setMaxPageButtons] = useState(5);
 
 
 
-    const fetchAllCustomerData = async () => {
+    const fetchAllCustomerData = async (page = 1) => {
         try {
             setLoading(true); // 👈 Start loading
-            const res = await getAllCustomer();
+            const res = await getAllCustomer(page);
             if (res.status_code == 200) {
                 setRowData(res.data.data);
+                setCurrentPage(res.data.current_page);
+                setTotalPages(res.data.last_page);
                 console.log("all customer fetch", res)
             }
+
+            else {
+                CustomToast.error(res.message);
+            }
+
+
+
         } catch (error) {
             console.error("Failed to fetch customers", error);
         } finally {
@@ -80,7 +93,7 @@ const CustomerList = () => {
             header: 'Phone',
             cell: info => info.getValue(),
         }),
-    
+
         columnHelper.display({
             id: "status",
             header: 'Status',
@@ -134,6 +147,173 @@ const CustomerList = () => {
 
 
 
+
+
+    // REDNDER BUTTONS 
+    // const renderPageButtons = () => {
+    //     const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+    //     const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+    //     const pages = [];
+
+    //     // Always show first page
+    //     if (groupStart > 1) {
+    //         pages.push(
+    //             <button
+    //                 key={1}
+    //                 className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white'}`}
+    //                 onClick={() => fetchAllCustomerData(1)}
+    //             >
+    //                 1
+    //             </button>
+    //         );
+
+    //         if (groupStart > 2) {
+    //             pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+    //         }
+    //     }
+
+    //     for (let i = groupStart; i <= groupEnd; i++) {
+    //         pages.push(
+    //             <button
+    //                 key={i}
+    //                 className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+    //                 onClick={() => fetchAllCustomerData(i)}
+    //             >
+    //                 {i}
+    //             </button>
+    //         );
+    //     }
+
+    //     // Always show last page
+    //     if (groupEnd < totalPages) {
+    //         if (groupEnd < totalPages - 1) {
+    //             pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+    //         }
+
+    //         pages.push(
+    //             <button
+    //                 key={totalPages}
+    //                 className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white'}`}
+    //                 onClick={() => fetchAllCustomerData(totalPages)}
+    //             >
+    //                 {totalPages}
+    //             </button>
+    //         );
+    //     }
+
+    //     return (
+    //         <div className="flex gap-1 flex-wrap justify-center mt-4">
+    //             <button
+    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+    //                 onClick={() => {
+    //                     if (groupStart > 1) {
+    //                         fetchAllCustomerData(groupStart - 1);
+    //                     }
+    //                 }}
+    //                 disabled={groupStart === 1}
+    //             >
+    //                 <MdArrowBackIos size={18} />
+    //             </button>
+
+    //             {pages}
+
+    //             <button
+    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+    //                 onClick={() => {
+    //                     if (groupEnd < totalPages) {
+    //                         fetchAllCustomerData(groupEnd + 1);
+    //                     }
+    //                 }}
+    //                 disabled={groupEnd >= totalPages}
+    //             >
+    //                 <MdArrowForwardIos size={18} />
+
+    //             </button>
+    //         </div>
+    //     );
+    // };
+
+    const renderPageButtons = () => {
+        const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+        const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+        const pages = [];
+
+        // Always show first page
+        if (groupStart > 1) {
+            pages.push(
+                <button
+                    key={1}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchAllCustomerData(1)}
+                >
+                    1
+                </button>
+            );
+
+            if (groupStart > 2) {
+                pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
+        }
+
+        // Middle buttons
+        for (let i = groupStart; i <= groupEnd; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchAllCustomerData(i)}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        // Always show last page
+        if (groupEnd < totalPages) {
+            if (groupEnd < totalPages - 1) {
+                pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
+
+            pages.push(
+                <button
+                    key={totalPages}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchAllCustomerData(totalPages)}
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return (
+            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+                {/* Previous Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchAllCustomerData(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    <MdArrowBackIos size={18} />
+                </button>
+
+                {pages}
+
+                {/* Next Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchAllCustomerData(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    <MdArrowForwardIos size={18} />
+                </button>
+            </div>
+        );
+    };
+
+
+
     return (
         <div className="overflow-x-auto p-4">
             <div className="addUser_totalUser">
@@ -147,7 +327,7 @@ const CustomerList = () => {
 
             {/* Loading State */}
             {loading ? (
-                <div className="text-center py-10 text-lg font-semibold text-gray-600">
+                <div className="text-center py-10 text-lg font-semibold text-gray-600 h-1/2">
                     Loading customers...
                 </div>
             ) : (
@@ -178,30 +358,12 @@ const CustomerList = () => {
                     </table>
 
                     {/* Pagination Controls */}
-                    <div className="flex justify-between items-center mt-4">
-                        <div className="text-sm">
-                            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                        </div>
-                        <div className="space-x-2">
-                            <button
-                                className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                Previous
-                            </button>
-                            <button
-                                className="px-2 py-1 bg-gray-200 rounded cursor-pointer"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                    {renderPageButtons()}
                 </>
             )}
 
+
+            {/* THIS MODAL  */}
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
