@@ -22,7 +22,6 @@ const EditCustomerPage = () => {
         city: '',
         state: '',
         pincode: '',
-        pan_number: '',
         designation: '',
         account_number: '',
     });
@@ -41,7 +40,6 @@ const EditCustomerPage = () => {
                 city: customer.city || '',
                 state: customer.state || '',
                 pincode: customer.pincode || '',
-                pan_number: customer.pan_number || '',
                 designation: customer.designation || '',
                 account_number: customer.account_number || '',
             });
@@ -85,7 +83,6 @@ const EditCustomerPage = () => {
                         { label: 'City', name: 'city' },
                         { label: 'State', name: 'state' },
                         { label: 'Pincode', name: 'pincode' },
-                        { label: 'PAN Number', name: 'pan_number' },
                         { label: 'Designation', name: 'designation' },
                         { label: 'Account Number', name: 'account_number' },
                     ].map(({ label, name }) => (

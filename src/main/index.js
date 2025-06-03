@@ -37,8 +37,8 @@ function createWindow() {
 // ✅ Child window (modal or child of main)
 function createChildWindow() {
   const childWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+      width: 1200,
+    height: 800,
     parent: mainWindow, // 👈 makes it a child
     modal: true, // 👈 modal true hai
     webPreferences: {
@@ -83,8 +83,8 @@ function createChildWindow() {
 
 function createSecondWindow() {
   const secondWindow = new BrowserWindow({
-    width: 700,
-    height: 500,
+     width: 1500,
+    height: 800,
     autoHideMenuBar: true,      // Hides menu bar
     menuBarVisible: false,      // Completely disables it
     webPreferences: {
@@ -117,8 +117,8 @@ function createSecondWindow() {
 // CUSTOMER COLLECTION WIN
 function customerCollection() {
   const customerCollectionWin = new BrowserWindow({
-    width: 700,
-    height: 500,
+    width: 1200,
+    height: 800,
     autoHideMenuBar: true,      // Hides menu bar
     menuBarVisible: false,      // Completely disables it
     webPreferences: {

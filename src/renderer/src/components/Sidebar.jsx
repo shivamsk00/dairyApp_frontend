@@ -14,8 +14,8 @@ import { useLocation } from 'react-router-dom'
 const Sidbar = () => {
   const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false)
   const [isCustomerCollectionOpen, setIsCustomerCollectionOpen] = useState(false)
-  const isMenu = useToggleStore(state => state.isMenu)
   const [activeItem, setActiveItem] = useState(null)
+  const isMenu = useToggleStore(state => state.isMenu)
 
   const location = useLocation()
 
@@ -27,12 +27,18 @@ const Sidbar = () => {
   }, [])
 
 
-  useEffect(() => {
-    window.api?.onCutomerWindowClosed?.(() => {
-      setIsCustomerCollectionOpen(false)
-      setActiveItem(null)
-    })
-  }, [])
+useEffect(() => {
+  const handleCustomerWindowClose = () => {
+    setIsCustomerCollectionOpen(false)
+    setActiveItem(null)
+  }
+
+  window.api?.onCutomerWindowClosed?.(handleCustomerWindowClose)
+
+  return () => {
+    window.api?.removeCustomerWindowClose?.(handleCustomerWindowClose)
+  }
+}, [])
 
 
   const handleClick = () => {

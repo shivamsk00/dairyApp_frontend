@@ -6,9 +6,12 @@ import { FaTrashCan } from 'react-icons/fa6';
 import CustomToast from '../../helper/costomeToast';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
+import EditCustomerModal from '../customer/EditCustomerPage';
+import EditMilkCollectionModal from './EditMilkCollectionPage';
 
 const DailyMilkCollectionPage = () => {
     const nav = useNavigate()
+    const today = new Date().toISOString().split('T')[0];
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
     const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
@@ -21,6 +24,7 @@ const DailyMilkCollectionPage = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [milkType, setMilkType] = useState('cow');
     const [shiftValue, setShiftValue] = useState('morning');
+    const [isEditeModal, setIsEditeModal] = useState(false)
     const [form, setForm] = useState({
         customer_account_number: '',
         name: '',
@@ -34,9 +38,9 @@ const DailyMilkCollectionPage = () => {
         other_price: '0',
         rate: '',
         total_amount: '',
-        milk_type: milkType,
-        shift: shiftValue,
-        date: ""
+        milk_type: "",
+        shift: "",
+        date: today
     });
     const [collections, setCollections] = useState([]);
 
@@ -187,6 +191,8 @@ const DailyMilkCollectionPage = () => {
     };
 
     const handleSubmit = async (e) => {
+        form.shift = shiftValue
+        form.milk_type = milkType
         console.log("form value", form)
         e.preventDefault();
         try {
@@ -242,7 +248,7 @@ const DailyMilkCollectionPage = () => {
 
     useEffect(() => {
         fetchMilkCollectionDetails()
-    }, [])
+    }, [isEditeModal])
 
 
 
@@ -346,7 +352,10 @@ const DailyMilkCollectionPage = () => {
                                                 name="shift"
                                                 value={shift}
                                                 checked={shiftValue === shift}
-                                                onChange={() => setShiftValue(shift)}
+                                                onChange={() => {
+                                                    setShiftValue(shift)
+                                                    console.log("this is shift", shift)
+                                                }}
                                                 className="peer hidden"
                                             />
                                             <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
@@ -545,7 +554,7 @@ const DailyMilkCollectionPage = () => {
                                 ['FAT', form.fat || '-'],
                                 ['SNF', form.snf || '-'],
                                 ['Rate', form.rate ? `₹${form.rate}` : '-'],
-                                ['total_amount', form.total_total_amount ? `₹${form.total_total_amount}` : '-'],
+                                ['total_amount', form.total_amount ? `₹${form.total_amount}` : '-'],
                             ].map(([label, value]) => (
                                 <tr key={label} className="border-b hover:bg-gray-50">
                                     <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
@@ -597,7 +606,15 @@ const DailyMilkCollectionPage = () => {
                                                 >
                                                     <FaEye size={14} />
                                                 </button>
-                                                <button onClick={() => nav("/editMilkCollection", { state: { milkData: item } })} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
+                                                <button onClick={() => {
+
+
+                                                    setSelectedCustomer(item)
+                                                    setIsEditeModal(true)
+
+                                                }
+
+                                                } className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
                                                 <button
                                                     onClick={() => {
                                                         setDeleteId(item.id);
@@ -699,6 +716,14 @@ const DailyMilkCollectionPage = () => {
                     </div>
                 </div>
             )}
+
+
+            <EditMilkCollectionModal
+                isOpen={isEditeModal}
+                onClose={() => setIsEditeModal(false)}
+                milkData={selectedCustomer}
+            />
+
 
         </div>
 

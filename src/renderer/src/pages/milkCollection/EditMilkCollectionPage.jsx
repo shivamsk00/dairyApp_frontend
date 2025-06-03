@@ -1,21 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
-import CommonBackButton from '../../components/CommonBackButton';
+import { IoMdClose } from 'react-icons/io';
 
-const EditMilkCollectionPage = () => {
-  const nav = useNavigate()
-  const location = useLocation();
-  const milkData = location.state?.milkData || {};
-  console.log("milkData", milkData)
-  const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail)
-  const loading = useHomeStore(state => state.loading)
+const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
+  const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail);
+  const loading = useHomeStore(state => state.loading);
+
   const [form, setForm] = useState({
     milk_type: '',
     customer_account_number: '',
     name: '',
-    spouse: '',
+    careof: '',
     mobile: '',
     quantity: '',
     fat: '',
@@ -24,7 +20,7 @@ const EditMilkCollectionPage = () => {
     base_rate: '',
     other_price: '',
     rate: '',
-    amount: '',
+    total_amount: '',
     shift: ''
   });
 
@@ -34,7 +30,7 @@ const EditMilkCollectionPage = () => {
         milk_type: milkData.milk_type || '',
         customer_account_number: milkData.customer_account_number || '',
         name: milkData.name || '',
-        spouse: milkData.spouse || '',
+        careof: milkData.careof || '',
         mobile: milkData.mobile || '',
         quantity: milkData.quantity || '',
         fat: milkData.fat || '',
@@ -43,8 +39,8 @@ const EditMilkCollectionPage = () => {
         base_rate: milkData.base_rate || '',
         other_price: milkData.other_price || '',
         rate: milkData.base_rate || '',
-        amount: milkData.quantity * milkData.base_rate || '',
-        shift: 'morning'
+        total_amount: milkData.quantity * milkData.base_rate || '',
+        shift: milkData.shift || 'morning'
       });
     }
   }, [milkData]);
@@ -59,225 +55,85 @@ const EditMilkCollectionPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: update API call here
     try {
       const res = await editMilkCollectionDetail(milkData.id, form);
-      console.log("update response", res)
-      CustomToast.success(res.message)
-      nav(-1)
-
+      CustomToast.success(res.message);
+      onClose(); // close modal after success
     } catch (error) {
-
+      CustomToast.error("Error updating milk collection.");
     }
-    console.log('Updated form:', form);
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="w-full mx-auto p-6  rounded ">
-
-      <CommonBackButton />
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-2 bg-white shadow-md p-6 gap-x-6 gap-y-4 w-full"
-      >
-        {/* Milk Type */}
-        <div className="col-span-2">
-          <label className="block font-semibold mb-1">Milk Type:</label>
-          <select
-            name="milk_type"
-            value={form.milk_type}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">Select milk type</option>
-            <option value="cow">Cow</option>
-            <option value="buffalo">Buffalo</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        {/* Shift */}
-        <div className="col-span-2">
-          <label className="block font-semibold mb-1">Shift:</label>
-          <select
-            name="shift"
-            value={form.shift}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">Select shift</option>
-            <option value="morning">Morning</option>
-            <option value="evening">Evening</option>
-            <option value="both">Both</option>
-          </select>
-        </div>
-
-        {/* Account No */}
-        <div>
-          <label className="block font-semibold mb-1">Account No:</label>
-          <input
-            type="text"
-            name="customer_account_number"
-            value={form.customer_account_number}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded bg-gray-100"
-            readOnly
-          />
-        </div>
-
-        {/* Name */}
-        <div>
-          <label className="block font-semibold mb-1">Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Spouse */}
-        <div>
-          <label className="block font-semibold mb-1">Spouse:</label>
-          <input
-            type="text"
-            name="spouse"
-            value={form.spouse}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Mobile */}
-        <div>
-          <label className="block font-semibold mb-1">Mobile:</label>
-          <input
-            type="text"
-            name="mobile"
-            value={form.mobile}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Quantity */}
-        <div>
-          <label className="block font-semibold mb-1">Quantity (Ltr):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="quantity"
-            value={form.quantity}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* FAT */}
-        <div>
-          <label className="block font-semibold mb-1">FAT (%):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="fat"
-            value={form.fat}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* CLR */}
-        <div>
-          <label className="block font-semibold mb-1">CLR:</label>
-          <input
-            type="number"
-            step="0.01"
-            name="clr"
-            value={form.clr}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* SNF */}
-        <div>
-          <label className="block font-semibold mb-1">SNF (%):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="snf"
-            value={form.snf}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Base Rate */}
-        <div>
-          <label className="block font-semibold mb-1">Base Rate (₹/Ltr):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="base_rate"
-            value={form.base_rate}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Other Price */}
-        <div>
-          <label className="block font-semibold mb-1">Other Price (₹/Ltr):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="other_price"
-            value={form.other_price}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Rate (read-only) */}
-        <div>
-          <label className="block font-semibold mb-1">Rate (Auto):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="rate"
-            value={form.rate}
-            readOnly
-            className="w-full border px-3 py-2 rounded bg-gray-100"
-          />
-        </div>
-
-        {/* Amount (read-only) */}
-        <div>
-          <label className="block font-semibold mb-1">Amount (Auto):</label>
-          <input
-            type="number"
-            step="0.01"
-            name="amount"
-            value={form.amount}
-            readOnly
-            className="w-full border px-3 py-2 rounded bg-gray-100"
-          />
-        </div>
-
-        {/* Submit Button spans both columns */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white max-w-4xl w-full p-6 rounded-lg relative">
         <button
-          type="submit"
-          className="col-span-2  text-white py-2 rounded transition"
+          className="absolute top-2 p-2 rounded-md right-4 text-white text-xl"
+          onClick={onClose}
         >
-          {
-            loading ? "please wait " : "Update Milk Collection"
-          }
-
+          <IoMdClose />
         </button>
-      </form>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Edit Milk Collection</h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          {/* Fields (you can extract into a map if needed) */}
+          {[
+            { label: 'Milk Type', name: 'milk_type', type: 'select', options: ['cow', 'buffalo', 'other'] },
+            { label: 'Shift', name: 'shift', type: 'select', options: ['morning', 'evening', 'both'] },
+            { label: 'Account No', name: 'customer_account_number', readOnly: true },
+            { label: 'Name', name: 'name' },
+            { label: 'Care of', name: 'careof' },
+            { label: 'Mobile', name: 'mobile' },
+            { label: 'Quantity', name: 'quantity', type: 'number' },
+            { label: 'FAT', name: 'fat', type: 'number' },
+            { label: 'CLR', name: 'clr', type: 'number' },
+            { label: 'SNF', name: 'snf', type: 'number' },
+            { label: 'Base Rate', name: 'base_rate', type: 'number' },
+            { label: 'Other Price', name: 'other_price', type: 'number' },
+            { label: 'Rate', name: 'rate', readOnly: true, type: 'number' },
+            { label: 'Total Amount', name: 'total_amount', readOnly: true, type: 'number' },
+          ].map(({ label, name, readOnly = false, type = 'text', options }) => (
+            <div key={name}>
+              <label className="block font-medium mb-1">{label}</label>
+              {type === 'select' ? (
+                <select
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                >
+                  <option value="">Select {label.toLowerCase()}</option>
+                  {options.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={type}
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded bg-white"
+                  readOnly={readOnly}
+                />
+              )}
+            </div>
+          ))}
+
+          <div className="col-span-2 mt-4 flex justify-end">
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+              disabled={loading}
+            >
+              {loading ? "Please wait..." : "Update"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default EditMilkCollectionPage;
+export default EditMilkCollectionModal;

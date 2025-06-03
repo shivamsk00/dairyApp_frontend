@@ -5,9 +5,19 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
-  onSecondWindowClosed: (callback) => ipcRenderer.on('second-window-closed', callback),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
-  onCutomerWindowClosed: (callback) => ipcRenderer.on('customer-win-close', callback)
+
+  onSecondWindowClosed: (callback) => {
+    ipcRenderer.on('second-window-closed', callback)
+  },
+
+  onCutomerWindowClosed: (callback) => {
+    ipcRenderer.on('customer-win-close', callback)
+  },
+
+  removeCustomerWindowClose: (callback) => {
+    ipcRenderer.removeListener('customer-win-close', callback)
+  }
 }
 
 // Expose APIs to renderer safely
@@ -16,7 +26,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
-    console.error(error)
+    console.error('ContextBridge exposure failed:', error)
   }
 } else {
   window.electron = electronAPI
