@@ -27,18 +27,14 @@ const Sidbar = () => {
   }, [])
 
 
-useEffect(() => {
-  const handleCustomerWindowClose = () => {
-    setIsCustomerCollectionOpen(false)
-    setActiveItem(null)
-  }
+  useEffect(() => {
+    window.api?.onCutomerWindowClosed?.(() => {
+      setIsCustomerCollectionOpen(false)
+      setActiveItem(null)
+    })
+  }, [])
 
-  window.api?.onCutomerWindowClosed?.(handleCustomerWindowClose)
 
-  return () => {
-    window.api?.removeCustomerWindowClose?.(handleCustomerWindowClose)
-  }
-}, [])
 
 
   const handleClick = () => {
@@ -106,6 +102,7 @@ useEffect(() => {
           >
             <GiHeavyCollar /> <span>Milk Collection</span>
           </li>
+
           <li
             className={activeItem === 'customer-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
             onClick={() => {
@@ -115,7 +112,6 @@ useEffect(() => {
               setActiveItem('customer-collection')
             }}
             style={{
-              pointerEvents: isCustomerCollectionOpen ? 'none' : 'cursor',
               opacity: isCustomerCollectionOpen ? 0.5 : 1
             }}
           >

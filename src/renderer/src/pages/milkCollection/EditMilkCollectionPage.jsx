@@ -79,18 +79,17 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {/* Fields (you can extract into a map if needed) */}
           {[
-            { label: 'Milk Type', name: 'milk_type', type: 'select', options: ['cow', 'buffalo', 'other'] },
-            { label: 'Shift', name: 'shift', type: 'select', options: ['morning', 'evening', 'both'] },
+            { label: 'Milk Type', name: 'milk_type',readOnly:true, type: 'select', options: ['cow', 'buffalo', 'other'] },
+            { label: 'Shift', name: 'shift',readOnly:true, type: 'select', options: ['morning', 'evening', 'both'] },
             { label: 'Account No', name: 'customer_account_number', readOnly: true },
-            { label: 'Name', name: 'name' },
-            { label: 'Care of', name: 'careof' },
-            { label: 'Mobile', name: 'mobile' },
-            { label: 'Quantity', name: 'quantity', type: 'number' },
-            { label: 'FAT', name: 'fat', type: 'number' },
-            { label: 'CLR', name: 'clr', type: 'number' },
-            { label: 'SNF', name: 'snf', type: 'number' },
-            { label: 'Base Rate', name: 'base_rate', type: 'number' },
-            { label: 'Other Price', name: 'other_price', type: 'number' },
+            { label: 'Name',readOnly:true, name: 'name' },
+            { label: 'Care of',readOnly:true, name: 'careof' },
+            { label: 'Mobile',readOnly:true, name: 'mobile' },
+            { label: 'Quantity',readOnly:true, name: 'quantity', type: 'number' },
+            { label: 'FAT', name: 'fat',readOnly:true, type: 'number' },
+            { label: 'CLR', name: 'clr',readOnly:true, type: 'number' },
+            { label: 'SNF', name: 'snf',readOnly:true, type: 'number' },
+            { label: 'Base Rate', name: 'base_rate',readOnly:true, type: 'number' },
             { label: 'Rate', name: 'rate', readOnly: true, type: 'number' },
             { label: 'Total Amount', name: 'total_amount', readOnly: true, type: 'number' },
           ].map(({ label, name, readOnly = false, type = 'text', options }) => (

@@ -15,9 +15,7 @@ const api = {
     ipcRenderer.on('customer-win-close', callback)
   },
 
-  removeCustomerWindowClose: (callback) => {
-    ipcRenderer.removeListener('customer-win-close', callback)
-  }
+
 }
 
 // Expose APIs to renderer safely

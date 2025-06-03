@@ -511,7 +511,7 @@ const DailyMilkCollectionPage = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-white">total_amount (Auto)</label>
+                                <label className="block text-sm font-medium text-white">Total Amount (Auto)</label>
                                 <input
                                     type="number"
                                     name="total_amount"
@@ -554,7 +554,7 @@ const DailyMilkCollectionPage = () => {
                                 ['FAT', form.fat || '-'],
                                 ['SNF', form.snf || '-'],
                                 ['Rate', form.rate ? `₹${form.rate}` : '-'],
-                                ['total_amount', form.total_amount ? `₹${form.total_amount}` : '-'],
+                                ['Total Amount', form.total_amount ? `₹${form.total_amount}` : '-'],
                             ].map(([label, value]) => (
                                 <tr key={label} className="border-b hover:bg-gray-50">
                                     <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
@@ -571,9 +571,9 @@ const DailyMilkCollectionPage = () => {
                 <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
                 <div className="overflow-x-auto">
                     <table className="min-w-full border border-gray-300 text-sm">
-                        <thead className="bg-gray-100">
+                        <thead className="bg-blue-600 text-white">
                             <tr>
-                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'total_amount', 'Action'].map(header => (
+                                {['Milk Type', 'Account No', 'Name', 'Quantity', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Total Amount', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
                                 ))}
                             </tr>
@@ -581,11 +581,16 @@ const DailyMilkCollectionPage = () => {
                         <tbody>
                             {collections.length === 0 ? (
                                 <tr>
-                                    <td colSpan="9" className="text-center text-gray-500 py-4">Data not available</td>
+                                    <td colSpan="10" className="text-center text-gray-500 py-4">
+                                        Data not available
+                                    </td>
                                 </tr>
                             ) : (
                                 collections.map((item, i) => (
-                                    <tr key={i}>
+                                    <tr
+                                        key={i}
+                                        className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
+                                    >
                                         <td className="border px-2 py-1 text-center">{item.milk_type}</td>
                                         <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
                                         <td className="border px-2 py-1 text-center">{item.name}</td>
@@ -594,7 +599,9 @@ const DailyMilkCollectionPage = () => {
                                         <td className="border px-2 py-1 text-center">{item.snf}</td>
                                         <td className="border px-2 py-1 text-center">{item.shift}</td>
                                         <td className="border px-2 py-1 text-center">{item.base_rate}</td>
-                                        <td className="border px-2 py-1 text-center">{(item.base_rate * item.quantity).toFixed(2)}</td>
+                                        <td className="border px-2 py-1 text-center">
+                                            {(item.base_rate * item.quantity).toFixed(2)}
+                                        </td>
                                         <td className="border px-2 py-1 text-center">
                                             <div className="flex gap-2 justify-center">
                                                 <button
@@ -606,15 +613,15 @@ const DailyMilkCollectionPage = () => {
                                                 >
                                                     <FaEye size={14} />
                                                 </button>
-                                                <button onClick={() => {
-
-
-                                                    setSelectedCustomer(item)
-                                                    setIsEditeModal(true)
-
-                                                }
-
-                                                } className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"><FaPen size={14} /></button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCustomer(item);
+                                                        setIsEditeModal(true);
+                                                    }}
+                                                    className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
+                                                >
+                                                    <FaPen size={14} />
+                                                </button>
                                                 <button
                                                     onClick={() => {
                                                         setDeleteId(item.id);
@@ -666,11 +673,11 @@ const DailyMilkCollectionPage = () => {
                                     ['Base Rate (₹)', selectedCustomer.base_rate],
                                     ['Other Price (₹)', selectedCustomer.other_price],
                                     ['Rate (Base + Other)', (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price)).toFixed(2)],
-                                    ['total_amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
+                                    ['Total amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
                                     ['Created At', new Date(selectedCustomer.created_at).toLocaleString()],
-                                ].map(([label, value]) => (
-                                    <tr key={label} className="border-b hover:bg-gray-50">
-                                        <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
+                                ].map(([label, value], index) => (
+                                    <tr key={label} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-200'} hover:bg-gray-100`}>
+                                        <td className="font-medium text-gray-700 px-4 py-2 w-1/3">{label}</td>
                                         <td className="px-4 py-2">{value}</td>
                                     </tr>
                                 ))}
