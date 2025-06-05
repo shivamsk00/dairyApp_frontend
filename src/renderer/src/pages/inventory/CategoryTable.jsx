@@ -235,7 +235,7 @@ const CategoryTable = () => {
                     </table>
                </div> */}
 
-               return (
+              
                <>
                     {/* Table */}
 
@@ -312,7 +312,7 @@ const CategoryTable = () => {
 
 
                </>
-               )
+               
 
 
 

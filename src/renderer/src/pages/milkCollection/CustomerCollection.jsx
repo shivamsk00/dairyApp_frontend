@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import useHomeStore from '../../zustand/useHomeStore';
+import CustomToast from '../../helper/costomeToast';
 
 const CustomerCollection = () => {
+    const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
+
+
     const [form, setForm] = useState({
-        accountNo: '',
+        account_number: '',
         name: '',
         spouse: '',
         product: '',
@@ -17,6 +22,66 @@ const CustomerCollection = () => {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (form.account_number) {
+                fetchCustomerDetailByAccountNumber(form.account_number);
+            } else {
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    careof: '',
+                    mobile: '',
+                }));
+            }
+        }, 500); // wait 500ms after user stops typing
+
+        return () => clearTimeout(timeout); // cleanup on next input
+    }, [form.account_number]);
+
+
+
+    // FETCH ALL CUSTOMER
+    const fetchCustomerDetailByAccountNumber = async (accountNo) => {
+        // console.log('Fetching customer details for:', accountNo);
+        try {
+            const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
+            console.log('Customer response:', res);
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                setForm((prev) => ({
+                    ...prev,
+                    name: res.data.name || '',
+                    careof: res.data.careof || '',
+                    mobile: res.data.mobile || '',
+                }));
+            } else {
+
+                CustomToast.error(res.message)
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    careof: '',
+                    mobile: '',
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching customer details:', error);
+            setForm((prev) => ({
+                ...prev,
+                name: '',
+                careof: '',
+                mobile: '',
+            }));
+        }
+    };
+
+
+
+
+
+
     return (
         <div className="flex flex-col lg:flex-row gap-6 p-6">
             {/* Left Form */}
@@ -25,8 +90,8 @@ const CustomerCollection = () => {
                     <div>
                         <label className="block text-sm font-medium mb-1 text-white">Account No</label>
                         <input
-                            name="accountNo"
-                            value={form.accountNo}
+                            name="account_number"
+                            value={form.account_number}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 bg-white  w-full"
                         />
@@ -46,8 +111,8 @@ const CustomerCollection = () => {
                     <div>
                         <label className="block text-sm font-medium mb-1 text-white">Spouse</label>
                         <input
-                            name="spouse"
-                            value={form.spouse}
+                            name="careof"
+                            value={form.careof}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 w-full"
                         />

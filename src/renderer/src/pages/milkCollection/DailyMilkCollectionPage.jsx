@@ -622,8 +622,8 @@ const DailyMilkCollectionPage = () => {
                         <input
                             type="submit"
                             disabled={isDisabled}
-                            className={`mt-6 w-24 text-white py-1 rounded  bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
-                            value={'Submit'}
+                            className={`mt-6 px-3 text-white py-1 rounded  bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
+                            value={'Submit & Print'}
                         />
 
 
@@ -736,7 +736,7 @@ const DailyMilkCollectionPage = () => {
 
                 </div>
             </div>
-                    {renderPageButtons()}
+            {renderPageButtons()}
 
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
