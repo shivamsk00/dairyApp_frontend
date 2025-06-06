@@ -158,6 +158,15 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return err.response.data
     }
+  }, 
+  reportCustomer: async (params) => {
+    try {
+      const res = await api.get('customer-report', { params });
+      return res.data;
+    } catch (error) {
+      console.error('Error fetching customer report:', error);
+      return error.response?.data || { status_code: 500, message: 'Failed to fetch customer report' };
+    }
   },
 
   // ================MILK COLLECTION API =======================
