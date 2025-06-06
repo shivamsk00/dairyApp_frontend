@@ -9,12 +9,13 @@ const CustomerCollection = () => {
     const [form, setForm] = useState({
         account_number: '',
         name: '',
-        spouse: '',
-        product: '',
-        ghee: '',
-        pricePerUnit: '',
-        quantity: '',
-        price: ''
+        careof: '',
+        date:'',
+        category_id: '',
+        product_id: '',
+        product_price: '',
+        qty: '',
+        total: ''
     });
 
     const handleChange = (e) => {
@@ -109,7 +110,7 @@ const CustomerCollection = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium mb-1 text-white">Spouse</label>
+                        <label className="block text-sm font-medium mb-1 text-white">Care of</label>
                         <input
                             name="careof"
                             value={form.careof}
@@ -118,6 +119,28 @@ const CustomerCollection = () => {
                         />
                     </div>
                     <div>
+                        <label className="block text-sm font-medium mb-1 text-white">Category</label>
+                        <select
+                            name="category_id"
+                            value={form.category_id}
+                            onChange={handleChange}
+                            className="border rounded px-3 py-2 bg-white  w-full"
+                        >
+                            <option value="">Select Category</option>
+                            <option value="Ghee">Ghee</option>
+                            <option value="Paneer">Gatta</option>
+                        </select>
+                    </div>
+                    
+                </div>
+
+
+
+
+                <div className="grid grid-cols-2 gap-4">
+                   
+                {/* Product id */}
+                <div>
                         <label className="block text-sm font-medium mb-1 text-white">Product</label>
                         <select
                             name="product"
@@ -130,23 +153,11 @@ const CustomerCollection = () => {
                             <option value="Paneer">Gatta</option>
                         </select>
                     </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium mb-1 text-white">Ghee</label>
+                        <label className="block text-sm font-medium mb-1 text-white">Price</label>
                         <input
-                            name="ghee"
-                            value={form.ghee}
-                            onChange={handleChange}
-                            className="border rounded px-3 py-2 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1 text-white">Price (Ltr/Gm)</label>
-                        <input
-                            name="pricePerUnit"
-                            value={form.pricePerUnit}
+                            name="product_price"
+                            value={form.product_price}
                             onChange={handleChange}
                             type="number"
                             className="border rounded px-3 py-2  w-full"
@@ -166,10 +177,10 @@ const CustomerCollection = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1 text-white">Price</label>
+                        <label className="block text-sm font-medium mb-1 text-white">Total Price</label>
                         <input
-                            name="price"
-                            value={form.price}
+                            name="total"
+                            value={form.total}
                             onChange={handleChange}
                             type="number"
                             className="border rounded px-3 py-2  w-full"
