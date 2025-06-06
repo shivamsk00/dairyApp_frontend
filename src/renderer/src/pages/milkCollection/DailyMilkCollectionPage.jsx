@@ -219,7 +219,7 @@ const DailyMilkCollectionPage = () => {
                     rate: '',
                     total_amount: '',
                     milk_type: '',
-                    date: ''
+                    date:today,
                 })
                 fetchMilkCollectionDetails()
             } else {
