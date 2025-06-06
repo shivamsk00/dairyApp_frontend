@@ -158,14 +158,16 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return err.response.data
     }
-  }, 
+  },
   reportCustomer: async (params) => {
     try {
-      const res = await api.get('customer-report', { params });
-      return res.data;
+      const res = await api.get('customer-report', { params })
+      return res.data
     } catch (error) {
-      console.error('Error fetching customer report:', error);
-      return error.response?.data || { status_code: 500, message: 'Failed to fetch customer report' };
+      console.error('Error fetching customer report:', error)
+      return (
+        error.response?.data || { status_code: 500, message: 'Failed to fetch customer report' }
+      )
     }
   },
 
@@ -180,6 +182,8 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
+
+  // GET MILK RATE FETCH
   getMilkRate: async (fat, clr, snf) => {
     try {
       const res = await api.get(`/milk-rate-fetch-by-fat-snf-clr`, {
@@ -194,6 +198,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
   submitMilkCollection: async (milkCollectionData) => {
     console.log('milkCollectionData', milkCollectionData)
     try {
@@ -203,6 +208,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
   getMilkCollectionRecord: async (page) => {
     try {
       const res = await api.get(`/all-milk-collection?page=${page}`)
@@ -211,6 +217,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
   editMilkCollectionDetail: async (milk_collection_id, milkCollectionData) => {
     try {
       // set({loading:true})
@@ -224,6 +231,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
   deleteMilkCollection: async (milk_collection_id) => {
     try {
       // set({loading:true})
@@ -246,11 +254,24 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
   // FETCH ALL PRODUCT API
   allProductGet: async () => {
     try {
       // set({loading:true})
       const res = await api.get(`/all-product`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  // FETCH ALL PRODUCT BY CATEGROY ID API
+  fetchProductByCategoryId: async (categroy_id) => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/fetch-product?category_id=${categroy_id}`)
       // set({loading:false})
       return res.data
     } catch (error) {
@@ -360,6 +381,16 @@ const useHomeStore = create((set) => ({
       return res.data
     } catch (error) {
       return error.response.data
+    }
+  },
+
+  // <======================= PRODUCT SALE SUBMIT API =======================>
+  productSaleSubmit: async (productSaleData) => {
+    try {
+      const res = await api.post('/product-sale-submit', productSaleData)
+      return res.data
+    } catch (error) {
+      console.log('ERROR IN SUBMIT PRODUCT SALE SUBMIT API', error)
     }
   }
 }))

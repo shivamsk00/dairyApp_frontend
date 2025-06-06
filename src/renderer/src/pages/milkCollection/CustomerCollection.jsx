@@ -1,26 +1,90 @@
 import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
+import DateFormate from '../../helper/DateFormate';
 
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
-
+    const fetchCategory = useHomeStore(state => state.fetchCategory)
+    const fetchProductByCategoryId = useHomeStore(state => state.fetchProductByCategoryId)
+    const productSaleSubmit = useHomeStore(state => state.productSaleSubmit)
+    const [allProductCategory, setAllProductCategory] = useState([])
+    const [allProducts, setAllProducts] = useState([])
+    const today = new Date().toISOString().split('T')[0];
 
     const [form, setForm] = useState({
         account_number: '',
         name: '',
         careof: '',
-        date:'',
+        date: today,
         category_id: '',
         product_id: '',
         product_price: '',
-        qty: '',
+        qty: 0,
         total: ''
     });
 
-    const handleChange = (e) => {
+    const handleChange = async (e) => {
         const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+
+        if (name === 'category_id') {
+            setForm(prev => ({
+                ...prev,
+                category_id: value,
+                product_id: '',
+                product_price: '',
+                qty: '',
+                total: ''
+            }));
+
+            if (value) {
+                try {
+                    const res = await fetchProductByCategoryId(value);
+                    setAllProducts(res.data);
+                    console.log("fetch product details===>", res.data)
+                } catch (error) {
+                    console.log("Error fetching products:", error);
+                }
+            } else {
+                setAllProducts([]);
+            }
+
+        } else if (name === 'product_id') {
+            setForm(prev => ({
+                ...prev,
+                product_id: value
+            }));
+
+            const selected = allProducts.find(p => p.id == value);
+            if (selected) {
+                const newPrice = selected.price;
+                const newQty = form.qty || 0;
+                const newTotal = newPrice * newQty;
+
+                setForm(prev => ({
+                    ...prev,
+                    product_price: newPrice,
+                    total: newTotal
+                }));
+            }
+
+        } else if (name === 'qty') {
+            const newQty = parseFloat(value) || '';
+            const price = parseFloat(form.product_price) || 0;
+            const newTotal = newQty * price;
+
+            setForm(prev => ({
+                ...prev,
+                qty: newQty,
+                total: newTotal
+            }));
+
+        } else {
+            setForm(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
 
@@ -79,6 +143,86 @@ const CustomerCollection = () => {
     };
 
 
+    useEffect(() => {
+        fetchAllProductCategory()
+    }, [])
+
+    const fetchAllProductCategory = async () => {
+        try {
+            const res = await fetchCategory()
+            setAllProductCategory(res.data.data)
+        } catch (error) {
+            console.log("ERROR IN FETCHING CATEGORY", error)
+        }
+    }
+
+    // // FETCH CATEGORY 
+
+    // const fetchProductBycategoryId = async () => {
+    //     try {
+    //         const res = await fetchProductByCategoryId()
+    //         console.log("fetch all category ===>", res)
+    //         setAllProductCatgory(res.data.data)
+    //     } catch (error) {
+    //         console.log("ERROR IN FETCHING CATGORY", error)
+
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     fetchAllProductCategory()
+    // }, [])
+
+
+    const handleSubmitProduct = async (e) => {
+        e.preventDefault()
+        const customerCollectionData = {
+            customer_account_number: form.account_number,
+            name: form.name,
+            date: DateFormate(form.date),
+            category_id: form.category_id,
+            product_id: form.product_id,
+            product_price: form.product_price,
+            qty: form.qty,
+            total: form.total
+        }
+
+
+        try {
+
+            const res = await productSaleSubmit(customerCollectionData);
+            if (res.status_code == 200) {
+
+                console.log("product sale submited successfully", res)
+                CustomToast.success(res.message)
+                setForm(
+                    {
+                        account_number: '',
+                        name: '',
+                        careof: '',
+                        date: today,
+                        category_id: '',
+                        product_id: '',
+                        product_price: '',
+                        qty: 0,
+                        total: ''
+                    }
+
+                )
+
+                setAllProducts([])
+            }else{
+                 CustomToast.error(res.message,"bottom-center")
+            }
+
+
+        } catch (error) {
+
+        }
+
+    }
+
+
 
 
 
@@ -86,7 +230,22 @@ const CustomerCollection = () => {
     return (
         <div className="flex flex-col lg:flex-row gap-6 p-6">
             {/* Left Form */}
-            <form className="bg-gray-800 p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4 ">
+            <form onSubmit={handleSubmitProduct} className="bg-gray-800 p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4 ">
+
+                {/* DATE INPUT */}
+                <div className="">
+                    {/* <label className="font-semibold text-white">Date:</label> */}
+
+                    <input
+                        type="date"
+                        value={form.date}
+                        name="date"
+                        onChange={handleChange}
+                        max={new Date().toISOString().split('T')[0]} // max = today
+                        className="px-3 w-52 py-1 rounded border border-gray-400 text-gray-700 bg-white"
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium mb-1 text-white">Account No</label>
@@ -104,6 +263,7 @@ const CustomerCollection = () => {
                             value={form.name}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 bg-white  w-full"
+                            readOnly
                         />
                     </div>
                 </div>
@@ -116,41 +276,50 @@ const CustomerCollection = () => {
                             value={form.careof}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 w-full"
+                            readOnly
                         />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1 text-white">Category</label>
+
                         <select
                             name="category_id"
                             value={form.category_id}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 bg-white  w-full"
+
                         >
                             <option value="">Select Category</option>
-                            <option value="Ghee">Ghee</option>
-                            <option value="Paneer">Gatta</option>
+                            {allProductCategory.map((cate) => (
+                                <option key={cate.id} value={cate.id}>{cate.name}</option>
+                            ))}
                         </select>
                     </div>
-                    
+
                 </div>
 
 
 
 
                 <div className="grid grid-cols-2 gap-4">
-                   
-                {/* Product id */}
-                <div>
+
+                    {/* Product id */}
+                    <div>
                         <label className="block text-sm font-medium mb-1 text-white">Product</label>
+
+
+
                         <select
-                            name="product"
-                            value={form.product}
+                            name="product_id"
+                            value={form.product_id}
                             onChange={handleChange}
                             className="border rounded px-3 py-2 bg-white  w-full"
+
                         >
                             <option value="">Select Product</option>
-                            <option value="Ghee">Ghee</option>
-                            <option value="Paneer">Gatta</option>
+                            {allProducts.map((prod) => (
+                                <option key={prod.id} value={prod.id}>{prod.name}</option>
+                            ))}
                         </select>
                     </div>
                     <div>
@@ -159,7 +328,8 @@ const CustomerCollection = () => {
                             name="product_price"
                             value={form.product_price}
                             onChange={handleChange}
-                            type="number"
+                            type="text"
+                            readOnly
                             className="border rounded px-3 py-2  w-full"
                         />
                     </div>
@@ -169,8 +339,8 @@ const CustomerCollection = () => {
                     <div>
                         <label className="block text-sm font-medium mb-1 text-white">Quantity</label>
                         <input
-                            name="quantity"
-                            value={form.quantity}
+                            name="qty"
+                            value={form.qty}
                             onChange={handleChange}
                             type="number"
                             className="border rounded px-3 py-2 w-full"
@@ -184,6 +354,7 @@ const CustomerCollection = () => {
                             onChange={handleChange}
                             type="number"
                             className="border rounded px-3 py-2  w-full"
+                            readOnly
                         />
                     </div>
                 </div>
@@ -191,7 +362,8 @@ const CustomerCollection = () => {
                 <input
                     type="submit"
                     value="Submit"
-                    className="mt-6 w-24 text-white py-1 rounded bg-blue-600 cursor-pointer"
+                    disabled={form.account_number == '' ? true: false}
+                    className={form.account_number == '' ?  `mt-6 w-24 text-white py-1 rounded bg-gray-400 opacity-60 cursor-not-allowed`: `mt-6 w-24 text-white py-1 rounded bg-blue-600 cursor-pointer`}
                 />
             </form>
 
