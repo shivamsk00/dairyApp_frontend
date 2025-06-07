@@ -394,10 +394,10 @@ const useHomeStore = create((set) => ({
     }
   },
   // Get All Sold Products
-  getAllSoldProducts: async () => {
+  getAllSoldProducts: async (page) => {
     try {
       // set({loading:true})
-      const res = await api.get(`/all-product-sale`)
+      const res = await api.get(`/all-product-sale?page=${page}`)
       // set({loading:false})
       return res.data
     } catch (error) {

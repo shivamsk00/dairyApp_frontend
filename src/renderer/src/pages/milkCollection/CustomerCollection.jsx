@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import DateFormate from '../../helper/DateFormate';
+import Preloading from '../../components/Preloading';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
@@ -13,21 +15,27 @@ const CustomerCollection = () => {
     const [allProducts, setAllProducts] = useState([])
     const today = new Date().toISOString().split('T')[0];
     const [allsoldproducts, setAllsoldproducts] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [maxPageButtons, setMaxPageButtons] = useState(5);
 
 
     // Sold Products Api Response
-    const soldproductAllDataFetch = async () => {
+    const soldproductAllDataFetch = async (page = 1) => {
         try {
-            const res = await allSoldProducts();
+            const res = await allSoldProducts(page);
             console.log("fetch all sold products ", res)
             if (res.status_code == 200) {
                 setAllsoldproducts(res.data)
+                // setCollections(res.data.data);
+                setCurrentPage(res.data.current_page);
+                setTotalPages(res.data.last_page);
             } else {
                 console.log("response errro", res)
             }
 
         } catch (error) {
-            console.log("ERROR IN FETCH ALL SOLD PRODUCT ")
+            console.log("ERROR IN FETCH ALL SOLD PRODUCT ", error)
 
         }
     }
@@ -202,7 +210,7 @@ const CustomerCollection = () => {
 
     const handleSubmitProduct = async (e) => {
         e.preventDefault();
-    
+
         const customerCollectionData = {
             customer_account_number: form.account_number,
             name: form.name,
@@ -213,12 +221,12 @@ const CustomerCollection = () => {
             qty: form.qty,
             total: form.total
         };
-    
+
         try {
             const res = await productSaleSubmit(customerCollectionData);
             if (res.status_code === 200) {
                 CustomToast.success(res.message);
-    
+
                 // Reset form
                 setForm({
                     account_number: '',
@@ -231,10 +239,10 @@ const CustomerCollection = () => {
                     qty: 0,
                     total: ''
                 });
-    
+
                 // Clear the product list
                 setAllProducts([]);
-    
+
                 // 🔁 Update the sold products table immediately
                 await soldproductAllDataFetch();
             } else {
@@ -245,7 +253,88 @@ const CustomerCollection = () => {
             CustomToast.error("Something went wrong while submitting!");
         }
     };
-    
+
+
+
+
+    // BUTTONS RENDERS FOR PAGINATION
+    const renderPageButtons = () => {
+        const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+        const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+        const pages = [];
+
+        // Always show first page
+        if (groupStart > 1) {
+            pages.push(
+                <button
+                    key={1}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => soldproductAllDataFetch(1)}
+                >
+                    1
+                </button>
+            );
+
+            if (groupStart > 2) {
+                pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
+        }
+
+        // Middle buttons
+        for (let i = groupStart; i <= groupEnd; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => soldproductAllDataFetch(i)}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        // Always show last page
+        if (groupEnd < totalPages) {
+            if (groupEnd < totalPages - 1) {
+                pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
+
+            pages.push(
+                <button
+                    key={totalPages}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => soldproductAllDataFetch(totalPages)}
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return (
+            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+                {/* Previous Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => soldproductAllDataFetch(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    <MdArrowBackIos size={18} />
+                </button>
+
+                {pages}
+
+                {/* Next Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => soldproductAllDataFetch(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    <MdArrowForwardIos size={18} />
+                </button>
+            </div>
+        );
+    };
 
 
 
@@ -461,36 +550,47 @@ const CustomerCollection = () => {
                     <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                         <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                             <tr>
-                                {['Sr No.','Acc No.','Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Unit', 'Date', ].map((header) => (
+                                {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Unit', 'Date',].map((header) => (
                                     <th key={header} className="border px-4 py-3 text-sm font-semibold tracking-wide text-center uppercase">
                                         {header}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody>
-                            {allsoldproducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan="9" className="text-center text-gray-500 py-6">No sold product data available</td>
-                                </tr>
-                            ) : (
-                                allsoldproducts.map((item, i) => (
-                                    <tr key={i} className="hover:bg-yellow-50 transition-all duration-300">
-                                        <td className="border px-4 py-2 text-center font-medium">{i + 1}</td>
-                                        <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer_account_number || '-'}</td>
-                                        <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer?.name || '-'}</td>
-                                        <td className="border px-4 py-2 text-center">{item.product?.name || '-'}</td>
-                                        <td className="border px-4 py-2 text-center">{item.category?.name || '-'}</td>
-                                        <td className="border px-4 py-2 text-center text-green-700 font-semibold">₹{item.product_price}</td>
-                                        <td className="border px-4 py-2 text-center">{item.qty}</td>
-                                        <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
-                                        <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td>
-                                        <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
+                        {
+                            allsoldproducts.length === 0 ? (
+                                <tbody>
+                                    <tr>
+                                        <td colSpan={10} className="py-10 text-center">
+                                            <Preloading />
+                                        </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
+                                </tbody>
+                            ) : (
+                                <tbody className='w-full'>
+                                    {
+                                        allsoldproducts.map((item, i) => (
+                                            <tr key={i} className="hover:bg-yellow-50 transition-all duration-300">
+                                                <td className="border px-4 py-2 text-center font-medium">{i + 1}</td>
+                                                <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer_account_number || '-'}</td>
+                                                <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer?.name || '-'}</td>
+                                                <td className="border px-4 py-2 text-center">{item.product?.name || '-'}</td>
+                                                <td className="border px-4 py-2 text-center">{item.category?.name || '-'}</td>
+                                                <td className="border px-4 py-2 text-center text-green-700 font-semibold">₹{item.product_price}</td>
+                                                <td className="border px-4 py-2 text-center">{item.qty}</td>
+                                                <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
+                                                <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td>
+                                                <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            )
+                        }
                     </table>
+
+                    {/* Pagination Controls */}
+                    {/* {renderPageButtons()} */}
                 </div>
             </div>
 
