@@ -392,7 +392,19 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       console.log('ERROR IN SUBMIT PRODUCT SALE SUBMIT API', error)
     }
-  }
+  },
+  // Get All Sold Products
+  getAllSoldProducts: async () => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/all-product-sale`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  
 }))
 
 export default useHomeStore

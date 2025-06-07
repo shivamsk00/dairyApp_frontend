@@ -8,9 +8,35 @@ const CustomerCollection = () => {
     const fetchCategory = useHomeStore(state => state.fetchCategory)
     const fetchProductByCategoryId = useHomeStore(state => state.fetchProductByCategoryId)
     const productSaleSubmit = useHomeStore(state => state.productSaleSubmit)
+    const allSoldProducts = useHomeStore(state => state.getAllSoldProducts)
     const [allProductCategory, setAllProductCategory] = useState([])
     const [allProducts, setAllProducts] = useState([])
     const today = new Date().toISOString().split('T')[0];
+    const [allsoldproducts, setAllsoldproducts] = useState([])
+
+
+    // Sold Products Api Response
+    const soldproductAllDataFetch = async () => {
+        try {
+            const res = await allSoldProducts();
+            console.log("fetch all sold products ", res)
+            if (res.status_code == 200) {
+                setAllsoldproducts(res.data)
+            } else {
+                console.log("response errro", res)
+            }
+
+        } catch (error) {
+            console.log("ERROR IN FETCH ALL SOLD PRODUCT ")
+
+        }
+    }
+
+    useEffect(() => {
+        soldproductAllDataFetch()
+    }, [])
+
+
 
     const [form, setForm] = useState({
         account_number: '',
@@ -175,7 +201,8 @@ const CustomerCollection = () => {
 
 
     const handleSubmitProduct = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+    
         const customerCollectionData = {
             customer_account_number: form.account_number,
             name: form.name,
@@ -185,42 +212,40 @@ const CustomerCollection = () => {
             product_price: form.product_price,
             qty: form.qty,
             total: form.total
-        }
-
-
+        };
+    
         try {
-
             const res = await productSaleSubmit(customerCollectionData);
-            if (res.status_code == 200) {
-
-                console.log("product sale submited successfully", res)
-                CustomToast.success(res.message)
-                setForm(
-                    {
-                        account_number: '',
-                        name: '',
-                        careof: '',
-                        date: today,
-                        category_id: '',
-                        product_id: '',
-                        product_price: '',
-                        qty: 0,
-                        total: ''
-                    }
-
-                )
-
-                setAllProducts([])
-            }else{
-                 CustomToast.error(res.message,"bottom-center")
+            if (res.status_code === 200) {
+                CustomToast.success(res.message);
+    
+                // Reset form
+                setForm({
+                    account_number: '',
+                    name: '',
+                    careof: '',
+                    date: today,
+                    category_id: '',
+                    product_id: '',
+                    product_price: '',
+                    qty: 0,
+                    total: ''
+                });
+    
+                // Clear the product list
+                setAllProducts([]);
+    
+                // 🔁 Update the sold products table immediately
+                await soldproductAllDataFetch();
+            } else {
+                CustomToast.error(res.message, "bottom-center");
             }
-
-
         } catch (error) {
-
+            console.error("Error submitting product sale:", error);
+            CustomToast.error("Something went wrong while submitting!");
         }
-
-    }
+    };
+    
 
 
 
@@ -230,7 +255,7 @@ const CustomerCollection = () => {
     return (
         <div className="flex flex-col lg:flex-row gap-6 p-6">
             {/* Left Form */}
-            <form onSubmit={handleSubmitProduct} className="bg-gray-800 p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4 ">
+            <form onSubmit={handleSubmitProduct} className="bg-gray-800 p-6 rounded shadow-xl w-full h-1/2 lg:w-1/2 flex flex-col gap-4 ">
 
                 {/* DATE INPUT */}
                 <div className="">
@@ -362,29 +387,29 @@ const CustomerCollection = () => {
                 <input
                     type="submit"
                     value="Submit"
-                    disabled={form.account_number == '' ? true: false}
-                    className={form.account_number == '' ?  `mt-6 w-24 text-white py-1 rounded bg-gray-400 opacity-60 cursor-not-allowed`: `mt-6 w-24 text-white py-1 rounded bg-blue-600 cursor-pointer`}
+                    disabled={form.account_number == '' ? true : false}
+                    className={form.account_number == '' ? `mt-6 w-24 text-white py-1 rounded bg-gray-400 opacity-60 cursor-not-allowed` : `mt-6 w-24 text-white py-1 rounded bg-blue-600 cursor-pointer`}
                 />
             </form>
 
             {/* Right Info Panel */}
-            <div className="w-full lg:w-1/2 flex flex-col gap-4 border p-3 bg-gray-800 rounded-md">
-                {/* Date Filter */}
+            {/* <div className="w-full lg:w-1/2 flex flex-col gap-4 border p-3 bg-gray-800 rounded-md">
+                Date Filter
                 <div className="flex flex-wrap gap-4 items-center">
                     <input type="date" className="border px-3 w-1/4 py-1 rounded" placeholder="From" />
                     <input type="date" className="border  px-3 w-1/4  py-1 rounded" placeholder="To" />
                     <button className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-700">Search</button>
                 </div>
 
-                {/* Purchase Summary */}
+                Purchase Summary
                 <div className="bg-gray-300 p-4 rounded shadow-xl mt-2 flex-1">
-                    {/* Header Info */}
+                    Header Info
                     <div className="mb-4">
                         <p className="font-semibold mb-1">Account No: 12345</p>
                         <p className="font-semibold mb-1">Name: Shivam</p>
                     </div>
 
-                    {/* Product Table */}
+                    Product Table
                     <table className="w-full text-left border border-gray-400 bg-white rounded overflow-hidden">
                         <thead className="bg-gray-200">
                             <tr>
@@ -404,19 +429,73 @@ const CustomerCollection = () => {
                         </tbody>
                     </table>
 
-                    {/* Summary */}
+                    Summary
                     <div className="flex flex-col items-end mt-4 text-sm">
                         <p className="font-semibold">Total Purchased Items: 3</p>
                         <p className="font-semibold text-lg">Total Price: ₹1300</p>
                     </div>
                 </div>
 
-                {/* Export/Share Buttons */}
+                Export/Share Buttons
                 <div className="flex justify-end gap-4 mt-4">
                     <button className="bg-yellow-500 text-white px-4 py-2 rounded shadow-lg hover:bg-yellow-600">Export Excel</button>
                     <button className="bg-green-500 text-white px-4 py-2 rounded shadow-lg hover:bg-green-600">Share WhatsApp</button>
                 </div>
+            </div> */}
+
+            {/* Bottom Table */}
+            <div className="mt-10 w-full">
+                {/* Export/Share Buttons */}
+                <div className="flex justify-end gap-4 mb-6">
+                    <button className="bg-yellow-500 text-white px-5 py-2 rounded shadow-md hover:bg-yellow-600 transition">
+                        Export Excel
+                    </button>
+                    <button className="bg-green-500 text-white px-5 py-2 rounded shadow-md hover:bg-green-600 transition">
+                        Share WhatsApp
+                    </button>
+                </div>
+
+                <h3 className="text-2xl font-bold text-gray-700 mb-4 text-center">All Sold Products</h3>
+
+                <div className="overflow-x-auto rounded-xl shadow-lg">
+                    <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
+                        <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
+                            <tr>
+                                {['Sr No.','Acc No.','Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Unit', 'Date', ].map((header) => (
+                                    <th key={header} className="border px-4 py-3 text-sm font-semibold tracking-wide text-center uppercase">
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allsoldproducts.length === 0 ? (
+                                <tr>
+                                    <td colSpan="9" className="text-center text-gray-500 py-6">No sold product data available</td>
+                                </tr>
+                            ) : (
+                                allsoldproducts.map((item, i) => (
+                                    <tr key={i} className="hover:bg-yellow-50 transition-all duration-300">
+                                        <td className="border px-4 py-2 text-center font-medium">{i + 1}</td>
+                                        <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer_account_number || '-'}</td>
+                                        <td className="border px-4 py-2 text-center text-indigo-700 font-medium">{item.customer?.name || '-'}</td>
+                                        <td className="border px-4 py-2 text-center">{item.product?.name || '-'}</td>
+                                        <td className="border px-4 py-2 text-center">{item.category?.name || '-'}</td>
+                                        <td className="border px-4 py-2 text-center text-green-700 font-semibold">₹{item.product_price}</td>
+                                        <td className="border px-4 py-2 text-center">{item.qty}</td>
+                                        <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
+                                        <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td>
+                                        <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+
+
         </div>
     );
 };
