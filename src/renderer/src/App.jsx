@@ -31,9 +31,18 @@ import EditProductPage from './pages/inventory/editProductPage';
 import NavigatorSetter from './helper/NavigatorSetter';
 import AddStockPage from './pages/inventory/AddStockPage';
 import EditeStockPage from './pages/inventory/EditeStockPage';
+import { useEffect } from 'react';
 
 function App() {
 
+  useEffect(() => {
+    const preloader = document.getElementById('preloader')
+    if (preloader) {
+      preloader.style.opacity = '0'
+      preloader.style.transition = 'opacity 0.3s ease'
+      setTimeout(() => preloader.remove(), 300)
+    }
+  }, [])
 
 
   return (
