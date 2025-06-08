@@ -3,12 +3,13 @@ import api from './axiosConfig'
 
 // Safe JSON parse function
 const useDailyMilkDispatchStore = create((set) => ({
-  submitDailyMilkSale: async (dailyMilkSaleData) => {
+  submitMilkDispatch: async (milkDispatchData) => {
+    console.log("milkDispatchData", milkDispatchData)
     try {
-      const res = await api.post('/daily-milk-sale-submit', dailyMilkSaleData)
+      const res = await api.post('/milk-dispatch-submit', milkDispatchData)
       return res.data
     } catch (error) {
-      console.error('ERROR IN DAILY MILK SALE SUBMIT API', error)
+      console.error('ERROR IN  MILKDISPATCH SUBMIT API', error)
     }
   },
   getDailyMilkSaleData: async () => {

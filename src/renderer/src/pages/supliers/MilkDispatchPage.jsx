@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import useDailyMilkDispatchStore from '../../zustand/useMilkDispatchStore';
+import CustomToast from '../../helper/costomeToast';
+import useHomeStore from '../../zustand/useHomeStore';
 
 const MilkDispatchPage = () => {
-  const submitMilkDispatct = useDailyMilkDispatchStore(state => state.useDailyMilkDispatchStore)
+  const submitMilkDispatch = useDailyMilkDispatchStore(state => state.submitMilkDispatch)
+  const getMilkRate = useHomeStore(state => state.getMilkRate);
   const today = new Date().toISOString().split('T')[0];
   const [form, setForm] = useState({
     dispatch_date: today,
@@ -34,18 +37,77 @@ const MilkDispatchPage = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  // const handleMilkDetailChange = (index, e) => {
+  //   const { name, value } = e.target;
+  //   const updatedDetails = [...form.milk_details];
+  //   updatedDetails[index][name] = value;
+
+  //   const { qty, rate } = updatedDetails[index];
+  //   if (qty && rate) {
+  //     updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
+  //   } else {
+  //     updatedDetails[index].amount = '';
+  //   }
+
+  //   setForm(prev => ({ ...prev, milk_details: updatedDetails }));
+  // };
+
+  let snfRateFetchTimeout;
+
   const handleMilkDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetails = [...form.milk_details];
     updatedDetails[index][name] = value;
 
-    const { qty, rate } = updatedDetails[index];
+    const { qty, fat, clr, rate } = updatedDetails[index];
+
+    // ✅ Calculate amount if qty & rate are present
     if (qty && rate) {
       updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
     } else {
       updatedDetails[index].amount = '';
     }
 
+    // ✅ Debounce rate fetch on SNF input
+    if (name === 'snf') {
+      clearTimeout(snfRateFetchTimeout);
+
+      // 👇 Only continue if SNF is a valid float
+      const snfValue = parseFloat(value);
+      const isValidSNF = !isNaN(snfValue) && value.includes('.');
+
+      if (!fat) {
+        CustomToast.error('⚠️ Please enter FAT value first to fetch rate');
+      } else if (isValidSNF) {
+        snfRateFetchTimeout = setTimeout(async () => {
+          try {
+            const result = await getMilkRate(fat, clr || '', snfValue);
+            console.log("result print ====>", result);
+
+            if (result?.rate) {
+              updatedDetails[index].rate = parseFloat(result.rate).toFixed(2);
+              if (qty) {
+                updatedDetails[index].amount = (parseFloat(qty) * result.rate).toFixed(2);
+              }
+
+              // ✅ Set updated form after rate is fetched
+              setForm(prev => {
+                const updatedMilkDetails = [...prev.milk_details];
+                updatedMilkDetails[index] = updatedDetails[index];
+                return { ...prev, milk_details: updatedMilkDetails };
+              });
+            } else {
+              CustomToast.error('❌ Rate not found for given values');
+            }
+          } catch (error) {
+            console.error('❌ Error fetching milk rate:', error);
+            CustomToast.error('❌ Error fetching milk rate');
+          }
+        }, 500);
+      }
+    }
+
+    // ✅ Immediate form update for all cases
     setForm(prev => ({ ...prev, milk_details: updatedDetails }));
   };
 
@@ -67,25 +129,48 @@ const MilkDispatchPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('🚚 Dispatch Form:', form);
     // TODO: Submit API call
+    try {
+      const res = await submitMilkDispatch(form);
+      console.log("respone milk dispatch", res)
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+        // ✅ Reset form after submit
+        setForm({
+          dispatch_date: today,
+          shift: '',
+          head_dairy_id: '',
+          vehicle_no: '',
+          total_qty: '',
+          total_amount: '',
+          notes: '',
+          milk_details: [
+            { milk_type: '', qty: '', fat: '', snf: '', rate: '', amount: '' },
+          ],
+        });
+      } else {
+        CustomToast.success(res.message)
 
-    // ✅ Reset form after submit
-    setForm({
-      dispatch_date: today,
-      shift: '',
-      head_dairy_id: '',
-      vehicle_no: '',
-      total_qty: '',
-      total_amount: '',
-      notes: '',
-      milk_details: [
-        { milk_type: '', qty: '', fat: '', snf: '', rate: '', amount: '' },
-      ],
-    });
+      }
+    } catch (error) {
+      console.log("ERROR IN SUBMIT MILK DISPATCH", error)
+
+    }
+
+
   };
+
+
+
+
+
+
+
+
+
   return (
     <div className="w-full mx-auto p-6 mt-10">
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Milk Dispatch Entry</h2>
@@ -183,7 +268,7 @@ const MilkDispatchPage = () => {
                 className="px-2 py-1 border rounded"
               />
               <input
-                type="number"
+                type="text"
                 name="snf"
                 placeholder="SNF"
                 value={item.snf}
