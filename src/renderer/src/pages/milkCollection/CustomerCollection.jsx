@@ -5,7 +5,9 @@ import DateFormate from '../../helper/DateFormate';
 import Preloading from '../../components/Preloading';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 import CommonHeader from '../../components/CommonHeader';
-
+import { TfiExport } from 'react-icons/tfi';
+import * as XLSX from 'xlsx';
+import { toast } from 'react-toastify';
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const fetchCategory = useHomeStore(state => state.fetchCategory)
@@ -19,26 +21,37 @@ const CustomerCollection = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
+    const [loading, setLoading] = useState(false)
 
 
     // Sold Products Api Response
     const soldproductAllDataFetch = async (page = 1) => {
         try {
+            setLoading(true)
             const res = await allSoldProducts(page);
             console.log("fetch all sold products ", res)
             if (res.status_code == 200) {
-                setAllsoldproducts(res.data)
+                setAllsoldproducts(res.data.data)
                 // setCollections(res.data.data);
                 setCurrentPage(res.data.current_page);
                 setTotalPages(res.data.last_page);
+                setLoading(false)
             } else {
                 console.log("response errro", res)
+                setLoading(false)
             }
 
         } catch (error) {
             console.log("ERROR IN FETCH ALL SOLD PRODUCT ", error)
+            setLoading(false)
 
+        } finally {
+
+            setLoading(false)
         }
+
+
+
     }
 
     useEffect(() => {
@@ -191,22 +204,33 @@ const CustomerCollection = () => {
         }
     }
 
-    // // FETCH CATEGORY 
+    // Export to Excel
+    const exportToExcel = () => {
+        if (!allsoldproducts?.length) {
+            toast.warning("No data to export");
+            return;
+        }
 
-    // const fetchProductBycategoryId = async () => {
-    //     try {
-    //         const res = await fetchProductByCategoryId()
-    //         console.log("fetch all category ===>", res)
-    //         setAllProductCatgory(res.data.data)
-    //     } catch (error) {
-    //         console.log("ERROR IN FETCHING CATGORY", error)
+        console.log("allsoldproducts", allsoldproducts)
+        const dataToExport = allsoldproducts.map(entry => ({
+            Acc_No: entry.customer.account_number,
+            Name: entry.customer.name,
+            Careof: entry.customer.careof,
+            Date: entry.date,
+            Category: entry.category_id,
+            Ptoduct: entry.product_id,
+            Product_price: entry.product_price,
+            Quantity: entry.qty,
+            Total: entry.total,
+        }));
 
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     fetchAllProductCategory()
-    // }, [])
+        console.log("dataToExport===>", dataToExport)
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Customer Collection Report');
+        XLSX.writeFile(workbook, 'customer_collection_report.xlsx');
+        toast.success("Report exported successfully");
+    };
 
 
     const handleSubmitProduct = async (e) => {
@@ -313,7 +337,7 @@ const CustomerCollection = () => {
         }
 
         return (
-            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+            <div className="flex gap-1 flex-wrap justify-start p-3 mt-4 w-full">
                 {/* Previous Button */}
                 <button
                     className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
@@ -537,20 +561,18 @@ const CustomerCollection = () => {
             </div> */}
 
                 {/* Bottom Table */}
-                <div className="mt-10 w-full">
+                <div className=" w-full border">
                     {/* Export/Share Buttons */}
-                    <div className="flex justify-end gap-4 mb-6">
-                        <button className="bg-yellow-500 text-white px-5 py-2 rounded shadow-md hover:bg-yellow-600 transition">
-                            Export Excel
-                        </button>
-                        <button className="bg-green-500 text-white px-5 py-2 rounded shadow-md hover:bg-green-600 transition">
-                            Share WhatsApp
-                        </button>
-                    </div>
 
-                    <h3 className="text-2xl font-bold text-gray-700 mb-4 text-center">All Sold Products</h3>
+
+                    {/* <h3 className="text-2xl font-bold text-gray-700 mb-4 text-center">All Sold Products</h3> */}
 
                     <div className="overflow-x-auto rounded-xl shadow-lg">
+                        <div className="flex justify-start bg-slate-800 p-3">
+                            <button onClick={exportToExcel} className="bg-orange-500 flex items-center justify-center gap-3 text-white px-5 py-2 rounded shadow-md hover:bg-yellow-600 transition">
+                                <TfiExport /> Export Excel
+                            </button>
+                        </div>
                         <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                             <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                                 <tr>
@@ -562,7 +584,7 @@ const CustomerCollection = () => {
                                 </tr>
                             </thead>
                             {
-                                allsoldproducts.length === 0 ? (
+                                loading ? (
                                     <tbody>
                                         <tr>
                                             <td colSpan={10} className="py-10 text-center">
@@ -594,7 +616,7 @@ const CustomerCollection = () => {
                         </table>
 
                         {/* Pagination Controls */}
-                        {/* {renderPageButtons()} */}
+                        {renderPageButtons()}
                     </div>
                 </div>
 

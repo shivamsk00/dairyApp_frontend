@@ -14,6 +14,7 @@ import { IoMdCloseCircle } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+import Preloading from '../../components/Preloading';
 
 const columnHelper = createColumnHelper();
 
@@ -327,9 +328,10 @@ const CustomerList = () => {
 
             {/* Loading State */}
             {loading ? (
-                <div className="text-center py-10 text-lg font-semibold text-gray-600 h-1/2">
-                    Loading customers...
+                <div className="text-center py-10 text-lg font-semibold text-gray-600 h-full flex">
+                    <Preloading />
                 </div>
+
             ) : (
                 <>
                     <table className="min-w-full border text-sm">

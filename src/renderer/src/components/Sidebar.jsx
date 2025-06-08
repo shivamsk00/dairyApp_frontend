@@ -119,7 +119,7 @@ const Sidbar = () => {
           </li>
 
           <NavLink
-            to="/milksales"
+            to="/milkDispatch"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
@@ -128,7 +128,7 @@ const Sidbar = () => {
           </NavLink>
 
           <NavLink
-            to="/suppliers"
+            to="/dailyMilkSale"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
