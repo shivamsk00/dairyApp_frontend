@@ -168,8 +168,26 @@ const ReportsPage = () => {
           </div>
         </form>
 
+        {
+          summaryData && (
+            <div className="mt-4 max-w-lg mx-auto h-48 bg-gradient-to-r from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
+              <p className="text-xl">
+                Total Milk Collected: <span className="text-green-700 font-bold">{summaryData.total_milk_collections} L</span>
+              </p>
+              <p className="text-xl">
+                Total Amount: <span className="text-green-700 font-bold">₹{summaryData.milk_total_amount}</span>
+              </p>
+              <p className="text-xl">
+                Wallet Balance:{" "}
+                <span className={summaryData.customer_wallet < 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
+                  ₹{summaryData.customer_wallet}
+                </span>
+              </p>
+            </div>
+          )
+        }
 
-        
+
 
       </div>
 
@@ -228,20 +246,7 @@ const ReportsPage = () => {
             </table>
           </div>
 
-          <div className="mt-4 max-w-md mx-auto h-48 bg-gradient-to-r from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
-          <p className="text-xl">
-            Total Milk Collected: <span className="text-green-700 font-bold">{summaryData.total_milk_collections} L</span>
-          </p>
-          <p className="text-xl">
-            Total Amount: <span className="text-green-700 font-bold">₹{summaryData.milk_total_amount}</span>
-          </p>
-          <p className="text-xl">
-            Wallet Balance:{" "}
-            <span className={summaryData.customer_wallet < 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
-              ₹{summaryData.customer_wallet}
-            </span>
-          </p>
-        </div>
+
 
         </div>
       )}

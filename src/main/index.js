@@ -4,6 +4,9 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 let mainWindow
+let secondWindow
+let customerCollectionWin
+let childWindow
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -22,6 +25,17 @@ function createWindow() {
     mainWindow.show()
   })
 
+  mainWindow.on('closed', () => {
+    secondWindow?.close()
+    customerCollectionWin?.close()
+    childWindow?.close()
+
+    mainWindow = null
+    secondWindow = null
+    customerCollectionWin = null
+    childWindow = null
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -35,7 +49,7 @@ function createWindow() {
 }
 
 function createSecondWindow() {
-  const secondWindow = new BrowserWindow({
+  secondWindow = new BrowserWindow({
     width: 1500,
     height: 800,
     autoHideMenuBar: true,
@@ -46,7 +60,10 @@ function createSecondWindow() {
   })
 
   secondWindow.on('closed', () => {
-    mainWindow?.webContents.send('second-window-closed')
+    secondWindow = null
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('second-window-closed')
+    }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -54,15 +71,13 @@ function createSecondWindow() {
   } else {
     secondWindow.loadFile(join(__dirname, '../renderer/index.html'))
     secondWindow.webContents.once('did-finish-load', () => {
-      secondWindow.webContents.executeJavaScript(`
-        window.location.hash = '#/milk-collection';
-      `)
+      secondWindow.webContents.executeJavaScript(`window.location.hash = '#/milk-collection';`)
     })
   }
 }
 
 function customerCollection() {
-  const customerCollectionWin = new BrowserWindow({
+  customerCollectionWin = new BrowserWindow({
     width: 1200,
     height: 800,
     autoHideMenuBar: true,
@@ -73,7 +88,10 @@ function customerCollection() {
   })
 
   customerCollectionWin.on('closed', () => {
-    mainWindow?.webContents.send('customer-win-close')
+    customerCollectionWin = null
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('customer-win-close')
+    }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -81,10 +99,27 @@ function customerCollection() {
   } else {
     customerCollectionWin.loadFile(join(__dirname, '../renderer/index.html'))
     customerCollectionWin.webContents.once('did-finish-load', () => {
-      customerCollectionWin.webContents.executeJavaScript(`
-        window.location.hash = '#/customer-collection';
-      `)
+      customerCollectionWin.webContents.executeJavaScript(`window.location.hash = '#/customer-collection';`)
     })
+  }
+}
+
+function createChildWindow() {
+  childWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    parent: mainWindow,
+    modal: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    childWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/child`)
+  } else {
+    childWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 
@@ -110,22 +145,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
-
-function createChildWindow() {
-  const childWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    parent: mainWindow,
-    modal: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    childWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/child`)
-  } else {
-    childWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}

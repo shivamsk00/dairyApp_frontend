@@ -5,59 +5,49 @@ import CommonBackButton from '../../components/CommonBackButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const EditProductPage = () => {
-  const nav = useNavigate()
+  const nav = useNavigate();
   const { state } = useLocation();
-  const { productId } = state
+  const { productId } = state;
+
   const fetchCategory = useHomeStore(state => state.fetchCategory);
   const editProductDetailsFetch = useHomeStore(state => state.editProductDetailsFetch);
   const updateProduct = useHomeStore(state => state.updateProduct);
+
   const [categories, setCategories] = useState([]);
 
-  // Simulated existing product data (replace with real API call)
   const [formData, setFormData] = useState({
-    category: '',         // pre-selected category ID
+    category: '',
     name: '',
-    unitValue: '',
-    unitType: '',
+    unit: '',     // 🟢 Combined field for value + type
     price: '',
   });
 
   const handleChange = (e) => {
-
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
   };
 
-
   const fetchProductEditData = async () => {
     try {
-      const res = await editProductDetailsFetch(productId)
-      console.log("print product edit data", res.data)
-
-
-      const productCategory = categories.find(cate => cate.id == res.data.category_id)
-      console.log("productCategory", productCategory)
+      const res = await editProductDetailsFetch(productId);
       setFormData({
-        category: res.data.category_id,         // pre-selected category ID
+        category: res.data.category_id,
         name: res.data.name,
-        unitValue: res.data.unit,
-        unitType: res.data.unit,
+        unit: res.data.unit,     // 🟢 like '1 Ltr'
         price: res.data.price,
-      })
+      });
     } catch (error) {
-
+      console.error("ERROR FETCHING PRODUCT", error);
     }
-  }
-
+  };
 
   const getAllCategory = async () => {
     try {
       const res = await fetchCategory();
       if (res.status_code == 200) {
         setCategories(res.data.data);
-        console.log("category fetch", res.data.data)
       } else {
         CustomToast.error(res.message);
       }
@@ -68,38 +58,32 @@ const EditProductPage = () => {
 
   useEffect(() => {
     getAllCategory();
-    fetchProductEditData()
+    fetchProductEditData();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const combinedUnit = `${formData.unitValue} ${formData.unitType}`;
-      const finalData = { ...formData, unit: combinedUnit };
-
       const productData = {
-        "category_id": finalData.category,
-        "name": finalData.name,
-        "unit": finalData.unit,
-        "price": finalData.price
-      }
-      const res = await updateProduct(productId, productData)
+        category_id: formData.category,
+        name: formData.name,
+        unit: formData.unit,  // 🟢 no combination needed
+        price: formData.price,
+      };
+
+      const res = await updateProduct(productId, productData);
       if (res.status_code == 200) {
-        CustomToast.success(res.message)
-        nav(-1)
-        console.log("update data ", res)
+        CustomToast.success(res.message);
+        nav(-1);
       }
     } catch (error) {
-      console.log("ERROR IN UPDATE PRODUCT", error)
+      console.log("ERROR IN UPDATE PRODUCT", error);
     }
-
-
   };
 
   return (
     <>
       <div className="w-full px-4 md:px-6 py-3 text-left">
-
         <CommonBackButton heading="Edit Product" />
       </div>
       <div className="w-full px-4 md:px-6 lg:w-1/2 mx-auto py-6 shadow-xl m-3 rounded-lg bg-slate-700">
@@ -143,30 +127,15 @@ const EditProductPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 font-medium text-white">Product Unit</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  name="unitValue"
-                  placeholder="e.g., 1, 500"
-                  value={formData.unitValue}
-                  onChange={handleChange}
-                  required
-                  className="w-1/2 border border-gray-300 rounded px-3 py-2"
-                />
-                <select
-                  name="unitType"
-                  value={formData.unitType}
-                  onChange={handleChange}
-                  required
-                  className="w-1/2 border border-gray-300 rounded px-3 py-2"
-                >
-                  <option value="">Select Unit</option>
-                  <option value="Ltr">Ltr</option>
-                  <option value="KG">KG</option>
-                  <option value="gm">gm</option>
-                  <option value="ml">ml</option>
-                </select>
-              </div>
+              <input
+                type="text"
+                name="unit"
+                placeholder="e.g., 1 Ltr, 500 gm"
+                value={formData.unit}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
             </div>
 
             <div>

@@ -256,10 +256,10 @@ const useHomeStore = create((set) => ({
   },
 
   // FETCH ALL PRODUCT API
-  allProductGet: async () => {
+  allProductGet: async (page) => {
     try {
       // set({loading:true})
-      const res = await api.get(`/all-product`)
+      const res = await api.get(`/all-product?page=${page}`)
       // set({loading:false})
       return res.data
     } catch (error) {
@@ -403,8 +403,7 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return error.response.data
     }
-  },
-  
+  }
 }))
 
 export default useHomeStore

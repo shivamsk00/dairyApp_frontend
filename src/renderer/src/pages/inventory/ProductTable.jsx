@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
 import { FaEye, FaPen } from 'react-icons/fa';
 import { FaTrashCan } from 'react-icons/fa6';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 
 const ProductTable = () => {
   const nav = useNavigate()
@@ -16,15 +17,20 @@ const ProductTable = () => {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [productEdit, setProductEdit] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [maxPageButtons, setMaxPageButtons] = useState(5);
   // const [selectedCustomer, setSelectedProduct] = useState(null);
 
 
-  const productAllDataFetch = async () => {
+  const productAllDataFetch = async (page = 1) => {
     try {
-      const res = await allProductGet();
+      const res = await allProductGet(page);
       console.log("fetch all product ", res)
       if (res.status_code == 200) {
         setProducts(res.data.data)
+        setCurrentPage(res.data.current_page);
+        setTotalPages(res.data.last_page);
       } else {
         console.log("response errro", res)
       }
@@ -185,6 +191,86 @@ const ProductTable = () => {
   };
 
 
+  // PAGINATION 
+  const renderPageButtons = () => {
+    const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+    const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+    const pages = [];
+
+    // Always show first page
+    if (groupStart > 1) {
+      pages.push(
+        <button
+          key={1}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          onClick={() => productAllDataFetch(1)}
+        >
+          1
+        </button>
+      );
+
+      if (groupStart > 2) {
+        pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+      }
+    }
+
+    // Middle buttons
+    for (let i = groupStart; i <= groupEnd; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          onClick={() => productAllDataFetch(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    // Always show last page
+    if (groupEnd < totalPages) {
+      if (groupEnd < totalPages - 1) {
+        pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+      }
+
+      pages.push(
+        <button
+          key={totalPages}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          onClick={() => productAllDataFetch(totalPages)}
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    return (
+      <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+        {/* Previous Button */}
+        <button
+          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+          onClick={() => productAllDataFetch(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <MdArrowBackIos size={18} />
+        </button>
+
+        {pages}
+
+        {/* Next Button */}
+        <button
+          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+          onClick={() => productAllDataFetch(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <MdArrowForwardIos size={18} />
+        </button>
+      </div>
+    );
+  };
+
+
 
   return (
     <>
@@ -255,6 +341,10 @@ const ProductTable = () => {
               )}
             </tbody>
           </table>
+          {/* Pagination Controls */}
+          {renderPageButtons()}
+
+
         </div>
       </div>
 

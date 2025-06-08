@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import EditCustomerModal from '../customer/EditCustomerPage';
 import EditMilkCollectionModal from './EditMilkCollectionPage';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+import CommonHeader from '../../components/CommonHeader';
 
 const DailyMilkCollectionPage = () => {
     const nav = useNavigate()
@@ -30,7 +31,8 @@ const DailyMilkCollectionPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
-    const [currentTime, setCurrentTime] = useState(new Date());
+ 
+    const [customerWallet, setCustomerWallet] = useState(null)
     const [form, setForm] = useState({
         customer_account_number: '',
         name: '',
@@ -63,6 +65,8 @@ const DailyMilkCollectionPage = () => {
                     careof: res.data.careof || '',
                     mobile: res.data.mobile || '',
                 }));
+                setCustomerWallet(res.data.wallet)
+
             } else {
 
                 CustomToast.error(res.message)
@@ -219,7 +223,7 @@ const DailyMilkCollectionPage = () => {
                     rate: '',
                     total_amount: '',
                     milk_type: '',
-                    date:today,
+                    date: today,
                 })
                 fetchMilkCollectionDetails()
             } else {
@@ -324,28 +328,13 @@ const DailyMilkCollectionPage = () => {
 
 
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000); // updates every second
-
-        return () => clearInterval(timer); // cleanup on unmount
-    }, []);
 
 
 
 
 
-    const formattedDateTime = currentTime.toLocaleString('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-    });
+
+
 
 
 
@@ -355,16 +344,9 @@ const DailyMilkCollectionPage = () => {
     return (
         <div className="w-full">
 
-            <div className="w-full flex items-center justify-between border-b border-gray-200 px-4 py-3 mb-4 bg-blue-950 shadow-sm">
-                <h1 className="text-lg sm:text-xl font-semibold text-white">
-                    Daily Milk Collection
-                </h1>
-                <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-                    <div className="inline-block bg-blue-50 border border-blue-300 text-blue-700 px-4 py-1 rounded-lg shadow-lg text-lg sm:text-sm font-medium tracking-wide">
-                        {formattedDateTime}
-                    </div>
-                </div>
-            </div>
+ 
+
+            <CommonHeader heading={"Milk Collection"} />
 
             {/* Grid for Form and Receipt */}
             <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4 ">
@@ -633,6 +615,19 @@ const DailyMilkCollectionPage = () => {
                 </form>
 
                 <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
+                    {
+                        customerWallet && (
+                            <div className=" bg-gradient-to-r w-1/2 from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-3 mb-3 shadow-lg flex  space-x-3 font-semibold justify-between ">
+                                <p className="text-xl font-bold">
+                                    Customer Wallet
+                                </p>
+                                <p className={customerWallet < 0 ? "text-xl text-red-700 font-bold" : "text-xl text-green-600 font-bold"} >
+                                    ₹ {customerWallet}
+                                </p>
+                            </div>
+                        )
+                    }
+
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
 
                     <table className="w-full text-sm text-left border border-gray-300">
