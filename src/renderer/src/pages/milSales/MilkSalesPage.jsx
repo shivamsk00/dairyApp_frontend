@@ -124,6 +124,8 @@ const MilkSalesPage = () => {
     e.preventDefault();
     const dailyMilkSaleData = {
       "sale_date": form.sale_date,
+      "account_number": form.account_number,
+      "sale_date": form.sale_date,
       "shift": form.shift,
       "milk_type": form.milk_type,
       "quentity": form.quentity,

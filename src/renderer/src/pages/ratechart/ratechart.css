@@ -32,7 +32,7 @@
 .snfChartTable td {
   border: 1px solid #ccc;
   padding: 6px;
-  min-width: 60px;
+  min-width: 30px;
 }
 
 .snfChartTable th {
@@ -46,7 +46,8 @@
   width: 100%;
   border: none;
   text-align: center;
-  font-size: 14px;
+  font-size: 10px;
+  border: 2px solid yellow;
   padding: 4px;
   background-color: transparent;
   outline: none;

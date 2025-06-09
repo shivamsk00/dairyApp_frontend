@@ -202,6 +202,7 @@ const DailyMilkCollectionPage = () => {
     const handleSubmit = async (e) => {
         form.shift = shiftValue
         form.milk_type = milkType
+        setCustomerWallet(null)
         console.log("form value", form)
         e.preventDefault();
         try {

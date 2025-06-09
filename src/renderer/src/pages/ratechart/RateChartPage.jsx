@@ -150,13 +150,13 @@ const RateChartPage = () => {
           <table className="border-collapse text-sm min-w-full">
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
-                <th className="sticky left-0  text-white border bg-slate-500 border-gray-300 px-2 py-1 z-20">
+                <th className="sticky left-0  text-white border bg-slate-500 border-gray-300 px-1 py-1 z-20">
                   FAT / SNF
                 </th>
                 {SNF_VALUES.map((snf) => (
                   <th
                     key={snf}
-                    className="border border-gray-300 px-2 py-1 text-center bg-slate-500 text-white"
+                    className="border border-gray-300 px-1 py-1 text-center bg-slate-500 text-white"
                   >
                     {snf.toFixed(1)}
                   </th>
@@ -166,18 +166,19 @@ const RateChartPage = () => {
             <tbody className='bg-slate-700' >
               {rateData.map((row, fatIndex) => (
                 <tr key={fatIndex}>
-                  <td className="sticky left-0 bg-slate-500 text-white text-center border border-gray-300 px-2 py-1 font-medium z-10">
+                  <td className="sticky left-0 bg-slate-500 text-white text-center border border-gray-300 px-1 py-1 font-medium z-10" style={{width:'60px'}}>
                     {row.fat}
                   </td>
                   {row.snfRates.map((cell, snfIndex) => (
-                    <td key={snfIndex} className="border border-gray-300 px-2 py-1">
+                    <td key={snfIndex} className="border border-gray-300 " >
                       <input
+                      style={{width:'60px'}}
                         type="text"
                         value={cell.rate}
                         onChange={(e) =>
                           handleChange(fatIndex, snfIndex, e.target.value)
                         }
-                        className=" text-sm text-center text-white  rounded px-1 py-2 focus:outline-none focus:ring-2 bg-slate-700 focus:ring-blue-400"
+                        className=" text-sm text-center text-white  rounded px-1 py-1 focus:outline-none focus:ring-2 bg-slate-700 focus:ring-blue-400"
                       />
                     </td>
                   ))}
