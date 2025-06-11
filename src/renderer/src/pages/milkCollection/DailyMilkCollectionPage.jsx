@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
 import { FaEye, FaPen } from 'react-icons/fa';
@@ -10,6 +10,10 @@ import EditCustomerModal from '../customer/EditCustomerPage';
 import EditMilkCollectionModal from './EditMilkCollectionPage';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 import CommonHeader from '../../components/CommonHeader';
+import ToggleButton from '../../components/ToggleButton';
+
+
+
 
 const DailyMilkCollectionPage = () => {
     const nav = useNavigate()
@@ -31,6 +35,7 @@ const DailyMilkCollectionPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
+    const [toggle, setToggle] = useState(false)
 
     const [customerWallet, setCustomerWallet] = useState(null)
     const [form, setForm] = useState({
@@ -327,15 +332,25 @@ const DailyMilkCollectionPage = () => {
     };
 
 
+  const handlePrint = () => {
+  const printData = {
+    customer: "Shivam",
+    milk: "5 Litres",
+    rate: "₹40",
+    total: "₹200"
+  };
+
+  window.api.printSlip(printData); // ab string nahi, object bhej rahe hain
+};
 
 
-
-
-
-
-
-
-
+    useEffect(() => {
+        if (window.api) {
+            window.api.onPrintError((msg) => {
+                alert(msg); // ya toast/snackbar
+            });
+        }
+    }, []);
 
 
 
@@ -348,8 +363,8 @@ const DailyMilkCollectionPage = () => {
 
     return (
         <div className="w-full">
-
-
+            <button onClick={handlePrint}>Print Now</button>
+            {/* <PrintComponent /> */}
 
             <CommonHeader heading={"Milk Collection"} />
 
@@ -607,7 +622,7 @@ const DailyMilkCollectionPage = () => {
                     {/* Submit Button */}
                     <div className="mt-1 flex items-center gap-4">
                         {/* Print Toggle Checkbox */}
-                        <label className="flex items-center cursor-pointer">
+                        {/* <label className="flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
                                 name="print"
@@ -619,7 +634,13 @@ const DailyMilkCollectionPage = () => {
                                 <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-[24px]"></span>
                             </span>
                             <span className="ml-2 text-sm font-medium text-white">Print</span>
-                        </label>
+                        </label> */}
+
+                        <ToggleButton
+                            label="Print"
+                            enabled={toggle}
+                            onToggle={(val) => setToggle(val)}
+                        />
 
                         {/* Submit Button */}
                         <input
@@ -672,6 +693,8 @@ const DailyMilkCollectionPage = () => {
                     </table>
                 </div>
             </div>
+
+
 
             {/* === Bottom Table === */}
             <div className="mt-8 w-full">

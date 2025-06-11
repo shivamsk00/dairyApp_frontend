@@ -6,16 +6,15 @@ const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
-
+  printSlip: (htmlContent) => ipcRenderer.send('print-slip', htmlContent),
+  onPrintError: (callback) => ipcRenderer.on('print-error', (event, message) => callback(message)),
   onSecondWindowClosed: (callback) => {
     ipcRenderer.on('second-window-closed', callback)
   },
 
   onCutomerWindowClosed: (callback) => {
     ipcRenderer.on('customer-win-close', callback)
-  },
-
-
+  }
 }
 
 // Expose APIs to renderer safely
