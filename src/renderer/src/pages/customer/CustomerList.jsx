@@ -383,6 +383,7 @@ const CustomerList = () => {
                             <tbody>
                                 {[
                                     ['Name', selectedCustomer.name],
+                                    ['Customer Type', selectedCustomer.customer_type],
                                     ['Email', selectedCustomer.email],
                                     ['Mobile', selectedCustomer.mobile],
                                     ['Contact Person', selectedCustomer.contact_person],

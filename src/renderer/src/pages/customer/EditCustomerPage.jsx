@@ -14,6 +14,7 @@ const EditCustomerPage = () => {
     const customer = location.state;
 
     const [customerData, setCustomerData] = useState({
+        customer_type: '',
         name: '',
         email: '',
         mobile: '',
@@ -32,6 +33,7 @@ const EditCustomerPage = () => {
             navigate('/customer');
         } else {
             setCustomerData({
+                customer_type: customer.customer_type || '',
                 name: customer.name || '',
                 email: customer.email || '',
                 mobile: customer.mobile || '',
@@ -75,6 +77,7 @@ const EditCustomerPage = () => {
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {[
+                        { label: 'Customer Type', name: 'customer_type' },
                         { label: 'Name', name: 'name' },
                         { label: 'Email', name: 'email' },
                         { label: 'Mobile', name: 'mobile' },
@@ -88,14 +91,29 @@ const EditCustomerPage = () => {
                     ].map(({ label, name }) => (
                         <div key={name}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                            <input
-                                type="text"
-                                name={name}
-                                value={customerData[name]}
-                                onChange={handleChange}
-                                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder={`Enter ${label.toLowerCase()}`}
-                            />
+
+                            {name === 'customer_type' ? (
+                                <select
+                                    name="customer_type"
+                                    value={customerData.customer_type}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                >
+                                    <option value="">Choose</option>
+                                    <option value="Buyer">Buyer</option>
+                                    <option value="Seller">Seller</option>
+                                </select>
+                            ) : (
+                                <input
+                                    type="text"
+                                    name={name}
+                                    value={customerData[name]}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder={`Enter ${label.toLowerCase()}`}
+                                />
+                            )}
                         </div>
                     ))}
 

@@ -115,7 +115,8 @@ const Sidbar = () => {
               opacity: isCustomerCollectionOpen ? 0.5 : 1
             }}
           >
-            <GiHeavyCollar /> <span>Customer Collection</span>
+            <GiHeavyCollar /> <span>
+              Products Sold</span>
           </li>
 
           <NavLink
@@ -155,12 +156,12 @@ const Sidbar = () => {
           </NavLink>
 
           <NavLink
-            to="/ledger"
+            to="/paymentregister"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }
           >
-            <FaRupeeSign /> <span>Payments / Ledger</span>
+            <FaRupeeSign /> <span>Payments Register</span>
           </NavLink>
 
           <NavLink

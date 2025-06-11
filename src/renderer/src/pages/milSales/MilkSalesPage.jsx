@@ -123,7 +123,6 @@ const MilkSalesPage = () => {
   const handleDailyMilkSubmit = async (e) => {
     e.preventDefault();
     const dailyMilkSaleData = {
-      "sale_date": form.sale_date,
       "account_number": form.account_number,
       "sale_date": form.sale_date,
       "shift": form.shift,

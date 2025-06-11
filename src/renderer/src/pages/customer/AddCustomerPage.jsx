@@ -15,6 +15,7 @@ const AddCustomerPage = () => {
     const addCustomer = useHomeStore(state => state.addCustomer);
 
     const [form, setForm] = useState({
+        customer_type: '',
         name: '',
         mobile: '',
         email: '',
@@ -23,7 +24,7 @@ const AddCustomerPage = () => {
         pincode: '',
         contact_person: '',
         designation: '',
-        pan_number: '',
+        // pan_number: '',
         state: '',
     });
 
@@ -44,15 +45,17 @@ const AddCustomerPage = () => {
 
                 // Optional: Clear the form
                 setForm({
+                    customer_type: '',
                     name: '',
                     mobile: '',
                     email: '',
+                    careof: '',
                     address: '',
                     city: '',
                     pincode: '',
                     contact_person: '',
                     designation: '',
-                    pan_number: '',
+                    // pan_number: '',
                     state: '',
                 });
                 CustomToast.success(res.message)
@@ -96,6 +99,32 @@ const AddCustomerPage = () => {
                 {/* Name and Phone */}
                 <div className="w-full flex flex-col md:flex-row gap-4">
                     <div className="w-full">
+                        <label htmlFor="customer_type" className="block text-sm font-medium text-gray-700">
+                            Customer Type <span className="text-red-600 text-xl">*</span>
+                        </label>
+                        <select
+                            name="customer_type"
+                            id="customer_type"
+                            onChange={handleChange}
+                            value={form.customer_type}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                            required
+                        >
+                            <option value="">Choose</option>
+                            <option value="Buyer">Buyer</option>
+                            <option value="Seller">Seller</option>
+                        </select>
+
+                        {/* <input
+                            type="text"
+                            name="name"
+                            
+                           
+                            required
+                            
+                        /> */}
+                    </div>
+                    <div className="w-full">
                         <label className="block text-sm font-medium text-gray-700">
                             Customer Name <span className='text-red-600 text-xl'>*</span>
                         </label>
@@ -124,16 +153,29 @@ const AddCustomerPage = () => {
                     </div>
                 </div>
 
-                {/* Email and Address */}
-                <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
+                {/* Email and Care of */}
+                <div className="w-full flex flex-col md:flex-row gap-4">
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                    {/* Careof */}
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700">Care of</label>
+                        <input
+                            type="text"
+                            name="careof"
+                            value={form.careof}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
                 </div>
                 <div className="w-full">
                     <label className="block text-sm font-medium text-gray-700">
@@ -191,7 +233,7 @@ const AddCustomerPage = () => {
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />
                     </div>
-                    <div>
+                    {/* <div>
                         <label className="block text-sm font-medium text-gray-700">PAN Number</label>
                         <input
                             type="text"
@@ -200,7 +242,7 @@ const AddCustomerPage = () => {
                             onChange={handleChange}
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />
-                    </div>
+                    </div> */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">State</label>
                         <input

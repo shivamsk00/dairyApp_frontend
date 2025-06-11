@@ -79,7 +79,7 @@ useEffect(() => {
             <Route path="dailyMilkSale" element={<MilkSalesPage />} />
             <Route path="milkDispatch" element={<MilkDispatchPage />} />
             <Route path="ratechart" element={<RateChartPage />} />
-            <Route path="ledger" element={<PaymentLedgerPage />} />
+            <Route path="paymentregister" element={<PaymentLedgerPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="inventory" element={<InventoryPage />} />
             <Route path="settings" element={<Setting />} />

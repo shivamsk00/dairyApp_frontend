@@ -31,7 +31,7 @@ const DailyMilkCollectionPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
- 
+
     const [customerWallet, setCustomerWallet] = useState(null)
     const [form, setForm] = useState({
         customer_account_number: '',
@@ -48,7 +48,8 @@ const DailyMilkCollectionPage = () => {
         total_amount: '',
         milk_type: "",
         shift: "",
-        date: today
+        date: today,
+        print: false,
     });
 
     // FETCH ALL CUSTOMER
@@ -184,10 +185,10 @@ const DailyMilkCollectionPage = () => {
 
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
 
         setForm(prev => {
-            let updated = { ...prev, [name]: value };
+            let updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
 
             if (name === "clr") {
                 updated.snf = ""; // CLR input hua → SNF clear
@@ -197,6 +198,9 @@ const DailyMilkCollectionPage = () => {
 
             return updated;
         });
+
+
+
     };
 
     const handleSubmit = async (e) => {
@@ -345,7 +349,7 @@ const DailyMilkCollectionPage = () => {
     return (
         <div className="w-full">
 
- 
+
 
             <CommonHeader heading={"Milk Collection"} />
 
@@ -601,15 +605,29 @@ const DailyMilkCollectionPage = () => {
 
                     </div>
                     {/* Submit Button */}
-                    <div className="mt-1">
+                    <div className="mt-1 flex items-center gap-4">
+                        {/* Print Toggle Checkbox */}
+                        <label className="flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="print"
+                                checked={form.print || false}
+                                onChange={handleChange}
+                                className="peer hidden"
+                            />
+                            <span className="relative inline-block w-10 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-blue-600">
+                                <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-[24px]"></span>
+                            </span>
+                            <span className="ml-2 text-sm font-medium text-white">Print</span>
+                        </label>
+
+                        {/* Submit Button */}
                         <input
                             type="submit"
                             disabled={isDisabled}
-                            className={`mt-6 px-3 text-white py-1 rounded  bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
-                            value={'Submit & Print'}
+                            className={`px-3 text-white py-1 rounded bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
+                            value="Submit"
                         />
-
-
                     </div>
 
 

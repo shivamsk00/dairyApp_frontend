@@ -369,7 +369,7 @@ const CustomerCollection = () => {
     return (
         <>
 
-            <CommonHeader heading={"Product Sale"} />
+            <CommonHeader heading={"Products Sold"} />
             <div className="flex flex-col lg:flex-row gap-6 p-6">
                 {/* Left Form */}
                 <form onSubmit={handleSubmitProduct} className="bg-gray-800 p-6 rounded shadow-xl w-full h-1/2 lg:w-1/2 flex flex-col gap-4 ">
