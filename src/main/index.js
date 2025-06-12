@@ -158,6 +158,7 @@ app.whenReady().then(() => {
       document.getElementById('milk').innerText = "${printData.milk || '5 Litres'}";
       document.getElementById('rate').innerText = "${printData.rate || '₹40 / Litre'}";
       document.getElementById('total').innerText = "${printData.total || '₹200'}";
+      
     `);
 
     // Print
