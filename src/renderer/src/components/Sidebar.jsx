@@ -104,7 +104,7 @@ const Sidbar = () => {
           </li>
 
           <NavLink
-            to="/headDairy"
+            to="/alldairymaster"
             className={({ isActive }) =>
               isActive ? 'sidebarListItem active' : 'sidebarListItem'
             }

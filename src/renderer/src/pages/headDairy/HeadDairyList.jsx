@@ -95,6 +95,10 @@ const HeadDairyList = () => {
             header: 'Address',
             cell: info => info.getValue(),
         }),
+        columnHelper.accessor('wallet', {
+            header: 'Wallet',
+            cell: info => info.getValue(),
+        }),
 
         columnHelper.display({
             id: "status",
@@ -219,6 +223,7 @@ const HeadDairyList = () => {
                                     ['Mobile', selectedHeadDairy.mobile],
                                     ['Contact Person', selectedHeadDairy.contact_person],
                                     ['Address', selectedHeadDairy.address],
+                                    ['Wallet', selectedHeadDairy.wallet],
                                     ['Status', selectedHeadDairy.status === "1" ? 'Active' : 'Inactive'],
                                 ].map(([label, value]) => (
                                     <tr key={label} className="border-b hover:bg-gray-50">

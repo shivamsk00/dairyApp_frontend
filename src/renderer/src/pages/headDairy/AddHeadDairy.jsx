@@ -60,10 +60,10 @@ const AddHeadDairy = () => {
 
     return (
         <div className="w-full p-4 addCustomerContainer">
-            {/* <CommonBackButton  heading={"Add Head Dairy Master"} /> */}
-            <button onClick={() => navigate('/alldairymaster')}>
+            <CommonBackButton  heading={"Add Head Dairy Master"} />
+            {/* <button onClick={() => navigate('/alldairymaster')}>
                     Add Head Dairy Master
-                </button>
+                </button> */}
             {error && (
                 <div className="text-red-600 font-medium mb-4">{error}</div>
             )}

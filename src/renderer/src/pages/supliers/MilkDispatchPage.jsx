@@ -8,6 +8,8 @@ const MilkDispatchPage = () => {
   const submitMilkDispatch = useDailyMilkDispatchStore(state => state.submitMilkDispatch)
   const getMilkRate = useHomeStore(state => state.getMilkRate);
   const today = new Date().toISOString().split('T')[0];
+  const [headDairies, setHeadDairies] = useState([]);
+
   const [form, setForm] = useState({
     dispatch_date: today,
     shift: '',
@@ -21,6 +23,19 @@ const MilkDispatchPage = () => {
     ],
   });
 
+  const getAllHeadDairyMaster = useHomeStore(state => state.getAllHeadDairyMaster); // your Zustand API function
+
+    useEffect(() => {
+    const fetchData = async () => {
+      const res = await getAllHeadDairyMaster();
+      console.log('Dairy Id',res);
+        setHeadDairies(res.data);
+      
+    };
+    fetchData();
+  }, []);
+
+ 
   // Auto calculate total qty and amount
   useEffect(() => {
     const totalQty = form.milk_details.reduce((sum, item) => sum + Number(item.qty || 0), 0);
@@ -204,13 +219,20 @@ const MilkDispatchPage = () => {
             </div>
             <div>
               <label className="block font-medium">Head Dairy ID</label>
-              <input
-                type="text"
+              <select
                 name="head_dairy_id"
                 value={form.head_dairy_id}
                 onChange={handleFormChange}
                 className="w-full px-4 py-2 border rounded"
-              />
+                required
+              >
+                <option value="">Choose Head Dairy</option>
+                {headDairies.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.dairy_name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block font-medium">Vehicle No.</label>
