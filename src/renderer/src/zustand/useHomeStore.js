@@ -243,6 +243,61 @@ const useHomeStore = create((set) => ({
     }
   },
 
+  // Dairy Head Master API
+  addHeadDairy: async (headDairyData) => {
+    try {
+      const res = await api.post('/head-dairy-master-submit', headDairyData)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  getAllHeadDairyMaster: async () => {
+    try {
+      const res = await api.get(`/all-head-dairy-master`)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  updateHeadDairyMaster: async (headDairy_id, headDairyData) => {
+    try {
+      const res = await api.post(`/update-head-dairy-master/${headDairy_id}`, headDairyData)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+  deleteHeadDairyMaster: async (headDairy_id) => {
+    try {
+      const res = await api.post(`delete-head-dairy-master/${headDairy_id}`)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+    updateHeadDairyMasterStatus: async (headDairy_id) => {
+    try {
+      
+      const res = await api.post(`/update-status-head-dairy-master/${headDairy_id}`)
+
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+  editHeadDairyMasterFetch: async (headDairy_id) => {
+    try {
+ 
+      const res = await api.get(`/edit-head-dairy-master/${headDairy_id}`)
+
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
   // ADD PRODUCT API
   addProduct: async (productData) => {
     try {

@@ -103,6 +103,16 @@ const Sidbar = () => {
             <GiHeavyCollar /> <span>Milk Collection</span>
           </li>
 
+          <NavLink
+            to="/headDairy"
+            className={({ isActive }) =>
+              isActive ? 'sidebarListItem active' : 'sidebarListItem'
+            }
+          >
+            <FaMoneyBillTrendUp /> <span>Head Dairy Master</span>
+          </NavLink>
+         
+
           <li
             className={activeItem === 'customer-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
             onClick={() => {
