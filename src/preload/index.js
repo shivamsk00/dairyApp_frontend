@@ -6,8 +6,18 @@ const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
-  printSlip: (htmlContent) => ipcRenderer.send('print-slip', htmlContent),
-  onPrintError: (callback) => ipcRenderer.on('print-error', (event, message) => callback(message)),
+  printSlip: (html) => ipcRenderer.send('print-slip', html),
+  onPrintError: (callback) => ipcRenderer.on('print-error', (_, msg) => callback(msg)),
+  listPrinters: () => ipcRenderer.send('list-printers'),
+
+  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+  on: (channel, callback) => ipcRenderer.on(channel, (event, data) => callback(data)),
+
+  onPrintersList: (callback) =>
+    ipcRenderer.on('printers-list', (_, printers) => callback(printers)),
+
+  openPrintPreview: () => ipcRenderer.send('print-slip-window'),
+
   onSecondWindowClosed: (callback) => {
     ipcRenderer.on('second-window-closed', callback)
   },

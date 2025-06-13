@@ -332,17 +332,27 @@ const DailyMilkCollectionPage = () => {
     };
 
 
-  const handlePrint = () => {
-  const printData = {
-    customer: "Shivam",
-    milk: "5 Litres",
-    rate: "₹40",
-    total: "₹200"
-  };
+    //     const handlePrint = () => {
+    //         const htmlContent = `
+    //     <html>
+    //       <head>
+    //         <style>
+    //           body { font-family: sans-serif; padding: 20px; }
+    //           h1 { font-size: 18px; }
+    //         </style>
+    //       </head>
+    //       <body>
+    //         <h1>Slip Title</h1>
+    //         <p>Customer: Shivam</p>
+    //         <p>Milk: 5 Litres</p>
+    //         <p>Rate: ₹40</p>
+    //         <p>Total: ₹200</p>
+    //       </body>
+    //     </html>
+    //   `;
 
-  window.api.printSlip(printData); // ab string nahi, object bhej rahe hain
-};
-
+    //         window.api.printSlip(htmlContent); // ← exposed in preload.js
+    //     };
 
     useEffect(() => {
         if (window.api) {
@@ -351,6 +361,27 @@ const DailyMilkCollectionPage = () => {
             });
         }
     }, []);
+
+
+    useEffect(() => {
+        if (window.api) {
+            window.api.invoke('get-printers')
+                .then(printers => {
+                    console.log("🖨️ Printers List:", printers);
+                })
+                .catch(err => {
+                    console.error("Error fetching printers:", err);
+                });
+        }
+    }, []);
+
+    const handlePrint = () => {
+        if (window.api?.openPrintPreview) {
+            window.api.openPrintPreview();
+        } else {
+            alert('Print API not available');
+        }
+    };
 
 
 

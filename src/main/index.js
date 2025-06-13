@@ -137,109 +137,106 @@ app.whenReady().then(() => {
   ipcMain.on('open-second-window', () => createSecondWindow())
   ipcMain.on('open-cutomer-win', () => customerCollection())
 
-  ipcMain.on('print-slip', async (event, printData) => {
-  const printWindow = new BrowserWindow({
-    width: 400,
-    height: 600,
-    show: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-    },
-  });
+  // ipcMain.on('print-slip', async (event, htmlContent) => {
+  //   const printWindow = new BrowserWindow({
+  //     width: 400,
+  //     height: 600,
+  //     show: true,
+  //     webPreferences: {
+  //       contextIsolation: true
+  //     }
+  //   })
 
- const slipFilePath = join(app.getAppPath(), 'out', 'milk-slip.html'); // ✅ correct
-  await printWindow.loadFile(slipFilePath);
+  //   await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
 
-  printWindow.webContents.on('did-finish-load', async () => {
-    // Inject data if needed via JS
-    await printWindow.webContents.executeJavaScript(`
-      document.getElementById('customer-name').innerText = "${printData.customer || 'Shivam'}";
-      document.getElementById('milk').innerText = "${printData.milk || '5 Litres'}";
-      document.getElementById('rate').innerText = "${printData.rate || '₹40 / Litre'}";
-      document.getElementById('total').innerText = "${printData.total || '₹200'}";
-      
-    `);
+  //   printWindow.webContents.on('did-finish-load', () => {
+  //     printWindow.webContents.print(
+  //       {
+  //         silent: false, // ✅ Keep it false to show dialog
+  //         printBackground: true
+  //       },
+  //       (success, errorType) => {
+  //         if (!success) {
+  //           console.error('Print failed:', errorType)
+  //           event.reply('print-error', `Print failed: ${errorType}`)
+  //         }
+  //         printWindow.close()
+  //       }
+  //     )
+  //   })
+  // })
 
-    // Print
-    printWindow.webContents.print(
-      {
-        silent: false,
-        printBackground: true,
-        pageSize:'A6'
-      },
-      (success, errorType) => {
-        if (!success) {
-          event.reply('print-error', `Print failed: ${errorType}`);
-        }
-        printWindow.close();
+  // print commond+===================>
+  ipcMain.on('print-slip', async (event, htmlContent) => {
+    const printWindow = new BrowserWindow({
+      width: 400,
+      height: 600,
+      show: true, // You can set false for silent print
+      webPreferences: {
+        contextIsolation: true
       }
-    );
-  });
-});
+    })
 
+    // Load HTML string into the window
+    await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
 
+    // Wait for HTML to fully load
+    printWindow.webContents.on('did-finish-load', () => {
+      printWindow.webContents.print(
+        {
+          silent: false, // If true: no dialog shown (but deviceName is needed)
+          printBackground: true, // Important if your HTML has background color/images
+          // deviceName: 'printer-name' // ✅ Optional: if you want to force a specific printer
+          printBackground: true
+        },
+        (success, errorType) => {
+          if (!success) {
+            console.error('Print failed:', errorType)
+            event.reply('print-error', `Print failed: ${errorType}`)
+          }
+          printWindow.close()
+        }
+      )
+    })
+  })
 
+  ipcMain.handle('get-printers', async () => {
+    const win = BrowserWindow.getAllWindows()[0]
 
+    if (!win || !win.webContents) {
+      throw new Error('No window or webContents available')
+    }
 
+    // Wait for content to be loaded before calling getPrinters
+    if (!win.webContents.isLoadingMainFrame()) {
+      return win.webContents.getPrinters() // 🖨️ This will work here
+    }
 
+    return new Promise((resolve, reject) => {
+      win.webContents.once('did-finish-load', () => {
+        try {
+          resolve(win.webContents.getPrinters())
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+  })
 
+  ipcMain.on('print-slip-window', () => {
+    const printWin = new BrowserWindow({ 
+      width: 400,
+      height: 600,
+      autoHideMenuBar: true,
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    })
 
-
-
-
-//   ipcMain.on('print-slip', async (event, htmlContent) => {
-//   const printWindow = new BrowserWindow({
-//     width: 400,
-//     height: 600,
-//     show: true,
-//     webPreferences: {
-//       contextIsolation: true,
-//       nodeIntegration: false
-//     }
-//   });
-
-//   await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
-
-//   printWindow.webContents.on('did-finish-load', async () => {
-//     try {
-//       // ✅ Correct method with await
-//       const printers = await printWindow.webContents.getPrintersAsync();
-
-//       if (printers.length === 0) {
-//         console.log('❌ No printers found');
-//         event.reply('print-error', '❌ No printers connected');
-//         printWindow.close();
-//         return;
-//       }
-
-//       console.log('🖨️ Printers found:', printers.map(p => p.name));
-
-//       printWindow.webContents.print(
-//         {
-//           silent: true,
-//           printBackground: true,
-//            pageSize: 'A4'  // 👈 Force page size
-//         },
-//         (success, errorType) => {
-//           if (!success) {
-//             console.log('❌ Print failed:', errorType);
-//             event.reply('print-error', `❌ Print failed: ${errorType}`);
-//           } else {
-//             console.log('✅ Print success');
-//           }
-
-//           printWindow.close();
-//         }
-//       );
-//     } catch (err) {
-//       console.error('💥 Error in print process:', err);
-//       event.reply('print-error', `💥 Print error: ${err.message}`);
-//       printWindow.close();
-//     }
-//   });
-// });
-
+    const slipPath = join(__dirname, '../../out/milk-slip.html')
+    printWin.loadFile(slipPath)
+  })
 
   createWindow()
 
