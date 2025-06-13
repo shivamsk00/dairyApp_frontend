@@ -7,6 +7,8 @@ const EditeMilkSale = ({ dailyMilkSaleId, onSubmit, onCancel }) => {
     );
 
     const [form, setForm] = useState({
+        customer_account_number: '',
+        customer_name: '',
         sale_date: '',
         shift: '',
         milk_type: '',
@@ -22,6 +24,8 @@ const EditeMilkSale = ({ dailyMilkSaleId, onSubmit, onCancel }) => {
             try {
                 const res = await getDailyMilkSaleDataForEdit(dailyMilkSaleId?.id);
                 const {
+                    customer_account_number,
+                    customer_name,
                     sale_date,
                     shift,
                     milk_type,
@@ -32,6 +36,8 @@ const EditeMilkSale = ({ dailyMilkSaleId, onSubmit, onCancel }) => {
                 } = res.data;
 
                 setForm({
+                    customer_account_number,
+                    customer_name,
                     sale_date: formatDateForInput(sale_date), // e.g. 2025-06-08
                     shift,
                     milk_type: milk_type.toLowerCase(), // normalize spelling
@@ -77,6 +83,27 @@ const EditeMilkSale = ({ dailyMilkSaleId, onSubmit, onCancel }) => {
         <div className="w-full p-4 bg-white rounded shadow">
             <h2 className="text-2xl font-semibold mb-4">Edit Daily Milk Sale</h2>
             <form onSubmit={handleSubmit} className="space-y-4 w-full">
+
+                 {/* Acc No. */}
+                <div>
+                    <label className="block mb-1 font-medium">Acc No.</label>
+                    <input
+                        type="text"
+                        value={form.customer_account_number}
+                        readOnly
+                        className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-700"
+                    />
+                </div>
+                 {/* Customer Name */}
+                <div>
+                    <label className="block mb-1 font-medium">Customer Name</label>
+                    <input
+                        type="text"
+                        value={form.customer_name}
+                        readOnly
+                        className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-700"
+                    />
+                </div>
                 {/* Sale Date */}
                 <div>
                     <label className="block mb-1 font-medium">Sale Date</label>
@@ -92,6 +119,7 @@ const EditeMilkSale = ({ dailyMilkSaleId, onSubmit, onCancel }) => {
 
                 {/* Shift */}
                 <div>
+                    
                     <label className="block mb-1 font-medium">Shift</label>
                     <select
                         name="shift"

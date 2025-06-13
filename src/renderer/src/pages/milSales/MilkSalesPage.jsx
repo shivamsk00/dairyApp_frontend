@@ -28,6 +28,7 @@ const MilkSalesPage = () => {
 
   const [form, setForm] = useState({
     account_number: '',
+    customer_name: '',
     sale_date: today,
     shift: '',
     milk_type: '',
@@ -36,8 +37,6 @@ const MilkSalesPage = () => {
     total_amount: '',
     payment_mode: '',
     notes: '',
-    name: '',
-    careof: ''
   });
 
 
@@ -123,7 +122,8 @@ const MilkSalesPage = () => {
   const handleDailyMilkSubmit = async (e) => {
     e.preventDefault();
     const dailyMilkSaleData = {
-      "account_number": form.account_number,
+      "customer_account_number": form.account_number,
+      "customer_name": form.name,
       "sale_date": form.sale_date,
       "shift": form.shift,
       "milk_type": form.milk_type,
@@ -143,7 +143,8 @@ const MilkSalesPage = () => {
         CustomToast.success(res.response)
         fetchDailyMilkSaleData()
         setForm({
-          account_number: '',
+          customer_account_number: '',
+          customer_name: '',
           sale_date: today,
           shift: '',
           milk_type: '',
@@ -152,8 +153,6 @@ const MilkSalesPage = () => {
           total_amount: '',
           payment_mode: '',
           notes: '',
-          name: '',
-          careof: ''
         })
       } else {
         CustomToast.success(res.message)
@@ -172,9 +171,9 @@ const MilkSalesPage = () => {
     try {
       const res = await getDailyMilkSaleData()
       console.log("fetch all milk daily collection sale data====>", res)
-      if (res.status_code == 200) {
+      if (res) {
 
-        setDailyMilkCollectionData(res.data.data)
+        setDailyMilkCollectionData(res.data)
         CustomToast.success(res.message)
         setCurrentPage(res.data.current_page);
         setTotalPages(res.data.last_page);
@@ -290,24 +289,6 @@ const MilkSalesPage = () => {
   };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   return (
     <div className="w-full mx-auto p-6 mt-10">
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Milk Sale Entry</h2>
@@ -344,14 +325,14 @@ const MilkSalesPage = () => {
               <label className="block mb-1 font-medium">Name</label>
               <input
                 type="text"
-                name="name"
+                name="customer_name"
                 value={form.name}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-1 font-medium">Care Of</label>
               <input
                 type="text"
@@ -360,7 +341,7 @@ const MilkSalesPage = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
               />
-            </div>
+            </div> */}
           </div>
 
           {/* Rest of the fields */}
@@ -535,7 +516,7 @@ const MilkSalesPage = () => {
             <thead className="bg-blue-600 text-white">
               <tr>
                 {[
-                  'SR NO.', 'Date', 'Milk Type', 'Qty (Ltr)', 'Rate (₹)', 'Amount (₹)',
+                  'SR NO.','Acc No.','Customer Name', 'Date', 'Milk Type', 'Qty (Ltr)', 'Rate (₹)', 'Amount (₹)',
                   'Shift', 'Payment Mode', 'Notes', 'Action'
                 ].map((header) => (
                   <th key={header} className="border px-2 py-1 text-center">
@@ -558,6 +539,8 @@ const MilkSalesPage = () => {
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50`}
                   >
                     <td className="border px-2 py-1 text-center">{index + 1}</td>
+                    <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
+                    <td className="border px-2 py-1 text-center">{item.customer_name}</td>
                     <td className="border px-2 py-1 text-center">{item.sale_date}</td>
                     <td className="border px-2 py-1 text-center capitalize">{item.milk_type}</td>
                     <td className="border px-2 py-1 text-center">{item.quentity}</td>

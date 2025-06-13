@@ -458,7 +458,21 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return error.response.data
     }
-  }
+  },
+
+  // Payment Register Api
+    paymentRegister: async (params) => {
+    try {
+      const res = await api.get('milk-collections/summary', { params })
+      return res.data
+    } catch (error) {
+      console.error('Error fetching Payment Register:', error)
+      return (
+        error.response?.data || { status_code: 500, message: 'Failed to fetch Payment Register' }
+      )
+    }
+  },
+
 }))
 
 export default useHomeStore

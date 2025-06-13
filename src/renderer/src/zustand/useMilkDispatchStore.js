@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import api from './axiosConfig'
 
 // Safe JSON parse function
+// Head Dairy Milk dispatch api for submit data
 const useDailyMilkDispatchStore = create((set) => ({
   submitMilkDispatch: async (milkDispatchData) => {
     console.log("milkDispatchData", milkDispatchData)
@@ -12,6 +13,29 @@ const useDailyMilkDispatchStore = create((set) => ({
       console.error('ERROR IN  MILKDISPATCH SUBMIT API', error)
     }
   },
+  // Head Dairy Milk dispatch api for all data
+
+
+  getHeadDairyMilkData: async (page) => {
+    try {
+      const res = await api.get('/all-milk-dispatch?page=${page}')
+      return res.data
+    } catch (error) {
+      console.error('ERROR IN HEAD DAIRY MILK SALE GET ALL DATA API', error)
+    }
+  },
+
+  // Head Dairy Milk dispatch Delete Data Api
+    deleteHeadDairyMilkDispatch: async (id) => {
+    try {
+      const res = await api.post(`delete-milk-dispatch/${id}`)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+
+
   getDailyMilkSaleData: async () => {
     try {
       const res = await api.get('/all-daily-milk-sale')

@@ -110,6 +110,7 @@ const HeadDairyList = () => {
                 </div>
             ),
         }),
+        
         columnHelper.display({
             id: 'actions',
             header: 'Actions',

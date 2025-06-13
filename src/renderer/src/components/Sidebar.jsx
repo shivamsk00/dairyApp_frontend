@@ -111,23 +111,8 @@ const Sidbar = () => {
           >
             <FaMoneyBillTrendUp /> <span>Head Dairy Master</span>
           </NavLink>
-         
 
-          <li
-            className={activeItem === 'customer-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
-            onClick={() => {
-              if (isCustomerCollectionOpen) return
-              window.api.openCusomerWindow()
-              setIsCustomerCollectionOpen(true)
-              setActiveItem('customer-collection')
-            }}
-            style={{
-              opacity: isCustomerCollectionOpen ? 0.5 : 1
-            }}
-          >
-            <GiHeavyCollar /> <span>
-              Products Sold</span>
-          </li>
+
 
           <NavLink
             to="/milkDispatch"
@@ -146,6 +131,8 @@ const Sidbar = () => {
           >
             <FaArrowTrendUp /> <span>Open Milk Sale</span>
           </NavLink>
+
+
 
           <NavLink
             to="/ratechart"
@@ -191,6 +178,22 @@ const Sidbar = () => {
           >
             <FaDatabase /> <span>Inventory</span>
           </NavLink>
+
+                    <li
+            className={activeItem === 'customer-collection' ? 'sidebarListItem active cursor-not-allowed' : 'sidebarListItem cursor-pointer'}
+            onClick={() => {
+              if (isCustomerCollectionOpen) return
+              window.api.openCusomerWindow()
+              setIsCustomerCollectionOpen(true)
+              setActiveItem('customer-collection')
+            }}
+            style={{
+              opacity: isCustomerCollectionOpen ? 0.5 : 1
+            }}
+          >
+            <GiHeavyCollar /> <span>
+              Products Sold</span>
+          </li>
 
           <NavLink
             to="/settings"
