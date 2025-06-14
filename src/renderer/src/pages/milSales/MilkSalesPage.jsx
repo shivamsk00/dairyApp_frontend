@@ -118,7 +118,7 @@ const MilkSalesPage = () => {
     }
   };
 
-
+// Data Submit Data///////////////////////////////////////////////
   const handleDailyMilkSubmit = async (e) => {
     e.preventDefault();
     const dailyMilkSaleData = {
@@ -165,18 +165,18 @@ const MilkSalesPage = () => {
   }
 
 
-  // ALL DAILY MILK SALE FETCH 
+  // ALL DAILY MILK SALE FETCH  ////////////////////////////////////////////////////////////////
 
-  const fetchDailyMilkSaleData = async () => {
+  const fetchDailyMilkSaleData = async (page = 1) => {
     try {
-      const res = await getDailyMilkSaleData()
+      const res = await getDailyMilkSaleData(page)
       console.log("fetch all milk daily collection sale data====>", res)
       if (res) {
 
         setDailyMilkCollectionData(res.data)
         CustomToast.success(res.message)
-        setCurrentPage(res.data.current_page);
-        setTotalPages(res.data.last_page);
+        setCurrentPage(res.current_page);
+        setTotalPages(res.last_page);
       } else {
 
         CustomToast.error(res.message)
@@ -189,7 +189,7 @@ const MilkSalesPage = () => {
   }
 
 
-
+// Update Api////////////////////////////////////////////////////////////////////////////////////////
   const handleUpdate = async (updatedData) => {
     console.log('Updated Data:', updatedData);
     setIsEditModalOpen(false);
@@ -255,7 +255,7 @@ const MilkSalesPage = () => {
         <button
           key={i}
           className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-          onClick={() => fetchMilkCollectionDetails(i)}
+          onClick={() => fetchDailyMilkSaleData(i)}
         >
           {i}
         </button>
@@ -267,7 +267,7 @@ const MilkSalesPage = () => {
         {/* Previous Page Button */}
         <button
           className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-          onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
+          onClick={() => fetchDailyMilkSaleData(currentPage - 1)}
           disabled={currentPage === 1}
         >
           <MdArrowBackIos size={18} />
@@ -279,7 +279,7 @@ const MilkSalesPage = () => {
         {/* Next Page Button */}
         <button
           className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-          onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
+          onClick={() => fetchDailyMilkSaleData(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
           <MdArrowForwardIos size={18} />

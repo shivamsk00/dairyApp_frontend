@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import useDailyMilkDispatchStore from '../../zustand/useMilkDispatchStore';
+import useMilkDispatchStore from '../../zustand/useMilkDispatchStore';
 import CustomToast from '../../helper/costomeToast';
 import useHomeStore from '../../zustand/useHomeStore';
 import { FaDotCircle, FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
@@ -10,7 +11,7 @@ const MilkDispatchPage = () => {
   const submitMilkDispatch = useDailyMilkDispatchStore(state => state.submitMilkDispatch)
   const getHeadDairyMilkData = useDailyMilkDispatchStore(state => state.getHeadDairyMilkData)
   const getAllHeadDairyMaster = useHomeStore(state => state.getAllHeadDairyMaster);
-  const deleteHeadDairyMilkDispatch = useHomeStore(state => state.deleteHeadDairyMilkDispatch);
+  const deleteHeadDairyMilkDispatch = useMilkDispatchStore(state => state.deleteHeadDairyMilkDispatch);
   const getMilkRate = useHomeStore(state => state.getMilkRate);
   const today = new Date().toISOString().split('T')[0];
   const [headDairies, setHeadDairies] = useState([]);
@@ -19,9 +20,13 @@ const MilkDispatchPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [maxPageButtons, setMaxPageButtons] = useState(5);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHeadDairy, setSelectedHeadDairy] = useState(null);
-  const [rowData, setRowData] = useState([]);
+  const [headDairyToDelete, setHeadDairyToDelete] = useState(null);
+   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+   const [selectedDairy, setSelectedDairy] = useState(null);
+  // const [rowData, setRowData] = useState([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [form, setForm] = useState({
     dispatch_date: today,
@@ -66,38 +71,6 @@ const MilkDispatchPage = () => {
   };
 
 
-  const confirmDeleteHeadDairyMilkDispatch = async () => {
-    try {
-      const res = await deleteHeadDairyMilkDispatch(headDairyToDelete?.id);
-      if (res.status_code == 200) {
-        CustomToast.success(res.message)
-        fetchData();
-      } else {
-        CustomToast.error(res.message)
-
-      }
-    } catch (error) {
-      CustomToast.error(res.message)
-      console.log("ERROR IN DELETE FUN IN Head Dairy LIST", error);
-    } finally {
-      setIsConfirmOpen(false); ``
-      setHeadDairyToDelete(null);
-    }
-  };
-  // const handleMilkDetailChange = (index, e) => {
-  //   const { name, value } = e.target;
-  //   const updatedDetails = [...form.milk_details];
-  //   updatedDetails[index][name] = value;
-
-  //   const { qty, rate } = updatedDetails[index];
-  //   if (qty && rate) {
-  //     updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
-  //   } else {
-  //     updatedDetails[index].amount = '';
-  //   }
-
-  //   setForm(prev => ({ ...prev, milk_details: updatedDetails }));
-  // };
 
   let snfRateFetchTimeout;
 
@@ -185,6 +158,7 @@ const MilkDispatchPage = () => {
       console.log("respone milk dispatch", res)
       if (res.status_code == 200) {
         CustomToast.success(res.message)
+        fetchMilkCollectionDetails();
         // ✅ Reset form after submit
         setForm({
           dispatch_date: today,
@@ -210,6 +184,7 @@ const MilkDispatchPage = () => {
 
   };
 
+  // All Data Coming Through this API ////////////////////////////////////////////////
   const fetchMilkCollectionDetails = async (page = 1) => {
     try {
       const res = await getHeadDairyMilkData(page);
@@ -230,6 +205,28 @@ const MilkDispatchPage = () => {
     fetchMilkCollectionDetails()
   }, [isEditeModal])
 
+  // Delete Api/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  const confirmDeleteHeadDairyMilkDispatch = async () => {
+    try {
+      const res = await deleteHeadDairyMilkDispatch(headDairyToDelete?.id);
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+        fetchMilkCollectionDetails();
+      } else {
+        CustomToast.error(res.message)
+
+      }
+    } catch (error) {
+      CustomToast.error(res.message)
+      console.log("ERROR IN DELETE FUN IN Head Dairy LIST", error);
+    } finally {
+      setIsConfirmOpen(false); ``
+      setHeadDairyToDelete(null);
+    }
+  };
+
+  // Update Api/////////////////////////////////////////////////////////////////////////////////////////////////////
+  
   // REDNDER BUTTONS 
   const renderPageButtons = () => {
     const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
@@ -493,7 +490,7 @@ const MilkDispatchPage = () => {
             <tbody>
               {collections.map((item, idx) => (
                 <tr key={idx}>
-                  <td className="p-1 border">{item.head_dairy_id || '--'}</td>
+                  <td className="p-1 border">{item.dairy_name || '--'}</td>
                   <td className="p-1 border">{item.dispatch_date || '--'}</td>
                   <td className="p-1 border">{item.shift || '--'}</td>
                   <td className="p-1 border">{item.milk_details[0].milk_type || '--'}</td>
@@ -505,14 +502,21 @@ const MilkDispatchPage = () => {
                   <td className="p-1 border text-center space-x-1"> {/* Added space-x-1 for spacing */}
                     <button
                       className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition"
-                    
+                      onClick={() => {
+                          setIsModalOpen(true);
+                        setSelectedHeadDairy(item);
+                      }}
+                      
                       title="View Details"
                     >
                       <FaEye />
                     </button>
                     <button
                       className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-                      onClick={() => nav("/editMilkDispatch", { state: item })} // Corrected: use 'item' instead of 'row.original'
+                      onClick={() => {
+                            setSelectedDairy(item);
+                            setIsEditModalOpen(true);
+                          }}
                       title="Edit"
                     >
                       <FaPen />
@@ -520,6 +524,7 @@ const MilkDispatchPage = () => {
                     <button
                       className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                       onClick={() => {
+                        
                         setHeadDairyToDelete(item); // Corrected: use 'item' instead of 'row.original'
                         setIsConfirmOpen(true);
                       }}
@@ -541,17 +546,18 @@ const MilkDispatchPage = () => {
       {isModalOpen && selectedHeadDairy && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">Head Dairy Details</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">Milk Dispatch Entry Details</h2>
 
             <table className="w-full text-sm text-left border border-gray-200">
               <tbody>
                 {[
                   ['Name', selectedHeadDairy.dairy_name],
-                  ['Mobile', selectedHeadDairy.mobile],
-                  ['Contact Person', selectedHeadDairy.contact_person],
-                  ['Address', selectedHeadDairy.address],
-                  ['Wallet', selectedHeadDairy.wallet],
-                  ['Status', selectedHeadDairy.status === "1" ? 'Active' : 'Inactive'],
+                  ['Date', selectedHeadDairy.dispatch_date],
+                  ['Shift', selectedHeadDairy.shift],
+                  ['Vehicle No.', selectedHeadDairy.vehicle_no],
+                  ['Total Qty', selectedHeadDairy.total_qty],
+                  ['Total Amount', selectedHeadDairy.total_amount],
+                  // ['Status', selectedHeadDairy.status === "1" ? 'Active' : 'Inactive'],
                 ].map(([label, value]) => (
                   <tr key={label} className="border-b hover:bg-gray-50">
                     <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
@@ -587,7 +593,7 @@ const MilkDispatchPage = () => {
                 Cancel
               </button>
               <button
-                onClick={confirmDeleteHeadDairyMaster}
+                onClick={confirmDeleteHeadDairyMilkDispatch}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Delete

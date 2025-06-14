@@ -11,9 +11,9 @@ const useDailyMilkSaleStore = create((set) => ({
       console.error('ERROR IN DAILY MILK SALE SUBMIT API', error)
     }
   },
-  getDailyMilkSaleData: async () => {
+  getDailyMilkSaleData: async (page) => {
     try {
-      const res = await api.get('/all-daily-milk-sale')
+      const res = await api.get(`/all-daily-milk-sale?page=${page}`)
       return res.data
     } catch (error) {
       console.error('ERROR IN DAILY MILK SALE GET ALL DATA API', error)
