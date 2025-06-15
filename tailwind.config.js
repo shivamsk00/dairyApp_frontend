@@ -7,9 +7,9 @@ module.exports = {
   plugins: [],
   theme: {
     extend: {
-      fontFamily: {
-        display: ['"Poppins"', 'sans-serif'],
-      },
+     fontFamily: {
+  sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+}
     },
   },
 }

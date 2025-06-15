@@ -12,6 +12,7 @@ const EditCustomerPage = () => {
     const loading = useHomeStore(state => state.loading);
 
     const customer = location.state;
+    console.log('Customer data:', customer);
 
     const [customerData, setCustomerData] = useState({
         customer_type: '',
@@ -57,12 +58,11 @@ const EditCustomerPage = () => {
         e.preventDefault();
         try {
             const res = await updateCustomer(customer.id, customerData);
-            if (res.status_code == 200) {
-                CustomToast.success(res.message)
-
+            if (res.status_code === 200) {
+                CustomToast.success(res.message);
                 navigate('/customer');
             } else {
-                CustomToast.error(res.message)
+                CustomToast.error(res.message);
             }
         } catch (err) {
             toast.error('Error updating customer');
@@ -71,9 +71,12 @@ const EditCustomerPage = () => {
 
     return (
         <div className="w-full px-4 sm:px-8 py-10 bg-gray-100 min-h-screen">
-            <CommonBackButton heading={"Cutomer Edit"} />
-            <div className="max-w-5xl mx-auto bg-white p-6 sm:p-10 rounded-lg shadow-lg">
-                <h1 className="text-2xl font-semibold mb-6 text-center">Edit Customer</h1>
+            <CommonBackButton heading={"Edit Customer"} />
+
+            <div className="max-w-5xl mx-auto bg-white p-6 sm:p-10 rounded-lg shadow-xl border border-gray-200">
+                <h1 className="text-3xl font-semibold mb-8 text-center text-indigo-700">
+                    Update Customer Details
+                </h1>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {[
@@ -90,17 +93,19 @@ const EditCustomerPage = () => {
                         { label: 'Account Number', name: 'account_number' },
                     ].map(({ label, name }) => (
                         <div key={name}>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {label}
+                            </label>
 
                             {name === 'customer_type' ? (
                                 <select
                                     name="customer_type"
                                     value={customerData.customer_type}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required
                                 >
-                                    <option value="">Choose</option>
+                                    <option value="">Select</option>
                                     <option value="Buyer">Buyer</option>
                                     <option value="Seller">Seller</option>
                                 </select>
@@ -110,20 +115,24 @@ const EditCustomerPage = () => {
                                     name={name}
                                     value={customerData[name]}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     placeholder={`Enter ${label.toLowerCase()}`}
                                 />
                             )}
                         </div>
                     ))}
 
-                    <div className="col-span-1 sm:col-span-2 flex justify-end mt-2">
+                    <div className="col-span-1 sm:col-span-2 flex justify-end mt-4">
                         <button
                             type="submit"
                             disabled={loading}
-                            className=" text-white px-6 py-2 rounded transition"
+                            className={`px-6 py-2 rounded-md text-white font-medium transition duration-200 
+                            ${loading
+                                    ? 'bg-indigo-300 cursor-not-allowed'
+                                    : 'bg-indigo-600 hover:bg-indigo-700'
+                                }`}
                         >
-                            {loading ? 'please wait...' : 'Update Customer'}
+                            {loading ? 'Please wait...' : 'Update Customer'}
                         </button>
                     </div>
                 </form>

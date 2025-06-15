@@ -54,14 +54,14 @@ a {
   color: black;
 }
 
-button {
+/* button {
   background-color: var(--btn-color);
   transition: 0.2s linear;
 }
 
 button:hover {
   background-color: #363885;
-}
+} */
 
 body {
   /* min-height: 100vh; */

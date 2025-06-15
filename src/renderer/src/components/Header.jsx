@@ -41,14 +41,14 @@ const Header = () => {
     }, []);
 
     return (
-        <div className="w-full flex justify-between items-center px-6 py-4 bg-white shadow-md relative z-50">
+        <div className="w-full flex justify-between items-center px-6 py-4 bg-slate-800 shadow-md relative z-50">
             {/* Search Box */}
-            <div className="flex items-center gap-2 border px-3 py-1 rounded-md">
-                <FaSearch className="text-gray-500" />
+            <div className="flex items-center gap-2 border border-gray-600 px-3 py-1 rounded-md bg-slate-700">
+                <FaSearch className="text-gray-300" />
                 <input
                     type="search"
                     placeholder="Search..."
-                    className="outline-none text-sm w-48"
+                    className="outline-none text-sm w-48 bg-transparent text-white placeholder-gray-300"
                 />
             </div>
 
@@ -58,8 +58,8 @@ const Header = () => {
                     className="flex items-center gap-2 cursor-pointer"
                     onClick={() => setIsToggleMenu(!isToggleMenu)}
                 >
-                    <h2 className="flex items-center gap-1 text-sm font-medium text-gray-700">
-                        <MdEmail className="text-blue-500" size={20} />
+                    <h2 className="flex items-center gap-1 text-sm font-medium text-white">
+                        <MdEmail className="text-blue-400" size={20} />
                         {user.email}
                     </h2>
                     <img src={profile} alt="Profile" className="w-10 h-10 rounded-full border" />
@@ -67,7 +67,6 @@ const Header = () => {
 
                 {isToggleMenu && (
                     <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-xl p-4 border z-50 flex flex-col gap-3">
-
                         <button
                             onClick={() => {
                                 nav("/changePassword");
@@ -80,14 +79,14 @@ const Header = () => {
 
                         <button
                             onClick={() => {
-                                localStorage.clear(); // ✅ Local storage cleared
-                                toast.success("Clear Previouse data", {
+                                localStorage.clear();
+                                toast.success("Cleared previous data", {
                                     position: "top-right",
                                     autoClose: 3000,
                                     theme: "dark"
                                 });
                                 setIsToggleMenu(false);
-                                nav("login")
+                                nav("login");
                             }}
                             className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm transition"
                         >

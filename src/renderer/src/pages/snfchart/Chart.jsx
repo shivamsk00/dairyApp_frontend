@@ -15,15 +15,9 @@ const Chart = ({ formValues, trigger }) => {
           return (Math.round(snf * 10) / 10).toFixed(1); // round to one decimal
      };
 
-     // Recalculate SNF table whenever formula values or trigger change
      useEffect(() => {
-          // Prevent calculation if formula values are invalid
-          if (
-               isNaN(formValues.A) ||
-               isNaN(formValues.B) ||
-               isNaN(formValues.C)
-          ) {
-               setSnfTable([]); // Reset table if formula is invalid
+          if (isNaN(formValues.A) || isNaN(formValues.B) || isNaN(formValues.C)) {
+               setSnfTable([]);
                return;
           }
 
@@ -48,15 +42,14 @@ const Chart = ({ formValues, trigger }) => {
                });
 
                const res = await snfChartDataFetch(transformedData);
-               if(res.status_code == 200){
-
-                    CustomToast.success(res.message)
-               }else{
-                    CustomToast.error(res.message)
+               if (res.status_code == 200) {
+                    CustomToast.success(res.message);
+               } else {
+                    CustomToast.error(res.message);
                }
           } catch (error) {
                console.error('Error sending SNF data:', error);
-               CustomToast.error("Failed to update SNF chart.'")
+               CustomToast.error("Failed to update SNF chart.");
           }
      };
 
@@ -67,15 +60,18 @@ const Chart = ({ formValues, trigger }) => {
      }, [trigger]);
 
      return (
-          <section className="p-6 bg-gray-50">
-               <h2 className="text-2xl font-semibold text-center mb-6">SNF Chart</h2>
-               <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
-                    <table className="min-w-full table-auto border-collapse text-sm">
-                         <thead className="bg-gray-200">
+          <section className="bg-gray-900 rounded-xl mt-10 p-4">
+               <h2 className="text-xl font-semibold text-white text-center mb-4">SNF Chart</h2>
+               <div className="overflow-x-auto rounded-lg border border-gray-700">
+                    <table className="table-auto min-w-[900px] w-full text-sm text-white">
+                         <thead className="bg-gray-800">
                               <tr>
-                                   <th className="px-6 py-4 border-b text-left text-sm font-medium text-gray-700">FAT \ CLR</th>
+                                   <th className="px-4 py-2 text-left border border-gray-700">FAT / CLR</th>
                                    {clrValues.map(clr => (
-                                        <th key={clr} className="px-6 py-4 border-b text-sm font-medium text-gray-700">
+                                        <th
+                                             key={clr}
+                                             className="px-4 py-2 text-center border border-gray-700 font-medium"
+                                        >
                                              {clr}
                                         </th>
                                    ))}
@@ -83,11 +79,16 @@ const Chart = ({ formValues, trigger }) => {
                          </thead>
                          <tbody>
                               {fatValues.map((fat, rowIdx) => (
-                                   <tr key={fat} className="border-b">
-                                        <td className="px-6 py-4 text-sm text-gray-800">{fat}</td>
+                                   <tr
+                                        key={fat}
+                                        className="even:bg-gray-800 odd:bg-gray-700 border-b border-gray-600"
+                                   >
+                                        <td className="px-4 py-2 border border-gray-600">{fat}</td>
                                         {clrValues.map((clr, colIdx) => (
-                                             <td key={clr} className="px-6 py-4 text-sm text-gray-800 text-center">
-                                                  {/* ✅ Avoid undefined value warning */}
+                                             <td
+                                                  key={`${fat}-${clr}`}
+                                                  className="px-4 py-2 text-center border border-gray-600"
+                                             >
                                                   {snfTable[rowIdx]?.[colIdx] ?? ''}
                                              </td>
                                         ))}

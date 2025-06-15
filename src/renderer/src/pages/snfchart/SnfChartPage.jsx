@@ -13,6 +13,7 @@ const SnfChartPage = () => {
      const [saveTrigger, setSaveTrigger] = useState(0);
      const snfFormulaDataFetch = useHomeStore(state => state.snfFormulaDataFetch);
      const getSnfFormulaData = useHomeStore(state => state.getSnfFormulaData);
+
      const handleChange = (e) => {
           const { name, value } = e.target;
           setFormValues({
@@ -31,27 +32,17 @@ const SnfChartPage = () => {
           ];
 
           try {
-               // ✅ 1. Save SNF formula to backend
-               const res =await snfFormulaDataFetch(formulaData);
-               console.log("response update snf chart", res.data)
-               if(res.status_code == 200){
-                    CustomToast.success(res.message)
-               }else{
-                    CustomToast.error(res.message)
+               const res = await snfFormulaDataFetch(formulaData);
+               console.log("response update snf chart", res.data);
+               if (res.status_code == 200) {
+                    CustomToast.success(res.message);
+               } else {
+                    CustomToast.error(res.message);
                }
 
-
-               // ✅ 2. Trigger SNF chart data generation
-               setSaveTrigger(prev => prev + 1); // will trigger Chart component to recalculate
-
-               // ✅ 3. Optionally send postMessage or reload iframe if needed
-               // setTimeout(() => {
-               //      document.querySelector('iframe')?.contentWindow?.postMessage('triggerFetch', '*');
-               // }, 0);
-
-
+               setSaveTrigger(prev => prev + 1);
           } catch (error) {
-               CustomToast.error(error)
+               CustomToast.error(error);
           }
      };
 
@@ -62,7 +53,7 @@ const SnfChartPage = () => {
                C: 0.66,
           });
      };
-     // Latest values for Snf Formulas
+
      useEffect(() => {
           const fetchFormula = async () => {
                const data = await getSnfFormulaData();
@@ -79,57 +70,66 @@ const SnfChartPage = () => {
      }, []);
 
      return (
-          <>
-               <section className="container mx-auto p-6">
-                    <div className="flex justify-center items-center mb-8">
+          <section className="h-screen bg-gradient-to-br  text-white p-6 overflow-auto">
+             
+                    <div className="flex justify-center items-center mb-10">
                          <form
                               onSubmit={handleSave}
-                              className="w-full max-w-md p-6 border rounded-lg shadow-xl bg-gray-700"
+                              className="w-full max-w-lg bg-gray-800 border border-gray-700 rounded-2xl shadow-lg p-8"
                          >
-                              <h2 className="text-xl font-semibold text-center mb-6 text-white">SNF Formula</h2>
-                              <p className="text-center text-sm mb-6 text-white">(CLR / A) + (B * FAT) + C</p>
+                              <h2 className="text-2xl font-bold text-center mb-4 text-teal-400">SNF Formula Settings</h2>
+                              <p className="text-center text-sm mb-8 text-gray-300">(CLR / A) + (B × FAT) + C</p>
 
-                              <label className="block text-sm font-medium mb-2 text-white">A:</label>
-                              <input
-                                   type="number"
-                                   name="A"
-                                   value={formValues.A}
-                                   onChange={handleChange}
-                                   step="any"
-                                   className="w-full p-3 mb-4 border rounded-lg text-sm"
-                              />
+                              {/* Field A */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for A:</label>
+                                   <input
+                                        type="number"
+                                        name="A"
+                                        value={formValues.A}
+                                        onChange={handleChange}
+                                        step="any"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                                   />
+                              </div>
 
-                              <label className="block text-sm font-medium mb-2 text-white">B:</label>
-                              <input
-                                   type="number"
-                                   name="B"
-                                   value={formValues.B}
-                                   onChange={handleChange}
-                                   step="any"
-                                   className="w-full p-3 mb-4 border rounded-lg text-sm"
-                              />
+                              {/* Field B */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for B:</label>
+                                   <input
+                                        type="number"
+                                        name="B"
+                                        value={formValues.B}
+                                        onChange={handleChange}
+                                        step="any"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                                   />
+                              </div>
 
-                              <label className="block text-sm font-medium mb-2 text-white">C:</label>
-                              <input
-                                   type="number"
-                                   name="C"
-                                   value={formValues.C}
-                                   onChange={handleChange}
-                                   step="any"
-                                   className="w-full p-3 mb-6 border rounded-lg text-sm"
-                              />
+                              {/* Field C */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for C:</label>
+                                   <input
+                                        type="number"
+                                        name="C"
+                                        value={formValues.C}
+                                        onChange={handleChange}
+                                        step="any"
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                                   />
+                              </div>
 
-                              <div className="flex justify-between items-center">
+                              <div className="flex justify-between items-center mt-6">
                                    <button
                                         type="submit"
-                                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                        className="w-full mr-2 bg-teal-600 hover:bg-teal-700 transition text-white font-semibold py-2 rounded-lg"
                                    >
                                         Save
                                    </button>
                                    <button
                                         type="button"
                                         onClick={handleReset}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                        className="w-full ml-2 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 rounded-lg"
                                    >
                                         Reset
                                    </button>
@@ -137,9 +137,12 @@ const SnfChartPage = () => {
                          </form>
                     </div>
 
-                    <Chart formValues={formValues} trigger={saveTrigger} />
-               </section>
-          </>
+                    {/* Chart Section */}
+                    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-md">
+                         <Chart formValues={formValues} trigger={saveTrigger} />
+                    </div>
+               
+          </section>
      );
 };
 

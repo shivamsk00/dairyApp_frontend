@@ -6,8 +6,7 @@ import { toast } from 'react-toastify';
 
 const ChangePassword = () => {
     const nav = useNavigate();
-      const saveEmail = localStorage.getItem('rememberEmail')
-    const passChange = useAuthStore(state => state.changePassword)
+    const passChange = useAuthStore(state => state.changePassword);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -36,91 +35,81 @@ const ChangePassword = () => {
             return;
         }
 
-        // 🛠️ Here you'd call your API to change password
-        console.log('Change Password Request:', formData);
-        const res = await passChange(formData)
-        console.log("response======>", res)
-
-        if (res.status_code == 200) {
-
-            toast(res.message, {
+        const res = await passChange(formData);
+        if (res.status_code === 200) {
+            toast.success(res.message, {
                 position: "top-right",
                 autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                type: 'success'
-
+                theme: "dark"
             });
             setFormData({ email: '', old_password: '', new_password: '' });
-            nav("/")
-        } else if (res.status_code == 400) {
-            toast(res.message, {
+            nav("/");
+        } else if (res.status_code === 400) {
+            toast.error(res.message, {
                 position: "top-right",
                 autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                type: 'error'
-
+                theme: "dark"
             });
-
         }
-
-
     };
 
     return (
-        <div className="changePasswordContainer">
-            <div className="flex justify-start items-center mb-4 gap-3">
-                <button onClick={() => nav("/")} className="addUserBackBtn">
+        <div className="p-6   bg-white rounded-lg shadow-md mt-6">
+            {/* Back Button & Title */}
+            <div className="flex items-center gap-3 mb-6">
+                <button onClick={() => nav("/")} className="p-2 bg-gray-200 rounded-full hover:bg-gray-300">
                     <FaArrowLeft />
                 </button>
-                <h2 className="text-2xl font-bold">Change Password</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Change Password</h2>
             </div>
 
-            <form className="shadow-md rounded-md p-8" onSubmit={handleSubmit}>
-                <div className="changePasswordInputBox">
-                    <label>Enter Email</label>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Email Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {errors.email && <p className="errorText">{errors.email}</p>}
+                    {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
                 </div>
 
-                <div className="changePasswordInputBox">
-                    <label>Enter Old Password</label>
+                {/* Old Password Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Old Password</label>
                     <input
                         type="password"
                         name="old_password"
                         value={formData.old_password}
                         onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {errors.old_password && <p className="errorText">{errors.old_password}</p>}
+                    {errors.old_password && <p className="text-red-600 text-sm mt-1">{errors.old_password}</p>}
                 </div>
 
-                <div className="changePasswordInputBox">
-                    <label>Enter New Password</label>
+                {/* New Password Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                     <input
                         type="password"
                         name="new_password"
                         value={formData.new_password}
                         onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    {errors.new_password && <p className="errorText">{errors.new_password}</p>}
+                    {errors.new_password && <p className="text-red-600 text-sm mt-1">{errors.new_password}</p>}
                 </div>
 
-                <div className="changePasswordBtnBox">
-                    <button type="submit" className="p-2 rounded-md text-white text-sm">
+                {/* Submit Button */}
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-sm transition"
+                    >
                         Change Password
                     </button>
                 </div>
