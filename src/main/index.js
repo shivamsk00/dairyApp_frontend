@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { format } from 'url'
 
 let mainWindow
 let secondWindow
@@ -178,36 +179,83 @@ app.whenReady().then(() => {
   // })
 
   // new commond
-  ipcMain.on('print-slip', (event) => {
-    const printWindow = new BrowserWindow({
-      width: 400,
-      height: 600,
-      show: true,
+  // ipcMain.on('print-slip', (event, slipData) => {
+  //   const { customer, date, milk, rate, total } = slipData
+
+  //   const slipWindow = new BrowserWindow({
+  //     width: 400,
+  //     height: 600,
+  //     show: false,
+  //     webPreferences: {
+  //       sandbox: false
+  //     }
+  //   })
+
+  //   const filePath = join(__dirname, '../../out/milk-slip.html') // 🔁 Adjust path as needed
+  //   // const filePath = join(__dirname, '../out/slip.html');
+
+  //   const queryParams = new URLSearchParams({
+  //     customer,
+  //     date,
+  //     milk,
+  //     rate,
+  //     total
+  //   }).toString()
+
+  //   slipWindow.loadURL(
+  //     format({
+  //       protocol: 'file',
+  //       slashes: true,
+  //       pathname: filePath,
+  //       search: `?${queryParams}`
+  //     })
+  //   )
+  // })
+
+  // dyanamic html
+  ipcMain.on('print-slip', (event, slipData) => {
+    const { customer, date, milk, rate, total } = slipData
+
+    const slipWindow = new BrowserWindow({
+      show: false, // ✅ Don't show the window
       webPreferences: {
         sandbox: false
       }
     })
 
-    const slipPath = join(__dirname, "../../out/milk-slip.html") // 🔁 Adjust path as needed
+    const filePath = join(__dirname, '../../out/milk-slip.html') // 🔁 Adjust path as needed
 
-    printWindow.loadFile(slipPath)
+    const queryParams = new URLSearchParams({
+      customer,
+      date,
+      milk,
+      rate,
+      total
+    }).toString()
 
-    printWindow.webContents.on('did-finish-load', () => {
-      printWindow.webContents.print(
+    slipWindow.loadURL(
+      format({
+        protocol: 'file',
+        slashes: true,
+        pathname: filePath,
+        search: `?${queryParams}`
+      })
+    )
+
+    slipWindow.webContents.on('did-finish-load', () => {
+      slipWindow.webContents.print(
         {
-          silent: true,
+          silent: true, // ✅ Silent mode ON
           printBackground: true,
-          margins: {
-            marginType: 'none'
-          },
+          margins: { marginType: 'none' },
           pageSize: {
-            width: 58000,
+            width: 58000, // 58mm
             height: 200000
           }
         },
-        (success, failureReason) => {
-          if (!success) console.log('Print failed:', failureReason)
-          printWindow.close()
+        (success, error) => {
+          if (!success) console.log('Print failed:', error)
+          slipWindow.close()
         }
       )
     })

@@ -373,10 +373,16 @@ const DailyMilkCollectionPage = () => {
 
 
     const handlePrint = () => {
-        // No need to pass HTML string anymore
-        window.api.printSlip(); // Just trigger the print
-    };
+        const slipData = {
+            customer: "John Doe",
+            date: "15-06-2025",
+            milk: "5 Litres",
+            rate: "₹40 / Litre",
+            total: "₹200"
+        };
 
+        window.api.printSlip(slipData);
+    };
 
 
 
