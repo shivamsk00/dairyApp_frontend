@@ -354,36 +354,86 @@ const DailyMilkCollectionPage = () => {
     //         window.api.printSlip(htmlContent); // ← exposed in preload.js
     //     };
 
-    useEffect(() => {
-        if (window.api) {
-            window.api.onPrintError((msg) => {
-                alert(msg); // ya toast/snackbar
-            });
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (window.api) {
+    //         window.api.onPrintError((msg) => {
+    //             alert(msg); // ya toast/snackbar
+    //         });
+    //     }
+    // }, []);
+
+
+    // useEffect(() => {
+    //     const fetchPrinters = async () => {
+    //         try {
+    //             if (window.api && typeof window.api.getPrinters === 'function') {
+    //                 const printers = await window.api.getPrinters();
+    //                 console.log('🖨️ Printers:', printers);
+    //             } else {
+    //                 console.warn('window.api.getPrinters not available');
+    //             }
+    //         } catch (err) {
+    //             console.error('❌ Error fetching printers:', err);
+    //         }
+    //     };
+
+    //     fetchPrinters();
+    // }, []);
+
+    // const handlePrint = () => {
+    //     if (window.api?.openPrintPreview) {
+    //         window.api.openPrintPreview();
+    //     } else {
+    //         alert('Print API not available');
+    //     }
+    // };
 
 
     useEffect(() => {
-        if (window.api) {
-            window.api.invoke('get-printers')
-                .then(printers => {
-                    console.log("🖨️ Printers List:", printers);
-                })
-                .catch(err => {
-                    console.error("Error fetching printers:", err);
-                });
+        // 🔴 Listen for any print errors from main process
+        window.api.onPrintError((msg) => {
+            alert('Print Error: ' + msg)
+        })
+    }, [])
+
+
+    useEffect(() => {
+        const fetchPrinters = async () => {
+            try {
+                const printers = await window.api.getPrinters()
+                console.log('🖨️ Printers:', printers)
+            } catch (err) {
+                console.error('❌ Error fetching printers:', err)
+            }
         }
-    }, []);
+
+        fetchPrinters()
+    }, [])
+
 
     const handlePrint = () => {
-        if (window.api?.openPrintPreview) {
-            window.api.openPrintPreview();
-        } else {
-            alert('Print API not available');
+        // 🟢 Open static slip preview window
+        window.api.openPrintPreview()
+    }
+
+
+    useEffect(() => {
+        const testPrinters = async () => {
+            if (!window.api?.getPrinters) {
+                console.warn('🛑 getPrinters not exposed')
+                return
+            }
+
+            try {
+                const printers = await window.api.getPrinters()
+                console.log('🖨️ Printer List:', printers)
+            } catch (error) {
+                console.error('❌ Printer fetch error:', error)
+            }
         }
-    };
 
-
+        testPrinters()
+    }, [])
 
 
 

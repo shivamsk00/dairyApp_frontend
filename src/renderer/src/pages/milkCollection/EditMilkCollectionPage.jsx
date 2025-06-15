@@ -40,7 +40,8 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
         other_price: milkData.other_price || '',
         rate: milkData.base_rate || '',
         total_amount: milkData.quantity * milkData.base_rate || '',
-        shift: milkData.shift || 'morning'
+        shift: milkData.shift || '',
+        date:milkData.date
       });
     }
   }, [milkData]);
@@ -79,6 +80,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {/* Fields (you can extract into a map if needed) */}
           {[
+            { label: 'Date', name: 'date',readOnly:true, type:"date"},
             { label: 'Milk Type', name: 'milk_type',readOnly:true, type: 'select', options: ['cow', 'buffalo', 'other'] },
             { label: 'Shift', name: 'shift',readOnly:true, type: 'select', options: ['morning', 'evening', 'both'] },
             { label: 'Account No', name: 'customer_account_number', readOnly: true },

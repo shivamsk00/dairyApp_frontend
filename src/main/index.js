@@ -166,32 +166,29 @@ app.whenReady().then(() => {
   //   })
   // })
 
-  // print commond+===================>
+  // 🧾 PRINT SLIP FROM HTML CONTENT
   ipcMain.on('print-slip', async (event, htmlContent) => {
     const printWindow = new BrowserWindow({
       width: 400,
       height: 600,
-      show: true, // You can set false for silent print
+      show: false,
       webPreferences: {
-        contextIsolation: true
+        contextIsolation: true,
+        sandbox: false
       }
     })
 
-    // Load HTML string into the window
     await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
 
-    // Wait for HTML to fully load
     printWindow.webContents.on('did-finish-load', () => {
       printWindow.webContents.print(
         {
-          silent: false, // If true: no dialog shown (but deviceName is needed)
-          printBackground: true, // Important if your HTML has background color/images
-          // deviceName: 'printer-name' // ✅ Optional: if you want to force a specific printer
+          silent: false,
           printBackground: true
         },
         (success, errorType) => {
           if (!success) {
-            console.error('Print failed:', errorType)
+            console.error('❌ Print failed:', errorType)
             event.reply('print-error', `Print failed: ${errorType}`)
           }
           printWindow.close()
@@ -200,44 +197,40 @@ app.whenReady().then(() => {
     })
   })
 
-  ipcMain.handle('get-printers', async () => {
-    const win = BrowserWindow.getAllWindows()[0]
-
-    if (!win || !win.webContents) {
-      throw new Error('No window or webContents available')
-    }
-
-    // Wait for content to be loaded before calling getPrinters
-    if (!win.webContents.isLoadingMainFrame()) {
-      return win.webContents.getPrinters() // 🖨️ This will work here
-    }
+  // 🖨️ GET PRINTER LIST (Safe with Temp Window)
+  ipcMain.handle('get-printers', async (event) => {
+    const wc = event.sender
 
     return new Promise((resolve, reject) => {
-      win.webContents.once('did-finish-load', () => {
-        try {
-          resolve(win.webContents.getPrinters())
-        } catch (error) {
-          reject(error)
-        }
-      })
+      if (typeof wc.getPrinters === 'function') {
+        resolve(wc.getPrinters())
+      } else {
+        wc.once('did-finish-load', () => {
+          try {
+            resolve(wc.getPrinters())
+          } catch (err) {
+            reject(err)
+          }
+        })
+      }
     })
   })
 
+  // 🧾 OPEN STATIC SLIP HTML (milk-slip.html)
   ipcMain.on('print-slip-window', () => {
-    const printWin = new BrowserWindow({ 
+    const printWin = new BrowserWindow({
       width: 400,
       height: 600,
       autoHideMenuBar: true,
       webPreferences: {
         contextIsolation: true,
-        nodeIntegration: false
+        sandbox: false
       }
     })
 
     const slipPath = join(__dirname, '../../out/milk-slip.html')
     printWin.loadFile(slipPath)
   })
-
   createWindow()
 
   app.on('activate', function () {

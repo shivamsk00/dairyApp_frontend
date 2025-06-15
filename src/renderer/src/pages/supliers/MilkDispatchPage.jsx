@@ -6,6 +6,7 @@ import CustomToast from '../../helper/costomeToast';
 import useHomeStore from '../../zustand/useHomeStore';
 import { FaDotCircle, FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+import EditMilkDispatch from './EditMilkDispatch';
 
 const MilkDispatchPage = () => {
   const submitMilkDispatch = useDailyMilkDispatchStore(state => state.submitMilkDispatch)
@@ -24,8 +25,10 @@ const MilkDispatchPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHeadDairy, setSelectedHeadDairy] = useState(null);
   const [headDairyToDelete, setHeadDairyToDelete] = useState(null);
-   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-   const [selectedDairy, setSelectedDairy] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedDairy, setSelectedDairy] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const LOCAL_KEY = 'milkDispatchDraft';
   // const [rowData, setRowData] = useState([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [form, setForm] = useState({
@@ -65,71 +68,102 @@ const MilkDispatchPage = () => {
     }));
   }, [form.milk_details]);
 
+
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(updatedForm));
   };
 
 
 
-  let snfRateFetchTimeout;
+  let snfDebounceTimeout;
 
   const handleMilkDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetails = [...form.milk_details];
     updatedDetails[index][name] = value;
 
-    const { qty, fat, clr, rate } = updatedDetails[index];
+    const { qty, fat, clr } = updatedDetails[index];
 
-    // ✅ Calculate amount if qty & rate are present
-    if (qty && rate) {
-      updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
+    // ✅ Update amount if qty & rate available
+    if (qty && updatedDetails[index].rate) {
+      updatedDetails[index].amount = (parseFloat(qty) * parseFloat(updatedDetails[index].rate)).toFixed(2);
     } else {
       updatedDetails[index].amount = '';
     }
 
-    // ✅ Debounce rate fetch on SNF input
+    // ✅ SNF Debounce Logic
     if (name === 'snf') {
-      clearTimeout(snfRateFetchTimeout);
+      clearTimeout(snfDebounceTimeout);
 
-      // 👇 Only continue if SNF is a valid float
-      const snfValue = parseFloat(value);
-      const isValidSNF = !isNaN(snfValue) && value.includes('.');
-
-      if (!fat) {
-        CustomToast.error('⚠️ Please enter FAT value first to fetch rate');
-      } else if (isValidSNF) {
-        snfRateFetchTimeout = setTimeout(async () => {
-          try {
-            const result = await getMilkRate(fat, clr || '', snfValue);
-            console.log("result print ====>", result);
-
-            if (result?.rate) {
-              updatedDetails[index].rate = parseFloat(result.rate).toFixed(2);
-              if (qty) {
-                updatedDetails[index].amount = (parseFloat(qty) * result.rate).toFixed(2);
-              }
-
-              // ✅ Set updated form after rate is fetched
-              setForm(prev => {
-                const updatedMilkDetails = [...prev.milk_details];
-                updatedMilkDetails[index] = updatedDetails[index];
-                return { ...prev, milk_details: updatedMilkDetails };
-              });
-            } else {
-              CustomToast.error('❌ Rate not found for given values');
-            }
-          } catch (error) {
-            console.error('❌ Error fetching milk rate:', error);
-            CustomToast.error('❌ Error fetching milk rate');
-          }
-        }, 500);
-      }
+      snfDebounceTimeout = setTimeout(() => {
+        const snfValue = value.includes('.') ? parseFloat(value) : parseFloat(`${value}.0`);
+        if (isNaN(snfValue)) return;
+        if (!fat) {
+          CustomToast.error('⚠️ Please enter FAT value first');
+          return;
+        }
+        fetchRateAndUpdate(index, fat, clr || '', snfValue, updatedDetails, qty);
+      }, 800);
     }
 
-    // ✅ Immediate form update for all cases
-    setForm(prev => ({ ...prev, milk_details: updatedDetails }));
+    const updatedForm = { ...form, milk_details: updatedDetails };
+    setForm(updatedForm);
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(updatedForm));
   };
+
+
+  const fetchRateAndUpdate = async (index, fat, clr, snf, updatedDetails, qty) => {
+    try {
+      const result = await getMilkRate(fat, clr, snf);
+      console.log("Fetched rate:", result);
+
+      const updatedMilk = { ...updatedDetails[index] };
+
+      if (result?.rate) {
+        updatedMilk.rate = parseFloat(result.rate).toFixed(2);
+
+        if (qty) {
+          updatedMilk.amount = (parseFloat(qty) * result.rate).toFixed(2);
+        } else {
+          updatedMilk.amount = '';
+        }
+
+        CustomToast.success('✅ Rate updated');
+      } else {
+        // ❌ No rate found — clear rate & amount
+        updatedMilk.rate = '';
+        updatedMilk.amount = '';
+      }
+
+      // ✅ Update in form
+      setForm(prev => {
+        const updatedMilkDetails = [...prev.milk_details];
+        updatedMilkDetails[index] = updatedMilk;
+        return { ...prev, milk_details: updatedMilkDetails };
+      });
+
+    } catch (err) {
+      console.error('❌ Error fetching milk rate:', err);
+      CustomToast.error('❌ Error fetching milk rate');
+    }
+  };
+
+
+
+
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setForm(parsed);
+    }
+  }, []);
+
+
 
   const addMilkDetailRow = () => {
     setForm(prev => ({
@@ -151,15 +185,17 @@ const MilkDispatchPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('🚚 Dispatch Form:', form);
-    // TODO: Submit API call
+    setLoading(true);
     try {
       const res = await submitMilkDispatch(form);
-      console.log("respone milk dispatch", res)
-      if (res.status_code == 200) {
-        CustomToast.success(res.message)
+      if (res.status_code === 200) {
+        CustomToast.success(res.message);
         fetchMilkCollectionDetails();
-        // ✅ Reset form after submit
+
+        // ✅ Clear local storage
+        localStorage.removeItem(LOCAL_KEY);
+
+        // ✅ Reset form
         setForm({
           dispatch_date: today,
           shift: '',
@@ -173,15 +209,14 @@ const MilkDispatchPage = () => {
           ],
         });
       } else {
-        CustomToast.success(res.message)
-
+        CustomToast.error(res.message);
       }
     } catch (error) {
-      console.log("ERROR IN SUBMIT MILK DISPATCH", error)
-
+      console.error("ERROR IN SUBMIT MILK DISPATCH", error);
+      CustomToast.error("❌ Failed to submit");
+    } finally {
+      setLoading(false);
     }
-
-
   };
 
   // All Data Coming Through this API ////////////////////////////////////////////////
@@ -203,7 +238,7 @@ const MilkDispatchPage = () => {
 
   useEffect(() => {
     fetchMilkCollectionDetails()
-  }, [isEditeModal])
+  }, [isEditModalOpen])
 
   // Delete Api/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const confirmDeleteHeadDairyMilkDispatch = async () => {
@@ -225,8 +260,20 @@ const MilkDispatchPage = () => {
     }
   };
 
-  // Update Api/////////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // REDNDER BUTTONS 
   const renderPageButtons = () => {
     const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
@@ -448,10 +495,12 @@ const MilkDispatchPage = () => {
           </div>
 
           <button
+            disabled={loading}
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 mt-4"
           >
-            Submit
+            {loading ? "Please waite..." : "Submit"}
+
           </button>
         </form>
 
@@ -503,10 +552,10 @@ const MilkDispatchPage = () => {
                     <button
                       className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition"
                       onClick={() => {
-                          setIsModalOpen(true);
+                        setIsModalOpen(true);
                         setSelectedHeadDairy(item);
                       }}
-                      
+
                       title="View Details"
                     >
                       <FaEye />
@@ -514,9 +563,9 @@ const MilkDispatchPage = () => {
                     <button
                       className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                       onClick={() => {
-                            setSelectedDairy(item);
-                            setIsEditModalOpen(true);
-                          }}
+                        setSelectedDairy(item);
+                        setIsEditModalOpen(true);
+                      }}
                       title="Edit"
                     >
                       <FaPen />
@@ -524,7 +573,7 @@ const MilkDispatchPage = () => {
                     <button
                       className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                       onClick={() => {
-                        
+
                         setHeadDairyToDelete(item); // Corrected: use 'item' instead of 'row.original'
                         setIsConfirmOpen(true);
                       }}
@@ -537,12 +586,24 @@ const MilkDispatchPage = () => {
                 </tr>
               ))}
             </tbody>
-            {renderPageButtons()}
           </table>
+          {renderPageButtons()}
         </div>
       </div>
 
-      {/* THIS MODAL  */}
+
+
+
+      {/* EDIT MODAL  */}
+
+      <EditMilkDispatch
+        milkDispatchData={selectedDairy}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+
+      />
+
+      {/* THIS MODAL VIEW DETAILS  */}
       {isModalOpen && selectedHeadDairy && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
@@ -579,6 +640,8 @@ const MilkDispatchPage = () => {
         </div>
       )}
 
+
+      {/* DELELTE MODAL */}
       {isConfirmOpen && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-sm mx-4 p-6 text-center relative">
@@ -609,3 +672,61 @@ const MilkDispatchPage = () => {
 };
 
 export default MilkDispatchPage;
+
+
+// const handleMilkDetailChange = (index, e) => {
+//   const { name, value } = e.target;
+//   const updatedDetails = [...form.milk_details];
+//   updatedDetails[index][name] = value;
+
+//   const { qty, fat, clr, rate } = updatedDetails[index];
+
+//   // ✅ Calculate amount if qty & rate are present
+//   if (qty && rate) {
+//     updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
+//   } else {
+//     updatedDetails[index].amount = '';
+//   }
+
+//   // ✅ Debounce rate fetch on SNF input
+//   if (name === 'snf') {
+//     clearTimeout(snfRateFetchTimeout);
+
+//     // 👇 Only continue if SNF is a valid float
+//     const snfValue = parseFloat(value);
+//     const isValidSNF = !isNaN(snfValue) && value.includes('.');
+
+//     if (!fat) {
+//       CustomToast.error('⚠️ Please enter FAT value first to fetch rate');
+//     } else if (isValidSNF) {
+//       snfRateFetchTimeout = setTimeout(async () => {
+//         try {
+//           const result = await getMilkRate(fat, clr || '', snfValue);
+//           console.log("result print ====>", result);
+
+//           if (result?.rate) {
+//             updatedDetails[index].rate = parseFloat(result.rate).toFixed(2);
+//             if (qty) {
+//               updatedDetails[index].amount = (parseFloat(qty) * result.rate).toFixed(2);
+//             }
+
+//             // ✅ Set updated form after rate is fetched
+//             setForm(prev => {
+//               const updatedMilkDetails = [...prev.milk_details];
+//               updatedMilkDetails[index] = updatedDetails[index];
+//               return { ...prev, milk_details: updatedMilkDetails };
+//             });
+//           } else {
+//             CustomToast.error('❌ Rate not found for given values');
+//           }
+//         } catch (error) {
+//           console.error('❌ Error fetching milk rate:', error);
+//           CustomToast.error('❌ Error fetching milk rate');
+//         }
+//       }, 800);
+//     }
+//   }
+
+//   // ✅ Immediate form update for all cases
+//   setForm(prev => ({ ...prev, milk_details: updatedDetails }));
+// };
