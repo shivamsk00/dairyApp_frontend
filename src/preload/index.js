@@ -7,6 +7,8 @@ const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
+    printSlip: (html) => ipcRenderer.send('print-slip', html),
+
 
   // 🧩 Utility
   invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),

@@ -331,13 +331,54 @@ const DailyMilkCollectionPage = () => {
         );
     };
 
+    // Printer button
+    const handlePrint = () => {
+        const slipHtml = `
+    <html>
+      <head>
+        <style>
+          @media print {
+            body {
+              margin: 0;
+              font-size: 12px;
+              padding: 0;
+            }
+          }
+          body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            line-height: 1.4;
+          }
+          h2 {
+            margin: 0 0 10px 0;
+          }
+          p {
+            margin: 4px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Milk Slip</h2>
+        <p>Customer Name: John Doe</p>
+        <p>Date: 15-06-2025</p>
+        <p>Quantity: 5 Litres</p>
+        <p>Total: ₹150</p>
+      </body>
+    </html>
+  `;
+
+        // Call to main process via preload bridge
+        window.api.printSlip(slipHtml);
+    };
 
     const isDisabled = !form.name; // Disable if customer data not loaded
-
     return (
         <div className="w-full">
-            
+
             {/* <PrintComponent /> */}
+            <button onClick={handlePrint}>Print Slip</button>
+
+
 
             <CommonHeader heading={"Milk Collection"} />
 

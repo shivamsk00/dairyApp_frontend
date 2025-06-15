@@ -126,6 +126,8 @@ function createChildWindow() {
 }
 
 app.whenReady().then(() => {
+
+  createWindow()
   electronApp.setAppUserModelId('com.electron')
 
   app.on('browser-window-created', (_, window) => {
@@ -137,9 +139,44 @@ app.whenReady().then(() => {
   ipcMain.on('open-second-window', () => createSecondWindow())
   ipcMain.on('open-cutomer-win', () => customerCollection())
 
-  // ⛔️ All printer commands removed
+  // ⛔️ All printer commands 
+  ipcMain.on('print-slip', (event, htmlContent) => {
+    const printWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        sandbox: false,
+      },
+    });
 
-  createWindow()
+    printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+
+    printWindow.webContents.on('did-finish-load', () => {
+      printWindow.webContents.print({
+        silent: true,
+        printBackground: true,
+        margins: {
+          marginType: 'none'
+        },
+        pageSize: {
+          width: 58000,  // 58 mm = 58000 microns
+          height: 100000 // 100 mm = 100000 microns (adjust based on slip length)
+        },
+      }, (success, failureReason) => {
+        if (!success) console.log('Print failed:', failureReason);
+        printWindow.close();
+      });
+    });
+
+    // printWindow.webContents.on('did-finish-load', () => {
+    //   printWindow.webContents.print({ silent: true, printBackground: true }, (success, errorType) => {
+    //     if (!success) console.log('Print failed:', errorType);
+    //     printWindow.close();
+    //   });
+    // });
+  });
+
+
+
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
