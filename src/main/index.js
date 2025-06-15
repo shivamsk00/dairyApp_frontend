@@ -245,16 +245,19 @@ app.whenReady().then(() => {
     slipWindow.webContents.on('did-finish-load', () => {
       slipWindow.webContents.print(
         {
-          silent: true, // ✅ Silent mode ON
+          silent: true,
           printBackground: true,
+          scaleFactor: 100,
           margins: { marginType: 'none' },
           pageSize: {
-            width: 58000, // 58mm
-            height: 200000
+            width: 89000, // microns
+            height: 89000
           }
         },
         (success, error) => {
-          if (!success) console.log('Print failed:', error)
+          if (!success) {
+            console.error('Print failed:', error)
+          }
           slipWindow.close()
         }
       )
