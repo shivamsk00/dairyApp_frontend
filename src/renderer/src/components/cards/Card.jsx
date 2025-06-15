@@ -14,8 +14,8 @@ const Card = ({ width, height, background, data }) => {
               
                 <h1>
                     {
-                        data.title == "Customer" ? <FaUser /> : data.title == "Transctions" ?
-                            <FaRupeeSign /> : data.title =="Inventory" ?   <FaDatabase />:data.title == "Milk Sale" ?<FaMoneyBillTrendUp />:
+                        data.title == "Customer" ? <FaUser /> : data.title == "Milk Purchase" ?
+                             <FaMoneyBillTrendUp /> : data.title =="Inventory" ?   <FaDatabase />:data.title == "Milk Sale" ?<FaMoneyBillTrendUp />:
                             null
                     }
 

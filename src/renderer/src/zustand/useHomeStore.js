@@ -6,6 +6,17 @@ const useHomeStore = create((set) => ({
   loading: false,
   error: null,
 
+
+  // Dahboard Api Data Fetch//////////////////////////////////////////////////////////////////////////
+    fetchDashboardData: async () => {
+    try {
+      const res = await api.get('/dashboard')
+      return res.data
+    } catch (error) {
+      console.log('Error fetching dashboard data:', error)
+      return null
+    }
+  },
   // Snf Chart Api
   snfChartDataFetch: async (snfData) => {
     console.log('SNF DATA IN FRONT SNF TABLE====>', snfData)
