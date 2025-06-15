@@ -202,7 +202,7 @@ app.whenReady().then(() => {
           },
           pageSize: {
             width: 58000,
-            height: 100000
+            height: 200000
           }
         },
         (success, failureReason) => {
