@@ -218,6 +218,13 @@ const DailyMilkCollectionPage = () => {
             const res = await submitMilkCollection(form);
             console.log("submited milk collection response", res)
             if (res.status_code == 200) {
+
+                if (toggle) {
+                    handlePrint(form)
+                }
+
+
+
                 CustomToast.success(res.message)
                 setForm({
                     customer_account_number: '',
@@ -372,13 +379,28 @@ const DailyMilkCollectionPage = () => {
     //     };
 
 
-    const handlePrint = () => {
+    const handlePrint = (data) => {
+        const now = new Date();
+        const localTime = now.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
         const slipData = {
-            customer: "John Doe",
-            date: "15-06-2025",
-            milk: "5 Litres",
-            rate: "₹40 / Litre",
-            total: "₹200"
+            account_no: data.customer_account_number,
+            customer: data.name,
+            date: data.date,
+            time: localTime, // ✅ Local time here
+            shift: data.shift,
+            milk_type: data.milk_type,
+            qty: `${data.quantity} / Ltr`,
+            fat: data.fat,
+            snf: data.snf,
+            oth_rate: data.oth_rate || "0.00",
+            base_rate: data.base_rate,
+            rate: `${data.base_rate} / Ltr`,
+            total: data.total_amount
         };
 
         window.api.printSlip(slipData);
@@ -399,8 +421,6 @@ const DailyMilkCollectionPage = () => {
     return (
         <div className="w-full">
 
-            {/* <PrintComponent /> */}
-            <button onClick={handlePrint}>Print Slip</button>
 
 
 
