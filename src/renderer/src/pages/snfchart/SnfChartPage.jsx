@@ -70,9 +70,9 @@ const SnfChartPage = () => {
      }, []);
 
      return (
-          <section className="h-screen bg-gradient-to-br  text-white p-6 overflow-auto">
+          <section className="h-screen bg-gradient-to-br from-slate-800 to-gray-900  text-white p-6 overflow-auto">
              
-                    <div className="flex justify-center items-center mb-10">
+                    <div className="flex justify-center items-center mb-10 border border-dashed border-gray-600 rounded-lg p-4">
                          <form
                               onSubmit={handleSave}
                               className="w-full max-w-lg bg-gray-800 border border-gray-700 rounded-2xl shadow-lg p-8"

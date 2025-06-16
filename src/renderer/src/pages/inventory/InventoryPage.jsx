@@ -46,14 +46,22 @@ const InventoryPage = () => {
           ))}
         </div>
         <div className="flex justify-center items-center mb-4 gap-2">
-
-          <button onClick={() => navigateTo("/addcategory")} className=" text-white px-4 py-2 rounded ">
+          <button
+            onClick={() => navigateTo("/addcategory")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition duration-300"
+          >
             Add Category
           </button>
-          <button onClick={() => navigateTo("/addStock")} className=" text-white px-4 py-2 rounded ">
+          <button
+            onClick={() => navigateTo("/addStock")}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition duration-300"
+          >
             Add Stock
           </button>
-          <button onClick={() => navigateTo("/AddProductPage")} className=" text-white px-4 py-2 rounded ">
+          <button
+            onClick={() => navigateTo("/AddProductPage")}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow transition duration-300"
+          >
             Add Product
           </button>
         </div>

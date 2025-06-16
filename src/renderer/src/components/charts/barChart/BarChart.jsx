@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import useHomeStore from '../../../zustand/useHomeStore';
+import useHomeStore from '../../../zustand/useHomeStore'; // Adjust the path if needed
 
 const BarChart = () => {
   const fetchDashboardData = useHomeStore(state => state.fetchDashboardData);
@@ -11,6 +11,7 @@ const BarChart = () => {
     options: {
       chart: {
         type: 'bar',
+        height: 350,
       },
       plotOptions: {
         bar: {
@@ -21,42 +22,18 @@ const BarChart = () => {
       },
       dataLabels: { enabled: false },
       xaxis: {
-        categories: [],
+        categories: [], // Updated dynamically
         title: { text: 'Days of the Week' },
-        labels: {
-          style: { colors: '#4B5563' }, // gray-600
-        },
       },
       yaxis: {
         title: { text: 'Litres' },
-        labels: {
-          style: { colors: '#4B5563' },
-        },
       },
       title: {
         text: 'Weekly Milk Sales',
         align: 'center',
-        style: {
-          fontSize: '18px',
-          color: '#1F2937', // gray-800
-        },
+        style: { fontSize: '18px' },
       },
-      colors: ['#3B82F6'], // Tailwind blue-500
-      responsive: [
-        {
-          breakpoint: 640,
-          options: {
-            plotOptions: {
-              bar: {
-                columnWidth: '60%',
-              },
-            },
-            chart: {
-              height: 300,
-            },
-          },
-        },
-      ],
+      colors: ['#4CAF50'],
     },
   });
 
@@ -90,15 +67,13 @@ const BarChart = () => {
   }, [weeklyMilkSale]);
 
   return (
-    <div className="w-full max-w-full bg-white p-4 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700 text-center">
-        Weekly Milk Sales
-      </h2>
+    <div id="bar-chart">
       <ReactApexChart
         options={chartData.options}
         series={chartData.series}
         type="bar"
         height={350}
+        width={600}
       />
     </div>
   );
