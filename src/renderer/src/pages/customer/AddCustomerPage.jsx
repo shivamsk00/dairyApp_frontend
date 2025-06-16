@@ -18,6 +18,7 @@ const AddCustomerPage = () => {
         customer_type: '',
         name: '',
         mobile: '',
+        careof: '',
         email: '',
         address: '',
         city: '',
