@@ -266,61 +266,61 @@ app.whenReady().then(() => {
 
 
   ipcMain.on('print-slip', (event, slipData) => {
-  const slipWindow = new BrowserWindow({
-    show: false,
-    webPreferences: {
-      sandbox: false
-    }
-  });
-
-     const filePath = join(__dirname, '../../out/milk-slip.html')
-
-  const queryParams = new URLSearchParams({
-    account_no: slipData.account_no,
-    customer: slipData.customer,
-    date: slipData.date,
-    time: slipData.time,
-    shift: slipData.shift,
-    milk_type: slipData.milk_type,
-    qty: slipData.qty,
-    fat: slipData.fat,
-    snf: slipData.snf,
-    oth_rate: slipData.oth_rate,
-    base_rate: slipData.base_rate,
-    rate: slipData.rate,
-    total: slipData.total
-  }).toString();
-
-  const finalUrl = format({
-    protocol: 'file',
-    slashes: true,
-    pathname: filePath,
-    search: `?${queryParams}`
-  });
-
-  console.log("🖨️ Loading Slip URL:", finalUrl); // ✅ log to debug
-
-  slipWindow.loadURL(finalUrl);
-
-  slipWindow.webContents.on('did-finish-load', () => {
-    slipWindow.webContents.print(
-      {
-        silent: true,
-        printBackground: true,
-        scaleFactor: 100,
-        margins: { marginType: 'none' },
-        pageSize: {
-          width: 89000,
-          height: 89000
-        }
-      },
-      (success, error) => {
-        if (!success) console.error('Print failed:', error);
-        slipWindow.close();
+    const slipWindow = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        sandbox: false
       }
-    );
+    });
+
+    const filePath = join(__dirname, '../../out/milk-slip.html')
+
+    const queryParams = new URLSearchParams({
+      account_no: slipData.account_no,
+      customer: slipData.customer,
+      date: slipData.date,
+      time: slipData.time,
+      shift: slipData.shift,
+      milk_type: slipData.milk_type,
+      qty: slipData.qty,
+      fat: slipData.fat,
+      snf: slipData.snf,
+      oth_rate: slipData.oth_rate,
+      base_rate: slipData.base_rate,
+      rate: slipData.rate,
+      total: slipData.total
+    }).toString();
+
+    const finalUrl = format({
+      protocol: 'file',
+      slashes: true,
+      pathname: filePath,
+      search: `?${queryParams}`
+    });
+
+    console.log("🖨️ Loading Slip URL:", finalUrl); // ✅ log to debug
+
+    slipWindow.loadURL(finalUrl);
+
+    slipWindow.webContents.on('did-finish-load', () => {
+      slipWindow.webContents.print(
+        {
+          silent: true,
+          printBackground: true,
+          scaleFactor: 100,
+          margins: { marginType: 'none' },
+          pageSize: {
+            width: 89000,
+            height: 89000
+          }
+        },
+        (success, error) => {
+          if (!success) console.error('Print failed:', error);
+          slipWindow.close();
+        }
+      );
+    });
   });
-});
 
 
 

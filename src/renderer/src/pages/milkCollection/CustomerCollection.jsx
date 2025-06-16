@@ -576,7 +576,7 @@ const CustomerCollection = () => {
                         <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                             <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                                 <tr>
-                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Unit', 'Date',].map((header) => (
+                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total',  'Date',].map((header) => (
                                         <th key={header} className="border px-4 py-3 text-sm text-black  font-bold tracking-wide text-center uppercase">
                                             {header}
                                         </th>
@@ -605,7 +605,7 @@ const CustomerCollection = () => {
                                                     <td className="border px-4 py-2 text-center text-green-700 font-semibold">₹{item.product_price}</td>
                                                     <td className="border px-4 py-2 text-center">{item.qty}</td>
                                                     <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
-                                                    <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td>
+                                                    {/* <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td> */}
                                                     <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
                                                 </tr>
                                             ))
