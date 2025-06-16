@@ -307,11 +307,11 @@ app.whenReady().then(() => {
         {
           silent: true,
           printBackground: true,
-          scaleFactor: 100,
+          // scaleFactor: 100,
           margins: { marginType: 'none' },
           pageSize: {
-            width: 89000,
-            height: 89000
+            width: 50000,
+            height: 300000 // Adjusted for slip size
           }
         },
         (success, error) => {

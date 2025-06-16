@@ -64,7 +64,7 @@ const Dashboard = () => {
           ))}
         </div>
       <div className="chartContainer">
-        <AreaChart />
+        {/* <AreaChart /> */}
         <BarChart />
         <PieChart />
       </div>

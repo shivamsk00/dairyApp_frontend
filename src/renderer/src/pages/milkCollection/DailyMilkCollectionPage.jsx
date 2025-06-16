@@ -406,7 +406,40 @@ const DailyMilkCollectionPage = () => {
         window.api.printSlip(slipData);
     };
 
+    // When Enter press Then cursor going to next empty input filed
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // prevent form submission
 
+            // Get all focusable input fields inside the form
+            const form = e.target.form;
+            const inputs = Array.from(form.querySelectorAll('input'))
+                .filter(input =>
+                    !input.disabled &&
+                    !input.readOnly &&
+                    input.type !== 'hidden' &&
+                    input.offsetParent !== null // skip hidden by CSS
+                );
+
+            const currentIndex = inputs.indexOf(e.target);
+
+            // Find the next empty input after current one
+            for (let i = currentIndex + 1; i < inputs.length; i++) {
+                if (inputs[i].value.trim() === '') {
+                    inputs[i].focus();
+                    return;
+                }
+            }
+
+            // If no empty input is found ahead, loop back from start
+            for (let i = 0; i < currentIndex; i++) {
+                if (inputs[i].value.trim() === '') {
+                    inputs[i].focus();
+                    return;
+                }
+            }
+        }
+    };
 
 
 
@@ -445,6 +478,7 @@ const DailyMilkCollectionPage = () => {
                                             value={type}
                                             checked={milkType === type}
                                             onChange={() => setMilkType(type)}
+                                            onKeyDown={handleKeyDown}
                                             className="peer hidden"
                                         />
                                         <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
@@ -454,28 +488,6 @@ const DailyMilkCollectionPage = () => {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Shift */}
-                        {/* <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
-                            <label className="font-semibold block mb-2 sm:mb-0 sm:mr-2">Shift:</label>
-                            <div className="flex flex-wrap gap-2">
-                                {['morning', 'evening'].map((shift) => (
-                                    <label key={shift} className="relative">
-                                        <input
-                                            type="radio"
-                                            name="shift"
-                                            value={shift}
-                                            checked={shiftValue === shift}
-                                            onChange={() => setShiftValue(shift)}
-                                            className="peer hidden"
-                                        />
-                                        <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
-                                            {shift}
-                                        </span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div> */}
 
 
                         {/* DATE + SHIFT SELECTION */}
@@ -489,6 +501,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.date}
                                     name="date"
                                     onChange={handleChange}
+                                    onKeyDown={handleKeyDown}
                                     max={new Date().toISOString().split('T')[0]} // max = today
                                     className="px-3 py-1 rounded border border-gray-400 text-gray-700 bg-white"
                                 />
@@ -504,6 +517,7 @@ const DailyMilkCollectionPage = () => {
                                                 type="radio"
                                                 name="shift"
                                                 value={shift}
+                                                onKeyDown={handleKeyDown}
                                                 checked={shiftValue === shift}
                                                 onChange={() => {
                                                     setShiftValue(shift)
@@ -533,6 +547,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.customer_account_number}
                                     onChange={handleChange}
                                     // Always enabled
+                                    onKeyDown={handleKeyDown}
                                     className=" w-full border rounded py-1 px-4 mt-1 "
                                 />
                             </div>
@@ -544,6 +559,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.quantity}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -559,6 +575,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.name}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -570,6 +587,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.fat}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -585,6 +603,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.mobile}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -596,6 +615,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.clr}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -611,6 +631,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.careof}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -622,6 +643,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.snf}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -639,6 +661,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.base_rate}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className=" w-full border rounded py-1 px-4 bg-orange-100"
                                 />
                             </div>
@@ -650,6 +673,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.other_price}
                                     onChange={handleChange}
                                     disabled={isDisabled}
+                                    onKeyDown={handleKeyDown}
                                     className=" w-full border rounded py-1 px-4 bg-orange-100 "
                                 />
                             </div>
@@ -659,6 +683,7 @@ const DailyMilkCollectionPage = () => {
                                     type="number"
                                     name="rate"
                                     value={form.rate}
+                                    onKeyDown={handleKeyDown}
                                     readOnly
                                     className=" w-full border rounded py-1 px-4 bg-orange-100"
                                 />
@@ -669,6 +694,7 @@ const DailyMilkCollectionPage = () => {
                                     type="number"
                                     name="total_amount"
                                     value={form.total_amount}
+                                    onKeyDown={handleKeyDown}
                                     readOnly
                                     className=" w-full border rounded py-1 px-4 bg-orange-100"
                                 />
@@ -680,20 +706,6 @@ const DailyMilkCollectionPage = () => {
                     {/* Submit Button */}
                     <div className="mt-1 flex items-center gap-4">
                         {/* Print Toggle Checkbox */}
-                        {/* <label className="flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="print"
-                                checked={form.print || false}
-                                onChange={handleChange}
-                                className="peer hidden"
-                            />
-                            <span className="relative inline-block w-10 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-blue-600">
-                                <span className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-[24px]"></span>
-                            </span>
-                            <span className="ml-2 text-sm font-medium text-white">Print</span>
-                        </label> */}
-
                         <ToggleButton
                             label="Print"
                             enabled={toggle}
@@ -704,6 +716,7 @@ const DailyMilkCollectionPage = () => {
                         <input
                             type="submit"
                             disabled={isDisabled}
+                            onKeyDown={handleKeyDown}
                             className={`px-3 text-white py-1 rounded bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                             value="Submit"
                         />

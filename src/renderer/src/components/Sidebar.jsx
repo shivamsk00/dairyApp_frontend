@@ -114,7 +114,7 @@ const Sidbar = () => {
 
       <div className="p-4 bg-slate-800 text-center text-sm">
         <p>Version 1.0.0</p>
-        <p>© 2025 by Production House </p>
+        <p>© 2025 | Powered by Production House </p>
 
       </div>
     </div>
