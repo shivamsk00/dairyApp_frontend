@@ -295,48 +295,135 @@ const DailyMilkCollectionPage = () => {
 
 
     // REDNDER BUTTONS 
+    // const renderPageButtons = () => {
+    //     const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+    //     const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+    //     const pages = [];
+    //     for (let i = groupStart; i <= groupEnd; i++) {
+    //         pages.push(
+    //             <button
+    //                 key={i}
+    //                 className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+    //                 onClick={() => fetchMilkCollectionDetails(i)}
+    //             >
+    //                 {i}
+    //             </button>
+    //         );
+    //     }
+
+    //     return (
+    //         <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+    //             {/* Previous Page Button */}
+    //             <button
+    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+    //                 onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
+    //                 disabled={currentPage === 1}
+    //             >
+    //                 <MdArrowBackIos size={18} />
+    //             </button>
+
+    //             {/* Page Number Buttons */}
+    //             {pages}
+
+    //             {/* Next Page Button */}
+    //             <button
+    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+    //                 onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
+    //                 disabled={currentPage === totalPages}
+    //             >
+    //                 <MdArrowForwardIos size={18} />
+    //             </button>
+    //         </div>
+    //     );
+    // };
+
+
     const renderPageButtons = () => {
         const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
         const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
-
+    
         const pages = [];
-        for (let i = groupStart; i <= groupEnd; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-                    onClick={() => fetchMilkCollectionDetails(i)}
-                >
-                    {i}
-                </button>
-            );
+    
+        // Always show first page
+        if (groupStart > 1) {
+          pages.push(
+            <button
+              key={1}
+              className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+              onClick={() => fetchMilkCollectionDetails(1)}
+            >
+              1
+            </button>
+          );
+    
+          if (groupStart > 2) {
+            pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+          }
         }
-
+    
+        // Middle buttons
+        for (let i = groupStart; i <= groupEnd; i++) {
+          pages.push(
+            <button
+              key={i}
+              className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+              onClick={() => fetchMilkCollectionDetails(i)}
+            >
+              {i}
+            </button>
+          );
+        }
+    
+        // Always show last page
+        if (groupEnd < totalPages) {
+          if (groupEnd < totalPages - 1) {
+            pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+          }
+    
+          pages.push(
+            <button
+              key={totalPages}
+              className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+              onClick={() => fetchMilkCollectionDetails(totalPages)}
+            >
+              {totalPages}
+            </button>
+          );
+        }
+    
         return (
-            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
-                {/* Previous Page Button */}
-                <button
-                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-                    onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    <MdArrowBackIos size={18} />
-                </button>
-
-                {/* Page Number Buttons */}
-                {pages}
-
-                {/* Next Page Button */}
-                <button
-                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-                    onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                >
-                    <MdArrowForwardIos size={18} />
-                </button>
-            </div>
+          <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+            {/* Previous Button */}
+            <button
+              className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+              onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <MdArrowBackIos size={18} />
+            </button>
+    
+            {pages}
+    
+            {/* Next Button */}
+            <button
+              className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+              onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <MdArrowForwardIos size={18} />
+            </button>
+          </div>
         );
-    };
+      };
+
+
+
+
+
+
+
+
 
     // Printer button
     //     const handlePrint = () => {
@@ -452,7 +539,7 @@ const DailyMilkCollectionPage = () => {
 
     const isDisabled = !form.name; // Disable if customer data not loaded
     return (
-        <div className="w-full">
+        <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800">
 
 
 
@@ -460,10 +547,10 @@ const DailyMilkCollectionPage = () => {
             <CommonHeader heading={"Milk Collection"} />
 
             {/* Grid for Form and Receipt */}
-            <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4 ">
+            <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4  ">
                 {/* === Left: Milk Collection Form === */}
                 {/* === Left: Milk Collection Form === */}
-                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 rounded shadow-md w-full" style={{ width: '100%' }}>
+                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 rounded shadow-md w-full border border-dashed" style={{ width: '100%' }}>
                     {/* Milk Type & Shift in a row */}
                     <div className="mb-4 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
                         {/* Milk Type */}
@@ -725,7 +812,7 @@ const DailyMilkCollectionPage = () => {
 
                 </form>
 
-                <div className="bg-gray-50 p-6 rounded shadow-md border h-fit" style={{ width: '100%' }}>
+                <div className="bg-gray-50 p-6 rounded shadow-md  h-fit border border-dashed border-slate-700" style={{ width: '100%' }}>
                     {
                         customerWallet && (
                             <div className=" bg-gradient-to-r w-1/2 from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-3 mb-3 shadow-lg flex  space-x-3 font-semibold justify-between ">
@@ -768,11 +855,11 @@ const DailyMilkCollectionPage = () => {
 
 
             {/* === Bottom Table === */}
-            <div className="mt-8 w-full">
-                <h3 className="text-xl font-semibold mb-4">Submitted Collections</h3>
+            <div className="mt-4 m-auto w-[98%] bg-slate-700 shadow-lg  p-4 rounded-xl border border-dashed" >
+                <h3 className="text-xl font-semibold mb-4 text-white">Submitted Collections</h3>
                 <div className="overflow-x-auto">
                     <table className="min-w-full border border-gray-300 text-sm">
-                        <thead className="bg-blue-600 text-white">
+                        <thead className="bg-slate-800 text-white">
                             <tr>
                                 {['SR NO.', 'Date', 'Milk Type', 'AC No', 'Name', 'QTY', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Total Amount', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>

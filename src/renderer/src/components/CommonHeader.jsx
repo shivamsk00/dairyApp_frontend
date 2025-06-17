@@ -26,7 +26,7 @@ const CommonHeader = ({ heading }) => {
         hour12: true,
     });
     return (
-        <div className="w-full flex items-center justify-between border-b border-gray-200 px-4 py-3 mb-4 bg-blue-950 shadow-sm">
+        <div className="w-full flex items-center justify-between border-b border-gray-200 px-4 py-3 mb-4 bg-slate-800 shadow-sm">
             <h1 className="text-lg sm:text-xl font-semibold text-white">
                 {heading}
             </h1>

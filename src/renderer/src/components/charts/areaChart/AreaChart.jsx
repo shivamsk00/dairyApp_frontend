@@ -46,7 +46,7 @@ const AreaChart = () => {
   });
 
   return (
-    <div id="areaChart">
+    <div id="areaChart" className='bg-white p-4 rounded-lg shadow-lg flex-1'>
       <ReactApexChart
         options={state.options}
         series={state.series}

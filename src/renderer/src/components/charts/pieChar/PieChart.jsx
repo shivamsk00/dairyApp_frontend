@@ -52,7 +52,7 @@ const PieChart = () => {
   if (loading) return <p>Loading chart...</p>;
 
   return (
-    <div id="pie-chart">
+    <div id="pie-chart" className='bg-white p-4 rounded-lg shadow-lg flex-1'>
       <ReactApexChart
         options={{ ...chartOptions, labels }}
         series={series}

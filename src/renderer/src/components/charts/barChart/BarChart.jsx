@@ -67,7 +67,7 @@ const BarChart = () => {
   }, [weeklyMilkSale]);
 
   return (
-    <div id="bar-chart">
+    <div id="bar-chart" className='bg-white p-4 rounded-lg shadow-lg flex-1'>
       <ReactApexChart
         options={chartData.options}
         series={chartData.series}

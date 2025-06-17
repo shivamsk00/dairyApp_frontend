@@ -58,13 +58,13 @@ const Dashboard = () => {
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
 
         {/* Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 bg-white p-8 rounded-lg shadow-md">
           {cardData.map((item) => (
             <Card key={item.id} data={item} />
           ))}
         </div>
-      <div className="chartContainer">
-        {/* <AreaChart /> */}
+      <div className="chartContainer bg-white p-8 rounded-lg shadow-xl">
+        <AreaChart />
         <BarChart />
         <PieChart />
       </div>

@@ -27,10 +27,10 @@ const Sidbar = () => {
 
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-2 px-4 py-3 rounded-md transition-colors 
-     ${isActive ? 'bg-indigo-100 text-black' : 'text-gray-200 hover:bg-indigo-100 hover:text-black'}`;
+     ${isActive ? 'bg-slate-700 text-white' : 'text-gray-200 hover:bg-slate-700 hover:text-white'}`;
 
   return (
-    <div className="bg-slate-800 text-white w-64 min-h-screen flex flex-col shadow-lg">
+    <div className="bg-slate-800 text-white w-72 min-h-screen flex flex-col shadow-lg">
       <div className="p-4 bg-slate-800 flex justify-center">
         {/* <img src={dairyLogo} alt="Logo" className="h-14 object-contain" /> */}
         <h1 className='text-xl font-bold'>सरस डेयरी </h1>
@@ -47,8 +47,8 @@ const Sidbar = () => {
 
         <li
           className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'milk-collection'
-              ? 'bg-indigo-100 text-black cursor-not-allowed opacity-50'
-              : 'text-gray-200 hover:bg-indigo-100 hover:text-black'
+              ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
+              : 'text-gray-200 hover:bg-slate-700 hover:text-white'
             }`}
           onClick={() => {
             if (isSecondWindowOpen) return;
@@ -94,8 +94,8 @@ const Sidbar = () => {
 
         <li
           className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'customer-collection'
-              ? 'bg-indigo-100 text-black cursor-not-allowed opacity-50'
-              : 'text-gray-200 hover:bg-indigo-100 hover:text-black'
+              ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
+              : 'text-gray-200 hover:bg-slate-700 hover:text-white'
             }`}
           onClick={() => {
             if (isCustomerCollectionOpen) return;
