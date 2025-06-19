@@ -84,6 +84,7 @@ const EditCustomerPage = () => {
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {[
+                        { label: 'Account Number', name: 'account_number' },
                         { label: 'Customer Type', name: 'customer_type' },
                         { label: 'Name', name: 'name' },
                         { label: 'Email', name: 'email' },
@@ -96,7 +97,6 @@ const EditCustomerPage = () => {
                         { label: 'Care of', name: 'careof' },
                         { label: 'Pincode', name: 'pincode' },
                         { label: 'Designation', name: 'designation' },
-                        { label: 'Account Number', name: 'account_number' },
                     ].map(({ label, name }) => (
                         <div key={name}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
