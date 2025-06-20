@@ -97,12 +97,62 @@ const DailyMilkCollectionPage = () => {
 
 
     // 
+    // useEffect(() => {
+    //     const fat = form.fat?.trim();
+    //     const clr = form.clr?.trim();
+    //     const snf = form.snf?.trim();
+
+    //     if ((clr || snf) && fat) {
+    //         const timeout = setTimeout(() => {
+    //             const getBaseRateFetch = async () => {
+    //                 try {
+    //                     const res = await getMilkRate(fat, clr, snf);
+    //                     console.log("milk rate fetch", res);
+
+    //                     setForm(prev => ({
+    //                         ...prev,
+    //                         fat: res.fat || "",
+    //                         clr: res.clr || "",
+    //                         snf: res.snf || "",
+    //                         base_rate: res.rate || '',
+    //                     }));
+
+    //                     if (res.fat && res.clr && res.snf) {
+    //                         CustomToast.success("SNF CLR AND FAT FOUND", "top-center")
+    //                     }
+    //                     if (res.fat == '') {
+    //                         CustomToast.warn("FAT not found", "top-center")
+    //                     }
+    //                     if (res.clr == '') {
+    //                         CustomToast.warn("CLR not found", "top-center")
+    //                     }
+    //                     if (res.snf == '') {
+    //                         CustomToast.warn("SNF not found", "top-center")
+    //                     }
+    //                     if (res.rate == '') {
+    //                         CustomToast.warn("RATE not found", "top-center")
+    //                     }
+
+
+    //                 } catch (error) {
+    //                     console.error("Error fetching milk rate:", error);
+    //                 }
+    //             };
+
+    //             getBaseRateFetch();
+    //         }, 1000);
+
+    //         return () => clearTimeout(timeout);
+    //     }
+    // }, [form.clr, form.snf, form.fat]);
+
     useEffect(() => {
         const fat = form.fat?.trim();
         const clr = form.clr?.trim();
         const snf = form.snf?.trim();
 
-        if ((clr || snf) && fat) {
+        // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
+        if ((snf || clr) && fat) {
             const timeout = setTimeout(() => {
                 const getBaseRateFetch = async () => {
                     try {
@@ -117,35 +167,26 @@ const DailyMilkCollectionPage = () => {
                             base_rate: res.rate || '',
                         }));
 
-                        if (res.fat && res.clr && res.snf) {
-                            CustomToast.success("SNF CLR AND FAT FOUND", "top-center")
+                        // 🎯 Prioritize meaningful feedback
+                        if (res.rate) {
+                            CustomToast.success("Rate Found", "top-center");
+                        } else {
+                            if (!res.fat) CustomToast.warn("FAT not found", "top-center");
+                            if (!res.snf) CustomToast.warn("SNF not found", "top-center");
+                            if (!res.clr) CustomToast.warn("CLR not found", "top-center");
+                            CustomToast.warn("RATE not found", "top-center");
                         }
-                        if (res.fat == '') {
-                            CustomToast.warn("FAT not found", "top-center")
-                        }
-                        if (res.clr == '') {
-                            CustomToast.warn("CLR not found", "top-center")
-                        }
-                        if (res.snf == '') {
-                            CustomToast.warn("SNF not found", "top-center")
-                        }
-                        if (res.rate == '') {
-                            CustomToast.warn("RATE not found", "top-center")
-                        }
-
-
                     } catch (error) {
                         console.error("Error fetching milk rate:", error);
                     }
                 };
 
                 getBaseRateFetch();
-            }, 1000);
+            }, 800); // Slightly quicker feedback
 
             return () => clearTimeout(timeout);
         }
-    }, [form.clr, form.snf, form.fat]);
-
+    }, [form.fat, form.snf, form.clr]);
 
 
 
@@ -342,80 +383,80 @@ const DailyMilkCollectionPage = () => {
     const renderPageButtons = () => {
         const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
         const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
-    
+
         const pages = [];
-    
+
         // Always show first page
         if (groupStart > 1) {
-          pages.push(
-            <button
-              key={1}
-              className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-              onClick={() => fetchMilkCollectionDetails(1)}
-            >
-              1
-            </button>
-          );
-    
-          if (groupStart > 2) {
-            pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
-          }
+            pages.push(
+                <button
+                    key={1}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchMilkCollectionDetails(1)}
+                >
+                    1
+                </button>
+            );
+
+            if (groupStart > 2) {
+                pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
         }
-    
+
         // Middle buttons
         for (let i = groupStart; i <= groupEnd; i++) {
-          pages.push(
-            <button
-              key={i}
-              className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-              onClick={() => fetchMilkCollectionDetails(i)}
-            >
-              {i}
-            </button>
-          );
+            pages.push(
+                <button
+                    key={i}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchMilkCollectionDetails(i)}
+                >
+                    {i}
+                </button>
+            );
         }
-    
+
         // Always show last page
         if (groupEnd < totalPages) {
-          if (groupEnd < totalPages - 1) {
-            pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
-          }
-    
-          pages.push(
-            <button
-              key={totalPages}
-              className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-              onClick={() => fetchMilkCollectionDetails(totalPages)}
-            >
-              {totalPages}
-            </button>
-          );
+            if (groupEnd < totalPages - 1) {
+                pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+            }
+
+            pages.push(
+                <button
+                    key={totalPages}
+                    className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+                    onClick={() => fetchMilkCollectionDetails(totalPages)}
+                >
+                    {totalPages}
+                </button>
+            );
         }
-    
+
         return (
-          <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
-            {/* Previous Button */}
-            <button
-              className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-              onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <MdArrowBackIos size={18} />
-            </button>
-    
-            {pages}
-    
-            {/* Next Button */}
-            <button
-              className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-              onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <MdArrowForwardIos size={18} />
-            </button>
-          </div>
+            <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+                {/* Previous Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    <MdArrowBackIos size={18} />
+                </button>
+
+                {pages}
+
+                {/* Next Button */}
+                <button
+                    className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+                    onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                >
+                    <MdArrowForwardIos size={18} />
+                </button>
+            </div>
         );
-      };
+    };
 
 
 
