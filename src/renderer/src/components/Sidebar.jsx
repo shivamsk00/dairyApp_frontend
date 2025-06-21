@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import useToggleStore from '../zustand/useToggleStore';
 import { MdOutlineDashboard } from 'react-icons/md';
-import { FaChartBar, FaDatabase, FaFileAlt, FaRupeeSign, FaUser } from 'react-icons/fa';
+import { FaChartBar, FaDatabase, FaFileAlt, FaRupeeSign, FaUser, FaChevronDown } from 'react-icons/fa';
 import { GiHeavyCollar } from 'react-icons/gi';
 import { FaArrowTrendUp, FaGear, FaMoneyBillTrendUp } from 'react-icons/fa6';
 import { NavLink, useLocation } from 'react-router-dom';
 import dairyLogo from "../assets/dairyLogo.png";
+import { TbReceiptRupee } from 'react-icons/tb';
 
 const Sidbar = () => {
   const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false);
   const [isCustomerCollectionOpen, setIsCustomerCollectionOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const isMenu = useToggleStore(state => state.isMenu);
   const location = useLocation();
 
@@ -23,7 +25,15 @@ const Sidbar = () => {
       setIsCustomerCollectionOpen(false);
       setActiveItem(null);
     });
-  }, []);
+
+    // Auto open submenu if route matches
+    if (
+      location.pathname.startsWith('/subscribe') ||
+      location.pathname.startsWith('/subscribe-history')
+    ) {
+      setIsSubMenuOpen(true);
+    }
+  }, [location.pathname]);
 
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-2 px-4 py-3 rounded-md transition-colors 
@@ -33,7 +43,7 @@ const Sidbar = () => {
     <div className="bg-slate-800 text-white w-72 min-h-screen flex flex-col shadow-lg">
       <div className="p-4 bg-slate-800 flex justify-center">
         {/* <img src={dairyLogo} alt="Logo" className="h-14 object-contain" /> */}
-        <h1 className='text-xl font-bold'>सरस डेयरी </h1>
+        <h1 className='text-xl font-bold'>सरस डेयरी</h1>
       </div>
 
       <ul className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -46,10 +56,11 @@ const Sidbar = () => {
         </NavLink>
 
         <li
-          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'milk-collection'
+          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${
+            activeItem === 'milk-collection'
               ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
               : 'text-gray-200 hover:bg-slate-700 hover:text-white'
-            }`}
+          }`}
           onClick={() => {
             if (isSecondWindowOpen) return;
             window.api.openSecondWindow();
@@ -93,10 +104,11 @@ const Sidbar = () => {
         </NavLink>
 
         <li
-          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'customer-collection'
+          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${
+            activeItem === 'customer-collection'
               ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
               : 'text-gray-200 hover:bg-slate-700 hover:text-white'
-            }`}
+          }`}
           onClick={() => {
             if (isCustomerCollectionOpen) return;
             window.api.openCusomerWindow();
@@ -107,6 +119,56 @@ const Sidbar = () => {
           <GiHeavyCollar /> <span>Products Sold</span>
         </li>
 
+        {/* Subscription Dropdown */}
+        <li>
+          <div
+            onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
+            className={`flex items-center justify-between px-4 py-3 rounded-md cursor-pointer transition-colors ${
+              location.pathname.startsWith('/subscribe') || location.pathname.startsWith('/subscribe-history')
+                ? 'bg-slate-700 text-white'
+                : 'text-gray-200 hover:bg-slate-700 hover:text-white'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <TbReceiptRupee /> <span>Subscription</span>
+            </span>
+            <FaChevronDown
+              className={`transition-transform duration-300 ${
+                isSubMenuOpen ? 'rotate-180' : 'rotate-0'
+              }`}
+            />
+          </div>
+
+          {isSubMenuOpen && (
+            <ul className="ml-8 mt-1 space-y-1 text-sm">
+              <NavLink
+                to="/subscribe"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                  }`
+                }
+              >
+                Subscription Plans
+              </NavLink>
+              <NavLink
+                to="/subscribe-history"
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                  }`
+                }
+              >
+                Subscription History
+              </NavLink>
+            </ul>
+          )}
+        </li>
+
         <NavLink to="/settings" className={linkClasses}>
           <FaGear /> <span>Settings</span>
         </NavLink>
@@ -115,7 +177,6 @@ const Sidbar = () => {
       <div className="p-4 bg-slate-800 text-center text-sm">
         <p>Version 1.0.0</p>
         <p>© 2025 | Powered by Production House </p>
-
       </div>
     </div>
   );

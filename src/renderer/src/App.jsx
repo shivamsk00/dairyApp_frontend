@@ -35,6 +35,8 @@ import MilkDispatchPage from './pages/supliers/MilkDispatchPage';
 import AddHeadDairy from './pages/headDairy/AddHeadDairy';
 import EditHeadDairy from './pages/headDairy/EditHeadDairy';
 import HeadDairyPage from './pages/headDairy/HeadDairyPage';
+import SubscriptionPage from './pages/subscribe/SubscriptionPage';
+import SubscriptionHistoryPage from './pages/subscribe/SubscriptionHistoryPage';
 
 function App() {
 
@@ -99,6 +101,8 @@ useEffect(() => {
             <Route path="headDairy" element={<AddHeadDairy />} />
             <Route path="alldairymaster" element={<HeadDairyPage />} />
             <Route path="editHeadDairy" element={<EditHeadDairy />} />
+            <Route path="subscribe" element={<SubscriptionPage />} />
+            <Route path="subscribe-history" element={<SubscriptionHistoryPage />} />
 
           </Route>
 
