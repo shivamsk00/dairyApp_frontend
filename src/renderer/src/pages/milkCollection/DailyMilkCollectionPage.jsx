@@ -609,7 +609,7 @@ const DailyMilkCollectionPage = () => {
                                             onKeyDown={handleKeyDown}
                                             className="peer hidden"
                                         />
-                                        <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
+                                        <span className="capitalize px-2  rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-blue-100 hover:bg-green-100">
                                             {type}
                                         </span>
                                     </label>
@@ -676,7 +676,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     // Always enabled
                                     onKeyDown={handleKeyDown}
-                                    className=" w-full border rounded py-1 px-4 mt-1 "
+                                    className=" w-full border rounded  px-4 mt-1 "
                                 />
                             </div>
                             <div>
@@ -688,7 +688,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                         </div>
@@ -704,7 +704,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                             <div>
@@ -716,7 +716,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                         </div>
@@ -732,7 +732,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                             <div>
@@ -744,7 +744,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                         </div>
@@ -760,7 +760,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                             <div>
@@ -772,7 +772,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className={`w-full border rounded py-1 px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                         </div>
@@ -790,7 +790,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                    className=" w-full border rounded  px-4 bg-orange-100"
                                 />
                             </div>
                             <div>
@@ -802,7 +802,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
-                                    className=" w-full border rounded py-1 px-4 bg-orange-100 "
+                                    className=" w-full border rounded  px-4 bg-orange-100 "
                                 />
                             </div>
                             <div>
@@ -813,7 +813,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.rate}
                                     onKeyDown={handleKeyDown}
                                     readOnly
-                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                    className=" w-full border rounded  px-4 bg-orange-100"
                                 />
                             </div>
                             <div>
@@ -824,7 +824,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.total_amount}
                                     onKeyDown={handleKeyDown}
                                     readOnly
-                                    className=" w-full border rounded py-1 px-4 bg-orange-100"
+                                    className=" w-full border rounded  px-4 bg-orange-100"
                                 />
                             </div>
                         </div>

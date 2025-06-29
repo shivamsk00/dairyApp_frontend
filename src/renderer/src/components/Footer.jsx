@@ -10,8 +10,8 @@ const Footer = () => {
         }}>
             <h2 style={{
                 fontWeight:'semibold',
-                opacity:0.5
-            }}>Developed by Shivam & Akshay</h2>
+                opacity:0.8
+            }}>Powered by Production House</h2>
         </div>
     )
 }

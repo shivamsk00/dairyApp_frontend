@@ -120,7 +120,7 @@ const Sidbar = () => {
         </li>
 
         {/* Subscription Dropdown */}
-        <li>
+        {/* <li>
           <div
             onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
             className={`flex items-center justify-between px-4 py-3 rounded-md cursor-pointer transition-colors ${
@@ -167,7 +167,7 @@ const Sidbar = () => {
               </NavLink>
             </ul>
           )}
-        </li>
+        </li> */}
 
         <NavLink to="/settings" className={linkClasses}>
           <FaGear /> <span>Settings</span>
