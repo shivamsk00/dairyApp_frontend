@@ -260,7 +260,7 @@ const AddCustomerPage = () => {
                 <div className="w-full">
                     <button
                         type="submit"
-                        className="w-full addUserBtn text-white py-2 px-4 rounded"
+                        className="w-full bg-blue-400 text-white py-2 px-4 rounded"
                     >
                         Add Customer
                     </button>

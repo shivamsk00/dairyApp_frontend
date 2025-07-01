@@ -130,7 +130,7 @@ const RateChartPage = () => {
   }, []);
 
   return (
-    <div className="h-[93%] p-4 flex flex-col overflow-hidden ">
+    <div className="h-[93%] p-4 flex flex-col">
       <div className="flex justify-end gap-2 mb-3">
         <input
           ref={fileInputRef}
@@ -153,7 +153,47 @@ const RateChartPage = () => {
 
       <h1 className="text-lg font-semibold mb-3">SNF Rate Chart</h1>
 
-      <div className="overflow-auto border border-gray-400 rounded-md h-full">
+      <div className="w-[80%] h-[70%] overflow-auto top-48 border fixed border-gray-400 rounded-md">
+        <div className="w-full overflow-auto">
+          <table className="table-auto min-w-full text-sm">
+            <thead className="sticky top-0 bg-slate-600 text-white z-10">
+              <tr>
+                <th className="sticky left-0 z-20 bg-slate-700 px-2 py-1 border border-gray-400 text-center">
+                  FAT / SNF
+                </th>
+                {SNF_VALUES.map((snf) => (
+                  <th key={snf} className="px-2 py-1 border border-gray-400 text-center whitespace-nowrap">
+                    {snf.toFixed(1)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-slate-800 text-white">
+              {rateData.map((row, fatIndex) => (
+                <tr key={fatIndex}>
+                  <td className="sticky left-0 z-10 bg-slate-700 px-2 py-1 text-center font-medium border border-gray-400">
+                    {row.fat}
+                  </td>
+                  {row.snfRates.map((cell, snfIndex) => (
+                    <td key={snfIndex} className="border border-gray-500">
+                      <input
+                        type="text"
+                        value={cell.rate}
+                        onChange={(e) => handleChange(fatIndex, snfIndex, e.target.value)}
+                        className="w-16 bg-slate-800 border-none outline-none text-white text-center py-1 rounded focus:ring-2 focus:ring-blue-400"
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+      {/* <div className="overflow-auto border border-gray-400 rounded-md h-full">
         <table className="table-auto min-w-max text-sm">
           <thead className="sticky top-0 bg-slate-600 text-white z-10">
             <tr>
@@ -187,7 +227,7 @@ const RateChartPage = () => {
             ))}
           </tbody>
         </table>
-      </div>
+      </div> */}
     </div>
   );
 };

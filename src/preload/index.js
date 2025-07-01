@@ -9,6 +9,18 @@ const api = {
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
   printSlip: (data) => ipcRenderer.send('print-slip', data),
 
+  onUpdateMessage: (callback) => {
+    ipcRenderer.on('update-message', (event, message) => {
+      callback(message)
+    })
+  },
+
+  onUpdateProgress: (callback) => {
+    ipcRenderer.on('update-progress', (_, percent) => callback(percent))
+  },
+
+  // 📦 App Info
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   // 🧩 Utility
   invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
   on: (channel, callback) => ipcRenderer.on(channel, (event, data) => callback(data)),

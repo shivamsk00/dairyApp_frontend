@@ -5,6 +5,7 @@ import AreaChart from '../../components/charts/areaChart/AreaChart'
 import BarChart from '../../components/charts/barChart/BarChart'
 import PieChart from '../../components/charts/pieChar/PieChart'
 import useHomeStore from '../../zustand/useHomeStore'
+import { toast } from 'react-toastify'
 
 
 
@@ -53,16 +54,42 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  const [message, setMessage] = useState('');
+  const [progress, setProgress] = useState(null); // null = no progress
+
+  useEffect(() => {
+    window.api.onUpdateMessage((msg) => {
+      setMessage(msg);
+    });
+
+    window.api.onUpdateProgress((percent) => {
+      setProgress(percent);
+    });
+  }, []);
+
+
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
 
-        {/* Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 bg-white p-8 rounded-lg shadow-md">
-          {cardData.map((item) => (
-            <Card key={item.id} data={item} />
-          ))}
-        </div>
+      {
+        message !== '' && (
+          <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
+            <p>{message}</p>
+            {progress !== null && (
+              <div className="w-full mt-1 bg-gray-700 rounded overflow-hidden h-2">
+                <div
+                  className="bg-green-500 h-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+
+
       <div className="chartContainer bg-white p-8 rounded-lg shadow-xl">
         <AreaChart />
         <BarChart />

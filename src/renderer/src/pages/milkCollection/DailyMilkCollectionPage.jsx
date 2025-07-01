@@ -16,6 +16,9 @@ import ToggleButton from '../../components/ToggleButton';
 
 
 const DailyMilkCollectionPage = () => {
+
+
+
     const nav = useNavigate()
     const today = new Date().toISOString().split('T')[0];
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
@@ -35,9 +38,33 @@ const DailyMilkCollectionPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
-    const [toggle, setToggle] = useState(false)
+    const [toggle, setToggle] = useState(true)
+    const [milkCollectiionAvergeData, setMilkCollectionAvergeData] = useState({
+        avg_base_rate: '',
+        avg_fat: '',
+        avg_snf: '',
+        milk_total: '',
+        other_price_total: '',
+        total_amount: '',
+    });
+
 
     const [customerWallet, setCustomerWallet] = useState(null)
+
+    function checkTimeOfDay() {
+        const now = new Date();
+        const hour = now.getHours(); // Returns 0-23
+
+        if (hour < 12) {
+            setShiftValue("morning")
+
+        } else {
+            setShiftValue("evening")
+        }
+    }
+
+
+
     const [form, setForm] = useState({
         customer_account_number: '',
         name: '',
@@ -94,57 +121,6 @@ const DailyMilkCollectionPage = () => {
         }
     };
 
-
-
-    // 
-    // useEffect(() => {
-    //     const fat = form.fat?.trim();
-    //     const clr = form.clr?.trim();
-    //     const snf = form.snf?.trim();
-
-    //     if ((clr || snf) && fat) {
-    //         const timeout = setTimeout(() => {
-    //             const getBaseRateFetch = async () => {
-    //                 try {
-    //                     const res = await getMilkRate(fat, clr, snf);
-    //                     console.log("milk rate fetch", res);
-
-    //                     setForm(prev => ({
-    //                         ...prev,
-    //                         fat: res.fat || "",
-    //                         clr: res.clr || "",
-    //                         snf: res.snf || "",
-    //                         base_rate: res.rate || '',
-    //                     }));
-
-    //                     if (res.fat && res.clr && res.snf) {
-    //                         CustomToast.success("SNF CLR AND FAT FOUND", "top-center")
-    //                     }
-    //                     if (res.fat == '') {
-    //                         CustomToast.warn("FAT not found", "top-center")
-    //                     }
-    //                     if (res.clr == '') {
-    //                         CustomToast.warn("CLR not found", "top-center")
-    //                     }
-    //                     if (res.snf == '') {
-    //                         CustomToast.warn("SNF not found", "top-center")
-    //                     }
-    //                     if (res.rate == '') {
-    //                         CustomToast.warn("RATE not found", "top-center")
-    //                     }
-
-
-    //                 } catch (error) {
-    //                     console.error("Error fetching milk rate:", error);
-    //                 }
-    //             };
-
-    //             getBaseRateFetch();
-    //         }, 1000);
-
-    //         return () => clearTimeout(timeout);
-    //     }
-    // }, [form.clr, form.snf, form.fat]);
 
     useEffect(() => {
         const fat = form.fat?.trim();
@@ -249,12 +225,13 @@ const DailyMilkCollectionPage = () => {
 
     };
 
+
     const handleSubmit = async (e) => {
+        e.preventDefault();
         form.shift = shiftValue
         form.milk_type = milkType
         setCustomerWallet(null)
         console.log("form value", form)
-        e.preventDefault();
         try {
             const res = await submitMilkCollection(form);
             console.log("submited milk collection response", res)
@@ -301,9 +278,19 @@ const DailyMilkCollectionPage = () => {
             const res = await getMilkCollectionRecord(page);
             console.log("milk collection data fetch success", res);
             if (res.status_code == 200) {
-                setCollections(res.data.data);
+                setCollections(res.data);
                 setCurrentPage(res.data.current_page);
                 setTotalPages(res.data.last_page);
+                setMilkCollectionAvergeData({
+                    avg_base_rate: res.avg_base_rate || '',
+                    avg_fat: res.avg_fat || '',
+                    avg_snf: res.avg_snf || '',
+                    milk_total: res.milk_total || '',
+                    other_price_total: res.other_price_total || '',
+                    total_amount: res.total_amount || '',
+                })
+
+
             } else {
                 CustomToast.error(res.message);
             }
@@ -311,6 +298,8 @@ const DailyMilkCollectionPage = () => {
             console.error("Error fetching data:", error);
         }
     };
+
+
 
     useEffect(() => {
         fetchMilkCollectionDetails()
@@ -335,49 +324,6 @@ const DailyMilkCollectionPage = () => {
 
 
 
-    // REDNDER BUTTONS 
-    // const renderPageButtons = () => {
-    //     const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
-    //     const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
-
-    //     const pages = [];
-    //     for (let i = groupStart; i <= groupEnd; i++) {
-    //         pages.push(
-    //             <button
-    //                 key={i}
-    //                 className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-    //                 onClick={() => fetchMilkCollectionDetails(i)}
-    //             >
-    //                 {i}
-    //             </button>
-    //         );
-    //     }
-
-    //     return (
-    //         <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
-    //             {/* Previous Page Button */}
-    //             <button
-    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-    //                 onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
-    //                 disabled={currentPage === 1}
-    //             >
-    //                 <MdArrowBackIos size={18} />
-    //             </button>
-
-    //             {/* Page Number Buttons */}
-    //             {pages}
-
-    //             {/* Next Page Button */}
-    //             <button
-    //                 className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-    //                 onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
-    //                 disabled={currentPage === totalPages}
-    //             >
-    //                 <MdArrowForwardIos size={18} />
-    //             </button>
-    //         </div>
-    //     );
-    // };
 
 
     const renderPageButtons = () => {
@@ -466,48 +412,8 @@ const DailyMilkCollectionPage = () => {
 
 
 
-    // Printer button
-    //     const handlePrint = () => {
-    //         const slipHtml = `
-    //     <html>
-    //       <head>
-    //         <style>
-    //           @media print {
-    //             body {
-    //               margin: 0;
-    //               font-size: 12px;
-    //               padding: 0;
-    //             }
-    //           }
-    //           body {
-    //             font-family: Arial, sans-serif;
-    //             padding: 10px;
-    //             line-height: 1.4;
-    //           }
-    //           h2 {
-    //             margin: 0 0 10px 0;
-    //           }
-    //           p {
-    //             margin: 4px 0;
-    //           }
-    //         </style>
-    //       </head>
-    //       <body>
-    //         <h2>Milk Slip</h2>
-    //         <p>Customer Name: John Doe</p>
-    //         <p>Date: 15-06-2025</p>
-    //         <p>Quantity: 5 Litres</p>
-    //         <p>Total: ₹150</p>
-    //       </body>
-    //     </html>
-    //   `;
-
-    //         // Call to main process via preload bridge
-    //         window.api.printSlip(slipHtml);
-    //     };
-
-
     const handlePrint = (data) => {
+        const shift = data.shift === 'morning' ? 'M' : 'E';
         const now = new Date();
         const localTime = now.toLocaleTimeString('en-IN', {
             hour: '2-digit',
@@ -519,14 +425,14 @@ const DailyMilkCollectionPage = () => {
             account_no: data.customer_account_number,
             customer: data.name,
             date: data.date,
-            time: localTime, // ✅ Local time here
-            shift: data.shift,
-            milk_type: data.milk_type,
+            time: `${localTime}(${shift})`, // ✅ Local time here
+            // shift: data.shift,
+            // milk_type: data.milk_type,
             qty: `${data.quantity} / Ltr`,
             fat: data.fat,
             snf: data.snf,
-            oth_rate: data.oth_rate || "0.00",
-            base_rate: data.base_rate,
+            // oth_rate: data.oth_rate || "0.00",
+            // base_rate: data.base_rate,
             rate: `${data.base_rate} / Ltr`,
             total: data.total_amount
         };
@@ -537,9 +443,6 @@ const DailyMilkCollectionPage = () => {
     // When Enter press Then cursor going to next empty input filed
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // prevent form submission
-
-            // Get all focusable input fields inside the form
             const form = e.target.form;
             const inputs = Array.from(form.querySelectorAll('input'))
                 .filter(input =>
@@ -551,19 +454,27 @@ const DailyMilkCollectionPage = () => {
 
             const currentIndex = inputs.indexOf(e.target);
 
-            // Find the next empty input after current one
-            for (let i = currentIndex + 1; i < inputs.length; i++) {
-                if (inputs[i].value.trim() === '') {
-                    inputs[i].focus();
-                    return;
-                }
-            }
+            // Check if all inputs are filled
+            const allFilled = inputs.every(input => input.value.trim() !== '');
 
-            // If no empty input is found ahead, loop back from start
-            for (let i = 0; i < currentIndex; i++) {
-                if (inputs[i].value.trim() === '') {
-                    inputs[i].focus();
-                    return;
+            if (allFilled) {
+                // Submit the form if all inputs are filled
+                form.requestSubmit(); // HTML5 API that triggers submit handler
+            } else {
+                // Find the next empty input after current one
+                for (let i = currentIndex + 1; i < inputs.length; i++) {
+                    if (inputs[i].value.trim() === '') {
+                        inputs[i].focus();
+                        return;
+                    }
+                }
+
+                // If no empty input is found ahead, loop back from start
+                for (let i = 0; i < currentIndex; i++) {
+                    if (inputs[i].value.trim() === '') {
+                        inputs[i].focus();
+                        return;
+                    }
                 }
             }
         }
@@ -573,25 +484,24 @@ const DailyMilkCollectionPage = () => {
 
 
 
+    useEffect(() => {
+        checkTimeOfDay();
 
+    }, [])
 
 
 
 
     const isDisabled = !form.name; // Disable if customer data not loaded
     return (
-        <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800">
-
-
-
-
+        <div className="w-full h-screen  bg-gradient-to-r from-slate-900 to-slate-800">
             <CommonHeader heading={"Milk Collection"} />
 
             {/* Grid for Form and Receipt */}
             <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4  ">
                 {/* === Left: Milk Collection Form === */}
                 {/* === Left: Milk Collection Form === */}
-                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 rounded shadow-md w-full border border-dashed" style={{ width: '100%' }}>
+                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 h-auto rounded shadow-md w-full border border-dashed" style={{ width: '100%' }}>
                     {/* Milk Type & Shift in a row */}
                     <div className="mb-4 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
                         {/* Milk Type */}
@@ -688,6 +598,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
+                                    required
                                     className={`w-full border rounded px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -716,6 +627,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
+                                    required
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -772,6 +684,7 @@ const DailyMilkCollectionPage = () => {
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
+                                    required
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -854,7 +767,7 @@ const DailyMilkCollectionPage = () => {
                 </form>
 
                 <div className="bg-gray-50 p-6 rounded shadow-md  h-fit border border-dashed border-slate-700" style={{ width: '100%' }}>
-                    {
+                    {/* {
                         customerWallet && (
                             <div className=" bg-gradient-to-r w-1/2 from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-3 mb-3 shadow-lg flex  space-x-3 font-semibold justify-between ">
                                 <p className="text-xl font-bold">
@@ -865,7 +778,7 @@ const DailyMilkCollectionPage = () => {
                                 </p>
                             </div>
                         )
-                    }
+                    } */}
 
                     <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
 
@@ -899,10 +812,10 @@ const DailyMilkCollectionPage = () => {
             <div className="mt-4 m-auto w-[98%] bg-slate-700 shadow-lg  p-4 rounded-xl border border-dashed" >
                 <h3 className="text-xl font-semibold mb-4 text-white">Submitted Collections</h3>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full border border-gray-300 text-sm">
+                    <table className="w-full border border-gray-300 text-sm">
                         <thead className="bg-slate-800 text-white">
                             <tr>
-                                {['SR NO.', 'Date', 'Milk Type', 'AC No', 'Name', 'QTY', 'FAT', 'SNF', 'SHIFT', 'Rate', 'Total Amount', 'Action'].map(header => (
+                                {['SR NO.', 'AC No', 'Name', 'Date', 'SHIFT', 'QTY', 'FAT', 'SNF', 'Rate', 'Other Rate', 'Total Amount', 'Balance', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
                                 ))}
                             </tr>
@@ -921,18 +834,18 @@ const DailyMilkCollectionPage = () => {
                                         className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
                                     >
                                         <td className="border px-2 py-1 text-center">{i + 1}</td>
-                                        <td className="border px-2 py-1 text-center">{item.date}</td>
-                                        <td className="border px-2 py-1 text-center">{item.milk_type}</td>
                                         <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
                                         <td className="border px-2 py-1 text-center">{item.name}</td>
+                                        <td className="border px-2 py-1 text-center">{item.date}</td>
+                                        <td className="border px-2 py-1 text-center">{item.shift}</td>
                                         <td className="border px-2 py-1 text-center">{item.quantity}</td>
                                         <td className="border px-2 py-1 text-center">{item.fat}</td>
                                         <td className="border px-2 py-1 text-center">{item.snf}</td>
-                                        <td className="border px-2 py-1 text-center">{item.shift}</td>
                                         <td className="border px-2 py-1 text-center">{item.base_rate}</td>
-                                        <td className="border px-2 py-1 text-center">
-                                            {(item.base_rate * item.quantity).toFixed(2)}
-                                        </td>
+                                        <td className="border px-2 py-1 text-center">{item.other_price}</td>
+                                        <td className="border px-2 py-1 text-center">{item.total_amount}</td>
+
+                                        <td className="border px-2 py-1 text-center">{item.customer.wallet}</td>
                                         <td className="border px-2 py-1 text-center">
                                             <div className="flex gap-2 justify-center">
                                                 <button
@@ -967,12 +880,48 @@ const DailyMilkCollectionPage = () => {
                                     </tr>
                                 ))
                             )}
+
                         </tbody>
                     </table>
+                    <div className=' w-full flex justify-between items-center p-2 bg-yellow-100'>
+                        <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Ave. Fat</p>
+                            <p className='font-bold'>{milkCollectiionAvergeData.avg_fat}</p>
+                        </div>
+                        <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Ave. Snf</p>
+                            <p className='font-bold'>{milkCollectiionAvergeData.avg_snf}</p>
+                        </div>
+                        <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Ave. Base Rate</p>
+                            <p className='font-bold'>₹{milkCollectiionAvergeData.avg_base_rate}</p>
+                        </div>
 
+                        <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Other Price</p>
+                            <p className='font-bold'>₹{milkCollectiionAvergeData.other_price_total || 0}</p>
+                        </div>
+                        <div className='text-sm flex-1  text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Total Amount</p>
+                            <p className='font-bold'>₹{Number(milkCollectiionAvergeData.total_amount).toFixed(2)}</p>
+                        </div>
+                    </div>
+
+                    {/* <div className="fixed bottom-0 left-0 right-0 bg-yellow-100 text-sm text-gray-800 font-semibold px-4 py-2 border-t border-gray-300 flex flex-wrap gap-4 justify-start items-center z-50">
+                        <p>MLT - Milk Type, B.R - Base Rate, C - Count, A - Average, S - Sum</p>
+                        <div className="flex gap-6 flex-wrap">
+                            <p>A - 8</p>
+                            <p>A - 44.12</p>
+                            <p>A - 626</p>
+                            <p>S - 142.11</p>
+                            <p>S - 4883.77 + 0</p>
+                            <p>A - 35.13</p>
+                            <p>S - 4883.75</p>
+                        </div>
+                    </div> */}
                 </div>
             </div>
-            {renderPageButtons()}
+            {/* {renderPageButtons()} */}
 
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">

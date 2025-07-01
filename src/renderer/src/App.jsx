@@ -35,82 +35,80 @@ import MilkDispatchPage from './pages/supliers/MilkDispatchPage';
 import AddHeadDairy from './pages/headDairy/AddHeadDairy';
 import EditHeadDairy from './pages/headDairy/EditHeadDairy';
 import HeadDairyPage from './pages/headDairy/HeadDairyPage';
-import SubscriptionPage from './pages/subscribe/SubscriptionPage';
-import SubscriptionHistoryPage from './pages/subscribe/SubscriptionHistoryPage';
 
 function App() {
 
-useEffect(() => {
-  const preloader = document.getElementById('preloader')
-  if (preloader) {
-    setTimeout(() => {
-      preloader.style.opacity = '0'
-      preloader.style.transition = 'opacity 0.3s ease'
-
-      // Remove the element after the transition
+  useEffect(() => {
+    const preloader = document.getElementById('preloader')
+    if (preloader) {
       setTimeout(() => {
-        preloader.remove()
-      }, 300)
-    }, 1000) // 3 seconds delay before starting fade-out
-  }
-}, [])
+        preloader.style.opacity = '0'
+        preloader.style.transition = 'opacity 0.3s ease'
+
+        // Remove the element after the transition
+        setTimeout(() => {
+          preloader.remove()
+        }, 300)
+      }, 1000) // 3 seconds delay before starting fade-out
+    }
+  }, [])
 
 
-    return (
-      <HashRouter>
-        <NavigatorSetter /> {/* 👈 Set navigator once here */}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot_password" element={<ForgotPasswordPage />} />
-          <Route path="/set_forgot_password" element={<SetForgotPasswordPage />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
+  return (
+    <HashRouter>
+      <NavigatorSetter /> {/* 👈 Set navigator once here */}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot_password" element={<ForgotPasswordPage />} />
+        <Route path="/set_forgot_password" element={<SetForgotPasswordPage />} />
 
-            <Route path="category" element={<CategoreisPage />} />
-            <Route path="addcategory" element={<AddCategoriesPage />} />
-            <Route path="customer" element={<CustomerPage />} />
-            <Route path="milkcollection" element={<MilkCollectionPage />} />
-            <Route path="editMilkCollection" element={<EditMilkCollectionPage />} />
-            <Route path="dailyMilkSale" element={<MilkSalesPage />} />
-            <Route path="milkDispatch" element={<MilkDispatchPage />} />
-            <Route path="ratechart" element={<RateChartPage />} />
-            <Route path="paymentregister" element={<PaymentLedgerPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="settings" element={<Setting />} />
-            <Route path="addCustomer" element={<AddCustomerPage />} />
-            <Route path="editCustomer" element={<EditCustomerPage />} />
-            <Route path="changePassword" element={<ChangePassword />} />
-            <Route path="snfchart" element={<SnfChartPage />} />
-            <Route path="AddProductPage" element={<AddProductPage />} />
-            <Route path="editProduct" element={<EditProductPage />} />
-            {/* product stock  */}
-            <Route path="addStock" element={<AddStockPage />} />
-            <Route path="editStock" element={<EditeStockPage />} />
-            {/* Head Dairy  */}
-            <Route path="headDairy" element={<AddHeadDairy />} />
-            <Route path="alldairymaster" element={<HeadDairyPage />} />
-            <Route path="editHeadDairy" element={<EditHeadDairy />} />
-            <Route path="subscribe" element={<SubscriptionPage />} />
-            <Route path="subscribe-history" element={<SubscriptionHistoryPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
 
-          </Route>
+          <Route path="category" element={<CategoreisPage />} />
+          <Route path="addcategory" element={<AddCategoriesPage />} />
+          <Route path="customer" element={<CustomerPage />} />
+          <Route path="milkcollection" element={<MilkCollectionPage />} />
+          <Route path="editMilkCollection" element={<EditMilkCollectionPage />} />
+          <Route path="dailyMilkSale" element={<MilkSalesPage />} />
+          <Route path="milkDispatch" element={<MilkDispatchPage />} />
+          <Route path="ratechart" element={<RateChartPage />} />
+          <Route path="paymentregister" element={<PaymentLedgerPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="settings" element={<Setting />} />
+          <Route path="addCustomer" element={<AddCustomerPage />} />
+          <Route path="editCustomer" element={<EditCustomerPage />} />
+          <Route path="changePassword" element={<ChangePassword />} />
+          <Route path="snfchart" element={<SnfChartPage />} />
+          <Route path="AddProductPage" element={<AddProductPage />} />
+          <Route path="editProduct" element={<EditProductPage />} />
+          {/* product stock  */}
+          <Route path="addStock" element={<AddStockPage />} />
+          <Route path="editStock" element={<EditeStockPage />} />
+          {/* Head Dairy  */}
+          <Route path="headDairy" element={<AddHeadDairy />} />
+          <Route path="alldairymaster" element={<HeadDairyPage />} />
+          <Route path="editHeadDairy" element={<EditHeadDairy />} />
 
-          <Route path="milk-collection" element={<MilkCollectionPage />} />
-          <Route path="customer-collection" element={<CustomerCollection />} />
-        </Routes>
-      </HashRouter>
-    );
-  }
 
-  export default App;
+        </Route>
+
+        <Route path="milk-collection" element={<MilkCollectionPage />} />
+        <Route path="customer-collection" element={<CustomerCollection />} />
+      </Routes>
+    </HashRouter>
+  );
+}
+
+export default App;

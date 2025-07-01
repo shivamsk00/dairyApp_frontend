@@ -1,10 +1,14 @@
 {
   "name": "dairyapp",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "Production House",
   "homepage": "https://electron-vite.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivamsk00/dairyApp_frontend"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -17,12 +21,31 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux"
   },
+  "build": {
+    "appId": "com.dairy.productionhouse.store",
+    "productName": "DairyApp",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "shivamsk00",
+        "repo": "dairyApp_frontend",
+        "releaseType": "release"
+      }
+    ]
+  },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@tanstack/react-table": "^8.21.3",
     "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
+    "electron-updater": "^6.6.2",
     "lucide-react": "^0.515.0",
     "react-apexcharts": "^1.7.0",
     "react-icons": "^5.5.0",
