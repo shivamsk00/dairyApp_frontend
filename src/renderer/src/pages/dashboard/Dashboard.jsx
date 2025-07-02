@@ -54,7 +54,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(null);
   const [progress, setProgress] = useState(null); // null = no progress
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const Dashboard = () => {
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
 
       {
-        message !== '' && (
+        message && (
           <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
             <p>{message}</p>
             {progress !== null && (
