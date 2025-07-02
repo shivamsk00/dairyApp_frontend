@@ -84,7 +84,7 @@ const DailyMilkCollectionPage = () => {
         print: false,
     });
 
-    // FETCH ALL CUSTOMER
+    // FETCH PER CUSTOMER
     const fetchCustomerDetailByAccountNumber = async (accountNo) => {
         // console.log('Fetching customer details for:', accountNo);
         try {
@@ -121,48 +121,93 @@ const DailyMilkCollectionPage = () => {
         }
     };
 
+    // useEffect(() => {
+    //     const fat = form.fat?.trim();
+    //     const clr = form.clr?.trim();
+    //     const snfRaw = form.snf?.trim();
 
-    useEffect(() => {
-        const fat = form.fat?.trim();
-        const clr = form.clr?.trim();
-        const snf = form.snf?.trim();
+    //     // Don't proceed if no FAT or no SNF/CLR
+    //     if (!(fat && (snfRaw || clr))) return;
 
-        // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
-        if ((snf || clr) && fat) {
-            const timeout = setTimeout(() => {
-                const getBaseRateFetch = async () => {
-                    try {
-                        const res = await getMilkRate(fat, clr, snf);
-                        console.log("milk rate fetch", res);
+    //     const timeout = setTimeout(() => {
+    //         const getBaseRateFetch = async () => {
+    //             try {
+    //                 // 👇 Use `.0` only for fetching (do not change UI)
+    //                 const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
 
-                        setForm(prev => ({
-                            ...prev,
-                            fat: res.fat || "",
-                            clr: res.clr || "",
-                            snf: res.snf || "",
-                            base_rate: res.rate || '',
-                        }));
+    //                 const res = await getMilkRate(fat, clr, snfForApi);
+    //                 console.log("milk rate fetch", res);
 
-                        // 🎯 Prioritize meaningful feedback
-                        if (res.rate) {
-                            CustomToast.success("Rate Found", "top-center");
-                        } else {
-                            if (!res.fat) CustomToast.warn("FAT not found", "top-center");
-                            if (!res.snf) CustomToast.warn("SNF not found", "top-center");
-                            if (!res.clr) CustomToast.warn("CLR not found", "top-center");
-                            CustomToast.warn("RATE not found", "top-center");
-                        }
-                    } catch (error) {
-                        console.error("Error fetching milk rate:", error);
-                    }
-                };
+    //                 setForm(prev => ({
+    //                     ...prev,
+    //                     fat: res.fat || "",
+    //                     clr: res.clr || "",
+    //                     snf: res.snf || prev.snf,
+    //                     base_rate: res.rate || '',
+    //                 }));
 
-                getBaseRateFetch();
-            }, 800); // Slightly quicker feedback
+    //                 if (res.rate) {
+    //                     CustomToast.success("Rate Found", "top-center");
+    //                 } else {
+    //                     if (!res.fat) CustomToast.warn("FAT not found", "top-center");
+    //                     if (!res.snf) CustomToast.warn("SNF not found", "top-center");
+    //                     if (!res.clr) CustomToast.warn("CLR not found", "top-center");
+    //                     CustomToast.warn("RATE not found", "top-center");
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error fetching milk rate:", error);
+    //             }
+    //         };
 
-            return () => clearTimeout(timeout);
-        }
-    }, [form.fat, form.snf, form.clr]);
+    //         getBaseRateFetch();
+    //     }, 800);
+
+    //     return () => clearTimeout(timeout);
+    // }, [form.fat, form.snf, form.clr]);
+
+
+
+    // useEffect(() => {
+    //     const fat = form.fat?.trim();
+    //     const clr = form.clr?.trim();
+    //     const snf = form.snf?.trim();
+
+    //     // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
+    //     if ((snf || clr) && fat) {
+    //         const timeout = setTimeout(() => {
+    //             const getBaseRateFetch = async () => {
+    //                 try {
+    //                     const res = await getMilkRate(fat, clr, snf);
+    //                     console.log("milk rate fetch", res);
+
+    //                     setForm(prev => ({
+    //                         ...prev,
+    //                         fat: res.fat || "",
+    //                         clr: res.clr || "",
+    //                         snf: res.snf || "",
+    //                         base_rate: res.rate || '',
+    //                     }));
+
+    //                     // 🎯 Prioritize meaningful feedback
+    //                     if (res.rate) {
+    //                         CustomToast.success("Rate Found", "top-center");
+    //                     } else {
+    //                         if (!res.fat) CustomToast.warn("FAT not found", "top-center");
+    //                         if (!res.snf) CustomToast.warn("SNF not found", "top-center");
+    //                         if (!res.clr) CustomToast.warn("CLR not found", "top-center");
+    //                         CustomToast.warn("RATE not found", "top-center");
+    //                     }
+    //                 } catch (error) {
+    //                     console.error("Error fetching milk rate:", error);
+    //                 }
+    //             };
+
+    //             getBaseRateFetch();
+    //         }, 800); // Slightly quicker feedback
+
+    //         return () => clearTimeout(timeout);
+    //     }
+    // }, [form.fat, form.snf, form.clr]);
 
 
 
@@ -186,22 +231,22 @@ const DailyMilkCollectionPage = () => {
 
 
     // Debounced fetch on account number input
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (form.customer_account_number) {
-                fetchCustomerDetailByAccountNumber(form.customer_account_number);
-            } else {
-                setForm((prev) => ({
-                    ...prev,
-                    name: '',
-                    careof: '',
-                    mobile: '',
-                }));
-            }
-        }, 500); // wait 500ms after user stops typing
+    // useEffect(() => {
+    //     const timeout = setTimeout(() => {
+    //         if (form.customer_account_number) {
+    //             fetchCustomerDetailByAccountNumber(form.customer_account_number);
+    //         } else {
+    //             setForm((prev) => ({
+    //                 ...prev,
+    //                 name: '',
+    //                 careof: '',
+    //                 mobile: '',
+    //             }));
+    //         }
+    //     }, 500); // wait 500ms after user stops typing
 
-        return () => clearTimeout(timeout); // cleanup on next input
-    }, [form.customer_account_number]);
+    //     return () => clearTimeout(timeout); // cleanup on next input
+    // }, [form.customer_account_number]);
 
 
 
@@ -261,6 +306,7 @@ const DailyMilkCollectionPage = () => {
                     date: today,
                 })
                 fetchMilkCollectionDetails()
+                setTimeout(() => accRef.current?.focus(), 300);
             } else {
 
                 CustomToast.error(res.message || res.errors)
@@ -491,10 +537,23 @@ const DailyMilkCollectionPage = () => {
 
 
 
+    const accRef = useRef(null);
+    const qtyRef = useRef(null);
+    const nameRef = useRef(null);
+    const fatRef = useRef(null);
+    const mobileRef = useRef(null);
+    const clrRef = useRef(null);
+    const careOfRef = useRef(null);
+    const snfRef = useRef(null);
+    const otherRateRef = useRef(null);
+    const submitRef = useRef(null);
+
+
+
 
     const isDisabled = !form.name; // Disable if customer data not loaded
     return (
-        <div className="w-full h-screen  bg-gradient-to-r from-slate-900 to-slate-800">
+        <div className="w-full min-h-screen  bg-gradient-to-r from-slate-900 to-slate-800">
             <CommonHeader heading={"Milk Collection"} />
 
             {/* Grid for Form and Receipt */}
@@ -579,13 +638,35 @@ const DailyMilkCollectionPage = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium " >Account No</label>
-                                <input
+                                {/* <input
                                     type="text"
                                     name="customer_account_number"
                                     value={form.customer_account_number}
                                     onChange={handleChange}
                                     // Always enabled
                                     onKeyDown={handleKeyDown}
+                                    className=" w-full border rounded  px-4 mt-1 "
+                                /> */}
+
+                                <input
+                                    type="text"
+                                    name="customer_account_number"
+                                    value={form.customer_account_number}
+                                    onChange={(e) => setForm({ ...form, customer_account_number: e.target.value })}
+                                    ref={accRef}
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            const accNo = form.customer_account_number.trim();
+                                            if (accNo) {
+                                                await fetchCustomerDetailByAccountNumber(accNo);
+                                                isDisabled && qtyRef.current?.focus();
+                                            } else {
+                                                setForm((prev) => ({ ...prev, name: '', careof: '', mobile: '' }));
+                                            }
+                                        }
+                                    }}
+                                    placeholder="Enter Account Number"
                                     className=" w-full border rounded  px-4 mt-1 "
                                 />
                             </div>
@@ -597,7 +678,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.quantity}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={qtyRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
                                     required
                                     className={`w-full border rounded px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
@@ -614,7 +696,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.name}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={nameRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -626,7 +709,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.fat}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={fatRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
                                     required
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
@@ -643,7 +727,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.mobile}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={mobileRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -655,7 +740,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.clr}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={clrRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && careOfRef.current?.focus()}
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
@@ -671,13 +757,14 @@ const DailyMilkCollectionPage = () => {
                                     value={form.careof}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={careOfRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium ">SNF (%)</label>
-                                <input
+                                {/* <input
                                     type="number"
                                     name="snf"
                                     value={form.snf}
@@ -686,7 +773,45 @@ const DailyMilkCollectionPage = () => {
                                     onKeyDown={handleKeyDown}
                                     required
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                /> */}
+                                <input
+                                    type="text"
+                                    value={form.snf}
+                                    required
+                                    disabled={isDisabled}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    name="snf"
+                                    onChange={(e) => setForm({ ...form, snf: e.target.value })}
+                                    ref={snfRef}
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            const fat = form.fat?.trim();
+                                            const clr = form.clr?.trim();
+                                            const snfRaw = form.snf?.trim();
+                                            if (!(fat && (clr || snfRaw))) return;
+                                            const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+                                            try {
+                                                const res = await getMilkRate(fat, clr, snfForApi);
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    fat: res.fat || "",
+                                                    clr: res.clr || "",
+                                                    snf: res.snf || prev.snf,
+                                                    base_rate: res.rate || '',
+                                                }));
+                                                res.rate
+                                                    ? CustomToast.success("Rate Found", "top-center")
+                                                    : CustomToast.warn("RATE not found", "top-center");
+                                            } catch (err) {
+                                                console.error("Rate error", err);
+                                            }
+                                            otherRateRef.current?.focus();
+                                        }
+                                    }}
+                                    placeholder="Enter SNF"
                                 />
+
                             </div>
                         </div>
                     </div>
@@ -702,7 +827,8 @@ const DailyMilkCollectionPage = () => {
                                     value={form.base_rate}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
+                                    ref={otherRateRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.focus()}
                                     className=" w-full border rounded  px-4 bg-orange-100"
                                 />
                             </div>
@@ -757,9 +883,16 @@ const DailyMilkCollectionPage = () => {
                         <input
                             type="submit"
                             disabled={isDisabled}
-                            onKeyDown={handleKeyDown}
                             className={`px-3 text-white py-1 rounded bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                             value="Submit"
+                            ref={submitRef}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSubmit();
+                                    setTimeout(() => accRef.current?.focus(), 300);
+                                }
+                            }}
                         />
                     </div>
 
@@ -855,7 +988,7 @@ const DailyMilkCollectionPage = () => {
                                                         setIsModalOpen(true);
                                                     }}
                                                 >
-                                                    <FaEye size={14} />
+                                                    <FaEye size={12} />
                                                 </button>
                                                 <button
                                                     onClick={() => {

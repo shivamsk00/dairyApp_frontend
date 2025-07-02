@@ -7,7 +7,7 @@ const Setting = () => {
 
       {/* Business Info Section */}
       <section className="bg-blue-100 p-6 rounded-lg shadow-md w-full">
-        <h2 className="text-xl font-semibold text-blue-900 mb-4">Power by Production House</h2>
+        {/* <h2 className="text-xl font-semibold text-blue-900 mb-4">Power by Production House</h2> */}
         <h2 className="text-xl font-semibold text-blue-900 mb-4">Business Info</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input type="text" placeholder="Dairy Name" className="input" />

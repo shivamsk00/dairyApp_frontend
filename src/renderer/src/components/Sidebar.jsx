@@ -47,7 +47,7 @@ const Sidbar = () => {
      ${isActive ? 'bg-slate-700 text-white' : 'text-gray-200 hover:bg-slate-700 hover:text-white'}`;
 
   return (
-    <div className="bg-slate-800 text-white w-72 min-h-screen flex flex-col shadow-lg overflow-y-auto">
+    <div className="bg-slate-800 text-white w-72 h-screen flex flex-col shadow-lg overflow-y-auto">
       <div className="p-4 bg-slate-800 flex justify-center">
         {/* <img src={dairyLogo} alt="Logo" className="h-14 object-contain" /> */}
         <h1 className='text-xl font-bold'>सरस डेयरी</h1>
