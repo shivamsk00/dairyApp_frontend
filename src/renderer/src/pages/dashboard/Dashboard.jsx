@@ -79,7 +79,7 @@ const Dashboard = () => {
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
 
       {
-        message && message !== 'update-not-available' && (
+        message && message !== 'No update available.' && (
           <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
             <p>{message}</p>
             {progress !== null && (
@@ -95,7 +95,7 @@ const Dashboard = () => {
       }
 
 
-      {message && message !== 'update-not-available' && (
+      {message && message !== 'No update available.' && (
         <button
           onClick={handleUpdateClick}
           className="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition fixed bottom-20 right-10 z-50"
