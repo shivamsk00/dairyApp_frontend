@@ -88,7 +88,7 @@ const Register = () => {
     return (
         <div className="min-h-screen flex flex-col gap-6 items-center justify-center bg-gradient-to-r from-orange-100 to-orange-400 px-4 py-8">
             <h1 className='font-bold text-3xl text-orange-500'>Welcome Dairy Software</h1>
-            <form className="w-full max-w-6xl bg-white shadow-xl rounded-lg overflow-hidden flex flex-col lg:flex-row">
+            <div className="w-full max-w-6xl bg-white shadow-xl rounded-lg overflow-hidden flex flex-col lg:flex-row">
                 {/* Left Side Illustration */}
                 <div className="hidden lg:flex w-full lg:w-1/2 bg-slate-900 justify-center items-center p-6 relative">
                     <div className="text-white text-center">
@@ -144,7 +144,7 @@ const Register = () => {
                         <Link to="/login" className="text-blue-600 hover:underline font-medium">Login</Link>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };
