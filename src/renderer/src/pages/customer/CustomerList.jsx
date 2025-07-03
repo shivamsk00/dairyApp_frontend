@@ -45,9 +45,9 @@ const [totalPages, setTotalPages] = useState(null);
 
     if (res.status_code == 200) {
       const newData = res.data.data;
-
       setRowData(prev => [...prev, ...newData]); // ✅ Append
       setCurrentPage(res.data.current_page);
+      console.log('data',newData);
       setHasMore(res.data.current_page < res.data.last_page); // ✅ Stop if last
     } else {
       CustomToast.error(res.message);
@@ -105,6 +105,10 @@ useEffect(() => {
       id: 'srNo',
       header: 'Sr No.',
       cell: ({ row }) => row.index + 1,
+    }),
+    columnHelper.accessor('account_number', {
+      header: 'Account No.',
+      cell: info => info.getValue(),
     }),
     columnHelper.accessor('name', {
       header: 'Customer Name',

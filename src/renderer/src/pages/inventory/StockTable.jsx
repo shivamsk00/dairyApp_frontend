@@ -203,7 +203,7 @@ const StockTable = () => {
                          <table className="min-w-full border border-gray-300 text-sm">
                               <thead className="bg-gray-100">
                                    <tr>
-                                        {['Sr No.', 'Product Name', 'Quantity', 'Stock Type', 'Status', 'Action'].map(header => (
+                                        {['Sr No.', 'Product Name', 'Quantity', 'Date','Stock Type', 'Status', 'Action'].map(header => (
                                              <th key={header} className="border px-2 py-1">{header}</th>
                                         ))}
                                    </tr>
@@ -219,6 +219,7 @@ const StockTable = () => {
                                                   <td className="border px-2 py-1 text-center">{i + 1}</td>
                                                   <td className="border px-2 py-1 text-center">{item?.product?.name || <span className='text-red-600 font-medium'>Product Removed</span>}</td>
                                                   <td className="border px-2 py-1 text-center">{item.quantity}</td>
+                                                  <td className="border px-2 py-1 text-center">{item.date}</td>
                                                   <td className="border px-2 py-1 text-center">{item.stock_type}</td>
                                                   <td className="border px-2 py-1 text-center">
                                                        <button

@@ -71,7 +71,7 @@ const AddCategoriesPage = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`py-2 px-6 rounded text-white ${loading && 'bg-gray-600'}`}
+                            className={`py-2 px-6 rounded bg-blue-500 text-white ${loading && 'bg-gray-600'}`}
                         >
                             {loading ? "Please wait.." : "Add Category"}
                         </button>
