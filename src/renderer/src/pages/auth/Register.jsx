@@ -61,7 +61,7 @@ const Register = () => {
             password: formData.confirmPassword
         };
         const res = await register_sendOtp(otpPayload);
-        if (res?.status_code === 200) {
+        if (res?.status_code == 200) {
             setOtpSent(true);
             setTimer(600);
         }
@@ -77,7 +77,7 @@ const Register = () => {
             mobile: formData.phone
         };
         const res = await register_otpVerify(registerPayload);
-        if (res?.status_code === 200) {
+        if (res?.status_code == 200) {
             toast.success(res.message);
             nav('/login');
         } else {
