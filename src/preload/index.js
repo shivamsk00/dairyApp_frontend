@@ -8,6 +8,7 @@ const api = {
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
   printSlip: (data) => ipcRenderer.send('print-slip', data),
+  upadateStartDownload: (data) => ipcRenderer.send('start-update-download', data),
 
   onUpdateMessage: (callback) => {
     ipcRenderer.on('update-message', (event, message) => {

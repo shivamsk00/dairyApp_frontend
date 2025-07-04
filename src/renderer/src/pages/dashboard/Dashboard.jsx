@@ -70,7 +70,7 @@ const Dashboard = () => {
 
   // handle download update
   const handleUpdateClick = () => {
-    window.api.send('start-update-download');
+    window.api.upadateStartDownload('start-update-download');
   };
 
 
