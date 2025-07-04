@@ -222,10 +222,13 @@ const useHomeStore = create((set) => ({
 
   getMilkCollectionRecord: async (page) => {
     try {
-      const res = await api.get(`/all-milk-collection?page=${page}`)
+      const res = await api.get(`/all-milk-collection`)
+      console.log("response===>", res)
       return res.data
     } catch (error) {
+      console.log("error print in milk collection", error)
       return error.response.data
+
     }
   },
 

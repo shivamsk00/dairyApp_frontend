@@ -11,6 +11,7 @@ import EditMilkCollectionModal from './EditMilkCollectionPage';
 import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 import CommonHeader from '../../components/CommonHeader';
 import ToggleButton from '../../components/ToggleButton';
+import { BsFillPrinterFill } from 'react-icons/bs';
 
 
 
@@ -21,6 +22,14 @@ const DailyMilkCollectionPage = () => {
 
     const nav = useNavigate()
     const today = new Date().toISOString().split('T')[0];
+
+    // function getTodayDate() {
+    //     const offset = new Date().getTimezoneOffset() * 60000;
+    //     return new Date(Date.now() - offset).toISOString().split("T")[0];
+    // }
+    // const today = getTodayDate(); // ✅ timezone-safe
+    // console.log("today date", today)
+
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
     const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
@@ -48,6 +57,16 @@ const DailyMilkCollectionPage = () => {
         total_amount: '',
     });
 
+    const [dayTotal, setDayTotal] = useState({
+        morning_total_amount: 0,
+        morning_total_milk: 0,
+        evening_total_amount: 0,
+        evening_total_milk: 0,
+        total_amount: 0,
+        milk_total: 0,
+    })
+    const [morningCollection, setMorningCollection] = useState([]);
+    const [eveningCollection, setEveningCollection] = useState([]);
 
     const [customerWallet, setCustomerWallet] = useState(null)
 
@@ -322,11 +341,13 @@ const DailyMilkCollectionPage = () => {
     const fetchMilkCollectionDetails = async (page = 1) => {
         try {
             const res = await getMilkCollectionRecord(page);
-            console.log("milk collection data fetch success", res);
+            console.log("milk collection data fetch success====>", res);
             if (res.status_code == 200) {
-                setCollections(res.data);
-                setCurrentPage(res.data.current_page);
-                setTotalPages(res.data.last_page);
+                setCollections(res.morning);
+                setMorningCollection(res.morning);
+                setEveningCollection(res.evening);
+                // setCurrentPage(res.data.current_page);
+                // setTotalPages(res.data.last_page);
                 setMilkCollectionAvergeData({
                     avg_base_rate: res.avg_base_rate || '',
                     avg_fat: res.avg_fat || '',
@@ -334,6 +355,15 @@ const DailyMilkCollectionPage = () => {
                     milk_total: res.milk_total || '',
                     other_price_total: res.other_price_total || '',
                     total_amount: res.total_amount || '',
+                })
+
+                setDayTotal({
+                    morning_total_amount: res.morning_total_amount || 0,
+                    morning_total_milk: res.morning_total_milk || 0,
+                    evening_total_amount: res.evening_total_amount || 0,
+                    evening_total_milk: res.evening_total_milk || 0,
+                    total_amount: res.total_amount || 0,
+                    milk_total: res.milk_total || 0,
                 })
 
 
@@ -551,20 +581,22 @@ const DailyMilkCollectionPage = () => {
 
 
 
+
+
     const isDisabled = !form.name; // Disable if customer data not loaded
     return (
-        <div className="w-full min-h-screen  bg-gradient-to-r from-slate-900 to-slate-800">
+        <div className="w-full min-h-screen  bg-white">
             <CommonHeader heading={"Milk Collection"} />
 
             {/* Grid for Form and Receipt */}
             <div className="grid md:grid-cols-2 gap-10 w-full mx-auto p-4  ">
                 {/* === Left: Milk Collection Form === */}
                 {/* === Left: Milk Collection Form === */}
-                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 h-auto rounded shadow-md w-full border border-dashed" style={{ width: '100%' }}>
+                <form onSubmit={handleSubmit} className="bg-slate-800 p-3 h-auto rounded shadow-md w-full " style={{ width: '100%' }}>
                     {/* Milk Type & Shift in a row */}
-                    <div className="mb-4 flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+                    <div className="mb-4 flex lg:flex-row gap-4 lg:gap-8 w-full">
                         {/* Milk Type */}
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
+                        {/* <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-4 rounded border border-gray-400 w-full lg:w-auto">
                             <label className="font-semibold block mb-2 sm:mb-0 sm:mr-2">Milk Type:</label>
                             <div className="flex flex-wrap gap-2">
                                 {['cow', 'buffalo', 'other'].map((type) => (
@@ -584,11 +616,11 @@ const DailyMilkCollectionPage = () => {
                                     </label>
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
 
 
                         {/* DATE + SHIFT SELECTION */}
-                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-3 rounded border border-gray-400 w-full lg:w-auto">
+                        <div className="flex  justify-between sm:flex-row gap-4 items-start sm:items-center bg-slate-300 shadow-xl p-3 rounded border border-gray-400 w-full ">
 
                             {/* DATE INPUT */}
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -598,8 +630,9 @@ const DailyMilkCollectionPage = () => {
                                     value={form.date}
                                     name="date"
                                     onChange={handleChange}
-                                    onKeyDown={handleKeyDown}
-                                    max={new Date().toISOString().split('T')[0]} // max = today
+                                    // onKeyDown={handleKeyDown}
+                                    max={today} // max = today
+                                    // max={new Date().toISOString().split('T')[0]} // max = today
                                     className="px-3 py-1 rounded border border-gray-400 text-gray-700 bg-white"
                                 />
                             </div>
@@ -633,20 +666,11 @@ const DailyMilkCollectionPage = () => {
                     </div>
 
                     {/* Milk + Customer Info */}
-                    <div className="flex flex-col gap-4 mb-3 bg-slate-300 p-3 rounded-lg">
+                    <div className="flex flex-col gap-4 mb-3 bg-gradient-to-r from-slate-100 to-slate-300 p-3 rounded-lg">
                         {/* Row 1: Account No & Quantity */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-2">
                             <div>
                                 <label className="block text-sm font-medium " >Account No</label>
-                                {/* <input
-                                    type="text"
-                                    name="customer_account_number"
-                                    value={form.customer_account_number}
-                                    onChange={handleChange}
-                                    // Always enabled
-                                    onKeyDown={handleKeyDown}
-                                    className=" w-full border rounded  px-4 mt-1 "
-                                /> */}
 
                                 <input
                                     type="text"
@@ -667,7 +691,10 @@ const DailyMilkCollectionPage = () => {
                                         }
                                     }}
                                     placeholder="Enter Account Number"
-                                    className=" w-full border rounded  px-4 mt-1 "
+                                    className="w-full border rounded px-4 text-md h-7 outline-none  bg-white"
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
@@ -682,23 +709,9 @@ const DailyMilkCollectionPage = () => {
                                     onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
                                     required
                                     className={`w-full border rounded px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Row 2: Name & FAT */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium ">Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={nameRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
-                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
@@ -713,67 +726,35 @@ const DailyMilkCollectionPage = () => {
                                     onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
                                     required
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                         </div>
 
-                        {/* Row 3: Mobile & CLR */}
+                        {/* Row 3: Fat & CLR */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium ">Mobile</label>
-                                <input
-                                    type="text"
-                                    name="mobile"
-                                    value={form.mobile}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={mobileRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
-                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
-                                />
-                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium ">CLR</label>
                                 <input
                                     type="number"
                                     name="clr"
+                                    placeholder='Enter Clr'
                                     value={form.clr}
                                     onChange={handleChange}
                                     disabled={isDisabled}
                                     ref={clrRef}
                                     onKeyDown={(e) => e.key === 'Enter' && careOfRef.current?.focus()}
                                     className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Row 4: careof & SNF */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium ">Care of</label>
-                                <input
-                                    type="text"
-                                    name="careof"
-                                    value={form.careof}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={careOfRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
-                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium ">SNF (%)</label>
-                                {/* <input
-                                    type="number"
-                                    name="snf"
-                                    value={form.snf}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    onKeyDown={handleKeyDown}
-                                    required
-                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
-                                /> */}
                                 <input
                                     type="text"
                                     value={form.snf}
@@ -783,6 +764,9 @@ const DailyMilkCollectionPage = () => {
                                     name="snf"
                                     onChange={(e) => setForm({ ...form, snf: e.target.value })}
                                     ref={snfRef}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                     onKeyDown={async (e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();
@@ -814,10 +798,70 @@ const DailyMilkCollectionPage = () => {
 
                             </div>
                         </div>
+
+                        {/* Row 2: Name & MOBIL & CARE OF */}
+                        <div className="grid grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium ">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={nameRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium ">Mobile</label>
+                                <input
+                                    type="text"
+                                    name="mobile"
+                                    value={form.mobile}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={mobileRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium ">Care of</label>
+                                <input
+                                    type="text"
+                                    name="careof"
+                                    value={form.careof}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={careOfRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
+                                    className={`w-full border rounded  px-4 ${isDisabled ? 'bg-slate-400 opacity-50' : 'bg-white'} `}
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
+                                />
+                            </div>
+
+                        </div>
+
+
                     </div>
 
+
+
+
+
                     {/* Rate & Price Section */}
-                    <div className="mt-2  bg-orange-800 shadow-xl p-4 rounded border border-gray-400">
+                    <div className="mt-2  bg-gradient-to-r from-orange-500 to-orange-800 shadow-xl p-4 rounded border border-gray-400">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-white">Base Rate (₹/Ltr)</label>
@@ -830,6 +874,9 @@ const DailyMilkCollectionPage = () => {
                                     ref={otherRateRef}
                                     onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.focus()}
                                     className=" w-full border rounded  px-4 bg-orange-100"
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
@@ -842,6 +889,9 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     onKeyDown={handleKeyDown}
                                     className=" w-full border rounded  px-4 bg-orange-100 "
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
@@ -853,6 +903,9 @@ const DailyMilkCollectionPage = () => {
                                     onKeyDown={handleKeyDown}
                                     readOnly
                                     className=" w-full border rounded  px-4 bg-orange-100"
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                             <div>
@@ -864,6 +917,9 @@ const DailyMilkCollectionPage = () => {
                                     onKeyDown={handleKeyDown}
                                     readOnly
                                     className=" w-full border rounded  px-4 bg-orange-100"
+                                    style={{
+                                        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.7)',
+                                    }}
                                 />
                             </div>
                         </div>
@@ -871,7 +927,7 @@ const DailyMilkCollectionPage = () => {
 
                     </div>
                     {/* Submit Button */}
-                    <div className="mt-1 flex items-center gap-4">
+                    <div className="mt-2 flex items-center  gap-4">
                         {/* Print Toggle Checkbox */}
                         <ToggleButton
                             label="Print"
@@ -883,7 +939,7 @@ const DailyMilkCollectionPage = () => {
                         <input
                             type="submit"
                             disabled={isDisabled}
-                            className={`px-3 text-white py-1 rounded bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
+                            className={`px-3 text-white py-1 mt-2 rounded bg-blue-600 cursor-pointer ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                             value="Submit"
                             ref={submitRef}
                             onKeyDown={(e) => {
@@ -899,44 +955,103 @@ const DailyMilkCollectionPage = () => {
 
                 </form>
 
-                <div className="bg-gray-50 p-6 rounded shadow-md  h-fit border border-dashed border-slate-700" style={{ width: '100%' }}>
-                    {/* {
-                        customerWallet && (
-                            <div className=" bg-gradient-to-r w-1/2 from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-3 mb-3 shadow-lg flex  space-x-3 font-semibold justify-between ">
-                                <p className="text-xl font-bold">
-                                    Customer Wallet
-                                </p>
-                                <p className={customerWallet < 0 ? "text-xl text-red-700 font-bold" : "text-xl text-green-600 font-bold"} >
-                                    ₹ {customerWallet}
-                                </p>
+                <div className='flex flex-col gap-4 items-center justify-center w-full bg-gradient-to-r from-orange-600 to-orange-300 p-3 rounded-md shadow-2xl'>
+                   
+
+                    <div className="border border-gray-300 w-full p-4  rounded">
+                        <div className="text-white font-semibold mb-2">Day Total</div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-800">
+
+                            {/* Shift Morning */}
+                            <div className="bg-white p-4 rounded shadow-md">
+                                <div className="font-medium border-b border-gray-300 mb-2 text-gray-700">Shift Morning</div>
+                                <div className="flex justify-between mb-1">
+                                    <span>Milk Total :</span>
+                                    <span>{dayTotal?.morning_total_milk} Kg</span>
+                                </div>
+                                <div className="flex justify-between font-semibold">
+                                    <span>Rs. Total :</span>
+                                    <span>₹ {dayTotal?.morning_total_amount.toFixed(2)}</span>
+                                </div>
                             </div>
-                        )
-                    } */}
 
-                    <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
+                            {/* Shift Evening */}
+                            <div className="bg-white p-4 rounded shadow-md">
+                                <div className="font-medium border-b border-gray-300 mb-2 text-gray-700">Shift Evening</div>
+                                <div className="flex justify-between mb-1">
+                                    <span>Milk Total :</span>
+                                    <span>{dayTotal?.evening_total_milk} Kg</span>
+                                </div>
+                                <div className="flex justify-between font-semibold">
+                                    <span>Rs. Total :</span>
+                                    <span>₹ {dayTotal?.evening_total_amount.toFixed(2)}</span>
+                                </div>
+                            </div>
 
-                    <table className="w-full text-sm text-left border border-gray-300">
-                        <tbody>
-                            {[
-                                ['Milk Type', milkType || '-'],
-                                ['Account No', form.customer_account_number || '-'],
-                                ['Name', form.name || '-'],
-                                ['careof', form.careof || '-'],
-                                ['Mobile', form.mobile || '-'],
-                                ['Quantity', form.quantity ? `${form.quantity} Ltr` : '-'],
-                                ['FAT', form.fat || '-'],
-                                ['SNF', form.snf || '-'],
-                                ['Rate', form.rate ? `₹${form.rate}` : '-'],
-                                ['Total Amount', form.total_amount ? `₹${form.total_amount}` : '-'],
-                            ].map(([label, value]) => (
-                                <tr key={label} className="border-b hover:bg-gray-50">
-                                    <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
-                                    <td className="px-4 py-2">{value}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            {/* Total Today */}
+                            <div className="bg-white p-4 rounded shadow-md">
+                                <div className="font-medium border-b border-gray-300 mb-2 text-gray-700">Total Today</div>
+                                <div className="flex justify-between mb-1">
+                                    <span>Milk Total :</span>
+                                    <span>{dayTotal?.milk_total} Kg</span>
+                                </div>
+                                <div className="flex justify-between font-semibold">
+                                    <span>Rs. Total :</span>
+                                    <span>₹ {dayTotal?.total_amount.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-6 rounded shadow-md h-fit border border-dashed border-slate-700 w-full">
+                        <h3 className="text-lg font-bold mb-4">Customer Receipt</h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Left Column */}
+                            <table className="w-full text-sm text-left border border-gray-300">
+                                <tbody>
+                                    {[
+                                        ['Milk Type', milkType || '-'],
+                                        ['Account No', form.customer_account_number || '-'],
+                                        ['Name', form.name || '-'],
+                                        ['Care Of', form.careof || '-'],
+                                        ['Mobile', form.mobile || '-'],
+                                    ].map(([label, value]) => (
+                                        <tr key={label} className="border-b hover:bg-gray-50">
+                                            <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
+                                            <td className="px-4 py-2">{value}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {/* Right Column */}
+                            <table className="w-full text-sm text-left border border-gray-300">
+                                <tbody>
+                                    {[
+                                        ['Quantity', form.quantity ? `${form.quantity} Ltr` : '-'],
+                                        ['FAT', form.fat || '-'],
+                                        ['SNF', form.snf || '-'],
+                                        ['Rate', form.rate ? `₹${form.rate}` : '-'],
+                                        ['Total Amount', form.total_amount ? `₹${form.total_amount}` : '-'],
+                                    ].map(([label, value]) => (
+                                        <tr key={label} className="border-b hover:bg-gray-50">
+                                            <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-100">{label}</td>
+                                            <td className="px-4 py-2">{value}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
+
+
+
+
             </div>
 
 
@@ -953,15 +1068,119 @@ const DailyMilkCollectionPage = () => {
                                 ))}
                             </tr>
                         </thead>
+
                         <tbody>
-                            {collections.length === 0 ? (
+                            {morningCollection.length === 0 && eveningCollection.length === 0 ? (
+                                <tr>
+                                    <td colSpan="13" className="text-center text-gray-500 py-4">
+                                        Data not available
+                                    </td>
+                                </tr>
+                            ) : (
+                                <>
+                                    {morningCollection.length > 0 && (
+                                        <>
+                                            <tr className="bg-slate-100 font-semibold">
+                                                <td colSpan="13" className="text-center px-2 py-2 font-bold">
+                                                    Morning Collection
+                                                </td>
+                                            </tr>
+                                            {morningCollection.map((item, i) => (
+                                                <tr
+                                                    key={`morning-${i}`}
+                                                    className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
+                                                >
+                                                    <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.name}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.date}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.shift}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.quantity}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.fat}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.snf}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.base_rate}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.other_price}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.total_amount}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.customer.wallet}</td>
+                                                    <td className="border px-2 py-1 text-center">
+                                                        <div className="flex gap-2 justify-center">
+                                                            <button className="bg-blue-700 text-white px-2 py-1 rounded text-xs" onClick={() => handlePrint(item)}>
+                                                                <BsFillPrinterFill size={12} color="#fff" />
+                                                            </button>
+                                                            <button className="bg-green-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}>
+                                                                <FaEye size={12} />
+                                                            </button>
+                                                            <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}>
+                                                                <FaPen size={14} />
+                                                            </button>
+                                                            <button className="bg-red-600 text-white px-2 py-1 rounded text-xs" onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}>
+                                                                <FaTrashCan size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </>
+                                    )}
+
+                                    {eveningCollection.length > 0 && (
+                                        <>
+                                            <tr className="bg-slate-100 font-semibold">
+                                                <td colSpan="13" className="text-center font-bold px-2 py-2">
+                                                    Evening Collection
+                                                </td>
+                                            </tr>
+                                            {eveningCollection.map((item, i) => (
+                                                <tr
+                                                    key={`evening-${i}`}
+                                                    className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
+                                                >
+                                                    <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.customer_account_number}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.name}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.date}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.shift}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.quantity}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.fat}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.snf}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.base_rate}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.other_price}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.total_amount}</td>
+                                                    <td className="border px-2 py-1 text-center">{item.customer.wallet}</td>
+                                                    <td className="border px-2 py-1 text-center">
+                                                        <div className="flex gap-2 justify-center">
+                                                            <button className="bg-blue-700 text-white px-2 py-1 rounded text-xs" onClick={() => handlePrint(item)}>
+                                                                <BsFillPrinterFill size={12} color="#fff" />
+                                                            </button>
+                                                            <button className="bg-green-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}>
+                                                                <FaEye size={12} />
+                                                            </button>
+                                                            <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}>
+                                                                <FaPen size={14} />
+                                                            </button>
+                                                            <button className="bg-red-600 text-white px-2 py-1 rounded text-xs" onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}>
+                                                                <FaTrashCan size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </>
+                                    )}
+                                </>
+                            )}
+                        </tbody>
+
+
+                        {/* <tbody>
+                            {morningCollection.length === 0 ? (
                                 <tr>
                                     <td colSpan="10" className="text-center text-gray-500 py-4">
                                         Data not available
                                     </td>
                                 </tr>
                             ) : (
-                                collections.map((item, i) => (
+                                morningCollection.map((item, i) => (
                                     <tr
                                         key={i}
                                         className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-300'} hover:bg-gray-100`}
@@ -981,6 +1200,14 @@ const DailyMilkCollectionPage = () => {
                                         <td className="border px-2 py-1 text-center">{item.customer.wallet}</td>
                                         <td className="border px-2 py-1 text-center">
                                             <div className="flex gap-2 justify-center">
+                                                <button
+                                                    className="bg-blue-700 text-white px-2 py-1 rounded text-xs"
+                                                    onClick={() => {
+                                                        handlePrint(item);
+                                                    }}
+                                                >
+                                                    <BsFillPrinterFill size={12} color='#fff' />
+                                                </button>
                                                 <button
                                                     className="bg-green-500 text-white px-2 py-1 rounded text-xs"
                                                     onClick={() => {
@@ -1014,9 +1241,10 @@ const DailyMilkCollectionPage = () => {
                                 ))
                             )}
 
-                        </tbody>
+                        </tbody> */}
                     </table>
-                    <div className=' w-full flex justify-between items-center p-2 bg-yellow-100'>
+
+                    <div className=' w-full flex justify-between items-center p-2 bg-yellow-100 mt-2'>
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Ave. Fat</p>
                             <p className='font-bold'>{milkCollectiionAvergeData.avg_fat}</p>
@@ -1033,6 +1261,12 @@ const DailyMilkCollectionPage = () => {
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Other Price</p>
                             <p className='font-bold'>₹{milkCollectiionAvergeData.other_price_total || 0}</p>
+                        </div>
+
+
+                        <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
+                            <p className='font-bold'>Milk Total</p>
+                            <p className='font-bold'>{milkCollectiionAvergeData.milk_total || 0} KG</p>
                         </div>
                         <div className='text-sm flex-1  text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Total Amount</p>
@@ -1055,6 +1289,12 @@ const DailyMilkCollectionPage = () => {
                 </div>
             </div>
             {/* {renderPageButtons()} */}
+
+
+
+
+
+
 
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
