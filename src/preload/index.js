@@ -9,6 +9,7 @@ const api = {
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
   printSlip: (data) => ipcRenderer.send('print-slip', data),
   upadateStartDownload: (data) => ipcRenderer.send('start-update-download', data),
+  checkForUpdate: () => ipcRenderer.send('check-for-update'),
 
   onUpdateMessage: (callback) => {
     ipcRenderer.on('update-message', (event, message) => {

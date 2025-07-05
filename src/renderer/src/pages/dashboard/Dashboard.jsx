@@ -16,6 +16,7 @@ import { toast } from 'react-toastify'
 const Dashboard = () => {
   const fetchDashboardData = useHomeStore(state => state.fetchDashboardData);
   const [cardData, setCardData] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +72,7 @@ const Dashboard = () => {
   // handle download update
   const handleUpdateClick = () => {
     window.api.upadateStartDownload('start-update-download');
+    setIsDownloading(true)
   };
 
 
@@ -82,7 +84,7 @@ const Dashboard = () => {
         message && message !== 'No update available.' && (
           <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
             <p>{message}</p>
-            {progress !== null && (
+            {progress == null && (
               <div className="w-full mt-1 bg-gray-700 rounded overflow-hidden h-2">
                 <div
                   className="bg-green-500 h-full transition-all duration-300"
@@ -90,6 +92,7 @@ const Dashboard = () => {
                 ></div>
               </div>
             )}
+            <h1 className='text-white text-left'>{progress || 0}%</h1>
           </div>
         )
       }
@@ -98,12 +101,22 @@ const Dashboard = () => {
       {message && message !== 'No update available.' && (
         <button
           onClick={handleUpdateClick}
-          className="bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700 transition fixed bottom-20 right-10 z-50"
+          disabled={isDownloading}
+          className={`px-3 py-1 rounded shadow fixed bottom-20 right-10 z-50 transition 
+      ${isDownloading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}
+    `}
         >
-          Download Update
+          {isDownloading ? 'Downloading...' : 'Download Update'}
         </button>
       )}
 
+
+      <button
+        onClick={() => window.api.checkForUpdate('check-for-update')}
+        className="bg-green-600 text-white px-3 py-1 rounded shadow hover:bg-green-700 transition"
+      >
+        Check for Update
+      </button>
 
 
       <div className="chartContainer bg-white p-8 rounded-lg shadow-xl">

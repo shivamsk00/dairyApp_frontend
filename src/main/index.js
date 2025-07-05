@@ -237,6 +237,10 @@ app.whenReady().then(() => {
     autoUpdater.downloadUpdate()
   })
 
+  ipcMain.on('check-for-update', () => {
+    autoUpdater.checkForUpdates()
+  })
+
   autoUpdater.on('error', (err) => {
     mainWindow.webContents.send('update-message', `Update error: ${err.message}`)
   })
