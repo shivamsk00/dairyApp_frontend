@@ -473,6 +473,17 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+  // Delete Sold Products
+  getDeleteProducts: async (id) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/delete-product-sale/${id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
 
   // Payment Register Api
     paymentRegister: async (params) => {

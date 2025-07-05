@@ -8,6 +8,7 @@ import CommonHeader from '../../components/CommonHeader';
 import { TfiExport } from 'react-icons/tfi';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
+import { FaTrashCan } from 'react-icons/fa6';
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const fetchCategory = useHomeStore(state => state.fetchCategory)
@@ -18,10 +19,14 @@ const CustomerCollection = () => {
     const [allProducts, setAllProducts] = useState([])
     const today = new Date().toISOString().split('T')[0];
     const [allsoldproducts, setAllsoldproducts] = useState([])
+    const getDeleteProducts = useHomeStore(state => state.getDeleteProducts);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [maxPageButtons, setMaxPageButtons] = useState(5);
     const [loading, setLoading] = useState(false)
+
+    const [deleteId, setDeleteId] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
 
     // Sold Products Api Response
@@ -62,6 +67,7 @@ const CustomerCollection = () => {
 
     const [form, setForm] = useState({
         account_number: '',
+        transaction_type: '',
         name: '',
         careof: '',
         date: today,
@@ -136,9 +142,12 @@ const CustomerCollection = () => {
     };
 
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (form.account_number) {
+
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Optional: prevent form submit if inside a form
+            if (form.account_number.trim()) {
                 fetchCustomerDetailByAccountNumber(form.account_number);
             } else {
                 setForm((prev) => ({
@@ -148,11 +157,24 @@ const CustomerCollection = () => {
                     mobile: '',
                 }));
             }
-        }, 500); // wait 500ms after user stops typing
+        }
+    };
 
-        return () => clearTimeout(timeout); // cleanup on next input
-    }, [form.account_number]);
+    // Delete Products
+    const handleRemove = async (id) => {
+        try {
+            const res = await getDeleteProducts(id);
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                soldproductAllDataFetch()
+            } else {
+                CustomToast.success(res.message)
 
+            }
+        } catch (error) {
+
+        }
+    };
 
 
     // FETCH ALL CUSTOMER
@@ -244,8 +266,11 @@ const CustomerCollection = () => {
             product_id: form.product_id,
             product_price: form.product_price,
             qty: form.qty,
-            total: form.total
+            total: form.total,
+            transaction_type: form.transaction_type
         };
+        console.log('customerColletionData',customerCollectionData);
+        
 
         try {
             const res = await productSaleSubmit(customerCollectionData);
@@ -391,11 +416,19 @@ const CustomerCollection = () => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1 text-white">Account No</label>
-                            <input
+                            {/* <input
                                 name="account_number"
                                 value={form.account_number}
                                 onChange={handleChange}
                                 className="border rounded px-3 py-2 bg-white  w-full"
+                            /> */}
+
+                            <input
+                                name="account_number"
+                                value={form.account_number}
+                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                className="border rounded px-3 py-2 bg-white w-full"
                             />
                         </div>
                         <div>
@@ -499,7 +532,31 @@ const CustomerCollection = () => {
                                 readOnly
                             />
                         </div>
+
                     </div>
+
+
+                    {/* Transaction Type */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1 text-white">Transaction Type</label>
+
+
+
+                        <select
+                            name="transaction_type"
+                            value={form.transaction_type}
+                            onChange={handleChange}
+                            className="border rounded px-3 py-2 bg-white  w-full"
+
+                        >
+                            <option value="">Select Type</option>
+                            
+                                <option  value={'cash'}>Cash</option>
+                                <option  value={'borrow'}>Borrow</option>
+                        
+                        </select>
+                    </div>
+
 
                     <input
                         type="submit"
@@ -576,7 +633,7 @@ const CustomerCollection = () => {
                         <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                             <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                                 <tr>
-                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total',  'Date',].map((header) => (
+                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date', 'Action'].map((header) => (
                                         <th key={header} className="border px-4 py-3 text-sm text-black  font-bold tracking-wide text-center uppercase">
                                             {header}
                                         </th>
@@ -607,6 +664,29 @@ const CustomerCollection = () => {
                                                     <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
                                                     {/* <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td> */}
                                                     <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
+                                                    <td className="border px-4 py-2 text-center text-sm text-gray-600">
+                                                        <div className="flex gap-2 justify-center">
+
+                                                            {/* <button
+                                                                onClick={() => {
+                                                                    setSelectedCustomer(item);
+                                                                    setIsEditeModal(true);
+                                                                }}
+                                                                className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
+                                                            >
+                                                                <FaPen size={14} />
+                                                            </button> */}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setDeleteId(item.id);
+                                                                    setShowConfirmModal(true);
+                                                                }}
+                                                                className="bg-red-600 text-white px-2 py-1 rounded text-xs"
+                                                            >
+                                                                <FaTrashCan size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             ))
                                         }
@@ -623,6 +703,36 @@ const CustomerCollection = () => {
 
 
             </div>
+
+
+
+            {showConfirmModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-sm">
+                        <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+                        <p className="text-sm text-gray-700 mb-6">Are you sure you want to delete this item?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleRemove(deleteId);
+                                    setShowConfirmModal(false);
+                                    setDeleteId(null);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </>
     );
 };
