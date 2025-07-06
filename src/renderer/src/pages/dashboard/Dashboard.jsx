@@ -6,8 +6,28 @@ import BarChart from '../../components/charts/barChart/BarChart'
 import PieChart from '../../components/charts/pieChar/PieChart'
 import useHomeStore from '../../zustand/useHomeStore'
 import { toast } from 'react-toastify'
+import {
+  FaUndoAlt,
+  FaShoppingCart,
+  FaBox,
+  FaTruck,
+  FaClipboardCheck,
+  FaClock,
+  FaBriefcase,
+  FaTasks,
+} from 'react-icons/fa';
+import StatusCardGrid from '../../components/StatusCardGrid'
 
-
+const statusData = [
+  { label: 'Payment Refund', count: 490, icon: <FaUndoAlt /> },
+  { label: 'Order Cancel', count: 241, icon: <FaShoppingCart /> },
+  { label: 'Order Shipped', count: 630, icon: <FaBox /> },
+  { label: 'Order Delivering', count: 170, icon: <FaTruck /> },
+  { label: 'Pending Review', count: 210, icon: <FaClipboardCheck /> },
+  { label: 'Pending Payment', count: 608, icon: <FaClock /> },
+  { label: 'Delivered', count: 200, icon: <FaBriefcase /> },
+  { label: 'In Progress', count: 656, icon: <FaTasks /> },
+];
 
 
 
@@ -80,6 +100,7 @@ const Dashboard = () => {
   return (
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
 
+      <StatusCardGrid data={statusData} />
       {
         message && message !== 'No update available.' && (
           <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
@@ -111,12 +132,12 @@ const Dashboard = () => {
       )}
 
 
-      <button
+      {/* <button
         onClick={() => window.api.checkForUpdate('check-for-update')}
         className="bg-green-600 text-white px-3 py-1 rounded shadow hover:bg-green-700 transition"
       >
         Check for Update
-      </button>
+      </button> */}
 
 
       <div className="chartContainer bg-white p-8 rounded-lg shadow-xl">
@@ -124,8 +145,13 @@ const Dashboard = () => {
         <BarChart />
         <PieChart />
       </div>
+
+
     </div>
   )
 }
 
 export default Dashboard
+
+
+

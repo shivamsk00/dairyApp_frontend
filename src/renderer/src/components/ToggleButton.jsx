@@ -13,7 +13,7 @@ const ToggleButton = ({ label, enabled, onToggle }) => {
                         }`}
                 />
             </div>
-            {label && <span className='text-white'>{label}</span>}
+            {label && <span className=''>{label}</span>}
         </div>
     );
 };
