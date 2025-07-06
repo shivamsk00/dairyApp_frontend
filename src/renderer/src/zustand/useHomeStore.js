@@ -381,6 +381,20 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+
+
+  // UPDATE SOLD PRODUCT API
+  updateProductSale: async (product_id, productData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/update-product-sale/${product_id}`, productData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  
   // DELETE PRODUCT API
   deleteProduct: async (product_id) => {
     try {

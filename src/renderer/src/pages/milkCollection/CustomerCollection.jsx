@@ -8,7 +8,8 @@ import CommonHeader from '../../components/CommonHeader';
 import { TfiExport } from 'react-icons/tfi';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
-import { FaTrashCan } from 'react-icons/fa6';
+import { FaPen, FaTrashCan } from 'react-icons/fa6';
+import EditCustomerCollectionModal from './EditCustomerCollection';
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
     const fetchCategory = useHomeStore(state => state.fetchCategory)
@@ -27,7 +28,8 @@ const CustomerCollection = () => {
 
     const [deleteId, setDeleteId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-
+    const [isEditeModal, setIsEditeModal] = useState(false)
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     // Sold Products Api Response
     const soldproductAllDataFetch = async (page = 1) => {
@@ -61,7 +63,7 @@ const CustomerCollection = () => {
 
     useEffect(() => {
         soldproductAllDataFetch()
-    }, [])
+    }, [isEditeModal])
 
 
 
@@ -566,56 +568,7 @@ const CustomerCollection = () => {
                     />
                 </form>
 
-                {/* Right Info Panel */}
-                {/* <div className="w-full lg:w-1/2 flex flex-col gap-4 border p-3 bg-gray-800 rounded-md">
-                Date Filter
-                <div className="flex flex-wrap gap-4 items-center">
-                    <input type="date" className="border px-3 w-1/4 py-1 rounded" placeholder="From" />
-                    <input type="date" className="border  px-3 w-1/4  py-1 rounded" placeholder="To" />
-                    <button className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-700">Search</button>
-                </div>
-
-                Purchase Summary
-                <div className="bg-gray-300 p-4 rounded shadow-xl mt-2 flex-1">
-                    Header Info
-                    <div className="mb-4">
-                        <p className="font-semibold mb-1">Account No: 12345</p>
-                        <p className="font-semibold mb-1">Name: Shivam</p>
-                    </div>
-
-                    Product Table
-                    <table className="w-full text-left border border-gray-400 bg-white rounded overflow-hidden">
-                        <thead className="bg-gray-200">
-                            <tr>
-                                <th className="py-2 px-3 border-b border-gray-400">Item</th>
-                                <th className="py-2 px-3 border-b border-gray-400">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="py-2 px-3 border-b border-gray-300">Ghee</td>
-                                <td className="py-2 px-3 border-b border-gray-300">2 L</td>
-                            </tr>
-                            <tr>
-                                <td className="py-2 px-3 border-b border-gray-300">Paneer</td>
-                                <td className="py-2 px-3 border-b border-gray-300">1 Kg</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    Summary
-                    <div className="flex flex-col items-end mt-4 text-sm">
-                        <p className="font-semibold">Total Purchased Items: 3</p>
-                        <p className="font-semibold text-lg">Total Price: ₹1300</p>
-                    </div>
-                </div>
-
-                Export/Share Buttons
-                <div className="flex justify-end gap-4 mt-4">
-                    <button className="bg-yellow-500 text-white px-4 py-2 rounded shadow-lg hover:bg-yellow-600">Export Excel</button>
-                    <button className="bg-green-500 text-white px-4 py-2 rounded shadow-lg hover:bg-green-600">Share WhatsApp</button>
-                </div>
-            </div> */}
+                
 
                 {/* Bottom Table */}
                 <div className=" w-full border">
@@ -633,7 +586,7 @@ const CustomerCollection = () => {
                         <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                             <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                                 <tr>
-                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date', 'Action'].map((header) => (
+                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date','Transaction Type', 'Action'].map((header) => (
                                         <th key={header} className="border px-4 py-3 text-sm text-black  font-bold tracking-wide text-center uppercase">
                                             {header}
                                         </th>
@@ -664,10 +617,11 @@ const CustomerCollection = () => {
                                                     <td className="border px-4 py-2 text-center text-blue-700 font-bold">₹{item.total}</td>
                                                     {/* <td className="border px-4 py-2 text-center">{item.product?.unit || '-'}</td> */}
                                                     <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.date}</td>
+                                                    <td className="border px-4 py-2 text-center text-sm text-gray-600">{item.transaction_type}</td>
                                                     <td className="border px-4 py-2 text-center text-sm text-gray-600">
                                                         <div className="flex gap-2 justify-center">
 
-                                                            {/* <button
+                                                            <button
                                                                 onClick={() => {
                                                                     setSelectedCustomer(item);
                                                                     setIsEditeModal(true);
@@ -675,7 +629,7 @@ const CustomerCollection = () => {
                                                                 className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
                                                             >
                                                                 <FaPen size={14} />
-                                                            </button> */}
+                                                            </button> 
                                                             <button
                                                                 onClick={() => {
                                                                     setDeleteId(item.id);
@@ -703,6 +657,12 @@ const CustomerCollection = () => {
 
 
             </div>
+
+             <EditCustomerCollectionModal
+                isOpen={isEditeModal}
+                onClose={() => setIsEditeModal(false)}
+                productData={selectedCustomer}
+            />
 
 
 
