@@ -147,7 +147,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
       const res = await editMilkCollectionDetail(milkData.id, form);
       if (res.status_code == 200) {
 
-        CustomToast.success(res.message);
+        // CustomToast.success(res.message);
         onClose(); // close modal after success
       } else {
         CustomToast.error(res.message);
@@ -181,7 +181,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
 
             // 🎯 Prioritize meaningful feedback
             if (res.rate) {
-              CustomToast.success("Rate Found", "top-center");
+              // CustomToast.success("Rate Found", "top-center");
             } else {
               if (!res.fat) CustomToast.warn("FAT not found", "top-center");
               if (!res.snf) CustomToast.warn("SNF not found", "top-center");
@@ -293,7 +293,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
           <div className="col-span-2 mt-4 flex justify-end">
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+              className="bg-[#E6612A] hover:bg-orange-600 text-white px-6 py-2 rounded"
               disabled={loading}
             >
               {loading ? "Please wait..." : "Update"}

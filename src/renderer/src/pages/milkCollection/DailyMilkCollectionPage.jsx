@@ -693,7 +693,7 @@ const DailyMilkCollectionPage = () => {
 
 
                     {/* Customer Info Section */}
-                    <div className="bg-gradient-to-r from-slate-100 to-slate-200 p-5 rounded-xl shadow mb-5 space-y-4">
+                    <div className="bg-gradient-to-r from-orange-100 to-orange-200  border border-orange-300 p-5 rounded-xl shadow mb-5 space-y-4">
                         {/* Row 1 */}
                         <div className="grid grid-cols-3 gap-4">
                             <div>
@@ -1058,11 +1058,11 @@ const DailyMilkCollectionPage = () => {
 
 
             {/* === Bottom Table === */}
-            <div className="mt-4 m-auto w-[98%] bg-slate-700 shadow-lg  p-4 rounded-xl border border-dashed" >
-                <h3 className="text-xl font-semibold mb-4 text-white">Submitted Collections</h3>
+            <div className="mt-4 m-auto w-[98%] bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 shadow-lg  p-4 rounded-xl border border-dashed" >
+                <h3 className="text-xl  mb-4 text-slate-600 font-semibold">Milk Daily Collections</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full border border-gray-300 text-sm">
-                        <thead className="bg-slate-800 text-white">
+                        <thead className="bg-orange-400 text-slate-100">
                             <tr>
                                 {['SR NO.', 'AC No', 'Name', 'Date', 'SHIFT', 'QTY', 'FAT', 'SNF', 'Rate', 'Other Rate', 'Total Amount', 'Balance', 'Action'].map(header => (
                                     <th key={header} className="border px-2 py-1">{header}</th>
@@ -1139,7 +1139,7 @@ const DailyMilkCollectionPage = () => {
                                             isShift === 'evening' && eveningCollection.length > 0 && (
                                                 <>
                                                     <tr className="bg-slate-100 font-semibold">
-                                                        <td colSpan="13" className="text-center font-bold px-2 py-2">
+                                                        <td colSpan="13" className="text-center font-bold px-2 py-2 text-slate-600">
                                                             Evening Collection
                                                         </td>
                                                     </tr>
@@ -1257,7 +1257,7 @@ const DailyMilkCollectionPage = () => {
                         </tbody> */}
                     </table>
 
-                    <div className=' w-full flex justify-between items-center p-2 bg-yellow-100 mt-2'>
+                    <div className=' w-full flex justify-between items-center p-2 bg-yellow-200 '>
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Ave. Fat</p>
                             <p className='font-bold'>{milkCollectiionAvergeData?.avg_fat}</p>

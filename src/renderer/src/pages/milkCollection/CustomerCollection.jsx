@@ -215,9 +215,6 @@ const CustomerCollection = () => {
     };
 
 
-    useEffect(() => {
-        fetchAllProductCategory()
-    }, [])
 
     const fetchAllProductCategory = async () => {
         try {
@@ -227,6 +224,11 @@ const CustomerCollection = () => {
             console.log("ERROR IN FETCHING CATEGORY", error)
         }
     }
+
+
+    useEffect(() => {
+        fetchAllProductCategory()
+    }, [])
 
     // Export to Excel
     const exportToExcel = () => {
@@ -271,8 +273,8 @@ const CustomerCollection = () => {
             total: form.total,
             transaction_type: form.transaction_type
         };
-        console.log('customerColletionData',customerCollectionData);
-        
+        console.log('customerColletionData', customerCollectionData);
+
 
         try {
             const res = await productSaleSubmit(customerCollectionData);
@@ -397,9 +399,9 @@ const CustomerCollection = () => {
         <>
 
             <CommonHeader heading={"Products Sold"} />
-            <div className="flex flex-col lg:flex-row gap-6 p-6">
+            <div className="flex flex-col lg:flex-row gap-6 p-6 ">
                 {/* Left Form */}
-                <form onSubmit={handleSubmitProduct} className="bg-gray-800 p-6 rounded shadow-xl w-full h-1/2 lg:w-1/2 flex flex-col gap-4 ">
+                <form onSubmit={handleSubmitProduct} className="bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 p-6 rounded shadow-xl border border-orange-300 w-full h-1/2 lg:w-1/2 flex flex-col gap-4 ">
 
                     {/* DATE INPUT */}
                     <div className="">
@@ -417,7 +419,7 @@ const CustomerCollection = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Account No</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Account No</label>
                             {/* <input
                                 name="account_number"
                                 value={form.account_number}
@@ -434,7 +436,7 @@ const CustomerCollection = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Name</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Name</label>
                             <input
                                 name="name"
                                 value={form.name}
@@ -447,7 +449,7 @@ const CustomerCollection = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Care of</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Care of</label>
                             <input
                                 name="careof"
                                 value={form.careof}
@@ -457,7 +459,7 @@ const CustomerCollection = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Category</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Category</label>
 
                             <select
                                 name="category_id"
@@ -482,7 +484,7 @@ const CustomerCollection = () => {
 
                         {/* Product id */}
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Product</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Product</label>
 
 
 
@@ -500,7 +502,7 @@ const CustomerCollection = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Price</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Price</label>
                             <input
                                 name="product_price"
                                 value={form.product_price}
@@ -514,7 +516,7 @@ const CustomerCollection = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Quantity</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Quantity</label>
                             <input
                                 name="qty"
                                 value={form.qty}
@@ -524,7 +526,7 @@ const CustomerCollection = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-white">Total Price</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Total Price</label>
                             <input
                                 name="total"
                                 value={form.total}
@@ -540,7 +542,7 @@ const CustomerCollection = () => {
 
                     {/* Transaction Type */}
                     <div>
-                        <label className="block text-sm font-medium mb-1 text-white">Transaction Type</label>
+                        <label className="block text-sm font-medium mb-1 text-black">Transaction Type</label>
 
 
 
@@ -552,10 +554,10 @@ const CustomerCollection = () => {
 
                         >
                             <option value="">Select Type</option>
-                            
-                                <option  value={'cash'}>Cash</option>
-                                <option  value={'borrow'}>Borrow</option>
-                        
+
+                            <option value={'cash'}>Cash</option>
+                            <option value={'borrow'}>Borrow</option>
+
                         </select>
                     </div>
 
@@ -564,14 +566,14 @@ const CustomerCollection = () => {
                         type="submit"
                         value="Submit"
                         disabled={form.account_number == '' ? true : false}
-                        className={form.account_number == '' ? `mt-6 w-24 text-white py-1 rounded bg-gray-400 opacity-60 cursor-not-allowed` : `mt-6 w-24 text-white py-1 rounded bg-blue-600 cursor-pointer`}
+                        className={form.account_number == '' ? `mt-6 w-24 text-white py-1 rounded bg-gray-400 opacity-60 cursor-not-allowed` : `mt-6 w-24 text-white py-1 rounded bg-[#E6612A] cursor-pointer`}
                     />
                 </form>
 
-                
+
 
                 {/* Bottom Table */}
-                <div className=" w-full border">
+                <div className="w-full">
                     {/* Export/Share Buttons */}
 
 
@@ -586,7 +588,7 @@ const CustomerCollection = () => {
                         <table className="min-w-full border border-gray-300 text-sm bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
                             <thead className="bg-gradient-to-r from-yellow-400 to-yellow-200 text-white">
                                 <tr>
-                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date','Transaction Type', 'Action'].map((header) => (
+                                    {['Sr No.', 'Acc No.', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date', 'Transaction Type', 'Action'].map((header) => (
                                         <th key={header} className="border px-4 py-3 text-sm text-black  font-bold tracking-wide text-center uppercase">
                                             {header}
                                         </th>
@@ -629,7 +631,7 @@ const CustomerCollection = () => {
                                                                 className="bg-yellow-500 text-white px-2 py-1 rounded text-xs"
                                                             >
                                                                 <FaPen size={14} />
-                                                            </button> 
+                                                            </button>
                                                             <button
                                                                 onClick={() => {
                                                                     setDeleteId(item.id);
@@ -658,7 +660,7 @@ const CustomerCollection = () => {
 
             </div>
 
-             <EditCustomerCollectionModal
+            <EditCustomerCollectionModal
                 isOpen={isEditeModal}
                 onClose={() => setIsEditeModal(false)}
                 productData={selectedCustomer}

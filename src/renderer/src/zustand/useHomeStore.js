@@ -6,9 +6,8 @@ const useHomeStore = create((set) => ({
   loading: false,
   error: null,
 
-
   // Dahboard Api Data Fetch//////////////////////////////////////////////////////////////////////////
-    fetchDashboardData: async () => {
+  fetchDashboardData: async () => {
     try {
       const res = await api.get('/dashboard')
       return res.data
@@ -154,6 +153,16 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
+  editCustomerValueGet: async ({customer_id}) => {
+    console.log("customer_id in editCustomerValueGet", customer_id)
+    try {
+      const res = await api.get(`/edit-customer/${customer_id}`)
+      return res.data
+    } catch (error) {
+      return err.response.data
+    }
+  },
+
   updateCustomer: async (customer_id, customerData) => {
     try {
       const res = await api.post(`/update-customer/${customer_id}`, customerData)
@@ -223,12 +232,11 @@ const useHomeStore = create((set) => ({
   getMilkCollectionRecord: async (page) => {
     try {
       const res = await api.get(`/all-milk-collection`)
-      console.log("response===>", res)
+      console.log('response===>', res)
       return res.data
     } catch (error) {
-      console.log("error print in milk collection", error)
+      console.log('error print in milk collection', error)
       return error.response.data
-
     }
   },
 
@@ -290,9 +298,8 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
-    updateHeadDairyMasterStatus: async (headDairy_id) => {
+  updateHeadDairyMasterStatus: async (headDairy_id) => {
     try {
-      
       const res = await api.post(`/update-status-head-dairy-master/${headDairy_id}`)
 
       return res.data
@@ -303,7 +310,6 @@ const useHomeStore = create((set) => ({
 
   editHeadDairyMasterFetch: async (headDairy_id) => {
     try {
- 
       const res = await api.get(`/edit-head-dairy-master/${headDairy_id}`)
 
       return res.data
@@ -382,7 +388,6 @@ const useHomeStore = create((set) => ({
     }
   },
 
-
   // UPDATE SOLD PRODUCT API
   updateProductSale: async (product_id, productData) => {
     try {
@@ -394,7 +399,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
-  
+
   // DELETE PRODUCT API
   deleteProduct: async (product_id) => {
     try {
@@ -500,7 +505,7 @@ const useHomeStore = create((set) => ({
   },
 
   // Payment Register Api
-    paymentRegister: async (params) => {
+  paymentRegister: async (params) => {
     try {
       const res = await api.get('milk-collections/summary', { params })
       return res.data
@@ -510,8 +515,7 @@ const useHomeStore = create((set) => ({
         error.response?.data || { status_code: 500, message: 'Failed to fetch Payment Register' }
       )
     }
-  },
-
+  }
 }))
 
 export default useHomeStore

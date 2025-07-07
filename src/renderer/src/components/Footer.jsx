@@ -10,8 +10,7 @@ const Footer = () => {
         }}>
             <h2 style={{
                 fontWeight:'semibold',
-                opacity:0.8
-            }}>Powered by Production House</h2>
+            }}>© 2025 | Powered by Production House</h2>
         </div>
     )
 }

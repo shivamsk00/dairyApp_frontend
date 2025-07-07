@@ -9,6 +9,7 @@ const EditCustomerPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const updateCustomer = useHomeStore(state => state.updateCustomer);
+    const editCustomerValueGet = useHomeStore(state => state.editCustomerValueGet);
     const loading = useHomeStore(state => state.loading);
 
     const customer = location.state;
@@ -30,28 +31,71 @@ const EditCustomerPage = () => {
         account_number: '',
     });
 
-    useEffect(() => {
-        if (!customer) {
-            toast.error('No customer data provided.');
-            navigate('/customer');
-        } else {
-            setCustomerData({
-                customer_type: customer.customer_type || '',
-                name: customer.name || '',
-                email: customer.email || '',
-                mobile: customer.mobile || '',
-                careof: customer.careof || '',
-                contact_person: customer.contact_person || '',
-                address: customer.address || '',
-                city: customer.city || '',
-                state: customer.state || '',
-                wallet: customer.wallet || '',
-                pincode: customer.pincode || '',
-                designation: customer.designation || '',
-                account_number: customer.account_number || '',
-            });
+
+    const fetchCustomerEditData = async () => {
+        try {
+            const res = await editCustomerValueGet({ customer_id: customer.id });
+            const customerData = res.data;
+
+            console.log("Response from editCustomerValueGet====>", res);
+            if (res.status_code == 200) {
+                setCustomerData({
+                    customer_type: customerData.customer_type || '',
+                    name: customerData.name || '',
+                    email: customerData.email || '',
+                    mobile: customerData.mobile || '',
+                    careof: customerData.careof || '',
+                    contact_person: customerData.contact_person || '',
+                    addcustomerDatas: customerData.addcustomerDatas || '',
+                    city: customerData.city || '',
+                    state: customerData.state || '',
+                    wallet: customerData.wallet || '',
+                    pincode: customerData.pincode || '',
+                    designation: customerData.designation || '',
+                    account_number: customerData.account_number || '',
+                });
+            } else {
+                toast.error(res.message);
+            }
+        } catch (err) {
+            toast.error('Error fetching customer data');
         }
-    }, [customer]);
+    }
+
+    useEffect(() => {
+        fetchCustomerEditData();
+    }, [])
+
+
+
+
+    // useEffect(() => {
+    //     if (!customer) {
+    //         toast.error('No customer data provided.');
+    //         navigate('/customer');
+    //     } else {
+    //         setCustomerData({
+    //             customer_type: customer.customer_type || '',
+    //             name: customer.name || '',
+    //             email: customer.email || '',
+    //             mobile: customer.mobile || '',
+    //             careof: customer.careof || '',
+    //             contact_person: customer.contact_person || '',
+    //             address: customer.address || '',
+    //             city: customer.city || '',
+    //             state: customer.state || '',
+    //             wallet: customer.wallet || '',
+    //             pincode: customer.pincode || '',
+    //             designation: customer.designation || '',
+    //             account_number: customer.account_number || '',
+    //         });
+    //     }
+    // }, [customer]);
+
+
+
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;

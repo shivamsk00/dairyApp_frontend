@@ -21,6 +21,7 @@ const CustomerList = () => {
   const nav = useNavigate();
   const getAllCustomer = useHomeStore(state => state.getAllCustomer);
   const deleteCustomer = useHomeStore(state => state.deleteCustomer);
+   const editCustomerValueGet = useHomeStore(state => state.editCustomerValueGet);
 const scrollRef = useRef(null);
 const [totalPages, setTotalPages] = useState(null);
 
@@ -45,10 +46,20 @@ const [totalPages, setTotalPages] = useState(null);
 
     if (res.status_code == 200) {
       const newData = res.data.data;
-      setRowData(prev => [...prev, ...newData]); // ✅ Append
-      setCurrentPage(res.data.current_page);
-      console.log('data',newData);
-      setHasMore(res.data.current_page < res.data.last_page); // ✅ Stop if last
+
+      if (Array.isArray(newData) && newData.length > 0) {
+        setRowData(prev => {
+          const existingIds = new Set(prev.map(item => item.id)); // 🔍 existing IDs
+          const filteredNewData = newData.filter(item => !existingIds.has(item.id)); // 🧹 remove duplicates
+          return [...prev, ...filteredNewData];
+        });
+
+        setCurrentPage(res.data.current_page);
+        setHasMore(res.data.current_page < res.data.last_page); // ✅ Stop if last
+        console.log('data', newData);
+      } else {
+        console.log('No new data received.');
+      }
     } else {
       CustomToast.error(res.message);
     }
@@ -59,9 +70,38 @@ const [totalPages, setTotalPages] = useState(null);
   }
 };
 
+
+  const fetchCutomerDetail = async (id) => {
+    try {
+      const res = await editCustomerValueGet({ customer_id: id });
+      const customerData = res.data;
+      setSelectedCustomer(customerData)
+    } catch (error) {
+      console.log("ERROR IN FETCH CUSTOMER DETAIL", error);
+
+    }
+  }
+
+
+
+
+
+
   useEffect(() => {
     fetchAllCustomerData(1);
   }, []);
+
+
+
+
+
+
+
+
+
+
+
+
 
 useEffect(() => {
   const scrollContainer = scrollRef.current;
@@ -100,6 +140,9 @@ useEffect(() => {
     }
   };
 
+
+
+  // TABLE CONFIG
   const columns = [
         columnHelper.display({
       id: 'srNo',
@@ -137,7 +180,7 @@ useEffect(() => {
           <button
             className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
             onClick={() => {
-              setSelectedCustomer(row.original);
+              fetchCutomerDetail(row.original.id);
               setIsModalOpen(true);
             }}
           >

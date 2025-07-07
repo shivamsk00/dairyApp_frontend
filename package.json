@@ -28,7 +28,7 @@
       "output": "dist"
     },
     "win": {
-      "icon": "resources/icon1.ico",
+      "icon": "resources/icon2.ico",
       "target": "nsis"
     },
     "publish": [

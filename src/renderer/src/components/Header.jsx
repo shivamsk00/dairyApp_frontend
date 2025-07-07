@@ -62,7 +62,11 @@ const Header = () => {
                         <MdEmail className="text-blue-400" size={20} />
                         {user.email}
                     </h2>
-                    <img src={profile} alt="Profile" className="w-10 h-10 rounded-full border" />
+                    {/* <img src={profile} alt="Profile" className="w-10 h-10 rounded-full border" /> */}
+                    <div className='w-10 h-10 rounded-full border flex items-center justify-center bg-orange-600'>
+
+                        <h1 className='text-white uppercase'>{user && user.email.slice(0, 1)}</h1>
+                    </div>
                 </div>
 
                 {isToggleMenu && (
