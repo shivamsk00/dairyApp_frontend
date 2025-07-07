@@ -35,6 +35,7 @@ import MilkDispatchPage from './pages/supliers/MilkDispatchPage';
 import AddHeadDairy from './pages/headDairy/AddHeadDairy';
 import EditHeadDairy from './pages/headDairy/EditHeadDairy';
 import HeadDairyPage from './pages/headDairy/HeadDairyPage';
+import CashEntryPage from './pages/cashentry/CashEntryPage';
 
 function App() {
 
@@ -100,6 +101,7 @@ function App() {
           <Route path="headDairy" element={<AddHeadDairy />} />
           <Route path="alldairymaster" element={<HeadDairyPage />} />
           <Route path="editHeadDairy" element={<EditHeadDairy />} />
+        <Route path="cashentry" element={<CashEntryPage />} />
 
 
         </Route>

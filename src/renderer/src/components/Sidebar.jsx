@@ -108,6 +108,9 @@ const Sidbar = () => {
         <NavLink to="/inventory" className={linkClasses}>
           <FaDatabase /> <span>Inventory</span>
         </NavLink>
+        <NavLink to="/cashentry" className={linkClasses}>
+          <FaDatabase /> <span>Cash Entries</span>
+        </NavLink>
 
         <li
           className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'customer-collection'
