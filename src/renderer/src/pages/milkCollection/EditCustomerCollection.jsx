@@ -36,7 +36,7 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
         customer_account_number: productData.customer_account_number || '',
         name: productData.customer?.name || '',
         careof: productData.customer?.careof || '',
-        date: productData.date || today,
+        date: DateFormate(productData.date) || today,
         category_id: productData.category_id || '',
         product_id: productData.product_id || '',
         product_price: productData.product_price || '',
@@ -170,6 +170,8 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
         total: form.total,
         transaction_type: form.transaction_type,
       };
+
+      
 
       const res = await updateProductSale(productData.id, customerCollectionData);
       if (res.status_code === 200) {

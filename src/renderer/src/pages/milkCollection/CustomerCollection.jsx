@@ -77,7 +77,7 @@ const CustomerCollection = () => {
         product_id: '',
         product_price: '',
         qty: 0,
-        total: ''
+        total: '',
     });
 
     const handleChange = async (e) => {
@@ -278,7 +278,7 @@ const CustomerCollection = () => {
 
         try {
             const res = await productSaleSubmit(customerCollectionData);
-            if (res.status_code === 200) {
+            if (res.status_code == 200) {
                 CustomToast.success(res.message);
 
                 // Reset form
@@ -291,7 +291,8 @@ const CustomerCollection = () => {
                     product_id: '',
                     product_price: '',
                     qty: 0,
-                    total: ''
+                    total: '',
+                    transaction_type:''
                 });
 
                 // Clear the product list
