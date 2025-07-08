@@ -145,9 +145,9 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
-  getAllCustomer: async (page) => {
+  getAllCustomer: async () => {
     try {
-      const res = await api.get(`/all-customer?page=${page}`)
+      const res = await api.get(`/all-customer`)
       return res.data
     } catch (error) {
       return err.response.data

@@ -37,31 +37,61 @@ const [totalPages, setTotalPages] = useState(null);
   const [customerToDelete, setCustomerToDelete] = useState(null);
 
 
- const fetchAllCustomerData = async (page = 1) => {
-  if (loading || page < currentPage) return; // 🛑 prevent duplicate fetch
+//  const fetchAllCustomerData = async () => {
+//   if (loading ) return; // 🛑 prevent duplicate fetch
+
+//   try {
+//     setLoading(true);
+//     const res = await getAllCustomer();
+
+//     if (res.status_code == 200) {
+//       const newData = res.data.data;
+
+//       if (Array.isArray(newData) && newData.length > 0) {
+//         setRowData(prev => {
+//           const existingIds = new Set(prev.map(item => item.id)); // 🔍 existing IDs
+//           const filteredNewData = newData.filter(item => !existingIds.has(item.id)); // 🧹 remove duplicates
+//           return [...prev, ...filteredNewData];
+//         });
+
+//         setCurrentPage(res.data.current_page);
+//         setHasMore(res.data.current_page < res.data.last_page); // ✅ Stop if last
+//         console.log('data', newData);
+//       } else {
+//         console.log('No new data received.');
+//       }
+//     } else {
+//       CustomToast.error(res.message);
+//     }
+//   } catch (err) {
+//     console.error("Fetch error", err);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+const fetchAllCustomerData = async () => {
+  if (loading) return;
 
   try {
     setLoading(true);
-    const res = await getAllCustomer(page);
+    const res = await getAllCustomer();
 
-    if (res.status_code == 200) {
-      const newData = res.data.data;
+    if (res.status_code === "200") {
+      const newData = res.data; // ✅ Corrected line
 
       if (Array.isArray(newData) && newData.length > 0) {
         setRowData(prev => {
-          const existingIds = new Set(prev.map(item => item.id)); // 🔍 existing IDs
-          const filteredNewData = newData.filter(item => !existingIds.has(item.id)); // 🧹 remove duplicates
+          const existingIds = new Set(prev.map(item => item.id));
+          const filteredNewData = newData.filter(item => !existingIds.has(item.id));
           return [...prev, ...filteredNewData];
         });
-
-        setCurrentPage(res.data.current_page);
-        setHasMore(res.data.current_page < res.data.last_page); // ✅ Stop if last
-        console.log('data', newData);
+        console.log("Fetched customer data:", newData);
       } else {
-        console.log('No new data received.');
+        console.log("No new data received.");
       }
     } else {
-      CustomToast.error(res.message);
+      CustomToast.error(res.message || "Failed to fetch data");
     }
   } catch (err) {
     console.error("Fetch error", err);
@@ -69,6 +99,7 @@ const [totalPages, setTotalPages] = useState(null);
     setLoading(false);
   }
 };
+
 
 
   const fetchCutomerDetail = async (id) => {
@@ -215,7 +246,7 @@ useEffect(() => {
   return (
 <div
   ref={scrollRef}
-  className="overflow-y-auto overflow-x-auto p-4  h-[600px] text-slate-700"
+  className="overflow-y-auto overflow-x-auto p-4   text-slate-700"
 >
       {/* Header */}
       <div className="flex justify-between items-center mb-6 bg-indigo-100 border border-indigo-200 rounded-lg px-6 py-4 shadow-sm">
