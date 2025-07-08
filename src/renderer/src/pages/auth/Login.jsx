@@ -48,7 +48,7 @@ const Login = () => {
         }
 
         const res = await loginToStore({ email: loginState.email, password: loginState.password });
-        if (res.status_code === 200) {
+        if (res.status_code == 200) {
             CustomToast.success(res.message);
             nav('/');
         } else {

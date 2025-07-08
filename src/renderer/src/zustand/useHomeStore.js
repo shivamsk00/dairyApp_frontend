@@ -145,16 +145,16 @@ const useHomeStore = create((set) => ({
       return err.response.data
     }
   },
-  getAllCustomer: async () => {
+  getAllCustomer: async (searchCustomer) => {
     try {
-      const res = await api.get(`/all-customer`)
+      const res = await api.get(`/all-customer?search_customer=${searchCustomer}`)
       return res.data
     } catch (error) {
       return err.response.data
     }
   },
-  editCustomerValueGet: async ({customer_id}) => {
-    console.log("customer_id in editCustomerValueGet", customer_id)
+  editCustomerValueGet: async ({ customer_id }) => {
+    console.log('customer_id in editCustomerValueGet', customer_id)
     try {
       const res = await api.get(`/edit-customer/${customer_id}`)
       return res.data

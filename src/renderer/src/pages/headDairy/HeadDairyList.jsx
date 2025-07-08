@@ -24,7 +24,6 @@ const HeadDairyList = () => {
     const [loading, setLoading] = useState(false); // 👈 Add loading state
     const [selectedHeadDairy, setSelectedHeadDairy] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [headDairyToDelete, setHeadDairyToDelete] = useState(null);
 
@@ -110,7 +109,7 @@ const HeadDairyList = () => {
                 </div>
             ),
         }),
-        
+
         columnHelper.display({
             id: 'actions',
             header: 'Actions',
