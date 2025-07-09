@@ -14,6 +14,7 @@ import { IoMdCloseCircle } from 'react-icons/io'
 import CustomToast from '../../helper/costomeToast'
 import Preloading from '../../components/Preloading'
 import InputFeild from '../../components/InputFeild'
+import DataTable from 'react-data-table-component';
 
 const columnHelper = createColumnHelper()
 
@@ -34,6 +35,7 @@ const CustomerList = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [customerToDelete, setCustomerToDelete] = useState(null)
   const [searchCustomer, setSearchCustomer] = useState('')
+  const [filteredData, setFilteredData] = useState([]);
 
   //  const fetchAllCustomerData = async () => {
   //   if (loading ) return; // 🛑 prevent duplicate fetch
@@ -149,69 +151,169 @@ const CustomerList = () => {
     }
   }
 
-  // TABLE CONFIG
-  const columns = [
-    columnHelper.display({
-      id: 'srNo',
-      header: 'Sr No.',
-      cell: ({ row }) => row.index + 1
-    }),
-    columnHelper.accessor('account_number', {
-      header: 'Account No.',
-      cell: (info) => info.getValue()
-    }),
-    columnHelper.accessor('name', {
-      header: 'Customer Name',
-      cell: (info) => info.getValue()
-    }),
-    columnHelper.accessor('mobile', {
-      header: 'Phone',
-      cell: (info) => info.getValue()
-    }),
-    columnHelper.display({
-      id: 'status',
-      header: 'Status',
-      cell: ({ row }) => (
-        <div className="flex gap-3 items-center">
-          <FaDotCircle color={row.original.status == 1 ? 'green' : 'red'} />
-          <span>{row.original.status == 1 ? 'Active' : 'Inactive'}</span>
-        </div>
-      )
-    }),
 
-    columnHelper.display({
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 justify-center">
+
+  useEffect(() => {
+    setFilteredData(rowData); // set filtered data initially
+  }, [rowData]);
+
+
+
+
+
+
+
+  // TABLE CONFIG
+  // const columns = [
+  //   columnHelper.display({
+  //     id: 'srNo',
+  //     header: 'Sr No.',
+  //     cell: ({ row }) => row.index + 1
+  //   }),
+  //   columnHelper.accessor('account_number', {
+  //     header: 'Account No.',
+  //     cell: (info) => info.getValue()
+  //   }),
+  //   columnHelper.accessor('name', {
+  //     header: 'Customer Name',
+  //     cell: (info) => info.getValue()
+  //   }),
+  //   columnHelper.accessor('mobile', {
+  //     header: 'Phone',
+  //     cell: (info) => info.getValue()
+  //   }),
+  //   columnHelper.display({
+  //     id: 'status',
+  //     header: 'Status',
+  //     cell: ({ row }) => (
+  //       <div className="flex gap-3 items-center">
+  //         <FaDotCircle color={row.original.status == 1 ? 'green' : 'red'} />
+  //         <span>{row.original.status == 1 ? 'Active' : 'Inactive'}</span>
+  //       </div>
+  //     )
+  //   }),
+
+  //   columnHelper.display({
+  //     id: 'actions',
+  //     header: 'Actions',
+  //     cell: ({ row }) => (
+  //       <div className="flex items-center gap-2 justify-center">
+  //         <button
+  //           className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
+  //           onClick={() => {
+  //             fetchCutomerDetail(row.original.id)
+  //             setIsModalOpen(true)
+  //           }}
+  //         >
+  //           <FaEye />
+  //         </button>
+  //         <button
+  //           className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+  //           onClick={() => nav('/editCustomer', { state: row.original })}
+  //         >
+  //           <FaPen />
+  //         </button>
+  //         <button
+  //           className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+  //           onClick={() => {
+  //             setCustomerToDelete(row.original)
+  //             setIsConfirmOpen(true)
+  //           }}
+  //         >
+  //           <FaTrashAlt />
+  //         </button>
+  //       </div>
+  //     )
+  //   })
+  // ]
+
+
+  // Table Columns for RDT
+  const columns = [
+    {
+      name: 'Sr No.',
+      cell: (row, index) => index + 1,
+      width: '80px',
+      center: true
+    },
+    {
+      name: 'Account No.',
+      selector: row => row.account_number,
+      sortable: true
+    },
+    {
+      name: 'Customer Name',
+      selector: row => row.name,
+      sortable: true
+    },
+    {
+      name: 'Phone',
+      selector: row => row.mobile,
+      sortable: true
+    },
+    {
+      name: 'Status',
+      cell: row => (
+        <div className="flex gap-2 items-center">
+          <FaDotCircle color={row.status == 1 ? 'green' : 'red'} />
+          <span>{row.status == 1 ? 'Active' : 'Inactive'}</span>
+        </div>
+      ),
+      center: true
+    },
+    {
+      name: 'Actions',
+      cell: row => (
+        <div className="flex gap-2 items-center justify-center">
           <button
             className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
             onClick={() => {
-              fetchCutomerDetail(row.original.id)
-              setIsModalOpen(true)
+              fetchCutomerDetail(row.id);
+              setIsModalOpen(true);
             }}
           >
             <FaEye />
           </button>
           <button
             className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-            onClick={() => nav('/editCustomer', { state: row.original })}
+            onClick={() => nav('/editCustomer', { state: row })}
           >
             <FaPen />
           </button>
           <button
             className="px-2 py-1 bg-red-500 text-white rounded text-xs"
             onClick={() => {
-              setCustomerToDelete(row.original)
-              setIsConfirmOpen(true)
+              setCustomerToDelete(row);
+              setIsConfirmOpen(true);
             }}
           >
             <FaTrashAlt />
           </button>
         </div>
-      )
-    })
-  ]
+      ),
+      center: true
+    }
+  ];
+
+
+  const handleSearch = (value) => {
+    setSearchCustomer(value);
+
+    const filtered = rowData.filter((item) => {
+      const val = value.toLowerCase();
+      return (
+        item.name?.toLowerCase().includes(val) ||
+        item.account_number?.toString().includes(val)
+      );
+    });
+
+    setFilteredData(filtered);
+  };
+
+
+
+
+
 
   const table = useReactTable({
     data: rowData,
@@ -231,10 +333,7 @@ const CustomerList = () => {
     <div ref={scrollRef} className="overflow-y-auto overflow-x-auto p-4   text-slate-700">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 bg-orange-50 border border-orange-200 rounded-lg px-6 py-4 shadow-sm">
-        <div className="flex items-center gap-3 text-orange-800">
-          <User className="w-6 h-6" />
-          <h2 className="text-lg font-semibold">Total Customers: {rowData.length}</h2>
-        </div>
+      
         <button
           onClick={() => nav('/addCustomer')}
           className="bg-[#E6612A] hover:bg-orange-400 text-white px-4 py-2 rounded shadow-sm"
@@ -243,7 +342,7 @@ const CustomerList = () => {
         </button>
       </div>
 
-      <div onKeyDown={(e) => {
+      {/* <div onKeyDown={(e) => {
         if (e.key === "Enter") {
 
           fetchAllCustomerData()
@@ -257,11 +356,10 @@ const CustomerList = () => {
           onChange={(e) => setSearchCustomer(e.target.value)}
           value={searchCustomer}
         />
-      </div>
-
+      </div> */}
 
       {/* Table */}
-      <table className="min-w-full border text-sm bg-white rounded shadow overflow-hidden">
+      {/* <table className="min-w-full border text-sm bg-white rounded shadow overflow-hidden">
         <thead className="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -284,7 +382,32 @@ const CustomerList = () => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
+
+
+
+      <DataTable
+        // title="Customer List"
+        columns={columns}
+        data={filteredData}
+        pagination
+        highlightOnHover
+        striped
+        dense
+        subHeader
+        subHeaderComponent={
+          <div className='flex justify-between items-center w-full'>
+          <h1>Customer List</h1>
+          <input
+            type="text"
+            placeholder="Search customer..."
+            value={searchCustomer}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="border px-3 py-1 text-sm rounded w-64 focus:ring focus:ring-blue-400"
+            />
+            </div>
+        }
+      />
 
       {/* Infinite Scroll Loader */}
       {loading && (

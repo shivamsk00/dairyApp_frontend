@@ -43,13 +43,13 @@ const Header = () => {
     return (
         <div className="w-full flex justify-between items-center px-6 py-4 bg-slate-800 shadow-md relative z-50">
             {/* Search Box */}
-            <div className="flex items-center gap-2 border border-gray-600 px-3 py-1 rounded-md bg-slate-700">
-                <FaSearch className="text-gray-300" />
+            <div className="flex items-center gap-2  px-3 py-1 rounded-md ">
+                {/* <FaSearch className="text-gray-300" />
                 <input
                     type="search"
                     placeholder="Search..."
                     className="outline-none text-sm w-48 bg-transparent text-white placeholder-gray-300"
-                />
+                /> */}
             </div>
 
             {/* Profile Section */}
