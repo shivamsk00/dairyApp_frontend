@@ -27,6 +27,9 @@ const AddCustomerPage = () => {
         designation: '',
         // pan_number: '',
         state: '',
+        bank_account: '',
+        ifsc_code: '',
+        subsidy_code: ""
     });
 
     const handleChange = (e) => {
@@ -36,6 +39,8 @@ const AddCustomerPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        console.log("form data print ==>", form)
 
         try {
             const res = await addCustomer(form);
@@ -58,6 +63,9 @@ const AddCustomerPage = () => {
                     designation: '',
                     // pan_number: '',
                     state: '',
+                    bank_account: '',
+                    ifsc_code: '',
+                    subsidy_code: ""
                 });
                 CustomToast.success(res.message)
                 // Navigate to /customer after 2 seconds
@@ -153,6 +161,42 @@ const AddCustomerPage = () => {
                         />
                     </div>
                 </div>
+
+                {/* BANK ACCOUNT DETAILS */}
+                <div className="w-full flex flex-col md:flex-row gap-4">
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700">Bank Account</label>
+                        <input
+                            type="text"
+                            name="bank_account"
+                            value={form.bank_account}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                    {/* Careof */}
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700">IFC Code</label>
+                        <input
+                            type="text"
+                            name="ifsc_code"
+                            value={form.ifsc_code}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700">Subsidy Code</label>
+                        <input
+                            type="text"
+                            name="subsidy_code"
+                            value={form.subsidy_code}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                </div>
+
 
                 {/* Email and Care of */}
                 <div className="w-full flex flex-col md:flex-row gap-4">
@@ -260,7 +304,7 @@ const AddCustomerPage = () => {
                 <div className="w-full">
                     <button
                         type="submit"
-                        className="w-full bg-blue-400 text-white py-2 px-4 rounded"
+                        className="w-full bg-[#E6612A] text-white py-2 px-4 rounded"
                     >
                         Add Customer
                     </button>

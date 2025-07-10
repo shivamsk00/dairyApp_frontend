@@ -403,7 +403,7 @@ const CustomerList = () => {
             placeholder="Search customer..."
             value={searchCustomer}
             onChange={(e) => handleSearch(e.target.value)}
-            className="border px-3 py-1 text-sm rounded w-64 focus:ring focus:ring-blue-400"
+            className="border px-3 py-1 text-sm rounded w-64 outline-none border-orange-600 "
             />
             </div>
         }

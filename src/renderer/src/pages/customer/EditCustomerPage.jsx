@@ -29,6 +29,10 @@ const EditCustomerPage = () => {
         pincode: '',
         designation: '',
         account_number: '',
+        bank_account: '',
+        ifsc_code: '',
+        subsidy_code: ''
+
     });
 
 
@@ -47,12 +51,16 @@ const EditCustomerPage = () => {
                     careof: customerData.careof || '',
                     contact_person: customerData.contact_person || '',
                     addcustomerDatas: customerData.addcustomerDatas || '',
+                    address: customer.address || '',
                     city: customerData.city || '',
                     state: customerData.state || '',
                     wallet: customerData.wallet || '',
                     pincode: customerData.pincode || '',
                     designation: customerData.designation || '',
                     account_number: customerData.account_number || '',
+                    bank_account: customerData.bank_account,
+                    ifsc_code: customerData.ifsc_code,
+                    subsidy_code: customerData.subsidy_code
                 });
             } else {
                 toast.error(res.message);
@@ -102,8 +110,11 @@ const EditCustomerPage = () => {
         setCustomerData(prev => ({ ...prev, [name]: value }));
     };
 
+
     const handleSubmit = async (e) => {
+        console.log("customerData", customerData)
         e.preventDefault();
+        // return
         try {
             const res = await updateCustomer(customer.id, customerData);
             if (res.status_code === 200) {
@@ -126,22 +137,25 @@ const EditCustomerPage = () => {
                     Update Customer Details
                 </h1>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[
                         { label: 'Account Number', name: 'account_number' },
                         { label: 'Customer Type', name: 'customer_type' },
                         { label: 'Name', name: 'name' },
+                        { label: 'Bank Account', name: 'bank_account', type: 'number', },
+                        { label: 'IFSC Code', name: 'ifsc_code' },
+                        { label: 'Subsidy Code', name: 'subsidy_code', type: 'number' },
                         { label: 'Email', name: 'email' },
-                        { label: 'Mobile', name: 'mobile' },
+                        { label: 'Mobile', name: 'mobile', type: 'number', },
                         { label: 'Contact Person', name: 'contact_person' },
                         { label: 'Address', name: 'address' },
                         { label: 'City', name: 'city' },
                         { label: 'State', name: 'state' },
-                        { label: 'Wallet', name: 'wallet' },
+                        { label: 'Wallet', name: 'wallet', type: 'number' },
                         { label: 'Care of', name: 'careof' },
-                        { label: 'Pincode', name: 'pincode' },
+                        { label: 'Pincode', name: 'pincode', type: 'number' },
                         { label: 'Designation', name: 'designation' },
-                    ].map(({ label, name }) => (
+                    ].map(({ label, name, type }) => (
                         <div key={name}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 {label}
@@ -150,7 +164,7 @@ const EditCustomerPage = () => {
                             {name === 'customer_type' ? (
                                 <select
                                     name="customer_type"
-                                    value={customerData.customer_type}
+                                    value={customerData.customer_type || ''}
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required
@@ -161,9 +175,9 @@ const EditCustomerPage = () => {
                                 </select>
                             ) : (
                                 <input
-                                    type="text"
+                                    type={type || 'text'}
                                     name={name}
-                                    value={customerData[name]}
+                                    value={customerData[name] || ''}
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     placeholder={`Enter ${label.toLowerCase()}`}
@@ -172,15 +186,11 @@ const EditCustomerPage = () => {
                         </div>
                     ))}
 
-                    <div className="col-span-1 sm:col-span-2 flex justify-end mt-4">
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end mt-4">
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`px-6 py-2 rounded-md text-white font-medium transition duration-200 
-                            ${loading
-                                    ? 'bg-indigo-300 cursor-not-allowed'
-                                    : 'bg-indigo-600 hover:bg-indigo-700'
-                                }`}
+                            className={`px-6 py-2 rounded-md text-white font-medium transition duration-200  ${loading ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
                         >
                             {loading ? 'Please wait...' : 'Update Customer'}
                         </button>
