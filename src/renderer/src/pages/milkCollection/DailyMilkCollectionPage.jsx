@@ -569,21 +569,10 @@ const DailyMilkCollectionPage = () => {
     }, [])
 
 
-    const InputField = React.forwardRef(({ label, className = '', disabled, ...props }, ref) => (
-        <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-            <input
-                ref={ref} // 👈 Now ref reaches the real <input>
-                {...props}
-                disabled={disabled}
-                className={`w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 ${props.disabled ? 'bg-gray-200 opacity-70' : ''}`}
-            />
-        </div>
-    ));
 
 
 
-
+    // INPUT REFS
     const accRef = useRef(null);
     const qtyRef = useRef(null);
     const nameRef = useRef(null);
@@ -595,6 +584,26 @@ const DailyMilkCollectionPage = () => {
     const otherRateRef = useRef(null);
     const submitRef = useRef(null);
 
+
+    // RESET FORM HANDLER
+    const resetForm = () => {
+        setForm({
+            customer_account_number: '',
+            name: '',
+            careof: '',
+            mobile: '',
+            quantity: '',
+            clr: '',
+            fat: '',
+            snf: '',
+            base_rate: '',
+            other_price: '0',
+            rate: '',
+            total_amount: '',
+            milk_type: '',
+            date: today,
+        })
+    }
 
 
 
@@ -749,7 +758,41 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={fatRef}
                                     placeholder="Enter FAT %"
-                                    onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
+                                    // onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            const fat = form.fat?.trim();
+                                            const clr = form.clr?.trim();
+                                            const snfRaw = form.snf?.trim();
+
+                                            // If SNF or CLR is empty → focus on SNF input and prevent fetch
+                                            if (!snfRaw) {
+                                                e.preventDefault();
+                                                snfRef.current?.focus();
+                                                return;
+                                            }
+
+                                            // If both CLR and SNF have values → fetch milk rate
+                                            e.preventDefault();
+                                            const snfForApi = !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+
+                                            try {
+                                                const res = await getMilkRate(fat, clr, snfForApi);
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    fat: res.fat || "",
+                                                    clr: res.clr || "",
+                                                    snf: res.snf || prev.snf,
+                                                    base_rate: res.rate || '',
+                                                }));
+                                                res.rate
+                                                    ? CustomToast.success("Rate Found", "top-center")
+                                                    : CustomToast.warn("RATE not found", "top-center");
+                                            } catch (err) {
+                                                console.error("Rate error", err);
+                                            }
+                                        }
+                                    }}
                                     required
                                     className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
@@ -941,6 +984,7 @@ const DailyMilkCollectionPage = () => {
                                 }
                             }}
                         />
+                        <div className='px-4 py-1 bg-gray-700 text-white rounded-lg cursor-pointer' onClick={resetForm}>Reset Value</div>
                     </div>
                 </form>
 
