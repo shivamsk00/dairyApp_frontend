@@ -16,7 +16,7 @@ const Header = () => {
 
     const handleLogout = async () => {
         const res = await logout();
-        if (res.status_code === 200) {
+        if (res.status_code == 200) {
             toast(res.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -27,6 +27,8 @@ const Header = () => {
                 theme: "dark",
                 type: 'success'
             });
+
+            window.api.logoutCloseAll()
         }
     };
 
@@ -94,7 +96,7 @@ const Header = () => {
                             }}
                             className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm transition"
                         >
-                            Remove Account
+                            Login Again
                         </button>
 
                         <button

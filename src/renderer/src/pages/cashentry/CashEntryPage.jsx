@@ -53,8 +53,9 @@ const CashEntryPage = () => {
     try {
       const res = await fetchCustomerDetailsByAccount(accountNo);
 
-      if (res.status_code === 200) {
+      if (res.status_code == 200) {
         CustomToast.success(res.message);
+        console.log("response value===>", res)
 
         setForm((prev) => ({
           ...prev,

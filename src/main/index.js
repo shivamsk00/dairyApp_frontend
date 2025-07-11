@@ -151,6 +151,21 @@ app.whenReady().then(() => {
   ipcMain.on('open-cutomer-win', () => customerCollection())
   ipcMain.handle('get-app-version', () => app.getVersion())
 
+  ////////////////////////////////// CLOSE ALL WINDOW AFTER LOGOUT /////////////////////////////////////////////////////
+  ipcMain.on('logout_close_all', () => {
+    if (secondWindow && !secondWindow.isDestroyed()) {
+      secondWindow.close()
+    }
+
+    if (customerCollectionWin && !customerCollectionWin.isDestroyed()) {
+      customerCollectionWin.close()
+    }
+
+    if (childWindow && !childWindow.isDestroyed()) {
+      childWindow.close()
+    }
+  })
+
   // 🖨️ Slip printing
   ipcMain.on('print-slip', (event, slipData) => {
     const slipWindow = new BrowserWindow({

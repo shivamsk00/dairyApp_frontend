@@ -56,6 +56,18 @@ const DailyMilkCollectionPage = () => {
         milk_total: 0,
         other_price_total: 0,
         total_amount: 0,
+
+        morning_avg_base_rate: '',
+        morning_avg_fat: 0,
+        morning_avg_snf: 0,
+        morning_total_amount: 0,
+        morning_total_milk: 0,
+
+        evening_avg_base_rate: '',
+        evening_avg_fat: 0,
+        evening_avg_snf: 0,
+        evening_total_amount: 0,
+        evening_total_milk: 0
     });
 
     const [dayTotal, setDayTotal] = useState({
@@ -358,7 +370,19 @@ const DailyMilkCollectionPage = () => {
                     milk_total: res.milk_total || '',
                     other_price_total: res.other_price_total || '',
                     total_amount: res.total_amount || '',
-                })
+
+                    morning_avg_base_rate: res.morning_avg_base_rate || '',
+                    morning_avg_fat: res.morning_avg_fat || '',
+                    morning_avg_snf: res.morning_avg_snf || '',
+                    morning_total_amount: res.morning_total_amount || '',
+                    morning_total_milk: res.morning_total_milk || '',
+
+                    evening_avg_base_rate: res.evening_avg_base_rate || '',
+                    evening_avg_fat: res.evening_avg_fat || '',
+                    evening_avg_snf: res.evening_avg_snf || '',
+                    evening_total_amount: res.evening_total_amount || '',
+                    evening_total_milk: res.evening_total_milk || ''
+                });
 
                 setDayTotal({
                     morning_total_amount: res.morning_total_amount || 0,
@@ -367,6 +391,7 @@ const DailyMilkCollectionPage = () => {
                     evening_total_milk: res.evening_total_milk || 0,
                     total_amount: res.total_amount || 0,
                     milk_total: res.milk_total || 0,
+
                 })
 
 
@@ -490,7 +515,7 @@ const DailyMilkCollectionPage = () => {
 
 
 
-
+    // PRINT HANLDER
     const handlePrint = (data) => {
         const shift = data.shift === 'morning' ? 'M' : 'E';
         const now = new Date();
@@ -603,6 +628,8 @@ const DailyMilkCollectionPage = () => {
             milk_type: '',
             date: today,
         })
+
+        setTimeout(() => accRef.current?.focus(), 200);
     }
 
 
@@ -785,9 +812,12 @@ const DailyMilkCollectionPage = () => {
                                                     snf: res.snf || prev.snf,
                                                     base_rate: res.rate || '',
                                                 }));
+                                                otherRateRef.current?.focus()
                                                 res.rate
                                                     ? CustomToast.success("Rate Found", "top-center")
                                                     : CustomToast.warn("RATE not found", "top-center");
+
+                                                
                                             } catch (err) {
                                                 console.error("Rate error", err);
                                             }
@@ -848,6 +878,7 @@ const DailyMilkCollectionPage = () => {
                                                 res.rate
                                                     ? CustomToast.success("Rate Found", "top-center")
                                                     : CustomToast.warn("RATE not found", "top-center");
+
                                             } catch (err) {
                                                 console.error("Rate error", err);
                                             }
@@ -984,7 +1015,7 @@ const DailyMilkCollectionPage = () => {
                                 }
                             }}
                         />
-                        <div className='px-4 py-1 bg-gray-700 text-white rounded-lg cursor-pointer' onClick={resetForm}>Reset Value</div>
+                        <div className='px-4 py-1 bg-gray-300 text-black  rounded-lg cursor-pointer' onClick={resetForm}>Reset</div>
                     </div>
                 </form>
 
@@ -1304,15 +1335,15 @@ const DailyMilkCollectionPage = () => {
                     <div className=' w-full flex justify-between items-center p-2 bg-yellow-200 '>
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Ave. Fat</p>
-                            <p className='font-bold'>{milkCollectiionAvergeData?.avg_fat}</p>
+                            <p className='font-bold'>{isShift == 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}</p>
                         </div>
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Ave. Snf</p>
-                            <p className='font-bold'>{milkCollectiionAvergeData?.avg_snf}</p>
+                            <p className='font-bold'>{isShift == 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}</p>
                         </div>
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Ave. Base Rate</p>
-                            <p className='font-bold'>₹{milkCollectiionAvergeData?.avg_base_rate}</p>
+                            <p className='font-bold'>₹{isShift == 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}</p>
                         </div>
 
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
@@ -1323,11 +1354,11 @@ const DailyMilkCollectionPage = () => {
 
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Milk Total</p>
-                            <p className='font-bold'>{Number(milkCollectiionAvergeData.milk_total).toFixed(2) || 0} KG</p>
+                            <p className='font-bold'>{isShift == 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk) || 0} KG</p>
                         </div>
                         <div className='text-sm flex-1  text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Total Amount</p>
-                            <p className='font-bold'>₹{Number(milkCollectiionAvergeData?.total_amount).toFixed(2)}</p>
+                            <p className='font-bold'>₹{isShift == 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}</p>
                         </div>
                     </div>
 

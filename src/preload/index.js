@@ -10,6 +10,7 @@ const api = {
   printSlip: (data) => ipcRenderer.send('print-slip', data),
   upadateStartDownload: (data) => ipcRenderer.send('start-update-download', data),
   checkForUpdate: () => ipcRenderer.send('check-for-update'),
+  logoutCloseAll: () => ipcRenderer.send('logout_close_all'),
 
   onUpdateMessage: (callback) => {
     ipcRenderer.on('update-message', (event, message) => {
