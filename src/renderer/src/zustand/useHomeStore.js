@@ -526,7 +526,18 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return error.response.data
     }
-  }
+  },
+   // get all cash entries api
+  getAllCashEntries: async () => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/all-customer-payment`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
 
 }))
 
