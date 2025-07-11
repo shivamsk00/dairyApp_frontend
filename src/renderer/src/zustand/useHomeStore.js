@@ -515,7 +515,19 @@ const useHomeStore = create((set) => ({
         error.response?.data || { status_code: 500, message: 'Failed to fetch Payment Register' }
       )
     }
+  },
+
+  // Cash Entries Api
+    submitCashEntry: async (cashEntriesData) => {
+    console.log('cashEntriesData', cashEntriesData)
+    try {
+      const res = await api.post('/payment-submit', cashEntriesData)
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
   }
+
 }))
 
 export default useHomeStore
