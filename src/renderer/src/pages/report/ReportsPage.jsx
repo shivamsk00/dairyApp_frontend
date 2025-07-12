@@ -1,14 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import useHomeStore from '../../zustand/useHomeStore';
 import { toast } from 'react-toastify';
+import MergedReportTable from './MergedReportTable';
+
+// 🔹 Helpers: must come before usage
+const getToday = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+const getWeekRange = () => {
+  const today = new Date();
+  const day = today.getDay(); // 0 = Sunday, 1 = Monday
+  const diffToMonday = today.getDate() - (day === 0 ? 6 : day - 1);
+  const monday = new Date(today.setDate(diffToMonday));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  return {
+    start: monday.toISOString().split('T')[0],
+    end: sunday.toISOString().split('T')[0]
+  };
+};
+
+const getMonthRange = () => {
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  return {
+    start: firstDay.toISOString().split('T')[0],
+    end: lastDay.toISOString().split('T')[0]
+  };
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-');
+  return `${day}-${month}-${year}`;
+};
 
 const ReportsPage = () => {
   const [summaryData, setSummaryData] = useState(null);
   const [form, setForm] = useState({
     term: 'date_range',
-    start_date: '',
-    end_date: '',
+    start_date: getToday(),
+    end_date: getToday(),
     customer_account_number: ''
   });
 
@@ -16,20 +54,33 @@ const ReportsPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (form.term === 'this_week') {
+      const { start, end } = getWeekRange();
+      setForm(prev => ({ ...prev, start_date: start, end_date: end }));
+    } else if (form.term === 'this_month') {
+      const { start, end } = getMonthRange();
+      setForm(prev => ({ ...prev, start_date: start, end_date: end }));
+    } else if (form.term === 'date_range') {
+      const today = getToday();
+      setForm(prev => ({ ...prev, start_date: today, end_date: today }));
+    }
+  }, [form.term]);
 
   const formatInputDate = (isoDateStr) => {
     if (!isoDateStr) return '';
     const [yyyy, mm, dd] = isoDateStr.split('-');
-    return `${dd}-${mm}-${yyyy}`; // convert to dd-mm-yyyy
+    return `${dd}-${mm}-${yyyy}`;
   };
 
   const handleGenerate = async () => {
     const payload = {
       ...form,
       start_date: formatInputDate(form.start_date),
-      end_date: formatInputDate(form.end_date),
+      end_date: formatInputDate(form.end_date)
     };
 
     try {
@@ -49,19 +100,14 @@ const ReportsPage = () => {
   };
 
   const handleReset = () => {
+    const today = getToday();
     setForm({
       term: 'date_range',
-      start_date: '',
-      end_date: '',
+      start_date: today,
+      end_date: today,
       customer_account_number: ''
     });
     setSummaryData(null);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const [year, month, day] = dateString.split('-');
-    return `${day}-${month}-${year}`;
   };
 
   const exportToExcel = () => {
@@ -94,11 +140,13 @@ const ReportsPage = () => {
 
   const isFormValid = form.customer_account_number && form.start_date && form.end_date;
 
+  // Report All Data
+  
   return (
-    <>
-      <div className="flex flex-col lg:flex-row gap-6 p-6">
-        <form className="bg-gray-800 p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4">
-          <div className="w-full mx-auto bg-white p-6 rounded shadow">
+    <div className="p-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <form className="bg-gray-800 text-white p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4">
+          <div className="bg-white text-black p-6 rounded shadow">
             <h2 className="text-xl font-semibold text-orange-600 mb-4">Customer Milk Collection Report</h2>
 
             <div className="mb-4">
@@ -122,6 +170,7 @@ const ReportsPage = () => {
                 name="start_date"
                 value={form.start_date}
                 onChange={handleChange}
+                readOnly={form.term !== 'date_range'}
                 className="border rounded px-3 py-2 w-full"
               />
             </div>
@@ -133,6 +182,7 @@ const ReportsPage = () => {
                 name="end_date"
                 value={form.end_date}
                 onChange={handleChange}
+                readOnly={form.term !== 'date_range'}
                 className="border rounded px-3 py-2 w-full"
               />
             </div>
@@ -168,30 +218,29 @@ const ReportsPage = () => {
           </div>
         </form>
 
-        {
-          summaryData && (
-            <div className="mt-4 max-w-lg mx-auto h-48 bg-gradient-to-r from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
-              <p className="text-xl">
-                Total Milk Collected: <span className="text-green-700 font-bold">{summaryData.total_milk_collections} L</span>
-              </p>
-              <p className="text-xl">
-                Total Amount: <span className="text-green-700 font-bold">₹{summaryData.milk_total_amount}</span>
-              </p>
-              <p className="text-xl">
-                Wallet Balance:{" "}
-                <span className={summaryData.customer_wallet < 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
-                  ₹{summaryData.customer_wallet}
-                </span>
-              </p>
-            </div>
-          )
-        }
+        {summaryData && (
+          <div className="mt-4 max-w-lg mx-auto h-48 bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
+            <p className="text-xl">
+              Total Milk Collected: <span className="text-green-700 font-bold">{summaryData.total_milk_collections} L</span>
+            </p>
+            <p className="text-xl">
+              Total Amount:
+              <span className="text-green-700 font-bold">
+                ₹{Number(summaryData.milk_total_amount).toFixed(2)}
+              </span>
+            </p>
+            <p className="text-xl">
+              Wallet Balance:{" "}
+              <span className={summaryData.customer_wallet < 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
+                ₹{Number(summaryData.customer_wallet).toFixed(2)}
+              </span>
+            </p>
 
-
-
+          </div>
+        )}
       </div>
 
-      {summaryData && (
+      {/* {summaryData && (
         <div className="mt-12 p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">Milk Collection Report</h3>
@@ -220,7 +269,6 @@ const ReportsPage = () => {
                   <th className="border px-2 py-2">SNF</th>
                   <th className="border px-2 py-2">Base Rate</th>
                   <th className="border px-2 py-2">Total Amount</th>
-
                 </tr>
               </thead>
               <tbody>
@@ -239,18 +287,17 @@ const ReportsPage = () => {
                     <td className="border px-2 py-2 text-center">{entry.snf}</td>
                     <td className="border px-2 py-2 text-center">{entry.base_rate}</td>
                     <td className="border px-2 py-2 text-center">{entry.total_amount}</td>
-
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-
-
         </div>
-      )}
-    </>
+      )} */}
+
+      {summaryData && <MergedReportTable summaryData={summaryData} />}
+
+    </div>
   );
 };
 
