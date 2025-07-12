@@ -31,7 +31,7 @@ const CashEntryPage = () => {
     try {
       setLoading(true); // ✅ show loading if needed
       const res = await allCashEntries();
-      if (res.status_code === 200) {
+      if (res.status_code == 200) {
         setAllEntries(res.data); // ✅ fixed earlier
       } else {
         setAllEntries([]);
@@ -48,14 +48,16 @@ const CashEntryPage = () => {
   useEffect(() => {
     cashEntriesAllDataFetch()
   }, [])
+
+
   // Customer Fetch from Account Number
   const fetchCustomerDetailByAccountNumber = async (accountNo) => {
     try {
       const res = await fetchCustomerDetailsByAccount(accountNo);
+      console.log("response value===>", res.data.wallet)
 
       if (res.status_code == 200) {
         CustomToast.success(res.message);
-        console.log("response value===>", res)
 
         setForm((prev) => ({
           ...prev,
@@ -106,7 +108,7 @@ const CashEntryPage = () => {
 
     try {
       const res = await submitCashEntry(payload);
-      if (res.status_code === 200) {
+      if (res.status_code == 200) {
         CustomToast.success(res.message);
         setForm({
           customer_account_number: '',
