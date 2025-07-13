@@ -43,12 +43,15 @@ const formatDate = (dateString) => {
 
 const ReportsPage = () => {
   const [summaryData, setSummaryData] = useState(null);
+  const [isLoading, setLoading]= useState(false)
   const [form, setForm] = useState({
     term: 'date_range',
     start_date: getToday(),
     end_date: getToday(),
     customer_account_number: ''
   });
+
+
 
   const reportCustomer = useHomeStore(state => state.reportCustomer);
 
@@ -84,11 +87,13 @@ const ReportsPage = () => {
       end_date: formatInputDate(form.end_date)
     };
 
+    setLoading(true)
     try {
       const res = await reportCustomer(payload);
       if (res?.status_code == 200 && res?.data) {
         setSummaryData(res.data);
         toast.success("Report generated successfully");
+        setLoading(false)
       } else {
         setSummaryData(null);
         toast.error(res?.message || "Failed to generate report");
@@ -97,6 +102,10 @@ const ReportsPage = () => {
       console.error("Error generating report:", error);
       toast.error("Failed to generate report");
       setSummaryData(null);
+      setLoading(false)
+
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -205,14 +214,19 @@ const ReportsPage = () => {
 
             <div className="flex gap-3">
               <button
+
                 type="submit" // ✅ submit type for Enter key support
-                disabled={!isFormValid}
+                disabled={!isFormValid || isLoading}
                 className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
                   }`}
               >
-                Generate Report
+                {
+                  isLoading ? "Please wait..." :"Generate Report"
+                }
+                
               </button>
               <button
+              disabled={isLoading}
                 type="button"
                 onClick={handleReset}
                 className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
