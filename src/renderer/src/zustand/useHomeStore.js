@@ -518,7 +518,7 @@ const useHomeStore = create((set) => ({
   },
 
   // Cash Entries Api
-    submitCashEntry: async (cashEntriesData) => {
+  submitCashEntry: async (cashEntriesData) => {
     console.log('cashEntriesData', cashEntriesData)
     try {
       const res = await api.post('/payment-submit', cashEntriesData)
@@ -527,7 +527,7 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
-   // get all cash entries api
+  // get all cash entries api
   getAllCashEntries: async () => {
     try {
       // set({loading:true})
@@ -549,6 +549,24 @@ const useHomeStore = create((set) => ({
     }
   },
 
+  // MILK CORRECTION
+  getMilkCorrectionData: async (milkCorrectionData) => {
+    try {
+      // set({loading:true})
+      const res = await api.get(`/all-milk-collection-summery`, {
+        params: {
+          start_date: milkCorrectionData.start_date,
+          end_date: milkCorrectionData.end_date,
+          data_type: milkCorrectionData.data_type,
+          customer_account_number: milkCorrectionData.customer_account_number
+        }
+      })
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  }
 }))
 
 export default useHomeStore

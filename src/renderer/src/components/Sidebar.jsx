@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import useToggleStore from '../zustand/useToggleStore';
 import { MdOutlineDashboard } from 'react-icons/md';
 import { FaChartBar, FaDatabase, FaFileAlt, FaRupeeSign, FaUser, FaChevronDown } from 'react-icons/fa';
-import { GiHeavyCollar } from 'react-icons/gi';
-import { FaArrowTrendUp, FaGear, FaMoneyBillTrendUp } from 'react-icons/fa6';
+import { GiCash, GiHeavyCollar } from 'react-icons/gi';
+import { FaArrowTrendUp, FaGear, FaListCheck, FaMoneyBillTrendUp } from 'react-icons/fa6';
 import { NavLink, useLocation } from 'react-router-dom';
 import dairyLogo from "../assets/dairyLogo.png";
 import { TbReceiptRupee } from 'react-icons/tb';
@@ -109,7 +109,10 @@ const Sidbar = () => {
           <FaDatabase /> <span>Inventory</span>
         </NavLink>
         <NavLink to="/cashentry" className={linkClasses}>
-          <FaDatabase /> <span>Cash Entries</span>
+          <GiCash /> <span>Cash Entries</span>
+        </NavLink>
+        <NavLink to="/milkCorrection" className={linkClasses}>
+          <FaListCheck /> <span>Milk Correction</span>
         </NavLink>
 
         <li

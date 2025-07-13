@@ -335,12 +335,12 @@ const CashEntryPage = () => {
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-800">{entry.note || '-'}</td>
                     <td className="px-4 py-2 text-sm text-gray-800">
-                      <button
+                      {/* <button
                         onClick={() => nav('/editStock', { state: { stockId: item.id } })}
                         className="bg-yellow-500 mx-1 text-white px-2 py-1 rounded text-xs"
                       >
                         <FaPen size={14} />
-                      </button>
+                      </button> */}
                       <button
                         onClick={() => {
                           openModal('delete', entry)

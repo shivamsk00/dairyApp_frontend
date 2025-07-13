@@ -36,6 +36,7 @@ import AddHeadDairy from './pages/headDairy/AddHeadDairy';
 import EditHeadDairy from './pages/headDairy/EditHeadDairy';
 import HeadDairyPage from './pages/headDairy/HeadDairyPage';
 import CashEntryPage from './pages/cashentry/CashEntryPage';
+import MilkCorrectionPage from './pages/milkCorrection/MilkCorrectionPage';
 
 function App() {
 
@@ -101,7 +102,8 @@ function App() {
           <Route path="headDairy" element={<AddHeadDairy />} />
           <Route path="alldairymaster" element={<HeadDairyPage />} />
           <Route path="editHeadDairy" element={<EditHeadDairy />} />
-        <Route path="cashentry" element={<CashEntryPage />} />
+          <Route path="cashentry" element={<CashEntryPage />} />
+          <Route path="milkCorrection" element={<MilkCorrectionPage />} />
 
 
         </Route>
