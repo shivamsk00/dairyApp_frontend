@@ -1354,7 +1354,7 @@ const DailyMilkCollectionPage = () => {
 
                         <div className='text-sm flex-1 font-semibold text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Milk Total</p>
-                            <p className='font-bold'>{isShift == 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk) || 0} KG</p>
+                            <p className='font-bold'>{isShift == 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} KG</p>
                         </div>
                         <div className='text-sm flex-1  text-gray-700 flex justify-center items-center gap-2'>
                             <p className='font-bold'>Total Amount</p>
