@@ -1,137 +1,150 @@
-import React from 'react';
+import React from 'react'
 
 const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const [year, month, day] = dateString.split('-');
-  return `${day}-${month}-${year}`;
-};
+  if (!dateString) return ''
+  const [year, month, day] = dateString.split('-')
+  return `${day}-${month}-${year}`
+}
 
-const mergeReportByDate = (milk, products, payments) => {
-  const map = new Map();
+const mergeAllEntriesByDate = (milk, products, payments) => {
+  const map = new Map()
 
   milk.forEach((entry) => {
-    const key = entry.date;
-    if (!map.has(key)) map.set(key, { date: key, milk: [], products: [], given: [], received: [], lastNote: '' });
-    map.get(key).milk.push(entry);
-  });
+    const key = entry.date
+    if (!map.has(key)) map.set(key, [])
+    map.get(key).push({ type: 'milk', ...entry })
+  })
 
   products.forEach((entry) => {
-    const key = entry.date?.split('-').reverse().join('-'); // Convert to yyyy-mm-dd
-    if (!map.has(key)) map.set(key, { date: key, milk: [], products: [], given: [], received: [], lastNote: '' });
-    map.get(key).products.push(entry);
-  });
+    const key = entry.date?.split('-').reverse().join('-')
+    if (!map.has(key)) map.set(key, [])
+    map.get(key).push({ type: 'product', ...entry })
+  })
 
-  payments.forEach((entry, i, arr) => {
-    const key = entry.date?.split('-').reverse().join('-');
-    if (!map.has(key)) map.set(key, { date: key, milk: [], products: [], given: [], received: [], lastNote: '' });
+  payments.forEach((entry) => {
+    const key = entry.date?.split('-').reverse().join('-')
+    if (!map.has(key)) map.set(key, [])
+    map.get(key).push({ type: 'payment', ...entry })
+  })
 
-    const isLast = i === arr.length - 1;
-    if (entry.credit_debit_mode === 'given') {
-      map.get(key).given.push(entry);
-    } else {
-      map.get(key).received.push(entry);
-    }
+  return [...map.entries()]
+    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+    .flatMap(([date, entries]) =>
+      entries.map((entry) => ({
+        ...entry,
+        date
+      }))
+    )
+}
 
-    if (isLast) {
-      map.get(key).lastNote = entry.note || '';
-    }
-  });
-
-  return [...map.values()].sort((a, b) => new Date(a.date) - new Date(b.date));
-};
-
-const MergedReportTable = ({ summaryData }) => {
-  if (!summaryData) return null;
-
-  const merged = mergeReportByDate(
+const MergedTableExact = ({ summaryData }) => {
+  if (!summaryData) return null
+  console.log('Summary Data:', summaryData)
+  const entries = mergeAllEntriesByDate(
     summaryData.milk_collections || [],
     summaryData.product_sales || [],
-    summaryData.payments || []
-  );
+    summaryData.payments || [],
+    summaryData.customer_wallet || 0
+  )
+
+  let totalMilkQty = 0
+  let totalMilkAmount = 0
+  let totalProductQty = 0
+  let totalProductAmount = 0
+  let totalDebit = 0
+  let totalCredit = 0
 
   return (
-    <div className="mt-10 px-6">
-      <h3 className="text-2xl font-bold mb-6 text-purple-700">📊 Merged Daily Report</h3>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-purple-600 text-white">
-            <tr>
-              <th className="border px-3 py-2 text-left">Date</th>
-              <th className="border px-3 py-2 text-left">Milk Collection</th>
-              <th className="border px-3 py-2 text-left">Product Sales</th>
-              <th className="border px-3 py-2 text-left">Given</th>
-              <th className="border px-3 py-2 text-left">Received</th>
-              <th className="border px-3 py-2 text-left">Last Message</th>
-            </tr>
-          </thead>
-          <tbody>
-            {merged.map((entry, index) => (
-              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                {/* Date */}
-                <td className="border px-3 py-2 font-semibold">{formatDate(entry.date)}</td>
+    <div className="p-4 mt-10 overflow-x-auto">
+      <h2 className="text-xl font-bold ">
+        Account No. : {summaryData.milk_collections[0].customer_account_number || ''}
+      </h2>
+      <h2 className="text-xl font-bold ">Customer Name : {summaryData.customer_name || ''}</h2>
 
-                {/* Milk Collection */}
-                <td className="border px-3 py-2">
-                  {entry.milk.length ? (
-                    <ul className="space-y-1">
-                      {entry.milk.map((m, i) => (
-                        <li key={i} className="text-gray-700">
-                          <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full mr-2">
-                            {m.shift}
-                          </span>
-                          {m.quantity}L × ₹{parseFloat(m.base_rate).toFixed(2)} = ₹{parseFloat(m.total_amount).toFixed(2)}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : '—'}
-                </td>
+      <table className="min-w-full border border-white text-white text-sm">
+        <thead className="bg-gray-800">
+          <tr className="text-center border">
+            <th className="border px-2 py-1 w-10">Sr.</th>
+            <th className="border px-2 py-1 w-48">Date</th>
+            <th className="border px-2 py-1 w-24">Shift</th>
+            <th className="border px-2 py-1 w-20">Qty</th>
+            <th className="border px-2 py-1 w-20">Rate</th>
+            <th className="border px-2 py-1 w-24">Total</th>
+            <th className="border px-2 py-1 w-48">Product + Qty</th>
+            <th className="border px-2 py-1 w-60">Product Total Amount</th>
+            <th className="border px-2 py-1 w-24">Debit [Received]</th>
+            <th className="border px-2 py-1 w-24">Credit [Given]</th>
+            <th className="border px-2 py-1 w-40">Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry, idx) => {
+            const isMilk = entry.type === 'milk'
+            const isProduct = entry.type === 'product'
+            const isPayment = entry.type === 'payment'
 
-                {/* Products */}
-                <td className="border px-3 py-2">
-                  {entry.products.length ? (
-                    <ul className="space-y-1">
-                      {entry.products.map((p, i) => (
-                        <li key={i} className="text-gray-700">
-                          {p.product?.name || '—'} × {p.qty} = ₹{p.total}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : '—'}
-                </td>
+            // Totals
+            if (isMilk) {
+              totalMilkQty += parseFloat(entry.quantity || 0)
+              totalMilkAmount += parseFloat(entry.total_amount || 0)
+            }
+            if (isProduct) {
+              totalProductQty += parseInt(entry.qty || 0)
+              totalProductAmount += parseFloat(entry.total || 0)
+            }
+            if (isPayment) {
+              if (entry.credit_debit_mode === 'received') {
+                totalDebit += parseFloat(entry.amount || 0)
+              } else {
+                totalCredit += parseFloat(entry.amount || 0)
+              }
+            }
 
-                {/* Given Payments */}
-                <td className="border px-3 py-2 text-red-700">
-                  {entry.given.length ? (
-                    <ul className="space-y-1">
-                      {entry.given.map((p, i) => (
-                        <li key={i}>- ₹{p.amount} <span className="text-gray-500">({p.note})</span></li>
-                      ))}
-                    </ul>
-                  ) : '—'}
+            return (
+              <tr key={idx} className="text-center border border-gray-600">
+                <td className="border px-2 py-1 text-black">{idx + 1}</td>
+                <td className="border px-2 py-1 text-black">{formatDate(entry.date)}</td>
+                <td className="border px-2 py-1 text-black">{isMilk ? entry.shift : ''}</td>
+                <td className="border px-2 py-1 text-black">{isMilk ? entry.quantity : ''}</td>
+                <td className="border px-2 py-1 text-black">{isMilk ? entry.base_rate : ''}</td>
+                <td className="border px-2 py-1 text-black">{isMilk ? entry.total_amount : ''}</td>
+                <td className="border px-2 py-1 text-black">
+                  {isProduct ? `${entry.product?.name || ''} × ${entry.qty}` : ''}
                 </td>
-
-                {/* Received Payments */}
-                <td className="border px-3 py-2 text-green-700">
-                  {entry.received.length ? (
-                    <ul className="space-y-1">
-                      {entry.received.map((p, i) => (
-                        <li key={i}>+ ₹{p.amount} <span className="text-gray-500">({p.note})</span></li>
-                      ))}
-                    </ul>
-                  ) : '—'}
+                <td className="border px-2 py-1 text-black">{isProduct ? entry.total : ''}</td>
+                <td className="border px-2 py-1 text-green-500">
+                  {isPayment && entry.credit_debit_mode === 'received' ? entry.amount : ''}
                 </td>
-
-                {/* Last Note */}
-                <td className="border px-3 py-2 italic text-blue-600">
-                  {entry.lastNote || '—'}
+                <td className="border px-2 py-1 text-red-500">
+                  {isPayment && entry.credit_debit_mode === 'given' ? entry.amount : ''}
                 </td>
+                <td className="border px-2 py-1 text-black">{isPayment ? entry.note : ''}</td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            )
+          })}
+        </tbody>
+        <tfoot>
+          <tr className="bg-gray-800 font-semibold text-sm">
+            <td className="border px-2 py-2" colSpan={2}>
+              Total Milk Qty: {totalMilkQty} Ltr
+            </td>
+            <td className="border px-2 py-2" colSpan={2}>
+              Total Milk Amount: ₹{totalMilkAmount.toFixed(2)}
+            </td>
+            <td className="border px-2 py-2" colSpan={2}>
+              Purchased Products: {totalProductQty}
+            </td>
+            <td className="border px-2 py-2">₹{totalProductAmount.toFixed(2)}</td>
+            <td className="border px-2 py-2 text-green-500">₹{totalDebit.toFixed(2)}</td>
+            <td className="border px-2 py-2 text-red-500">₹{totalCredit.toFixed(2)}</td>
+            <td className="border px-2 py-2" colSpan={2}>
+              Total Paybal Amount: ₹{parseFloat(summaryData.customer_wallet || 0).toFixed(2)}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
-  );
-};
+  )
+}
 
-export default MergedReportTable;
+export default MergedTableExact
