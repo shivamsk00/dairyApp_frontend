@@ -296,7 +296,7 @@ const CashEntryPage = () => {
         </button>
       </form>
 
-      <div className="max-w-6xl mx-auto mt-10 overflow-x-auto bg-white shadow-md border border-gray-200 rounded-lg p-4">
+      <div className="w-full mx-auto mt-10 overflow-x-auto bg-white shadow-md border border-gray-200 rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-4">All Cash Entries</h2>
         {loading ? (
           <p className="text-center mt-6 text-gray-500">Loading entries...</p>

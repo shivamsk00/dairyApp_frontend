@@ -1,6 +1,6 @@
 {
   "name": "dairyapp",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
   "author": "Production House",
@@ -28,7 +28,7 @@
       "output": "dist"
     },
     "win": {
-      "icon": "resources/icon2.ico",
+      "icon": "resources/icon1.ico",
       "target": "nsis"
     },
     "publish": [
