@@ -3,7 +3,7 @@ import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import { IoMdClose } from 'react-icons/io';
 
-const EditMilkCollectionModal = ({ isOpen, onClose, milkData,onUpdate }) => {
+const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail);
   const loading = useHomeStore(state => state.loading);
   const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
@@ -160,16 +160,21 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData,onUpdate }) => {
 
 
   useEffect(() => {
+    // const fat = form.fat?.trim();
+    // const clr = form.clr?.trim();
+    // const snf = form.snf?.trim();
+
     const fat = form.fat?.trim();
     const clr = form.clr?.trim();
-    const snf = form.snf?.trim();
+    const snfRaw = form.snf?.trim();
+    const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
 
     // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
-    if ((snf || clr) && fat) {
+    if ((snfForApi || clr) && fat) {
       const timeout = setTimeout(() => {
         const getBaseRateFetch = async () => {
           try {
-            const res = await getMilkRate(fat, clr, snf);
+            const res = await getMilkRate(fat, clr, snfForApi);
             console.log("milk rate fetch", res);
 
             setForm(prev => ({

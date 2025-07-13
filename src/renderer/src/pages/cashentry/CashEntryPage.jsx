@@ -9,10 +9,6 @@ const CashEntryPage = () => {
   const today = new Date().toISOString().split('T')[0]
   const allCashEntries = useHomeStore((state) => state.getAllCashEntries)
   const [allEntries, setAllEntries] = useState([])
-  const accRef = useRef(null)
-  const amountRef = useRef(null)
-  const modeRef = useRef(null)
-  const noteRef = useRef(null)
   const deleteCashEntries = useHomeStore(state => state.deleteCashEntries)
   const [loading, setLoading] = useState(false)
   const [modalType, setModalType] = useState(null)
@@ -57,7 +53,7 @@ const CashEntryPage = () => {
   const fetchCustomerDetailByAccountNumber = async (accountNo) => {
     try {
       const res = await fetchCustomerDetailsByAccount(accountNo)
-      console.log('response value===>', res.data.wallet)
+
 
       if (res.status_code == 200) {
         CustomToast.success(res.message)
@@ -67,22 +63,16 @@ const CashEntryPage = () => {
           customer_name: res.data.name || '',
           wallet: res.data.wallet || '' // ✅ Update wallet inside form state
         }))
+        return true; // ✅ success
       } else {
         CustomToast.error(res.message)
-        setForm((prev) => ({
-          ...prev,
-          customer_name: '',
-          wallet: ''
-        }))
+
+        return false; // ❌ failed
       }
     } catch (error) {
       console.error('Error fetching customer details:', error)
-      setForm((prev) => ({
-        ...prev,
-        customer_name: '',
-        wallet: ''
-      }))
     }
+    return false;
   }
 
   const handleChange = (e) => {
@@ -160,6 +150,13 @@ const CashEntryPage = () => {
     setModalType(null)
   }
 
+
+  const accRef = useRef();
+  const dateRef = useRef();
+  const amountRef = useRef();
+  const modeRef = useRef();
+  const noteRef = useRef();
+
   return (
     <>
       <form
@@ -189,9 +186,14 @@ const CashEntryPage = () => {
               }}
               onKeyDown={async (e) => {
                 if (e.key === 'Enter') {
-                  e.preventDefault()
-                  const accNo = form.customer_account_number.trim()
-                  if (accNo) await fetchCustomerDetailByAccountNumber(accNo)
+                  e.preventDefault();
+                  const accNo = form.customer_account_number.trim();
+                  if (accNo) {
+                    const success = await fetchCustomerDetailByAccountNumber(accNo);
+                    if (success) {
+                      dateRef.current?.focus(); // ✅ Move focus only if fetch succeeded
+                    }
+                  }
                 }
               }}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -233,6 +235,8 @@ const CashEntryPage = () => {
               onChange={handleChange}
               max={today}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              ref={dateRef}
+              onKeyDown={(e) => e.key === 'Enter' && amountRef.current?.focus()}
             />
           </div>
 
@@ -245,6 +249,7 @@ const CashEntryPage = () => {
               value={form.amount}
               onChange={handleChange}
               ref={amountRef}
+              required
               onKeyDown={(e) => e.key === 'Enter' && modeRef.current?.focus()}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -362,7 +367,7 @@ const CashEntryPage = () => {
             </tbody>
           </table>
         )}
-       
+
         {/* DELETE MODAL */}
         {modalType === 'delete' && selectedCashEntry && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
