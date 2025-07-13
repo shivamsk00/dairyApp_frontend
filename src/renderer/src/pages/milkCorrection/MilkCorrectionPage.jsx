@@ -28,6 +28,8 @@ const MilkCorrectionPage = () => {
     const [milkToDelete, setMilkToDelete] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editableEntry, setEditableEntry] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
     const handleChange = (e) => {
@@ -75,7 +77,7 @@ const MilkCorrectionPage = () => {
     const columns = [
         {
             name: 'SR NO.',
-            cell: (row, index) => index + 1,
+            cell: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
             width: '100px',
             sortable: false
         },
@@ -275,7 +277,7 @@ const MilkCorrectionPage = () => {
 
 
             {
-                filteredData.length > 0 && (
+                milkData.length > 0 && (
                     <div className='w-full shadow-xl'>
                         <DataTable
                             columns={columns}
@@ -285,6 +287,11 @@ const MilkCorrectionPage = () => {
                             striped
                             dense
                             responsive
+                            onChangePage={(page) => setCurrentPage(page)}
+                            onChangeRowsPerPage={(newPerPage, page) => {
+                                setRowsPerPage(newPerPage);
+                                setCurrentPage(page);
+                            }}
                             subHeader
                             subHeaderComponent={
                                 <div className="flex justify-between items-center w-full">

@@ -39,7 +39,6 @@ const mergeAllEntriesByDate = (milk, products, payments) => {
 
 const MergedTableExact = ({ summaryData }) => {
   if (!summaryData) return null
-  console.log('Summary Data:', summaryData)
   const entries = mergeAllEntriesByDate(
     summaryData.milk_collections || [],
     summaryData.product_sales || [],
@@ -66,10 +65,10 @@ const MergedTableExact = ({ summaryData }) => {
       </div>
 
       <div className="relative border rounded overflow-hidden max-h-[70vh]">
-        <div className="sticky top-0 z-10">
-          <table className="min-w-full border border-white text-white text-sm">
-            <thead className="bg-gray-800">
-              <tr className="text-center border">
+        <div className="overflow-auto max-h-[calc(70vh-7rem)]">
+          <table className="min-w-full border border-white text-sm">
+            <thead className="sticky top-0 z-10 bg-gray-800 text-white">
+              <tr className="text-center">
                 <th className="border px-2 py-1 w-10">Sr.</th>
                 <th className="border px-2 py-1 w-48">Date</th>
                 <th className="border px-2 py-1 w-24">Shift</th>
@@ -83,10 +82,6 @@ const MergedTableExact = ({ summaryData }) => {
                 <th className="border px-2 py-1 w-40">Message</th>
               </tr>
             </thead>
-          </table>
-        </div>
-        <div className="overflow-auto max-h-[calc(70vh-7rem)]">
-          <table className="min-w-full text-sm">
             <tbody>
               {entries.map((entry, idx) => {
                 const isMilk = entry.type === 'milk'
@@ -111,46 +106,42 @@ const MergedTableExact = ({ summaryData }) => {
 
                 return (
                   <tr key={idx} className="text-center border border-gray-600">
-                    <td className="border px-2 py-1 text-black">{idx + 1}</td>
-                    <td className="border px-2 py-1 text-black">{formatDate(entry.date)}</td>
-                    <td className="border px-2 py-1 text-black">{isMilk ? entry.shift : ''}</td>
-                    <td className="border px-2 py-1 text-black">{isMilk ? entry.quantity : ''}</td>
-                    <td className="border px-2 py-1 text-black">{isMilk ? entry.base_rate : ''}</td>
-                    <td className="border px-2 py-1 text-black">{isMilk ? entry.total_amount : ''}</td>
-                    <td className="border px-2 py-1 text-black">
+                    <td className="border px-2 py-1 text-black w-10">{idx + 1}</td>
+                    <td className="border px-2 py-1 text-black w-48">{formatDate(entry.date)}</td>
+                    <td className="border px-2 py-1 text-black w-24">{isMilk ? entry.shift : ''}</td>
+                    <td className="border px-2 py-1 text-black w-20">{isMilk ? entry.quantity : ''}</td>
+                    <td className="border px-2 py-1 text-black w-20">{isMilk ? entry.base_rate : ''}</td>
+                    <td className="border px-2 py-1 text-black w-24">{isMilk ? entry.total_amount : ''}</td>
+                    <td className="border px-2 py-1 text-black w-48">
                       {isProduct ? `${entry.product?.name || ''} × ${entry.qty}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-black">{isProduct ? entry.total : ''}</td>
-                    <td className="border px-2 py-1 text-green-500">
+                    <td className="border px-2 py-1 text-black w-60">{isProduct ? entry.total : ''}</td>
+                    <td className="border px-2 py-1 text-green-500 w-24">
                       {isPayment && entry.credit_debit_mode === 'received' ? entry.amount : ''}
                     </td>
-                    <td className="border px-2 py-1 text-red-500">
+                    <td className="border px-2 py-1 text-red-500 w-24">
                       {isPayment && entry.credit_debit_mode === 'given' ? entry.amount : ''}
                     </td>
-                    <td className="border px-2 py-1 text-black">{isPayment ? entry.note : ''}</td>
+                    <td className="border px-2 py-1 text-black w-40">{isPayment ? entry.note : ''}</td>
                   </tr>
                 )
               })}
             </tbody>
-          </table>
-        </div>
-        <div className="sticky bottom-0">
-          <table className="min-w-full text-sm">
-            <tfoot>
-              <tr className="bg-gray-800 font-semibold text-sm text-white">
-                <td className="border px-2 py-2" colSpan={2}>
+            <tfoot className="sticky bottom-0 bg-gray-800 text-white">
+              <tr className="font-semibold text-sm">
+                <td className="border px-2 py-2 w-10" colSpan={2}>
                   Total Milk Qty: {totalMilkQty} Ltr
                 </td>
-                <td className="border px-2 py-2" colSpan={2}>
+                <td className="border px-2 py-2 w-24" colSpan={2}>
                   Total Milk Amount: ₹{totalMilkAmount.toFixed(2)}
                 </td>
-                <td className="border px-2 py-2" colSpan={2}>
+                <td className="border px-2 py-2 w-20" colSpan={2}>
                   Purchased Products: {totalProductQty}
                 </td>
-                <td className="border px-2 py-2">₹{totalProductAmount.toFixed(2)}</td>
-                <td className="border px-2 py-2 text-green-500">₹{totalDebit.toFixed(2)}</td>
-                <td className="border px-2 py-2 text-red-500">₹{totalCredit.toFixed(2)}</td>
-                <td className="border px-2 py-2" colSpan={2}>
+                <td className="border px-2 py-2 w-60 text-sm">Product Price ₹{totalProductAmount.toFixed(2)}</td>
+                <td className="border px-2 py-2 text-green-500 w-24 text-sm">Received Amount ₹{totalDebit.toFixed(2)}</td>
+                <td className="border px-2 py-2 text-red-500 w-48 text-sm"> Given Amount ₹{totalCredit.toFixed(2)}</td>
+                <td className="border px-2 py-2 w-40" colSpan={2}>
                   Total Paybal Amount: ₹{parseFloat(summaryData.customer_wallet || 0).toFixed(2)}
                 </td>
               </tr>
