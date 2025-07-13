@@ -537,6 +537,16 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       return error.response.data
     }
+  }, // Delete Cash Entries
+  deleteCashEntries: async (id) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/delete-payment/${id}`)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
   },
 
 }))

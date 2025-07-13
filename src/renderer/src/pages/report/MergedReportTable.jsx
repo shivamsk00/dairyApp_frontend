@@ -16,13 +16,13 @@ const mergeReportByDate = (milk, products, payments) => {
   });
 
   products.forEach((entry) => {
-    const key = entry.date;
+    const key = entry.date?.split('-').reverse().join('-'); // Convert to yyyy-mm-dd
     if (!map.has(key)) map.set(key, { date: key, milk: [], products: [], given: [], received: [], lastNote: '' });
     map.get(key).products.push(entry);
   });
 
   payments.forEach((entry, i, arr) => {
-    const key = entry.date?.split('-').reverse().join('-'); // convert dd-mm-yyyy to yyyy-mm-dd
+    const key = entry.date?.split('-').reverse().join('-');
     if (!map.has(key)) map.set(key, { date: key, milk: [], products: [], given: [], received: [], lastNote: '' });
 
     const isLast = i === arr.length - 1;
@@ -50,45 +50,49 @@ const MergedReportTable = ({ summaryData }) => {
   );
 
   return (
-    <div className="mt-12 p-6">
-      <h3 className="text-xl font-semibold mb-4">Merged Daily Report</h3>
+    <div className="mt-10 px-6">
+      <h3 className="text-2xl font-bold mb-6 text-purple-700">📊 Merged Daily Report</h3>
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
+        <table className="min-w-full border border-gray-300 text-sm shadow-md rounded-lg overflow-hidden">
           <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="border px-2 py-2">Date</th>
-              <th className="border px-2 py-2">Milk</th>
-              <th className="border px-2 py-2">Products</th>
-              <th className="border px-2 py-2">Given</th>
-              <th className="border px-2 py-2">Received</th>
-              <th className="border px-2 py-2">Last Message</th>
+              <th className="border px-3 py-2 text-left">Date</th>
+              <th className="border px-3 py-2 text-left">Milk Collection</th>
+              <th className="border px-3 py-2 text-left">Product Sales</th>
+              <th className="border px-3 py-2 text-left">Given</th>
+              <th className="border px-3 py-2 text-left">Received</th>
+              <th className="border px-3 py-2 text-left">Last Message</th>
             </tr>
           </thead>
           <tbody>
             {merged.map((entry, index) => (
-              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-                <td className="border px-2 py-2 text-center font-semibold">
-                  {formatDate(entry.date)}
-                </td>
+              <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                {/* Date */}
+                <td className="border px-3 py-2 font-semibold">{formatDate(entry.date)}</td>
 
-                {/* Milk */}
-                <td className="border px-2 py-2">
+                {/* Milk Collection */}
+                <td className="border px-3 py-2">
                   {entry.milk.length ? (
-                    <ul className="list-disc pl-4">
+                    <ul className="space-y-1">
                       {entry.milk.map((m, i) => (
-                        <li key={i}>{m.shift} - {m.quantity}L (₹{m.total_amount})</li>
+                        <li key={i} className="text-gray-700">
+                          <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full mr-2">
+                            {m.shift}
+                          </span>
+                          {m.quantity}L × ₹{parseFloat(m.base_rate).toFixed(2)} = ₹{parseFloat(m.total_amount).toFixed(2)}
+                        </li>
                       ))}
                     </ul>
                   ) : '—'}
                 </td>
 
                 {/* Products */}
-                <td className="border px-2 py-2">
+                <td className="border px-3 py-2">
                   {entry.products.length ? (
-                    <ul className="list-disc pl-4">
+                    <ul className="space-y-1">
                       {entry.products.map((p, i) => (
-                        <li key={i}>
-                          {p.product_name} × {p.quantity} (₹{p.total_amount})
+                        <li key={i} className="text-gray-700">
+                          {p.product?.name || '—'} × {p.qty} = ₹{p.total}
                         </li>
                       ))}
                     </ul>
@@ -96,29 +100,29 @@ const MergedReportTable = ({ summaryData }) => {
                 </td>
 
                 {/* Given Payments */}
-                <td className="border px-2 py-2 text-red-700">
+                <td className="border px-3 py-2 text-red-700">
                   {entry.given.length ? (
-                    <ul className="list-disc pl-4">
+                    <ul className="space-y-1">
                       {entry.given.map((p, i) => (
-                        <li key={i}>-₹{p.amount} ({p.note})</li>
+                        <li key={i}>- ₹{p.amount} <span className="text-gray-500">({p.note})</span></li>
                       ))}
                     </ul>
                   ) : '—'}
                 </td>
 
                 {/* Received Payments */}
-                <td className="border px-2 py-2 text-green-700">
+                <td className="border px-3 py-2 text-green-700">
                   {entry.received.length ? (
-                    <ul className="list-disc pl-4">
+                    <ul className="space-y-1">
                       {entry.received.map((p, i) => (
-                        <li key={i}>+₹{p.amount} ({p.note})</li>
+                        <li key={i}>+ ₹{p.amount} <span className="text-gray-500">({p.note})</span></li>
                       ))}
                     </ul>
                   ) : '—'}
                 </td>
 
                 {/* Last Note */}
-                <td className="border px-2 py-2 italic text-sm text-blue-600">
+                <td className="border px-3 py-2 italic text-blue-600">
                   {entry.lastNote || '—'}
                 </td>
               </tr>
