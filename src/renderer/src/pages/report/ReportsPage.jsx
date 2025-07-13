@@ -76,7 +76,8 @@ const ReportsPage = () => {
     return `${dd}-${mm}-${yyyy}`;
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (e) => {
+    e.preventDefault();
     const payload = {
       ...form,
       start_date: formatInputDate(form.start_date),
@@ -85,7 +86,7 @@ const ReportsPage = () => {
 
     try {
       const res = await reportCustomer(payload);
-      if (res?.status_code === 200 && res?.data) {
+      if (res?.status_code == 200 && res?.data) {
         setSummaryData(res.data);
         toast.success("Report generated successfully");
       } else {
@@ -141,11 +142,15 @@ const ReportsPage = () => {
   const isFormValid = form.customer_account_number && form.start_date && form.end_date;
 
   // Report All Data
-  
+
   return (
     <div className="p-6">
       <div className="flex flex-col lg:flex-row gap-6">
-        <form className="bg-gray-800 text-white p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4">
+        <form
+          className="bg-gray-800 text-white p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4"
+          onSubmit={handleGenerate}
+
+        >
           <div className="bg-white text-black p-6 rounded shadow">
             <h2 className="text-xl font-semibold text-orange-600 mb-4">Customer Milk Collection Report</h2>
 
@@ -200,10 +205,10 @@ const ReportsPage = () => {
 
             <div className="flex gap-3">
               <button
-                type="button"
-                onClick={handleGenerate}
+                type="submit" // ✅ submit type for Enter key support
                 disabled={!isFormValid}
-                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
               >
                 Generate Report
               </button>
@@ -240,7 +245,7 @@ const ReportsPage = () => {
         )}
       </div>
 
-      
+
 
       {summaryData && <MergedReportTable summaryData={summaryData} />}
 

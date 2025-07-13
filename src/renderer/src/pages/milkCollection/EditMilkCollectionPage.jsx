@@ -3,7 +3,7 @@ import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import { IoMdClose } from 'react-icons/io';
 
-const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
+const EditMilkCollectionModal = ({ isOpen, onClose, milkData,onUpdate }) => {
   const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail);
   const loading = useHomeStore(state => state.loading);
   const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
@@ -149,6 +149,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData }) => {
 
         // CustomToast.success(res.message);
         onClose(); // close modal after success
+        await onUpdate(e);
       } else {
         CustomToast.error(res.message);
       }

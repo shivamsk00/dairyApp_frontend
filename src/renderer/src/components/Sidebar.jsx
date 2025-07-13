@@ -76,6 +76,9 @@ const Sidbar = () => {
         >
           <GiHeavyCollar /> <span>Milk Collection</span>
         </li>
+          <NavLink to="/milkCorrection" className={linkClasses}>
+          <FaListCheck /> <span>All Milk Correction</span>
+        </NavLink>
 
         <NavLink to="/alldairymaster" className={linkClasses}>
           <FaMoneyBillTrendUp /> <span>Head Dairy Master</span>
@@ -111,9 +114,7 @@ const Sidbar = () => {
         <NavLink to="/cashentry" className={linkClasses}>
           <GiCash /> <span>Cash Entries</span>
         </NavLink>
-        <NavLink to="/milkCorrection" className={linkClasses}>
-          <FaListCheck /> <span>Milk Correction</span>
-        </NavLink>
+      
 
         <li
           className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'customer-collection'

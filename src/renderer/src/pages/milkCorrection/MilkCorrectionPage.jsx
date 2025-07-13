@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import sampleImage from '../../assets/login_img.png';
 import { colors } from '../../constant/constant';
 import useHomeStore from '../../zustand/useHomeStore';
@@ -6,16 +6,20 @@ import DateFormate from '../../helper/DateFormate';
 import DataTable from 'react-data-table-component';
 import { FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
 import { IoMdCloseCircle } from 'react-icons/io';
+import EditMilkCollectionModal from '../milkCollection/EditMilkCollectionPage';
+import CustomToast from '../../helper/costomeToast';
 
 const MilkCorrectionPage = () => {
     const getMilkCorrectionData = useHomeStore(state => state.getMilkCorrectionData);
+    const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
+    const today = new Date().toISOString().split('T')[0];
 
     const [selection, setSelection] = useState('all');
     const [milkData, setMilkData] = useState([]);
     const [searchCustomer, setSearchCustomer] = useState('');
     const [form, setForm] = useState({
-        start_date: '',
-        end_date: '',
+        start_date: today,
+        end_date: today,
         customer_account_number: ''
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +28,7 @@ const MilkCorrectionPage = () => {
     const [milkToDelete, setMilkToDelete] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editableEntry, setEditableEntry] = useState(null);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,8 +46,7 @@ const MilkCorrectionPage = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-
+        if (e) e.preventDefault(); // ✅ prevent error when called without event
         const payload = {
             start_date: DateFormate(form.start_date),
             end_date: DateFormate(form.end_date),
@@ -58,7 +62,6 @@ const MilkCorrectionPage = () => {
         }
     };
 
-
     const handleSearch = (text) => {
         setSearchCustomer(text);
     };
@@ -71,10 +74,10 @@ const MilkCorrectionPage = () => {
 
     const columns = [
         {
-            name: 'ID',
-            selector: row => row.id,
-            sortable: true,
-            width: '70px'
+            name: 'SR NO.',
+            cell: (row, index) => index + 1,
+            width: '100px',
+            sortable: false
         },
         {
             name: 'Account Number',
@@ -140,7 +143,7 @@ const MilkCorrectionPage = () => {
                     <button
                         className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                         onClick={() => {
-                            setCustomerToDelete(row);
+                            setMilkToDelete(row);
                             setIsConfirmOpen(true);
                         }}
                     >
@@ -151,6 +154,28 @@ const MilkCorrectionPage = () => {
             center: true
         }
     ];
+
+
+    // DELETE RECORD 
+    const handleRemove = async (id) => {
+        console.log("milkToDelete?.id", milkToDelete?.id)
+        try {
+            const res = await deleteMilkCollection(milkToDelete?.id);
+            console.log("respone===> ", res)
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                setIsConfirmOpen(false);
+                setMilkToDelete(null);
+                await handleSubmit()
+            } else {
+                CustomToast.success(res.message)
+
+            }
+        } catch (error) {
+            console.log("ERROR IN MILK CORRECTION DELETE ROW DATA", error)
+        }
+    };
+
 
 
 
@@ -251,7 +276,7 @@ const MilkCorrectionPage = () => {
 
             {
                 filteredData.length > 0 && (
-                    <div className='w-full shadow-xl p-4'>
+                    <div className='w-full shadow-xl'>
                         <DataTable
                             columns={columns}
                             data={filteredData}
@@ -330,77 +355,40 @@ const MilkCorrectionPage = () => {
 
 
             {/* EDIT MODAL  */}
-            {isEditModalOpen && editableEntry && (
+
+            <EditMilkCollectionModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                milkData={editableEntry}
+                onUpdate={handleSubmit}
+            />
+
+
+            {/* DELETE MODAL */}
+            {isConfirmOpen && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 p-6 relative">
-                        <h2 className="text-2xl font-semibold text-blue-600 mb-6 border-b pb-3 flex items-center gap-2">
-                            <FaPen className="w-5 h-5" />
-                            Edit Milk Entry
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-sm mx-4 p-6 text-center relative">
+                        <h2 className="text-lg font-semibold mb-4 text-red-700">
+                            Are you sure you want to delete?
                         </h2>
-                        <button
-                            onClick={() => setIsEditModalOpen(false)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-red-600"
-                            title="Close"
-                        >
-                            <IoMdCloseCircle size={30} />
-                        </button>
-
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                console.log('Updated Entry:', editableEntry);
-                                setIsEditModalOpen(false);
-                                // You can call update API here if needed
-                            }}
-                            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                        >
-                            {/* Editable fields */}
-                            {[
-                                { label: 'Date', name: 'date', type: 'date' },
-                                { label: 'Milk Type', name: 'milk_type', type: 'text' },
-                                { label: 'Shift', name: 'shift', type: 'select' },  // 👈 updated type
-                                { label: 'Quantity (Ltr)', name: 'quantity', type: 'number' },
-                                { label: 'FAT', name: 'fat', type: 'number' },
-                                { label: 'SNF', name: 'snf', type: 'number' },
-                                { label: 'Rate', name: 'base_rate', type: 'number' },
-                                { label: 'Amount', name: 'total_amount', type: 'number' },
-                            ].map(({ label, name, type }) => (
-                                <div key={name}>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">{label}</label>
-
-                                    {type === 'select' ? (
-                                        <select
-                                            name={name}
-                                            value={editableEntry[name] || ''}
-                                            onChange={(e) => setEditableEntry({ ...editableEntry, [name]: e.target.value })}
-                                            className="w-full border border-gray-300 rounded px-3 py-2"
-                                            required
-                                        >
-                                            <option value="">Select Shift</option>
-                                            <option value="morning">Morning</option>
-                                            <option value="evening">Evening</option>
-                                        </select>
-                                    ) : (
-                                        <input
-                                            type={type}
-                                            name={name}
-                                            value={editableEntry[name] || ''}
-                                            onChange={(e) => setEditableEntry({ ...editableEntry, [name]: e.target.value })}
-                                            className="w-full border border-gray-300 rounded px-3 py-2"
-                                            required
-                                        />
-                                    )}
-                                </div>
-                            ))}
-                            <div className="sm:col-span-2 text-right mt-4">
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-                                >
-                                    Save Changes
-                                </button>
-                            </div>
-                        </form>
+                        <p className="text-gray-700 mb-6">This action cannot be undone.</p>
+                        <div className="flex justify-center gap-4">
+                            <button
+                                onClick={() => {
+                                    setIsConfirmOpen(false);
+                                    setMilkToDelete(null);
+                                }}
+                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRemove}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
