@@ -655,7 +655,7 @@ const DailyMilkCollectionPage = () => {
                         {/* Milk Type */}
                         <div
                             // className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center bg-gradient-to-r from-gray-50 to-gray-100 shadow-xl p-3 rounded border border-gray-400 w-full xl:w-1/2"
-                            className="flex flex-col sm:flex-row bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200 shadow w-full xl:w-1/2"
+                            className="flex flex-col sm:flex-row bg-gradient-to-r from-gray-50 to-gray-100 p-2 rounded-lg border border-gray-200 shadow w-full xl:w-1/2"
 
 
                         >
@@ -683,7 +683,7 @@ const DailyMilkCollectionPage = () => {
                         {/* Date + Shift */}
                         <div
                             // className="flex flex-wrap md:flex-row gap-1 sm:gap-4 items-start lg:items-center bg-slate-300 shadow-xl p-1 rounded border border-gray-400 w-full xl:w-1/2" 
-                            className="flex flex-wrap md:flex-row gap-1 sm:gap-4 items-start lg:items-center bg-gradient-to-r from-gray-50 to-gray-100 p-1 rounded-lg border border-gray-200 shadow w-full xl:w-1/2"
+                            className="flex flex-wrap md:flex-row gap-1 sm:gap-2 items-start lg:items-center bg-gradient-to-r from-gray-50 to-gray-100 p-2 rounded-lg border border-gray-200 shadow w-full xl:w-1/2"
 
 
                         >
@@ -729,11 +729,11 @@ const DailyMilkCollectionPage = () => {
 
 
                     {/* Customer Info Section */}
-                    <div className="bg-gradient-to-r from-orange-100 to-orange-200  border border-orange-300 p-5 rounded-xl shadow mb-5 space-y-4">
+                    <div className="bg-black from-orange-100 to-orange-200  border border-orange-300 p-2 rounded-xl shadow mb-2 space-y-1">
                         {/* Row 1 */}
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-sm font-medium " >Account No</label>
+                                <label className="block text-xs font-medium text-white" >Account No</label>
 
                                 <input
                                     type="text"
@@ -754,86 +754,137 @@ const DailyMilkCollectionPage = () => {
                                         }
                                     }}
                                     placeholder="Enter AC No"
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
-                                />
-                            </div>
-
-
-                            <div>
-                                <label className="block text-sm font-medium ">Quantity (Ltr)</label>
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    value={form.quantity}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={qtyRef}
-                                    placeholder="Enter Quantity"
-                                    onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
-                                    required
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300  text-xs placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium ">FAT (%)</label>
+                                <label className="block text-xs font-medium text-white">Name</label>
                                 <input
-                                    type="number"
-                                    name="fat"
-                                    value={form.fat}
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
                                     onChange={handleChange}
                                     disabled={isDisabled}
-                                    ref={fatRef}
-                                    placeholder="Enter FAT %"
-                                    // onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
-                                    onKeyDown={async (e) => {
-                                        if (e.key === 'Enter') {
-                                            const fat = form.fat?.trim();
-                                            const clr = form.clr?.trim();
-                                            const snfRaw = form.snf?.trim();
-
-                                            // If SNF or CLR is empty → focus on SNF input and prevent fetch
-                                            if (!snfRaw) {
-                                                e.preventDefault();
-                                                snfRef.current?.focus();
-                                                return;
-                                            }
-
-                                            // If both CLR and SNF have values → fetch milk rate
-                                            e.preventDefault();
-                                            const snfForApi = !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
-
-                                            try {
-                                                const res = await getMilkRate(fat, clr, snfForApi);
-                                                setForm((prev) => ({
-                                                    ...prev,
-                                                    fat: res.fat || "",
-                                                    clr: res.clr || "",
-                                                    snf: res.snf || prev.snf,
-                                                    base_rate: res.rate || '',
-                                                }));
-                                                otherRateRef.current?.focus()
-                                                res.rate
-                                                    ? CustomToast.success("Rate Found", "top-center")
-                                                    : CustomToast.warn("RATE not found", "top-center");
-
-                                                
-                                            } catch (err) {
-                                                console.error("Rate error", err);
-                                            }
-                                        }
-                                    }}
-                                    required
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    ref={nameRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-white">Mobile</label>
+                                <input
+                                    type="text"
+                                    name="mobile"
+                                    value={form.mobile}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={mobileRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-white">Care of</label>
+                                <input
+                                    type="text"
+                                    name="careof"
+                                    value={form.careof}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={careOfRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                />
+                            </div>
+
                         </div>
 
-                        {/* Row 2 */}
-                        <div div className="grid grid-cols-2 gap-4" >
+                            {/* Row 2 */}
+                            <div div className="grid grid-cols-2 gap-4" >
+                                <div>
+                                    <label className="block text-xs font-medium text-white">Quantity (Ltr)</label>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={form.quantity}
+                                        onChange={handleChange}
+                                        disabled={isDisabled}
+                                        ref={qtyRef}
+                                        placeholder="Enter Quantity"
+                                        onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
+                                        required
+                                        className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-white">FAT (%)</label>
+                                    <input
+                                        type="number"
+                                        name="fat"
+                                        value={form.fat}
+                                        onChange={handleChange}
+                                        disabled={isDisabled}
+                                        ref={fatRef}
+                                        placeholder="Enter FAT %"
+                                        // onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
+                                        onKeyDown={async (e) => {
+                                            if (e.key === 'Enter') {
+                                                const fat = form.fat?.trim();
+                                                const clr = form.clr?.trim();
+                                                const snfRaw = form.snf?.trim();
+
+                                                // If SNF or CLR is empty → focus on SNF input and prevent fetch
+                                                if (!snfRaw) {
+                                                    e.preventDefault();
+                                                    snfRef.current?.focus();
+                                                    return;
+                                                }
+
+                                                // If both CLR and SNF have values → fetch milk rate
+                                                e.preventDefault();
+                                                const snfForApi = !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+
+                                                try {
+                                                    const res = await getMilkRate(fat, clr, snfForApi);
+                                                    setForm((prev) => ({
+                                                        ...prev,
+                                                        fat: res.fat || "",
+                                                        clr: res.clr || "",
+                                                        snf: res.snf || prev.snf,
+                                                        base_rate: res.rate || '',
+                                                    }));
+                                                    otherRateRef.current?.focus()
+                                                    res.rate
+                                                        ? CustomToast.success("Rate Found", "top-center")
+                                                        : CustomToast.warn("RATE not found", "top-center");
+
+
+                                                } catch (err) {
+                                                    console.error("Rate error", err);
+                                                }
+                                            }
+                                        }}
+                                        required
+                                        className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    />
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+                        
+
+                        {/* Row 3 */}
+                        < div className="grid grid-cols-2 gap-4" >
 
                             <div>
-                                <label className="block text-sm font-medium ">CLR</label>
+                                <label className="block text-xs font-medium text-white">CLR</label>
                                 <input
                                     type="number"
                                     name="clr"
@@ -843,17 +894,17 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={clrRef}
                                     onKeyDown={(e) => e.key === 'Enter' && careOfRef.current?.focus()}
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium ">SNF (%)</label>
+                                <label className="block text-xs font-medium text-white">SNF (%)</label>
                                 <input
                                     type="text"
                                     value={form.snf}
                                     required
                                     disabled={isDisabled}
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                     name="snf"
                                     onChange={(e) => setForm({ ...form, snf: e.target.value })}
                                     ref={snfRef}
@@ -889,50 +940,6 @@ const DailyMilkCollectionPage = () => {
                                 />
 
                             </div>
-                        </div >
-
-                        {/* Row 3 */}
-                        < div className="grid grid-cols-3 gap-4" >
-                            <div>
-                                <label className="block text-sm font-medium ">Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={nameRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium ">Mobile</label>
-                                <input
-                                    type="text"
-                                    name="mobile"
-                                    value={form.mobile}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={mobileRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium">Care of</label>
-                                <input
-                                    type="text"
-                                    name="careof"
-                                    value={form.careof}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={careOfRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
-                                    className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                />
-                            </div>
 
                         </ div>
                     </div>
@@ -940,10 +947,10 @@ const DailyMilkCollectionPage = () => {
                     {/* Rate & Total Section */}
 
 
-                    <div className="bg-gradient-to-r from-orange-100 to-orange-200 p-5 rounded-xl border border-orange-300 shadow-md mb-4 grid grid-cols-2 gap-6">
+                    <div className="bg-black from-orange-100 to-orange-200 p-2 rounded-xl border border-orange-300 shadow-md mb-2 grid grid-cols-2 gap-2">
                         {/* Base Rate */}
                         <div className="flex flex-col">
-                            <label className="block text-sm font-medium mb-1">Base Rate (₹/Ltr)</label>
+                            <label className="block text-xs font-medium mb-1 text-white">Base Rate (₹/Ltr)</label>
                             <input
                                 type="number"
                                 name="base_rate"
@@ -952,13 +959,13 @@ const DailyMilkCollectionPage = () => {
                                 readOnly
                                 ref={otherRateRef}
                                 onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.focus()}
-                                className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Other Price */}
                         <div className="flex flex-col">
-                            <label className="block text-sm font-medium mb-1">Other Price (₹/Ltr)</label>
+                            <label className="block text-xs font-medium mb-1 text-white">Other Price (₹/Ltr)</label>
                             <input
                                 type="number"
                                 name="other_price"
@@ -966,33 +973,33 @@ const DailyMilkCollectionPage = () => {
                                 onChange={handleChange}
                                 disabled={isDisabled}
                                 onKeyDown={handleKeyDown}
-                                className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Rate */}
                         <div className="flex flex-col">
-                            <label className="block text-sm font-medium mb-1">Rate (Auto)</label>
+                            <label className="block text-xs font-medium mb-1 text-white">Rate (Auto)</label>
                             <input
                                 type="number"
                                 name="rate"
                                 value={form.rate}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Total Amount */}
                         <div className="flex flex-col">
-                            <label className="block text-sm font-medium mb-1">Total Amount (Auto)</label>
+                            <label className="block text-xs font-medium mb-1 text-white">Total Amount (Auto)</label>
                             <input
                                 type="number"
                                 name="total_amount"
                                 value={form.total_amount}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-9 px-4 py-2 rounded-md border border-gray-300 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
                     </div>
@@ -1024,7 +1031,7 @@ const DailyMilkCollectionPage = () => {
 
 
 
-                <div className="flex flex-col gap-6 items-center justify-center w-full bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 p-6 rounded-xl shadow-2xl">
+                <div className="flex flex-col gap-6   w-full bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 p-6 rounded-xl shadow-2xl">
 
                     {/* Day Total Card */}
                     <div className="w-full rounded-xl border border-orange-300 shadow-xl overflow-hidden">
@@ -1077,15 +1084,15 @@ const DailyMilkCollectionPage = () => {
                     </div>
 
                     {/* Customer Receipt Section */}
-                    <div className="w-full rounded-xl border border-orange-300 shadow-xl overflow-hidden">
-                        {/* Header */}
+                    {/* <div className="w-full rounded-xl border border-orange-300 shadow-xl overflow-hidden">
+                        
                         <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-2">
                             <h3 className="text-white font-bold text-lg">Customer Receipt</h3>
                         </div>
 
-                        {/* Tables */}
+                       
                         <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Left Table */}
+                           
                             <table className="w-full text-sm text-left border border-orange-200 rounded-md overflow-hidden">
                                 <tbody>
                                     {[
@@ -1103,7 +1110,7 @@ const DailyMilkCollectionPage = () => {
                                 </tbody>
                             </table>
 
-                            {/* Right Table */}
+                            
                             <table className="w-full text-sm text-left border border-orange-200 rounded-md overflow-hidden">
                                 <tbody>
                                     {[
@@ -1121,7 +1128,7 @@ const DailyMilkCollectionPage = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
 
