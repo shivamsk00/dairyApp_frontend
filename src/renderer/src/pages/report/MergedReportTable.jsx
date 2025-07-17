@@ -77,8 +77,8 @@ const MergedTableExact = ({ summaryData }) => {
                 <th className="border px-2 py-1 w-24">Total</th>
                 <th className="border px-2 py-1 w-48">Product + Qty</th>
                 <th className="border px-2 py-1 w-60">Product Total Amount</th>
-                <th className="border px-2 py-1 w-24">Debit [Received]</th>
-                <th className="border px-2 py-1 w-24">Credit [Given]</th>
+                <th className="border px-2 py-1 w-24">Credit [Received]</th>
+                <th className="border px-2 py-1 w-24">Debit [Given]</th>
                 <th className="border px-2 py-1 w-40">Message</th>
               </tr>
             </thead>
