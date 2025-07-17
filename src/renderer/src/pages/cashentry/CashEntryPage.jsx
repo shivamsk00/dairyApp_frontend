@@ -165,24 +165,23 @@ const CashEntryPage = () => {
       >
         <h2 className="text-1x font-bold mb-6 text-center text-gray-800">Cash Entry</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Row 1: 4 input fields */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
           {/* Account No */}
           <div>
-            <label className="block text-sm font-small text-gray-700 mb-1">
-              Customer Account No
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Customer Account No</label>
             <input
               type="text"
               name="customer_account_number"
               value={form.customer_account_number}
               ref={accRef}
               onChange={(e) => {
-                const value = e.target.value
+                const value = e.target.value;
                 setForm((prev) => ({
                   ...prev,
                   customer_account_number: value,
-                  ...(value.trim() === '' && { customer_name: '', wallet: '' })
-                }))
+                  ...(value.trim() === '' && { customer_name: '', wallet: '' }),
+                }));
               }}
               onKeyDown={async (e) => {
                 if (e.key === 'Enter') {
@@ -201,7 +200,7 @@ const CashEntryPage = () => {
             />
           </div>
 
-          {/* Name */}
+          {/* Customer Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
             <input
@@ -239,7 +238,10 @@ const CashEntryPage = () => {
               onKeyDown={(e) => e.key === 'Enter' && amountRef.current?.focus()}
             />
           </div>
+        </div>
 
+        {/* Second Row: Amount, Mode */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
           {/* Amount */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
@@ -271,21 +273,21 @@ const CashEntryPage = () => {
               <option value="given">Given (Debit)</option>
             </select>
           </div>
+        </div>
 
-          {/* Note */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
-            <textarea
-              name="note"
-              value={form.note}
-              onChange={handleChange}
-              ref={noteRef}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={3}
-              placeholder="Enter note"
-            />
-          </div>
+        {/* Note - Full Width */}
+        <div className="mt-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
+          <textarea
+            name="note"
+            value={form.note}
+            onChange={handleChange}
+            ref={noteRef}
+            onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
+            placeholder="Enter note"
+          />
         </div>
 
         <button
@@ -295,6 +297,7 @@ const CashEntryPage = () => {
           Submit Entry
         </button>
       </form>
+
 
       <div className="w-full mx-auto mt-10 overflow-x-auto bg-white shadow-md border border-gray-200 rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-4">All Cash Entries</h2>

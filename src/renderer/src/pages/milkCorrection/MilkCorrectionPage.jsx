@@ -13,7 +13,7 @@ const MilkCorrectionPage = () => {
     const getMilkCorrectionData = useHomeStore(state => state.getMilkCorrectionData);
     const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
     const today = new Date().toISOString().split('T')[0];
-
+    const [loading, setLoading] = useState(false)
     const [selection, setSelection] = useState('all');
     const [milkData, setMilkData] = useState([]);
     const [searchCustomer, setSearchCustomer] = useState('');
@@ -49,19 +49,33 @@ const MilkCorrectionPage = () => {
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault(); // ✅ prevent error when called without event
-        const payload = {
-            start_date: DateFormate(form.start_date),
-            end_date: DateFormate(form.end_date),
-            data_type: selection,
-            customer_account_number: selection === 'customer' ? form.customer_account_number : ''
-        };
 
-        console.log('Final Payload ===>', payload);
-        const res = await getMilkCorrectionData(payload);
-        console.log('Response ===>', res);
-        if (res?.status_code == 200 && res.data?.milk_collections) {
-            setMilkData(res.data.milk_collections);
+        try {
+            setLoading(true)
+            const payload = {
+                start_date: DateFormate(form.start_date),
+                end_date: DateFormate(form.end_date),
+                data_type: selection,
+                customer_account_number: selection === 'customer' ? form.customer_account_number : ''
+            };
+
+            console.log('Final Payload ===>', payload);
+            const res = await getMilkCorrectionData(payload);
+            console.log('Response ===>', res);
+            if (res?.status_code == 200 && res.data?.milk_collections) {
+                setMilkData(res.data.milk_collections);
+                setLoading(false)
+            }
+
+        } catch (error) {
+            console.log("ERROR IN MILK CORRECTION PAGE ==>", error)
+            setLoading(false)
+
+        } finally {
+            setLoading(false)
+
         }
+
     };
 
     const handleSearch = (text) => {
@@ -191,30 +205,33 @@ const MilkCorrectionPage = () => {
                 <div className="bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 rounded-xl shadow-lg p-6 w-full">
                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">Milk Correction</h2>
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Start Date */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">From Date</label>
-                            <input
-                                type="date"
-                                name="start_date"
-                                value={form.start_date}
-                                onChange={handleChange}
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                required
-                            />
-                        </div>
+                        {/* From and To Date in one row */}
+                        <div className="flex flex-col md:flex-row gap-4">
+                            {/* Start Date */}
+                            <div className="w-full">
+                                <label className="block text-sm font-medium text-gray-600 mb-1">From Date</label>
+                                <input
+                                    type="date"
+                                    name="start_date"
+                                    value={form.start_date}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    required
+                                />
+                            </div>
 
-                        {/* End Date */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">To Date</label>
-                            <input
-                                type="date"
-                                name="end_date"
-                                value={form.end_date}
-                                onChange={handleChange}
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                                required
-                            />
+                            {/* End Date */}
+                            <div className="w-full">
+                                <label className="block text-sm font-medium text-gray-600 mb-1">To Date</label>
+                                <input
+                                    type="date"
+                                    name="end_date"
+                                    value={form.end_date}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {/* Radio Buttons */}
@@ -264,14 +281,18 @@ const MilkCorrectionPage = () => {
                         {/* Submit Button */}
                         <div>
                             <button
-                                style={{ background: colors.buttonColor }}
+                                disabled={loading}
+                                style={{ background: loading ? "#777": colors.buttonColor }}
                                 type="submit"
-                                className="w-full text-white py-2 rounded hover:opacity-90 transition"
+                                className={"w-full text-white py-2 rounded hover:opacity-90 transition"}
                             >
-                                Submit
+                                {
+                                    loading ? "Please waite..." : "  Submit"
+                                }
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
 

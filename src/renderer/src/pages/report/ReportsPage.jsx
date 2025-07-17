@@ -43,7 +43,7 @@ const formatDate = (dateString) => {
 
 const ReportsPage = () => {
   const [summaryData, setSummaryData] = useState(null);
-  const [isLoading, setLoading]= useState(false)
+  const [isLoading, setLoading] = useState(false)
   const [form, setForm] = useState({
     term: 'date_range',
     start_date: getToday(),
@@ -104,7 +104,7 @@ const ReportsPage = () => {
       setSummaryData(null);
       setLoading(false)
 
-    }finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -153,82 +153,81 @@ const ReportsPage = () => {
   // Report All Data
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col lg:flex-row gap-6">
+    <div className="p-2">
+      <div className="flex flex-col lg:flex-row gap-2">
         <form
-          className="bg-gray-800 text-white p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4"
+          className="bg-gray-800 text-white  rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-2"
           onSubmit={handleGenerate}
-
         >
           <div className="bg-white text-black p-6 rounded shadow">
             <h2 className="text-xl font-semibold text-orange-600 mb-4">Customer Milk Collection Report</h2>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">Select Term:</label>
-              <select
-                name="term"
-                value={form.term}
-                onChange={handleChange}
-                className="border rounded px-3 py-2 w-full"
-              >
-                <option value="date_range">Date Range</option>
-                <option value="this_week">This Week</option>
-                <option value="this_month">This Month</option>
-              </select>
+            {/* From and To Date - 1st Row */}
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="w-full">
+                <label className="block text-sm font-medium mb-1 text-gray-700">From:</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={form.start_date}
+                  onChange={handleChange}
+                  readOnly={form.term !== 'date_range'}
+                  className="border rounded px-3 py-2 w-full"
+                />
+              </div>
+              <div className="w-full">
+                <label className="block text-sm font-medium mb-1 text-gray-700">To:</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={form.end_date}
+                  onChange={handleChange}
+                  readOnly={form.term !== 'date_range'}
+                  className="border rounded px-3 py-2 w-full"
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">From:</label>
-              <input
-                type="date"
-                name="start_date"
-                value={form.start_date}
-                onChange={handleChange}
-                readOnly={form.term !== 'date_range'}
-                className="border rounded px-3 py-2 w-full"
-              />
+            {/* Select Term and Account No - 2nd Row */}
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="w-full">
+                <label className="block text-sm font-medium mb-1 text-gray-700">Select Term:</label>
+                <select
+                  name="term"
+                  value={form.term}
+                  onChange={handleChange}
+                  className="border rounded px-3 py-2 w-full"
+                >
+                  <option value="date_range">Date Range</option>
+                  <option value="this_week">This Week</option>
+                  <option value="this_month">This Month</option>
+                </select>
+              </div>
+              <div className="w-full">
+                <label className="block text-sm font-medium mb-1 text-gray-700">Customer Ac No:</label>
+                <input
+                  type="text"
+                  name="customer_account_number"
+                  value={form.customer_account_number}
+                  onChange={handleChange}
+                  className="border rounded px-3 py-2 w-full"
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">To:</label>
-              <input
-                type="date"
-                name="end_date"
-                value={form.end_date}
-                onChange={handleChange}
-                readOnly={form.term !== 'date_range'}
-                className="border rounded px-3 py-2 w-full"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-gray-700">Customer Ac No:</label>
-              <input
-                type="text"
-                name="customer_account_number"
-                value={form.customer_account_number}
-                onChange={handleChange}
-                className="border rounded px-3 py-2 w-full"
-              />
-            </div>
-
+            {/* Buttons */}
             <div className="flex gap-3">
               <button
-
-                type="submit" // ✅ submit type for Enter key support
+                type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
-                  }`}
+                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
               >
-                {
-                  isLoading ? "Please wait..." :"Generate Report"
-                }
-                
+                {isLoading ? "Please wait..." : "Generate Report"}
               </button>
               <button
-              disabled={isLoading}
                 type="button"
                 onClick={handleReset}
+                disabled={isLoading}
                 className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
               >
                 Reset
@@ -240,7 +239,7 @@ const ReportsPage = () => {
         {summaryData && (
           <div className="mt-4 max-w-lg mx-auto h-48 bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
             <p className="text-xl">
-              Total Milk Collected: <span className="text-green-700 font-bold">{summaryData.total_milk_collections} L</span>
+              Total Milk Collected: <span className="text-green-700 font-bold">{summaryData?.total_milk_collections.toFixed(2)} L</span>
             </p>
             <p className="text-xl">
               Total Amount:

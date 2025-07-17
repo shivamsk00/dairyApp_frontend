@@ -4,10 +4,11 @@ import { toast } from 'react-toastify';
 
 
 const PaymentLedgerPage = () => {
+  const today = new Date().toISOString().split('T')[0]
   const [summaryData, setSummaryData] = useState([]);
   const [form, setForm] = useState({
-    start_date: '',
-    end_date: '',
+    start_date: today,
+    end_date: today,
   });
 
   const paymentRegister = useHomeStore(state => state.paymentRegister);
@@ -32,7 +33,7 @@ const PaymentLedgerPage = () => {
     };
     try {
       const res = await paymentRegister(payload);
-      console.log('Response for payment register',res);
+      console.log('Response for payment register', res);
       if (res) {
         setSummaryData(res.data);
         toast.success("payment register generated successfully");
@@ -59,7 +60,7 @@ const PaymentLedgerPage = () => {
     const [year, month, day] = dateString.split('-');
     return `${day}-${month}-${year}`;
   };
-const isFormValid = form.start_date && form.end_date;
+  const isFormValid = form.start_date && form.end_date;
   return (
     <div className="flex min-h-screen">
 
@@ -79,8 +80,10 @@ const isFormValid = form.start_date && form.end_date;
         {/* Date Range Filter */}
         <div className="border p-4 mb-4 bg-gray-50 rounded w-full max-w-md">
           <h3 className="font-medium mb-2">Generate Payment Register</h3>
-          <div className="space-y-2">
-            <div className="mb-4">
+
+          <div className="flex gap-4 mb-4">
+            {/* From Date */}
+            <div className="flex-1">
               <label className="block text-sm font-medium mb-1 text-gray-700">From:</label>
               <input
                 type="date"
@@ -91,7 +94,8 @@ const isFormValid = form.start_date && form.end_date;
               />
             </div>
 
-            <div className="mb-4">
+            {/* To Date */}
+            <div className="flex-1">
               <label className="block text-sm font-medium mb-1 text-gray-700">To:</label>
               <input
                 type="date"
@@ -101,20 +105,30 @@ const isFormValid = form.start_date && form.end_date;
                 className="border rounded px-3 py-2 w-full"
               />
             </div>
+          </div>
 
-            <div className="flex space-x-2 pt-2">
-              <button onClick={handleGenerate}
-                disabled={!isFormValid}
-                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}>View</button>
-              <button  onClick={handleReset}
-                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Reset</button>
-            </div>
+          {/* Buttons */}
+          <div className="flex space-x-2 pt-2">
+            <button
+              onClick={handleGenerate}
+              disabled={!isFormValid}
+              className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+            >
+              View
+            </button>
+            <button
+              onClick={handleReset}
+              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+            >
+              Reset
+            </button>
           </div>
         </div>
 
+
         {/* Report Date Range */}
         <div className="mb-4">
-          <strong>Payment Register From Date:</strong> 
+          <strong>Payment Register From Date:</strong>
         </div>
 
         {/* Table */}
@@ -122,7 +136,7 @@ const isFormValid = form.start_date && form.end_date;
           <table className="min-w-full table-auto text-sm border-collapse">
             <thead className="bg-gray-200">
               <tr>
-                <th className="border px-3 py-2">SN</th>
+                <th className="border px-3 py-2">Sr no.</th>
                 <th className="border px-3 py-2">Ac No</th>
                 <th className="border px-3 py-2">Member Name</th>
                 <th className="border px-3 py-2">Total Quantity (Ltr.)</th>
@@ -135,22 +149,22 @@ const isFormValid = form.start_date && form.end_date;
             <tbody>
               {/* Dummy Rows - replace with actual data map */}
 
-                {
-          summaryData && summaryData?.map((item,index)=>(
+              {
+                summaryData && summaryData?.map((item, index) => (
 
-              <tr key={index}>
-                <td className="border px-3 py-2 text-center">{index+1}</td>
-                <td className="border px-3 py-2 text-center">{item.customer_account_number}</td>
-                <td className="border px-3 py-2 text-center">{item.customer_name}</td>
-                <td className="border px-3 py-2 text-center">{item.total_milk_in_ltr}</td>
-                <td className="border px-3 py-2 text-center">{item.total_payable_amount}</td>
-                <td className="border px-3 py-2 text-center">{item.total_other_price}</td>
-                <td className="border px-3 py-2 text-center">{item.grand_total_amount_in_range}</td>
-                <td className="border px-3 py-2 text-center"></td>
-              </tr>
-          )) 
+                  <tr key={index}>
+                    <td className="border px-3 py-2 text-center">{index + 1}</td>
+                    <td className="border px-3 py-2 text-center">{item.customer_account_number}</td>
+                    <td className="border px-3 py-2 text-center">{item.customer_name}</td>
+                    <td className="border px-3 py-2 text-center">{item.total_milk_in_ltr.toFixed(2)}</td>
+                    <td className="border px-3 py-2 text-center">{item.total_payable_amount}</td>
+                    <td className="border px-3 py-2 text-center">{item.total_other_price}</td>
+                    <td className="border px-3 py-2 text-center">{item.grand_total_amount_in_range}</td>
+                    <td className="border px-3 py-2 text-center"></td>
+                  </tr>
+                ))
 
-          }
+              }
               {/* Add more rows dynamically */}
             </tbody>
           </table>

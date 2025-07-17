@@ -130,7 +130,7 @@ const MergedTableExact = ({ summaryData }) => {
             <tfoot className="sticky bottom-0 bg-gray-800 text-white">
               <tr className="font-semibold text-sm">
                 <td className="border px-2 py-2 w-10" colSpan={2}>
-                  Total Milk Qty: {totalMilkQty} Ltr
+                  Total Milk Qty: {totalMilkQty.toFixed(2)} Ltr
                 </td>
                 <td className="border px-2 py-2 w-24" colSpan={2}>
                   Total Milk Amount: ₹{totalMilkAmount.toFixed(2)}
