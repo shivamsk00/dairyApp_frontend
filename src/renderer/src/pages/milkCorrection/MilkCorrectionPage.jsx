@@ -299,7 +299,7 @@ const MilkCorrectionPage = () => {
 
             {
                 milkData.length > 0 && (
-                    <div className='w-full shadow-xl'>
+                    <div className='w-full shadow-xl h-1/1 overflow-y-auto rounded-lg p-4 bg-white'>
                         {/* <DataTable
                             columns={columns}
                             data={filteredData}
