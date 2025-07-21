@@ -2,9 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAuthStore from '../zustand/useAuthStore';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
-import profile from "../assets/profile.png";
 
 const Header = () => {
     const [isToggleMenu, setIsToggleMenu] = useState(false);
@@ -18,17 +16,16 @@ const Header = () => {
         const res = await logout();
         if (res.status_code == 200) {
             toast(res.message, {
-                position: "top-right",
+                position: 'top-right',
                 autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: false,
                 pauseOnHover: true,
                 draggable: true,
-                theme: "dark",
-                type: 'success'
+                theme: 'dark',
+                type: 'success',
             });
-
-            window.api.logoutCloseAll()
+            window.api.logoutCloseAll();
         }
     };
 
@@ -38,20 +35,15 @@ const Header = () => {
                 setIsToggleMenu(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     return (
-        <div className="w-full flex justify-between items-center px-6 py-4 bg-slate-800 shadow-md relative z-50">
-            {/* Search Box */}
-            <div className="flex items-center gap-2  px-3 py-1 rounded-md ">
-                {/* <FaSearch className="text-gray-300" />
-                <input
-                    type="search"
-                    placeholder="Search..."
-                    className="outline-none text-sm w-48 bg-transparent text-white placeholder-gray-300"
-                /> */}
+        <div className="w-full flex justify-between items-center px-4 sm:px-6 py-3 bg-slate-800 shadow-md relative z-50">
+            {/* Search Box - hidden for now */}
+            <div className="flex items-center gap-2 px-3 py-1 rounded-md">
+                {/* Placeholder for search if needed later */}
             </div>
 
             {/* Profile Section */}
@@ -60,25 +52,27 @@ const Header = () => {
                     className="flex items-center gap-2 cursor-pointer"
                     onClick={() => setIsToggleMenu(!isToggleMenu)}
                 >
-                    <h2 className="flex items-center gap-1 text-sm font-medium text-white">
+                    {/* Hide email on small screens */}
+                    <h2 className="hidden sm:flex items-center gap-1 text-sm font-medium text-white">
                         <MdEmail className="text-blue-400" size={20} />
                         {user.email}
                     </h2>
-                    {/* <img src={profile} alt="Profile" className="w-10 h-10 rounded-full border" /> */}
-                    <div className='w-10 h-10 rounded-full border flex items-center justify-center bg-orange-600'>
 
-                        <h1 className='text-white uppercase'>{user && user.email.slice(0, 1)}</h1>
+                    {/* Profile Icon */}
+                    <div className="w-10 h-10 rounded-full border flex items-center justify-center bg-orange-600 text-white text-lg uppercase">
+                        {user?.email?.slice(0, 1) || 'U'}
                     </div>
                 </div>
 
+                {/* Dropdown Menu */}
                 {isToggleMenu && (
-                    <div className="absolute right-0 mt-2 w-52 bg-white shadow-lg rounded-xl p-4 border z-50 flex flex-col gap-3">
+                    <div className="absolute right-0 mt-2 w-44 sm:w-52 bg-white shadow-lg rounded-xl p-3 sm:p-4 border z-50 flex flex-col gap-2">
                         <button
                             onClick={() => {
-                                nav("/changePassword");
+                                nav('/changePassword');
                                 setIsToggleMenu(false);
                             }}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-sm transition"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md text-xs sm:text-sm transition"
                         >
                             Change Password
                         </button>
@@ -86,24 +80,24 @@ const Header = () => {
                         <button
                             onClick={() => {
                                 localStorage.clear();
-                                toast.success("Cleared previous data", {
-                                    position: "top-right",
+                                toast.success('Cleared previous data', {
+                                    position: 'top-right',
                                     autoClose: 3000,
-                                    theme: "dark"
+                                    theme: 'dark',
                                 });
                                 setIsToggleMenu(false);
-                                nav("login");
+                                nav('login');
                             }}
-                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-sm transition"
+                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md text-xs sm:text-sm transition"
                         >
                             Login Again
                         </button>
 
                         <button
                             onClick={handleLogout}
-                            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md text-sm transition"
+                            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md text-xs sm:text-sm transition"
                         >
-                            {loading ? "Please wait..." : "Log out"}
+                            {loading ? 'Please wait...' : 'Log out'}
                         </button>
                     </div>
                 )}

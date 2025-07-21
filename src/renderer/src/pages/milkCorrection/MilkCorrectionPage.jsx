@@ -299,7 +299,7 @@ const MilkCorrectionPage = () => {
 
             {
                 milkData.length > 0 && (
-                    <div className='w-full shadow-xl h-1/1 overflow-y-auto rounded-lg p-4 bg-white'>
+                    <div className=' shadow-xl h-1/1 overflow-y-auto overflow-x-hidden rounded-lg p-4 bg-white'>
                         {/* <DataTable
                             columns={columns}
                             data={filteredData}
@@ -338,14 +338,16 @@ const MilkCorrectionPage = () => {
                             responsive
                             subHeader
                             subHeaderComponent={
-                                <div className="flex justify-between items-center w-full">
-                                    <h1 className="text-lg font-semibold">Milk Collection Summary</h1>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 w-full">
+                                    <h1 className="text-base sm:text-lg font-semibold text-gray-800">
+                                        Milk Collection Summary
+                                    </h1>
                                     <input
                                         type="text"
                                         placeholder="Search by account number..."
                                         value={searchCustomer}
                                         onChange={(e) => handleSearch(e.target.value)}
-                                        className="border px-3 py-1 text-sm rounded w-64 outline-none border-orange-600"
+                                        className="border px-3 py-2 text-sm rounded w-full sm:w-64 outline-none border-orange-600"
                                     />
                                 </div>
                             }
@@ -409,7 +411,10 @@ const MilkCorrectionPage = () => {
 
             <EditMilkCollectionModal
                 isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
+                onClose={() => {
+                    setIsEditModalOpen(false)
+                    setEditableEntry(null);
+                }}
                 milkData={editableEntry}
                 onUpdate={handleSubmit}
             />

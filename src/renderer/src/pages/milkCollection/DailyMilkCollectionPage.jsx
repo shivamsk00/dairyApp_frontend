@@ -754,7 +754,7 @@ const DailyMilkCollectionPage = () => {
                                         }
                                     }}
                                     placeholder="Enter AC No"
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300  text-xs placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300  text-xs placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
                                 />
                             </div>
 
@@ -768,7 +768,7 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={nameRef}
                                     onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
@@ -781,7 +781,7 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={mobileRef}
                                     onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
 
@@ -795,7 +795,7 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={careOfRef}
                                     onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
 
@@ -815,7 +815,7 @@ const DailyMilkCollectionPage = () => {
                                         placeholder="Enter Quantity"
                                         onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
                                         required
-                                        className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                        className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                     />
                                 </div>
                                 <div>
@@ -867,7 +867,7 @@ const DailyMilkCollectionPage = () => {
                                             }
                                         }}
                                         required
-                                        className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                        className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                     />
                                 </div>
                             </div>
@@ -894,7 +894,7 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={clrRef}
                                     onKeyDown={(e) => e.key === 'Enter' && careOfRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
@@ -904,7 +904,7 @@ const DailyMilkCollectionPage = () => {
                                     value={form.snf}
                                     required
                                     disabled={isDisabled}
-                                    className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                     name="snf"
                                     onChange={(e) => setForm({ ...form, snf: e.target.value })}
                                     ref={snfRef}
@@ -947,7 +947,7 @@ const DailyMilkCollectionPage = () => {
                     {/* Rate & Total Section */}
 
 
-                    <div className="bg-black from-orange-100 to-orange-200 p-2 rounded-xl border border-orange-300 shadow-md mb-2 grid grid-cols-2 gap-2">
+                    <div className="bg-black from-orange-100 to-orange-200 p-2 rounded-xl border border-orange-300 shadow-sm mb-2 grid grid-cols-2 gap-2">
                         {/* Base Rate */}
                         <div className="flex flex-col">
                             <label className="block text-xs font-medium mb-1 text-white">Base Rate (₹/Ltr)</label>
@@ -959,7 +959,7 @@ const DailyMilkCollectionPage = () => {
                                 readOnly
                                 ref={otherRateRef}
                                 onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.focus()}
-                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
@@ -973,7 +973,7 @@ const DailyMilkCollectionPage = () => {
                                 onChange={handleChange}
                                 disabled={isDisabled}
                                 onKeyDown={handleKeyDown}
-                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
@@ -986,7 +986,7 @@ const DailyMilkCollectionPage = () => {
                                 value={form.rate}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
@@ -999,7 +999,7 @@ const DailyMilkCollectionPage = () => {
                                 value={form.total_amount}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-5 px-4 py-2 rounded-md border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
                     </div>
@@ -1012,7 +1012,7 @@ const DailyMilkCollectionPage = () => {
                             type="submit"
                             disabled={isDisabled}
                             value="Submit"
-                            className="px-4 py-1 rounded-md bg-[#E6612A] text-white font-medium hover:bg-blue-700 transition-all shadow disabled:opacity-50"
+                            className="px-4 py-1 rounded-sm bg-[#E6612A] text-white font-medium hover:bg-blue-700 transition-all shadow disabled:opacity-50"
                             ref={submitRef}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -1091,9 +1091,9 @@ const DailyMilkCollectionPage = () => {
                         </div>
 
                        
-                        <div className="bg-white p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                            
-                            <table className="w-full text-sm text-left border border-orange-200 rounded-md overflow-hidden">
+                            <table className="w-full text-sm text-left border border-orange-200 rounded-sm overflow-hidden">
                                 <tbody>
                                     {[
                                         ['Milk Type', milkType || '-'],
@@ -1111,7 +1111,7 @@ const DailyMilkCollectionPage = () => {
                             </table>
 
                             
-                            <table className="w-full text-sm text-left border border-orange-200 rounded-md overflow-hidden">
+                            <table className="w-full text-sm text-left border border-orange-200 rounded-sm overflow-hidden">
                                 <tbody>
                                     {[
                                         ['Quantity', form.quantity ? `${form.quantity} Ltr` : '-'],
@@ -1404,7 +1404,7 @@ const DailyMilkCollectionPage = () => {
                             className="absolute bg-white top-4 right-4 text-xxl cursor-pointer"
                             title="Close"
                         >
-                            <IoMdCloseCircle size={30} />
+                            <IosmCloseCircle size={30} />
                         </div> */}
 
                         {/* Milk Collection Info Table */}
