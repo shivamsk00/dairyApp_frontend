@@ -140,7 +140,7 @@ const PaymentLedgerPage = () => {
                 <th className="border px-3 py-2">Ac No</th>
                 <th className="border px-3 py-2">Member Name</th>
                 <th className="border px-3 py-2">Total Quantity (Ltr.)</th>
-                <th className="border px-3 py-2">Payable Amount</th>
+                <th className="border px-3 py-2">Amount</th>
                 <th className="border px-3 py-2">CM Subsidy Amount</th>
                 <th className="border px-3 py-2">Total Amount</th>
                 <th className="border px-3 py-2">Member Sign</th>
@@ -157,9 +157,9 @@ const PaymentLedgerPage = () => {
                     <td className="border px-3 py-2 text-center">{item.customer_account_number}</td>
                     <td className="border px-3 py-2 text-center">{item.customer_name}</td>
                     <td className="border px-3 py-2 text-center">{item.total_milk_in_ltr.toFixed(2)}</td>
-                    <td className="border px-3 py-2 text-center">{item.total_payable_amount}</td>
+                    <td className="border px-3 py-2 text-center">{item.total_payable_amount.toFixed(2)}</td>
                     <td className="border px-3 py-2 text-center">{item.total_other_price}</td>
-                    <td className="border px-3 py-2 text-center">{item.grand_total_amount_in_range}</td>
+                    <td className="border px-3 py-2 text-center">{item.grand_total_amount_in_range.toFixed(2)}</td>
                     <td className="border px-3 py-2 text-center"></td>
                   </tr>
                 ))

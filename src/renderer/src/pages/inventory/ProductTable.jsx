@@ -299,7 +299,7 @@ const ProductTable = () => {
                   <tr key={i}>
                     <td className="border px-2 py-1 text-center">{i + 1}</td>
                     <td className="border px-2 py-1 text-center">{item.name}</td>
-                    <td className="border px-2 py-1 text-center">{item.category.name}</td>
+                    <td className="border px-2 py-1 text-center">{item.category?.name }</td>
                     <td className="border px-2 py-1 text-center">₹{item.price}</td>
                     <td className="border px-2 py-1 text-center">{item.unit}</td>
                     <td className="border px-2 py-1 text-center">
@@ -370,7 +370,7 @@ const ProductTable = () => {
               <tbody>
                 {[
                   ['Product Name', selectedProduct.name],
-                  ['Category Name', selectedProduct.category.name],
+                  ['Category Name', selectedProduct.category?.name],
                   ['Price', `₹${selectedProduct.price}`],
                   ['Unit', selectedProduct.unit],
                   ['Stocks', selectedProduct.stocks.length],
