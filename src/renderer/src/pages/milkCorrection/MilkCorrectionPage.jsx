@@ -66,8 +66,8 @@ const MilkCorrectionPage = () => {
             console.log('Response ===>', res);
             if (res?.status_code == 200 && res.data?.milk_collections) {
                 setMilkData(res.data.milk_collections);
-                setTotalMilk(res.data.totalAmount || 0);
-                setTotalAmount(res.data.totalMilk || 0);
+                setTotalMilk(res.data.totalMilk || 0);
+                setTotalAmount(res.data.totalAmount || 0);
                 setLoading(false)
             }
 
