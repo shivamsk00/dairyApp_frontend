@@ -282,7 +282,7 @@ const MilkCorrectionPage = () => {
                         <div>
                             <button
                                 disabled={loading}
-                                style={{ background: loading ? "#777": colors.buttonColor }}
+                                style={{ background: loading ? "#777" : colors.buttonColor }}
                                 type="submit"
                                 className={"w-full text-white py-2 rounded hover:opacity-90 transition"}
                             >
@@ -300,7 +300,7 @@ const MilkCorrectionPage = () => {
             {
                 milkData.length > 0 && (
                     <div className='w-full shadow-xl'>
-                        <DataTable
+                        {/* <DataTable
                             columns={columns}
                             data={filteredData}
                             pagination
@@ -313,6 +313,29 @@ const MilkCorrectionPage = () => {
                                 setRowsPerPage(newPerPage);
                                 setCurrentPage(page);
                             }}
+                            subHeader
+                            subHeaderComponent={
+                                <div className="flex justify-between items-center w-full">
+                                    <h1 className="text-lg font-semibold">Milk Collection Summary</h1>
+                                    <input
+                                        type="text"
+                                        placeholder="Search by account number..."
+                                        value={searchCustomer}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        className="border px-3 py-1 text-sm rounded w-64 outline-none border-orange-600"
+                                    />
+                                </div>
+                            }
+                        /> */}
+
+
+                        <DataTable
+                            columns={columns}
+                            data={filteredData}
+                            highlightOnHover
+                            striped
+                            dense
+                            responsive
                             subHeader
                             subHeaderComponent={
                                 <div className="flex justify-between items-center w-full">
