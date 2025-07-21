@@ -30,6 +30,8 @@ const MilkCorrectionPage = () => {
     const [editableEntry, setEditableEntry] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalMilk, setTotalMilk] = useState(0);
+    const [totalAmount, setTotalAmount] = useState(0);
 
 
     const handleChange = (e) => {
@@ -64,6 +66,8 @@ const MilkCorrectionPage = () => {
             console.log('Response ===>', res);
             if (res?.status_code == 200 && res.data?.milk_collections) {
                 setMilkData(res.data.milk_collections);
+                setTotalMilk(res.data.totalAmount || 0);
+                setTotalAmount(res.data.totalMilk || 0);
                 setLoading(false)
             }
 
@@ -355,6 +359,20 @@ const MilkCorrectionPage = () => {
                     </div>
                 )
             }
+
+            {
+                totalMilk > 0 && totalAmount > 0 && (
+                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 bg-white rounded shadow border">
+                        <div className="text-base sm:text-lg font-medium text-gray-700">
+                            Total Milk: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
+                        </div>
+                        <div className="text-base sm:text-lg font-medium text-gray-700">
+                            Total Amount: <span className="font-semibold text-green-700">₹ {totalAmount.toFixed(2)}</span>
+                        </div>
+                    </div>
+                )
+            }
+
 
 
             {/* VIEW DETAIL MODAL  */}
