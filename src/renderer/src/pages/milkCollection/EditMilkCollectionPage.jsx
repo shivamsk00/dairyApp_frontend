@@ -8,6 +8,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   const loading = useHomeStore(state => state.loading);
   const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
   const getMilkRate = useHomeStore(state => state.getMilkRate);
+  const [isCustomer, setIscustomer] = useState(true);
 
   const [form, setForm] = useState({
     milk_type: '',
@@ -92,6 +93,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
       console.log('Customer response:', res);
       if (res.status_code == 200) {
         // CustomToast.success(res.message)
+        setIscustomer(false)
         setForm((prev) => ({
           ...prev,
           name: res.data.name || '',
@@ -101,7 +103,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
         // setCustomerWallet(res.data.wallet)
 
       } else {
-
+        setIscustomer(true)
         CustomToast.error(res.message)
         setForm((prev) => ({
           ...prev,
@@ -149,12 +151,13 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
         // CustomToast.success(res.message);
         onClose(); // close modal after success
-        await onUpdate(e);
+        // await onUpdate(e);
       } else {
         CustomToast.error(res.message);
       }
     } catch (error) {
-      CustomToast.error("Error updating milk collection.");
+      // CustomToast.error("Error updating milk collection.");
+      console.error("Error updating milk collection:", error);
     }
   };
 
@@ -221,7 +224,6 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
     setForm((prev) => ({
       ...prev,
-      rate: rate.toFixed(2),
       total_amount: total_amount.toFixed(2),
     }));
   }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity]);
@@ -256,12 +258,12 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {[
             { label: 'Date', name: 'date', type: "date" },
-            { label: 'Account No', name: 'customer_account_number' },
-            { label: 'Name', name: 'name' },
-            { label: 'Care of', name: 'careof' },
+            { label: 'Account No', name: 'customer_account_number', },
+            { label: 'Name', name: 'name', readOnly: true },
+            { label: 'Care of', name: 'careof', readOnly: true },
             { label: 'Milk Type', name: 'milk_type', type: 'select', options: ['cow', 'buffalo', 'other'] },
             { label: 'Shift', name: 'shift', type: 'select', options: ['morning', 'evening', 'both'] },
-            { label: 'Mobile', name: 'mobile' },
+            { label: 'Mobile', name: 'mobile', readOnly: true },
             { label: 'Quantity', name: 'quantity', type: 'number' },
             { label: 'FAT', name: 'fat', type: 'number' },
             { label: 'SNF', name: 'snf', type: 'number' },
@@ -277,6 +279,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
                   value={form[name]}
                   onChange={handleChange}
                   className="w-full border px-3 py-2 rounded"
+                  readOnly={readOnly}
                 >
                   <option value="">Select {label.toLowerCase()}</option>
                   {options.map(opt => (
@@ -299,8 +302,8 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
           <div className="col-span-2 mt-4 flex justify-end">
             <button
               type="submit"
-              className="bg-[#E6612A] hover:bg-orange-600 text-white px-6 py-2 rounded"
-              disabled={loading}
+              className={`${isCustomer ? 'bg-gray-300' : 'bg-[#E6612A] hover:bg-orange-600'}   text-white px-6 py-2 rounded`}
+              disabled={loading || isCustomer}
             >
               {loading ? "Please wait..." : "Update"}
             </button>

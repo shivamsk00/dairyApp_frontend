@@ -801,76 +801,76 @@ const DailyMilkCollectionPage = () => {
 
                         </div>
 
-                            {/* Row 2 */}
-                            <div div className="grid grid-cols-2 gap-4" >
-                                <div>
-                                    <label className="block text-xs font-medium text-white">Quantity (Ltr)</label>
-                                    <input
-                                        type="number"
-                                        name="quantity"
-                                        value={form.quantity}
-                                        onChange={handleChange}
-                                        disabled={isDisabled}
-                                        ref={qtyRef}
-                                        placeholder="Enter Quantity"
-                                        onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
-                                        required
-                                        className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-white">FAT (%)</label>
-                                    <input
-                                        type="number"
-                                        name="fat"
-                                        value={form.fat}
-                                        onChange={handleChange}
-                                        disabled={isDisabled}
-                                        ref={fatRef}
-                                        placeholder="Enter FAT %"
-                                        // onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
-                                        onKeyDown={async (e) => {
-                                            if (e.key === 'Enter') {
-                                                const fat = form.fat?.trim();
-                                                const clr = form.clr?.trim();
-                                                const snfRaw = form.snf?.trim();
-
-                                                // If SNF or CLR is empty → focus on SNF input and prevent fetch
-                                                if (!snfRaw) {
-                                                    e.preventDefault();
-                                                    snfRef.current?.focus();
-                                                    return;
-                                                }
-
-                                                // If both CLR and SNF have values → fetch milk rate
-                                                e.preventDefault();
-                                                const snfForApi = !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
-
-                                                try {
-                                                    const res = await getMilkRate(fat, clr, snfForApi);
-                                                    setForm((prev) => ({
-                                                        ...prev,
-                                                        fat: res.fat || "",
-                                                        clr: res.clr || "",
-                                                        snf: res.snf || prev.snf,
-                                                        base_rate: res.rate || '',
-                                                    }));
-                                                    otherRateRef.current?.focus()
-                                                    res.rate
-                                                        ? CustomToast.success("Rate Found", "top-center")
-                                                        : CustomToast.warn("RATE not found", "top-center");
-
-
-                                                } catch (err) {
-                                                    console.error("Rate error", err);
-                                                }
-                                            }
-                                        }}
-                                        required
-                                        className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                    />
-                                </div>
+                        {/* Row 2 */}
+                        <div div className="grid grid-cols-2 gap-4" >
+                            <div>
+                                <label className="block text-xs font-medium text-white">Quantity (Ltr)</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    value={form.quantity}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={qtyRef}
+                                    placeholder="Enter Quantity"
+                                    onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
+                                    required
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                />
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-white">FAT (%)</label>
+                                <input
+                                    type="number"
+                                    name="fat"
+                                    value={form.fat}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={fatRef}
+                                    placeholder="Enter FAT %"
+                                    // onKeyDown={(e) => e.key === 'Enter' && mobileRef.current?.focus()}
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            const fat = form.fat?.trim();
+                                            const clr = form.clr?.trim();
+                                            const snfRaw = form.snf?.trim();
+
+                                            // If SNF or CLR is empty → focus on SNF input and prevent fetch
+                                            if (!snfRaw) {
+                                                e.preventDefault();
+                                                snfRef.current?.focus();
+                                                return;
+                                            }
+
+                                            // If both CLR and SNF have values → fetch milk rate
+                                            e.preventDefault();
+                                            const snfForApi = !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+
+                                            try {
+                                                const res = await getMilkRate(fat, clr, snfForApi);
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    fat: res.fat || "",
+                                                    clr: res.clr || "",
+                                                    snf: res.snf || prev.snf,
+                                                    base_rate: res.rate || '',
+                                                }));
+                                                otherRateRef.current?.focus()
+                                                res.rate
+                                                    ? CustomToast.success("Rate Found", "top-center")
+                                                    : CustomToast.warn("RATE not found", "top-center");
+
+
+                                            } catch (err) {
+                                                console.error("Rate error", err);
+                                            }
+                                        }
+                                    }}
+                                    required
+                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                />
+                            </div>
+                        </div>
 
 
 
@@ -878,7 +878,7 @@ const DailyMilkCollectionPage = () => {
 
 
 
-                        
+
 
                         {/* Row 3 */}
                         < div className="grid grid-cols-2 gap-4" >
@@ -1241,7 +1241,7 @@ const DailyMilkCollectionPage = () => {
                                                             <td className="border px-2 py-1 text-center">{item.base_rate}</td>
                                                             <td className="border px-2 py-1 text-center">{item.other_price}</td>
                                                             <td className="border px-2 py-1 text-center">{item.total_amount}</td>
-                                                            <td className="border px-2 py-1 text-center">{item.customer.wallet}</td>
+                                                            <td className="border px-2 py-1 text-center">{item?.customer?.wallet || 'Customer not available'}</td>
                                                             <td className="border px-2 py-1 text-center">
                                                                 <div className="flex gap-2 justify-center">
                                                                     <button className="bg-blue-700 text-white px-2 py-1 rounded text-xs" onClick={() => handlePrint(item)}>
