@@ -29,7 +29,10 @@ const AddCustomerPage = () => {
         state: '',
         bank_account: '',
         ifsc_code: '',
-        subsidy_code: ""
+        subsidy_code: "",
+        total_cows:"",
+        total_buffalos: "",
+        total_animals: ""
     });
 
     const handleChange = (e) => {
@@ -65,7 +68,10 @@ const AddCustomerPage = () => {
                     state: '',
                     bank_account: '',
                     ifsc_code: '',
-                    subsidy_code: ""
+                    subsidy_code: "",
+                    total_cows: "",
+                    total_buffalos: "",
+                    total_animals: ""
                 });
                 CustomToast.success(res.message)
                 // Navigate to /customer after 2 seconds
@@ -278,22 +284,43 @@ const AddCustomerPage = () => {
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />
                     </div>
-                    {/* <div>
-                        <label className="block text-sm font-medium text-gray-700">PAN Number</label>
-                        <input
-                            type="text"
-                            name="pan_number"
-                            value={form.pan_number}
-                            onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                    </div> */}
+                  
                     <div>
                         <label className="block text-sm font-medium text-gray-700">State</label>
                         <input
                             type="text"
                             name="state"
                             value={form.state}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Total Cows</label>
+                        <input
+                            type="number"
+                            name="total_cows"
+                            value={form.total_cows}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mt-2">Total Buffalos</label>
+                        <input
+                            type="number"
+                            name="total_buffalos"
+                            value={form.total_buffalos}
+                            onChange={handleChange}
+                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mt-2">Total Animals</label>
+                        <input
+                            type="number"
+                            name="total_animals"
+                            value={form.total_animals}
                             onChange={handleChange}
                             className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
                         />

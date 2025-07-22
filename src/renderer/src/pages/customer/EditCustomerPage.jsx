@@ -31,7 +31,10 @@ const EditCustomerPage = () => {
         account_number: '',
         bank_account: '',
         ifsc_code: '',
-        subsidy_code: ''
+        subsidy_code: '',
+        total_cows: "",
+        total_buffalos: "",
+        total_animals: ""
 
     });
 
@@ -60,7 +63,10 @@ const EditCustomerPage = () => {
                     account_number: customerData.account_number || '',
                     bank_account: customerData.bank_account,
                     ifsc_code: customerData.ifsc_code,
-                    subsidy_code: customerData.subsidy_code
+                    subsidy_code: customerData.subsidy_code,
+                    total_cows: customerData.total_cows || "",
+                    total_buffalos: customerData.total_buffalos || "",
+                    total_animals: customerData.total_animals || ""
                 });
             } else {
                 toast.error(res.message);
@@ -155,6 +161,9 @@ const EditCustomerPage = () => {
                         { label: 'Care of', name: 'careof' },
                         { label: 'Pincode', name: 'pincode', type: 'number' },
                         { label: 'Designation', name: 'designation' },
+                        { label: 'Total Cows', name: 'total_cows', type: 'number' },
+                        { label: 'Total Buffalos', name: 'total_buffalos', type: 'number' },
+                        { label: 'Total Animals', name: 'total_animals', type: 'number' }
                     ].map(({ label, name, type }) => (
                         <div key={name}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">

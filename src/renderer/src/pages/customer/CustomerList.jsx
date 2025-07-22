@@ -446,6 +446,12 @@ const CustomerList = () => {
                   ['Designation', selectedCustomer.designation],
                   ['Account Number', selectedCustomer.account_number],
                   ['Wallet', `₹${selectedCustomer.wallet}`],
+                  ['Bank Account', selectedCustomer.bank_account],
+                  ['IFSC Code', selectedCustomer.ifsc_code],
+                  ['Subsidy Code', selectedCustomer.subsidy_code],
+                  ['Total Cows', selectedCustomer.total_cows || 'N/A'],
+                  ['Total Buffalos', selectedCustomer.total_buffalos || 'N/A'],
+                  ['Total Animals', selectedCustomer.total_animals || 'N/A'],
                   ['Status', selectedCustomer.status === '1' ? 'Active' : 'Inactive'],
                   ['Created At', new Date(selectedCustomer.created_at).toLocaleString()]
                 ].map(([label, value]) => (
