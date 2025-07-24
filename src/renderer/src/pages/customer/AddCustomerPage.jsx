@@ -30,22 +30,22 @@ const AddCustomerPage = () => {
         bank_account: '',
         ifsc_code: '',
         subsidy_code: "",
-        total_cows:"",
+        total_cows: "",
         total_buffalos: "",
         total_animals: "",
-        aadhar_number:"",
-        jan_aadhar_number:"",
-        bank_image:""
+        aadhar_number: "",
+        jan_aadhar_number: "",
+        bank_image: ""
     });
 
     const handleChange = (e) => {
-            const { name, type, value, files } = e.target;
+        const { name, type, value, files } = e.target;
 
-    if (type === 'file') {
-        setForm(prev => ({ ...prev, [name]: files[0] })); // store the file object
-    } else {
-        setForm(prev => ({ ...prev, [name]: value }));
-    }
+        if (type === 'file') {
+            setForm(prev => ({ ...prev, [name]: files[0] })); // store the file object
+        } else {
+            setForm(prev => ({ ...prev, [name]: value }));
+        }
         // setForm({ ...form, [e.target.name]: e.target.value });
     };
 
@@ -98,55 +98,63 @@ const AddCustomerPage = () => {
     //     }
     // };
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
 
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
-    });
+        // Create FormData
+        const formData = new FormData();
+        Object.entries(form).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
 
-    try {
-        const res = await addCustomer(formData); // make sure this function supports FormData
-        console.log("API Response:", res);
-
-        if (res.status_code === 200) {
-            setShowSuccessModal(true);
-            CustomToast.success(res.message);
-            navigate('/customer');
-
-            // Reset form
-            setForm({
-                customer_type: '',
-                name: '',
-                mobile: '',
-                email: '',
-                careof: '',
-                address: '',
-                city: '',
-                pincode: '',
-                contact_person: '',
-                designation: '',
-                state: '',
-                bank_account: '',
-                ifsc_code: '',
-                subsidy_code: "",
-                total_cows: "",
-                total_buffalos: "",
-                total_animals: "",
-                aadhar_number: "",
-                jan_aadhar_number: "",
-                bank_image: ""
-            });
-        } else {
-            CustomToast.error(res.message);
+        // Debug: Log FormData entries
+        console.log("Form Data:");
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
         }
-    } catch (error) {
-        console.error('Error adding customer:', error);
-        setError('An unexpected error occurred.');
-    }
-};
+
+        // return
+        try {
+            const res = await addCustomer(formData); // <-- Your API call here
+            console.log("API Response:", res);
+
+            if (res.status_code == 200) {
+                setShowSuccessModal(true);
+                CustomToast.success(res.message);
+                navigate('/customer');
+
+                // Reset form
+                setForm({
+                    customer_type: '',
+                    name: '',
+                    mobile: '',
+                    careof: '',
+                    email: '',
+                    address: '',
+                    city: '',
+                    pincode: '',
+                    contact_person: '',
+                    designation: '',
+                    state: '',
+                    bank_account: '',
+                    ifsc_code: '',
+                    subsidy_code: "",
+                    total_cows: "",
+                    total_buffalos: "",
+                    total_animals: "",
+                    aadhar_number: "",
+                    jan_aadhar_number: "",
+                    bank_image: ""
+                });
+            } else {
+                CustomToast.error(res.message || 'Something went wrong.');
+            }
+        } catch (error) {
+            console.error('Error adding customer:', error);
+            setError('An unexpected error occurred. Please try again.');
+        }
+    };
 
 
     return (
@@ -290,7 +298,7 @@ const handleSubmit = async (e) => {
                         />
                     </div>
                     {/* contact person */}
-                      <div className='w-full'>
+                    <div className='w-full'>
                         <label className="block text-sm font-medium text-white">Contact Person</label>
                         <input
                             maxLength={10}
@@ -337,7 +345,7 @@ const handleSubmit = async (e) => {
                             className="mt-1 w-full border border-gray-300  px-1 "
                         />
                     </div>
-                  
+
                     <div>
                         <label className="block text-sm font-medium text-white">Designation</label>
                         <input
@@ -348,7 +356,7 @@ const handleSubmit = async (e) => {
                             className="mt-1 w-full border border-gray-300  px-1 "
                         />
                     </div>
-                  
+
                     <div>
                         <label className="block text-sm font-medium text-white">State</label>
                         <input
@@ -362,7 +370,7 @@ const handleSubmit = async (e) => {
                 </div>
 
                 {/* Varrification Entries */}
-               <h1 className='text-white text-center text-xl'>Varification</h1>
+                <h1 className='text-white text-center text-xl'>Varification</h1>
                 <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                     <div className='w-full'>
                         <label className="block text-sm font-medium text-white">Aadhar No.</label>
@@ -390,14 +398,14 @@ const handleSubmit = async (e) => {
                             type="file"
                             accept="image/*"
                             name="bank_image"
-                            value={form.bank_image}
+                            // value={form.bank_image}
                             onChange={handleChange}
                             className="mt-1 w-full h-7 border border-gray-300  px-1 "
                         />
                     </div>
                 </div>
 
-                
+
                 {/* Animals Entries */}
                 <h1 className='text-white text-center text-xl'>Animals Entries</h1>
                 <div className='w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -433,7 +441,7 @@ const handleSubmit = async (e) => {
                     </div>
                 </div>
 
-                
+
 
                 {/* Submit */}
                 <div className="w-full">
