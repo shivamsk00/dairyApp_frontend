@@ -139,7 +139,14 @@ const useHomeStore = create((set) => ({
 
   addCustomer: async (customerData) => {
     try {
-      const res = await api.post('/customer-submit', customerData)
+      const res = await api.post('/customer-submit', customerData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+        }
+      )
+
       return res.data
     } catch (error) {
       return err.response.data

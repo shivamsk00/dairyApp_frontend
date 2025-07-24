@@ -235,7 +235,7 @@ const CategoryTable = () => {
                     </table>
                </div> */}
 
-              
+
                <>
                     {/* Table */}
 
@@ -279,20 +279,34 @@ const CategoryTable = () => {
                                                                  <button
                                                                       className="bg-green-500 text-white px-2 py-1 rounded text-xs"
                                                                       onClick={() => {
-                                                                          openModal('edit', item)
+                                                                           openModal('edit', item)
                                                                       }}
                                                                  >
-                                                                      <FaEye size={14} />
+                                                                      {/* <FaEye size={14} /> */}
+                                                                      <FaPen size={14} />
                                                                  </button>
-                                                              
-                                                                 <button
+
+                                                                 {/* <button 
+                                                                      onClick={() => nav("/editStock", { state: { stockId: item.id } })} 
+                                                                      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
+                                                                      <FaPen size={14} />
+                                                                 </button> */}
+
+                                                                 {/* <button
+                                                                      onClick={() => openModal('edit', category)}
+                                                                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm"
+                                                                 >
+                                                                      <FaPen size={14} />
+                                                                 </button> */}
+
+                                                                 {/* <button
                                                                       onClick={() => {
                                                                            openModal("delete", item)
                                                                       }}
                                                                       className="bg-red-600 text-white px-2 py-1 rounded text-xs"
                                                                  >
                                                                       <FaTrashCan size={14} />
-                                                                 </button>
+                                                                 </button> */}
                                                             </div>
                                                        </td>
                                                   </tr>
@@ -304,7 +318,7 @@ const CategoryTable = () => {
                     </div>
 
 
-                    
+
 
 
 
@@ -312,7 +326,7 @@ const CategoryTable = () => {
 
 
                </>
-               
+
 
 
 
