@@ -323,6 +323,33 @@ const CustomerList = () => {
 
 
 
+  // const InfoCard = ({ label, value }) => (
+  //  <div className="bg-black from-sky-600 text-white rounded-lg p-3 shadow-md">
+
+  //     <p className="text-white text-xs uppercase mb-1">{label}</p>
+  //     <p className="font-medium text-white break-words">{value}</p>
+  //   </div>
+  // );
+
+  const InfoCard = ({ label, value }) => {
+    const isImage = typeof value === 'string' && (value.endsWith('.jpg') || value.endsWith('.jpeg') || value.endsWith('.png') || value.endsWith('.webp') || value.endsWith('.gif'));
+
+    return (
+      <div className="bg-black text-white rounded-lg p-3 shadow-md">
+        <p className="text-xs uppercase font-semibold mb-1 text-white/80">{label}</p>
+        {isImage ? (
+          <img
+            src={value}
+            alt={label}
+            className="rounded border border-white/30 shadow max-h-48 object-contain"
+          />
+        ) : (
+          <p className="font-medium text-white break-words">{value}</p>
+        )}
+      </div>
+    );
+  };
+
 
 
 
@@ -333,7 +360,7 @@ const CustomerList = () => {
     <div ref={scrollRef} className="overflow-y-auto overflow-x-auto p-4   text-slate-700">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 bg-orange-50 border border-orange-200 rounded-lg px-6 py-4 shadow-sm">
-      
+
         <button
           onClick={() => nav('/addCustomer')}
           className="bg-[#E6612A] hover:bg-orange-400 text-white px-4 py-2 rounded shadow-sm"
@@ -387,27 +414,53 @@ const CustomerList = () => {
 
 
       <DataTable
-        // title="Customer List"
         columns={columns}
         data={filteredData}
         pagination
         highlightOnHover
         striped
         dense
+        customStyles={{
+          headCells: {
+            style: {
+              backgroundColor: '#f8f9fa',
+              color: '#333',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              textTransform: 'uppercase',
+            },
+          },
+          rows: {
+            style: {
+              backgroundColor: 'white',
+              borderBottom: '1px solid #eaeaea',
+              transition: '0.2s',
+              '&:hover': {
+                backgroundColor: '#fff5f0',
+              },
+            },
+          },
+        }}
         subHeader
         subHeaderComponent={
-          <div className='flex justify-between items-center w-full'>
-          <h1>Customer List</h1>
-          <input
-            type="text"
-            placeholder="Search customer..."
-            value={searchCustomer}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="border px-3 py-1 text-sm rounded w-64 outline-none border-orange-600 "
-            />
+          <div className="flex justify-between items-center w-full">
+            <h1 className="text-xl font-bold text-gray-800">Customer List</h1>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search customer..."
+                value={searchCustomer}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="border px-3 py-2 text-sm rounded-full w-64 outline-none border-orange-600 focus:ring-2 focus:ring-orange-300 pl-10"
+              />
+              <span className="absolute left-3 top-2.5 text-gray-400">
+                🔍
+              </span>
             </div>
+          </div>
         }
       />
+
 
       {/* Infinite Scroll Loader */}
       {loading && (
@@ -416,58 +469,72 @@ const CustomerList = () => {
 
       {/* View Modal */}
       {isModalOpen && selectedCustomer && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-semibold text-indigo-800 mb-6 border-b pb-3 flex items-center gap-2">
-              <User className="w-6 h-6" />
-              Customer Details
-            </h2>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-red-600"
               title="Close"
             >
-              <IoMdCloseCircle size={30} />
+              <IoMdCloseCircle size={32} />
             </button>
-            <table className="w-full text-sm text-left border border-gray-200">
-              <tbody>
-                {[
-                  ['Name', selectedCustomer.name],
-                  ['Customer Type', selectedCustomer.customer_type],
-                  ['Email', selectedCustomer.email],
-                  ['Mobile', selectedCustomer.mobile],
-                  ['Care of', selectedCustomer.careof],
-                  ['Contact Person', selectedCustomer.contact_person],
-                  ['Address', selectedCustomer.address],
-                  ['City', selectedCustomer.city],
-                  ['State', selectedCustomer.state],
-                  ['Pincode', selectedCustomer.pincode],
-                  ['PAN Number', selectedCustomer.pan_number],
-                  ['Designation', selectedCustomer.designation],
-                  ['Account Number', selectedCustomer.account_number],
-                  ['Wallet', `₹${selectedCustomer.wallet}`],
-                  ['Bank Account', selectedCustomer.bank_account],
-                  ['IFSC Code', selectedCustomer.ifsc_code],
-                  ['Subsidy Code', selectedCustomer.subsidy_code],
-                  ['Total Cows', selectedCustomer.total_cows || 'N/A'],
-                  ['Total Buffalos', selectedCustomer.total_buffalos || 'N/A'],
-                  ['Total Animals', selectedCustomer.total_animals || 'N/A'],
-                  ['Status', selectedCustomer.status === '1' ? 'Active' : 'Inactive'],
-                  ['Created At', new Date(selectedCustomer.created_at).toLocaleString()]
-                ].map(([label, value]) => (
-                  <tr key={label} className="border-b hover:bg-gray-50">
-                    <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">
-                      {label}
-                    </td>
-                    <td className="px-4 py-2">{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+            <h2 className="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+              <User className="w-6 h-6" />
+              Customer Details
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-sm text-gray-800">
+              {/* PERSONAL INFO */}
+              <InfoCard label="Name" value={selectedCustomer.name} />
+              <InfoCard label="Customer Type" value={selectedCustomer.customer_type} />
+              <InfoCard label="Email" value={selectedCustomer.email} />
+              <InfoCard label="Mobile" value={selectedCustomer.mobile} />
+              <InfoCard label="Care of" value={selectedCustomer.careof} />
+              <InfoCard label="Contact Person" value={selectedCustomer.contact_person} />
+              <InfoCard label="Designation" value={selectedCustomer.designation} />
+
+              {/* ADDRESS INFO */}
+              <InfoCard label="Address" value={selectedCustomer.address} />
+              <InfoCard label="City" value={selectedCustomer.city} />
+              <InfoCard label="State" value={selectedCustomer.state} />
+              <InfoCard label="Pincode" value={selectedCustomer.pincode} />
+
+              {/* BANK & DOCUMENTS */}
+              <InfoCard label="PAN Number" value={selectedCustomer.pan_number} />
+              <InfoCard label="Account Number" value={selectedCustomer.account_number} />
+              <InfoCard label="Bank Account" value={selectedCustomer.bank_account} />
+              <InfoCard label="IFSC Code" value={selectedCustomer.ifsc_code} />
+              <InfoCard label="Subsidy Code" value={selectedCustomer.subsidy_code} />
+              <InfoCard label="Bank Copy" value={`https://dairy.productionhouse.store${selectedCustomer.bank_image}`} />
+
+              {/* ANIMAL INFO */}
+              <InfoCard label="Total Cows" value={selectedCustomer.total_cows || 'N/A'} />
+              <InfoCard label="Total Buffalos" value={selectedCustomer.total_buffalos || 'N/A'} />
+              <InfoCard label="Total Animals" value={selectedCustomer.total_animals || 'N/A'} />
+
+              {/* STATUS & META */}
+              <InfoCard
+                label="Status"
+                value={
+                  <span className={`inline-block px-3 py-1 text-xs rounded-full font-semibold ${selectedCustomer.status === '1'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                    }`}>
+                    {selectedCustomer.status === '1' ? 'Active' : 'Inactive'}
+                  </span>
+                }
+              />
+              <InfoCard label="Aadhar Number" value={selectedCustomer.aadhar_number} />
+              <InfoCard label="Jan Aadhar" value={selectedCustomer.jan_aadhar_number} />
+              <InfoCard label="Wallet" value={`₹${selectedCustomer.wallet}`} />
+              <InfoCard label="Created At" value={new Date(selectedCustomer.created_at).toLocaleString()} />
+            </div>
+
             <div className="mt-6 text-right">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                className="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded"
               >
                 Close
               </button>
@@ -475,6 +542,7 @@ const CustomerList = () => {
           </div>
         </div>
       )}
+
 
       {/* Confirm Delete Modal */}
       {isConfirmOpen && (
