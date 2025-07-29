@@ -99,10 +99,8 @@ const Dashboard = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-100 p-4 sm:p-6">
-
-      <StatusCardGrid data={statusData} />
       {
-        message && message !== 'No update available.' && (
+        message && message == 'No update available.' && (
           <div className=" w-full bg-slate-900 text-white text-center p-2 text-sm z-50">
             <p>{message}</p>
             {progress == null && (
@@ -130,6 +128,9 @@ const Dashboard = () => {
           {isDownloading ? 'Downloading...' : 'Download Update'}
         </button>
       )}
+
+      <StatusCardGrid data={statusData} />
+
 
 
       {/* <button

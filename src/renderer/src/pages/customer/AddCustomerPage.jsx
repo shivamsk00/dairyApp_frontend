@@ -180,7 +180,7 @@ const AddCustomerPage = () => {
             )}
 
 
-            <form onSubmit={handleSubmit} encType="multipart/form-data" className="bg-black shadow-md rounded p-6 w-full space-y-4">
+            <form onSubmit={handleSubmit} encType="multipart/form-data" className="bg-slate-800 shadow-md rounded p-6 w-full space-y-4">
                 {/* Name and Phone */}
                 <div className="w-full flex flex-col md:flex-row gap-3">
                     <div className="w-full">
@@ -192,7 +192,7 @@ const AddCustomerPage = () => {
                             id="customer_type"
                             onChange={handleChange}
                             value={form.customer_type}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                             required
                         >
                             <option value="">Choose</option>
@@ -219,7 +219,7 @@ const AddCustomerPage = () => {
                             value={form.name}
                             onChange={handleChange}
                             required
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className="w-full">
@@ -233,7 +233,7 @@ const AddCustomerPage = () => {
                             value={form.mobile}
                             onChange={handleChange}
                             required
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                 </div>
@@ -247,7 +247,7 @@ const AddCustomerPage = () => {
                             name="bank_account"
                             value={form.bank_account}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     {/* Careof */}
@@ -258,7 +258,7 @@ const AddCustomerPage = () => {
                             name="ifsc_code"
                             value={form.ifsc_code}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className="w-full">
@@ -268,7 +268,7 @@ const AddCustomerPage = () => {
                             name="subsidy_code"
                             value={form.subsidy_code}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                 </div>
@@ -283,18 +283,18 @@ const AddCustomerPage = () => {
                             name="email"
                             value={form.email}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     {/* Careof */}
-                    <div className="w-full">
-                        <label className="block text-sm font-medium text-white">Care of</label>
+                    <div className="w-full ">
+                        <label className="block text-sm font-medium  text-white">Care of</label>
                         <input
                             type="text"
                             name="careof"
                             value={form.careof}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     {/* contact person */}
@@ -306,7 +306,7 @@ const AddCustomerPage = () => {
                             name="contact_person"
                             value={form.contact_person}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                 </div>
@@ -319,7 +319,7 @@ const AddCustomerPage = () => {
                         value={form.address}
                         onChange={handleChange}
                         rows={2}
-                        className="mt-1 w-full border border-gray-300  px-1 "
+                        className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                     />
                 </div>
 
@@ -332,7 +332,7 @@ const AddCustomerPage = () => {
                             name="city"
                             value={form.city}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div>
@@ -342,7 +342,7 @@ const AddCustomerPage = () => {
                             name="pincode"
                             value={form.pincode}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
 
@@ -353,7 +353,7 @@ const AddCustomerPage = () => {
                             name="designation"
                             value={form.designation}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
 
@@ -364,7 +364,7 @@ const AddCustomerPage = () => {
                             name="state"
                             value={form.state}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                 </div>
@@ -379,7 +379,7 @@ const AddCustomerPage = () => {
                             name="aadhar_number"
                             value={form.aadhar_number}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className='w-full'>
@@ -389,7 +389,7 @@ const AddCustomerPage = () => {
                             name="jan_aadhar_number"
                             value={form.jan_aadhar_number}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className='w-full'>
@@ -400,7 +400,7 @@ const AddCustomerPage = () => {
                             name="bank_image"
                             // value={form.bank_image}
                             onChange={handleChange}
-                            className="mt-1 w-full h-7 border border-gray-300  px-1 "
+                            className="mt-1 w-full h-7 border border-gray-300 bg-gray-300 "
                         />
                     </div>
                 </div>
@@ -416,7 +416,7 @@ const AddCustomerPage = () => {
                             name="total_cows"
                             value={form.total_cows}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className='w-full'>
@@ -426,7 +426,7 @@ const AddCustomerPage = () => {
                             name="total_buffalos"
                             value={form.total_buffalos}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                     <div className='w-full'>
@@ -436,7 +436,7 @@ const AddCustomerPage = () => {
                             name="total_animals"
                             value={form.total_animals}
                             onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300  px-1 "
+                            className="mt-1 w-full border border-gray-300  px-3 py-1 rounded-md"
                         />
                     </div>
                 </div>

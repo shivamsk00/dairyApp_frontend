@@ -332,21 +332,22 @@ const CustomerList = () => {
   // );
 
   const InfoCard = ({ label, value }) => {
+    console.log("Value in InfoCard:", value);
     const isImage = typeof value === 'string' && (value.endsWith('.jpg') || value.endsWith('.jpeg') || value.endsWith('.png') || value.endsWith('.webp') || value.endsWith('.gif'));
 
     return (
       <div className="bg-slate-800 text-white rounded-lg p-3 shadow-md">
         <p className="text-xs uppercase font-semibold mb-1 text-white/80">{label}</p>
-        {/* {isImage ? (
+        {isImage ? (
           <img
             src={value}
             alt={label}
-            className="rounded border border-white/30 shadow max-h-48 object-contain"
+            className="rounded border border-white/30 shadow max-h-36 object-contain"
           />
         ) : (
           <p className="font-medium text-white break-words">{value}</p>
-        )} */}
-         <p className="font-medium text-white break-words">{value}</p>
+        )}
+
       </div>
     );
   };
@@ -485,7 +486,8 @@ const CustomerList = () => {
               Customer Details
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-sm text-gray-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 text-sm text-gray-800">
+
               {/* PERSONAL INFO */}
               <InfoCard label="Name" value={selectedCustomer.name} />
               <InfoCard label="Customer Type" value={selectedCustomer.customer_type} />
@@ -502,12 +504,12 @@ const CustomerList = () => {
               <InfoCard label="Pincode" value={selectedCustomer.pincode} />
 
               {/* BANK & DOCUMENTS */}
-              {/* <InfoCard label="PAN Number" value={selectedCustomer.pan_number} /> */}
+              <InfoCard label="PAN Number" value={selectedCustomer.pan_number} />
               <InfoCard label="Account Number" value={selectedCustomer.account_number} />
               <InfoCard label="Bank Account" value={selectedCustomer.bank_account} />
               <InfoCard label="IFSC Code" value={selectedCustomer.ifsc_code} />
               <InfoCard label="Subsidy Code" value={selectedCustomer.subsidy_code} />
-              {/* <InfoCard label="Bank Copy" value={`https://dairy.productionhouse.store${selectedCustomer.bank_image}`} /> */}
+              {/* <InfoCard label="Bank Copy" value={`${selectedCustomer.bank_image}`} /> */}
 
               {/* ANIMAL INFO */}
               <InfoCard label="Total Cows" value={selectedCustomer.total_cows || 'N/A'} />
@@ -519,8 +521,8 @@ const CustomerList = () => {
                 label="Status"
                 value={
                   <span className={`inline-block px-3 py-1 text-xs rounded-full font-semibold ${selectedCustomer.status === '1'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
                     }`}>
                     {selectedCustomer.status === '1' ? 'Active' : 'Inactive'}
                   </span>
@@ -530,6 +532,15 @@ const CustomerList = () => {
               <InfoCard label="Jan Aadhar" value={selectedCustomer.jan_aadhar_number} />
               <InfoCard label="Wallet" value={`₹${selectedCustomer.wallet}`} />
               <InfoCard label="Created At" value={new Date(selectedCustomer.created_at).toLocaleString()} />
+
+            </div>
+            <div className="h-36 flex flex-col gap-3 items-start justify-start mt-4 rounded-lg">
+              <h1 className='font-bold'>Bank Copy</h1>
+              <img
+                src={selectedCustomer.bank_image}
+                alt={'bank image copy'}
+                className="max-h-full max-w-full object-contain rounded-lg"
+              />
             </div>
 
             <div className="mt-6 text-right">
