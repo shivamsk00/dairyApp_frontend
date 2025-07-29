@@ -335,9 +335,9 @@ const CustomerList = () => {
     const isImage = typeof value === 'string' && (value.endsWith('.jpg') || value.endsWith('.jpeg') || value.endsWith('.png') || value.endsWith('.webp') || value.endsWith('.gif'));
 
     return (
-      <div className="bg-black text-white rounded-lg p-3 shadow-md">
+      <div className="bg-slate-800 text-white rounded-lg p-3 shadow-md">
         <p className="text-xs uppercase font-semibold mb-1 text-white/80">{label}</p>
-        {isImage ? (
+        {/* {isImage ? (
           <img
             src={value}
             alt={label}
@@ -345,7 +345,8 @@ const CustomerList = () => {
           />
         ) : (
           <p className="font-medium text-white break-words">{value}</p>
-        )}
+        )} */}
+         <p className="font-medium text-white break-words">{value}</p>
       </div>
     );
   };
@@ -470,7 +471,7 @@ const CustomerList = () => {
       {/* View Modal */}
       {isModalOpen && selectedCustomer && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
+          <div className="bg-slate-100 rounded-xl shadow-2xl w-full max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-red-600"
@@ -501,12 +502,12 @@ const CustomerList = () => {
               <InfoCard label="Pincode" value={selectedCustomer.pincode} />
 
               {/* BANK & DOCUMENTS */}
-              <InfoCard label="PAN Number" value={selectedCustomer.pan_number} />
+              {/* <InfoCard label="PAN Number" value={selectedCustomer.pan_number} /> */}
               <InfoCard label="Account Number" value={selectedCustomer.account_number} />
               <InfoCard label="Bank Account" value={selectedCustomer.bank_account} />
               <InfoCard label="IFSC Code" value={selectedCustomer.ifsc_code} />
               <InfoCard label="Subsidy Code" value={selectedCustomer.subsidy_code} />
-              <InfoCard label="Bank Copy" value={`https://dairy.productionhouse.store${selectedCustomer.bank_image}`} />
+              {/* <InfoCard label="Bank Copy" value={`https://dairy.productionhouse.store${selectedCustomer.bank_image}`} /> */}
 
               {/* ANIMAL INFO */}
               <InfoCard label="Total Cows" value={selectedCustomer.total_cows || 'N/A'} />
