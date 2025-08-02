@@ -659,8 +659,8 @@ const DailyMilkCollectionPage = () => {
 
 
                         >
-                            <label className="font-semibold min-w-[90px] text-sm">Milk Type:</label>
-                            <div className="flex flex-wrap gap-2">
+                            <label className="font-semibold min-w-[80px] text-sm">Milk Type:</label>
+                            <div className="flex flex-wrap gap-1">
                                 {['cow', 'buffalo', 'other'].map((type) => (
                                     <label key={type} className="relative">
                                         <input
@@ -672,7 +672,7 @@ const DailyMilkCollectionPage = () => {
                                             onKeyDown={handleKeyDown}
                                             className="peer hidden"
                                         />
-                                        <span className="capitalize px-3 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-[#E6612A] peer-checked:text-white peer-checked:border-[#E6612A] bg-blue-100 hover:bg-green-100 text-xs font-medium">
+                                        <span className="capitalize px-2 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-[#E6612A] peer-checked:text-white peer-checked:border-[#E6612A] bg-blue-100 hover:bg-green-100 text-[10px] font-medium">
                                             {type}
                                         </span>
                                     </label>
@@ -690,20 +690,20 @@ const DailyMilkCollectionPage = () => {
 
                             {/* Date Input */}
                             < div className="flex items-center gap-1 sm:w-auto" >
-                                <label className="font-semibold text-sm w-fit">Date:</label>
+                                <label className="font-semibold text-[10px] w-fit">Date:</label>
                                 <input
                                     type="date"
                                     value={form.date}
                                     name="date"
                                     onChange={handleChange}
                                     max={today}
-                                    className="px-2 py-1 rounded border border-gray-400 text-gray-700 bg-white text-sm w-full sm:w-[140px]"
+                                    className="px-1  rounded border border-gray-400 text-gray-700 bg-white text-[10px] w-full sm:w-[100px]"
                                 />
                             </div>
 
                             {/* Shift Radio */}
                             <div div className="flex items-center gap-2 w-full sm:w-auto" >
-                                <label className="font-semibold text-sm min-w-fit">Shift:</label>
+                                <label className="font-semibold text-xs min-w-fit">Shift:</label>
                                 <div className="flex gap-2 flex-wrap">
                                     {['morning', 'evening'].map((shift) => (
                                         <label key={shift} className="relative">
@@ -714,9 +714,9 @@ const DailyMilkCollectionPage = () => {
                                                 onKeyDown={handleKeyDown}
                                                 checked={shiftValue === shift}
                                                 onChange={() => setShiftValue(shift)}
-                                                className="peer hidden"
+                                                className="peer hidden "
                                             />
-                                            <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-[#E6612A] peer-checked:text-white peer-checked:border-[#E6612A] bg-blue-100 hover:bg-green-100 text-sm font-medium">
+                                            <span className="capitalize px-2 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-[#E6612A] peer-checked:text-white peer-checked:border-[#E6612A] bg-blue-100 hover:bg-green-100 text-[10px] font-medium">
                                                 {shift}
                                             </span>
                                         </label>
@@ -729,11 +729,11 @@ const DailyMilkCollectionPage = () => {
 
 
                     {/* Customer Info Section */}
-                    <div className="bg-black from-orange-100 to-orange-200  border border-orange-300 p-2 rounded-xl shadow mb-2 space-y-1">
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100  border border-orange-600 p-3 rounded-xl shadow mb-2 space-y-1">
                         {/* Row 1 */}
                         <div className="grid grid-cols-4 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-white" >Account No</label>
+                                <label className="block text-sm font-medium text-black" >Account No</label>
 
                                 <input
                                     type="text"
@@ -754,12 +754,12 @@ const DailyMilkCollectionPage = () => {
                                         }
                                     }}
                                     placeholder="Enter AC No"
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300  text-xs placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600  text-sm placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-white">Name</label>
+                                <label className="block text-sm font-medium text-black">Name</label>
                                 <input
                                     type="text"
                                     name="name"
@@ -768,11 +768,11 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={nameRef}
                                     onKeyDown={(e) => e.key === 'Enter' && fatRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-white">Mobile</label>
+                                <label className="block text-sm font-medium text-black">Mobile</label>
                                 <input
                                     type="text"
                                     name="mobile"
@@ -781,12 +781,12 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={mobileRef}
                                     onKeyDown={(e) => e.key === 'Enter' && clrRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-white">Care of</label>
+                                <label className="block text-sm font-medium text-black">Care of</label>
                                 <input
                                     type="text"
                                     name="careof"
@@ -795,7 +795,7 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={careOfRef}
                                     onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
 
@@ -804,7 +804,7 @@ const DailyMilkCollectionPage = () => {
                         {/* Row 2 */}
                         <div div className="grid grid-cols-2 gap-4" >
                             <div>
-                                <label className="block text-xs font-medium text-white">Quantity (Ltr)</label>
+                                <label className="block text-sm font-medium text-black">Quantity (Ltr)</label>
                                 <input
                                     type="number"
                                     name="quantity"
@@ -815,11 +815,11 @@ const DailyMilkCollectionPage = () => {
                                     placeholder="Enter Quantity"
                                     onKeyDown={(e) => e.key === 'Enter' && nameRef.current?.focus()}
                                     required
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-white">FAT (%)</label>
+                                <label className="block text-sm font-medium text-black">FAT (%)</label>
                                 <input
                                     type="number"
                                     name="fat"
@@ -867,7 +867,7 @@ const DailyMilkCollectionPage = () => {
                                         }
                                     }}
                                     required
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                         </div>
@@ -884,7 +884,7 @@ const DailyMilkCollectionPage = () => {
                         < div className="grid grid-cols-2 gap-4" >
 
                             <div>
-                                <label className="block text-xs font-medium text-white">CLR</label>
+                                <label className="block text-sm font-medium text-black">CLR</label>
                                 <input
                                     type="number"
                                     name="clr"
@@ -894,17 +894,17 @@ const DailyMilkCollectionPage = () => {
                                     disabled={isDisabled}
                                     ref={clrRef}
                                     onKeyDown={(e) => e.key === 'Enter' && careOfRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-white">SNF (%)</label>
+                                <label className="block text-sm font-medium text-black">SNF (%)</label>
                                 <input
                                     type="text"
                                     value={form.snf}
                                     required
                                     disabled={isDisabled}
-                                    className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                     name="snf"
                                     onChange={(e) => setForm({ ...form, snf: e.target.value })}
                                     ref={snfRef}
@@ -947,10 +947,10 @@ const DailyMilkCollectionPage = () => {
                     {/* Rate & Total Section */}
 
 
-                    <div className="bg-black from-orange-100 to-orange-200 p-2 rounded-xl border border-orange-300 shadow-sm mb-2 grid grid-cols-2 gap-2">
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border border-orange-300 shadow-sm mb-2 grid grid-cols-2 gap-2">
                         {/* Base Rate */}
                         <div className="flex flex-col">
-                            <label className="block text-xs font-medium mb-1 text-white">Base Rate (₹/Ltr)</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Base Rate (₹/Ltr)</label>
                             <input
                                 type="number"
                                 name="base_rate"
@@ -959,13 +959,13 @@ const DailyMilkCollectionPage = () => {
                                 readOnly
                                 ref={otherRateRef}
                                 onKeyDown={(e) => e.key === 'Enter' && submitRef.current?.focus()}
-                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Other Price */}
                         <div className="flex flex-col">
-                            <label className="block text-xs font-medium mb-1 text-white">Other Price (₹/Ltr)</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Other Price (₹/Ltr)</label>
                             <input
                                 type="number"
                                 name="other_price"
@@ -973,33 +973,33 @@ const DailyMilkCollectionPage = () => {
                                 onChange={handleChange}
                                 disabled={isDisabled}
                                 onKeyDown={handleKeyDown}
-                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Rate */}
                         <div className="flex flex-col">
-                            <label className="block text-xs font-medium mb-1 text-white">Rate (Auto)</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Rate (Auto)</label>
                             <input
                                 type="number"
                                 name="rate"
                                 value={form.rate}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
 
                         {/* Total Amount */}
                         <div className="flex flex-col">
-                            <label className="block text-xs font-medium mb-1 text-white">Total Amount (Auto)</label>
+                            <label className="block text-sm font-medium mb-1 text-black">Total Amount (Auto)</label>
                             <input
                                 type="number"
                                 name="total_amount"
                                 value={form.total_amount}
                                 onKeyDown={handleKeyDown}
                                 readOnly
-                                className={`w-full h-5 px-4 py-2 rounded-sm border border-gray-300 bg-white text-xs placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                             />
                         </div>
                     </div>
