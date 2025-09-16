@@ -205,34 +205,34 @@ const MilkCorrectionPage = () => {
     return (
         <div className="h-full p-5  flex flex-col gap-5">
             {/* Form Section */}
-            <div className="w-full md:w-1/2 md:pr-6">
+            <div className="w-full md:w-1/2 md:pr-6 ">
                 <div className="bg-gradient-to-br from-orange-200 via-orange-100 to-yellow-50 rounded-xl shadow-lg p-6 w-full">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">Milk Correction</h2>
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-3">Milk Correction</h2>
+                    <form onSubmit={handleSubmit} className="space-y-2">
                         {/* From and To Date in one row */}
-                        <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex flex-col md:flex-row gap-2">
                             {/* Start Date */}
                             <div className="w-full">
-                                <label className="block text-sm font-medium text-gray-600 mb-1">From Date</label>
+                                <label className="block text-[13px] font-medium text-gray-600 mb-1">From Date</label>
                                 <input
                                     type="date"
                                     name="start_date"
                                     value={form.start_date}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    className="w-full border border-gray-300 rounded px-3 py-1 text-[13px]"
                                     required
                                 />
                             </div>
 
                             {/* End Date */}
                             <div className="w-full">
-                                <label className="block text-sm font-medium text-gray-600 mb-1">To Date</label>
+                                <label className="block text-[13px] font-medium text-gray-600 mb-1">To Date</label>
                                 <input
                                     type="date"
                                     name="end_date"
                                     value={form.end_date}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                    className="w-full border border-gray-300 rounded px-3 py-1 text-[13px]"
                                     required
                                 />
                             </div>
@@ -240,8 +240,8 @@ const MilkCorrectionPage = () => {
 
                         {/* Radio Buttons */}
                         <div>
-                            <span className="block text-sm font-medium text-gray-600 mb-2">Select Option</span>
-                            <div className="flex gap-6">
+                            <span className="block text-[13px] font-medium text-gray-600 mb-2">Select Option</span>
+                            <div className="flex gap-2">
                                 <label className="inline-flex items-center">
                                     <input
                                         type="radio"
@@ -249,9 +249,9 @@ const MilkCorrectionPage = () => {
                                         value="all"
                                         checked={selection === 'all'}
                                         onChange={() => handleSelectionChange('all')}
-                                        className="text-blue-600"
+                                        className="text-blue-600 text-[13px]"
                                     />
-                                    <span className="ml-2">All</span>
+                                    <span className="ml-2 text-[13px]">All</span>
                                 </label>
                                 <label className="inline-flex items-center">
                                     <input
@@ -260,9 +260,9 @@ const MilkCorrectionPage = () => {
                                         value="customer"
                                         checked={selection === 'customer'}
                                         onChange={() => handleSelectionChange('customer')}
-                                        className="text-blue-600"
+                                        className="text-blue-600 text-[13px]"
                                     />
-                                    <span className="ml-2">By Customer</span>
+                                    <span className="ml-2 text-[13px]">By Customer</span>
                                 </label>
                             </div>
                         </div>
@@ -366,6 +366,13 @@ const MilkCorrectionPage = () => {
                         <div className="text-base sm:text-lg font-medium text-gray-700">
                             Total Milk: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
                         </div>
+                        <div className="text-base sm:text-lg font-medium text-gray-700">
+                            Avg Fat: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
+                        </div>
+                        <div className="text-base sm:text-lg font-medium text-gray-700">
+                            Avg SNF: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
+                        </div>
+
                         <div className="text-base sm:text-lg font-medium text-gray-700">
                             Total Amount: <span className="font-semibold text-green-700">₹ {totalAmount.toFixed(2)}</span>
                         </div>

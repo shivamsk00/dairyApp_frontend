@@ -802,7 +802,7 @@ const DailyMilkCollectionPage = () => {
                         </div>
 
                         {/* Row 2 */}
-                        <div div className="grid grid-cols-2 gap-4" >
+                        <div div className="grid grid-cols-4 gap-4" >
                             <div>
                                 <label className="block text-sm font-medium text-black">Quantity (Ltr)</label>
                                 <input
@@ -870,18 +870,6 @@ const DailyMilkCollectionPage = () => {
                                     className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
                                 />
                             </div>
-                        </div>
-
-
-
-
-
-
-
-
-
-                        {/* Row 3 */}
-                        < div className="grid grid-cols-2 gap-4" >
 
                             <div>
                                 <label className="block text-sm font-medium text-black">CLR</label>
@@ -940,14 +928,23 @@ const DailyMilkCollectionPage = () => {
                                 />
 
                             </div>
+                        </div>
 
-                        </ div>
+
+
+
+
+
+
+
+
+
                     </div>
 
                     {/* Rate & Total Section */}
 
 
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border border-orange-300 shadow-sm mb-2 grid grid-cols-2 gap-2">
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border border-orange-300 shadow-sm mb-2 grid grid-cols-4 gap-2">
                         {/* Base Rate */}
                         <div className="flex flex-col">
                             <label className="block text-sm font-medium mb-1 text-black">Base Rate (₹/Ltr)</label>
