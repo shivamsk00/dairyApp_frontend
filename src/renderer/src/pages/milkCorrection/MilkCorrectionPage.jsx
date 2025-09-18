@@ -8,6 +8,7 @@ import { FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
 import { IoMdCloseCircle } from 'react-icons/io';
 import EditMilkCollectionModal from '../milkCollection/EditMilkCollectionPage';
 import CustomToast from '../../helper/costomeToast';
+import { BsFillPrinterFill } from 'react-icons/bs';
 
 const MilkCorrectionPage = () => {
     const getMilkCorrectionData = useHomeStore(state => state.getMilkCorrectionData);
@@ -94,6 +95,34 @@ const MilkCorrectionPage = () => {
         item.customer_account_number?.toLowerCase().includes(searchCustomer.toLowerCase())
     );
 
+    // PRINT HANLDER
+    const handlePrint = (data) => {
+        const shift = data.shift === 'morning' ? 'M' : 'E';
+        const now = new Date();
+        const localTime = now.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        const slipData = {
+            account_no: data.customer_account_number,
+            customer: data.name,
+            date: data.date,
+            time: `${localTime}(${shift})`, // ✅ Local time here
+            // shift: data.shift,
+            // milk_type: data.milk_type,
+            qty: `${data.quantity} / Ltr`,
+            fat: data.fat,
+            snf: data.snf,
+            // oth_rate: data.oth_rate || "0.00",
+            // base_rate: data.base_rate,
+            rate: `${data.base_rate} / Ltr`,
+            total: data.total_amount
+        };
+
+        window.api.printSlip(slipData);
+    };
 
 
     const columns = [
@@ -146,6 +175,9 @@ const MilkCorrectionPage = () => {
             name: 'Actions',
             cell: row => (
                 <div className="flex gap-2 items-center justify-center">
+                    <button className="bg-blue-700 text-white px-2 py-1 rounded text-xs" onClick={() => handlePrint(row)}>
+                        <BsFillPrinterFill size={12} color="#fff" />
+                    </button>
                     <button
                         className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
                         onClick={() => {
