@@ -32,6 +32,8 @@ const MilkCorrectionPage = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [totalMilk, setTotalMilk] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [averageFat, setAverageFat] = useState(0);
+    const [averageSnf, setAvrageSnf] = useState(0);
 
 
     const handleChange = (e) => {
@@ -68,6 +70,8 @@ const MilkCorrectionPage = () => {
                 setMilkData(res.data.milk_collections);
                 setTotalMilk(res.data.totalMilk || 0);
                 setTotalAmount(res.data.totalAmount || 0);
+                setAverageFat(res.data.averageFat || 0);
+                setAvrageSnf(res.data.averageSnf || 0);
                 setLoading(false)
             }
 
@@ -361,16 +365,16 @@ const MilkCorrectionPage = () => {
             }
 
             {
-                totalMilk > 0 && totalAmount > 0 && (
+                totalMilk > 0 && totalAmount > 0 && averageFat > 0 && averageSnf > 0 && (
                     <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 bg-white rounded shadow border">
                         <div className="text-base sm:text-lg font-medium text-gray-700">
                             Total Milk: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
                         </div>
                         <div className="text-base sm:text-lg font-medium text-gray-700">
-                            Avg Fat: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
+                            Avg Fat: <span className="font-semibold text-blue-700">{averageFat} </span>
                         </div>
                         <div className="text-base sm:text-lg font-medium text-gray-700">
-                            Avg SNF: <span className="font-semibold text-blue-700">{totalMilk.toFixed(2)} Ltr</span>
+                            Avg SNF: <span className="font-semibold text-blue-700">{averageSnf} </span>
                         </div>
 
                         <div className="text-base sm:text-lg font-medium text-gray-700">

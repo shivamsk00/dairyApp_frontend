@@ -753,7 +753,7 @@ const DailyMilkCollectionPage = () => {
                                             }
                                         }
                                     }}
-                                    placeholder="Enter AC No"
+                                    placeholder="AC No"
                                     className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600  text-sm placeholder-gray-500 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition `}
                                 />
                             </div>
@@ -772,6 +772,19 @@ const DailyMilkCollectionPage = () => {
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-black">Care of</label>
+                                <input
+                                    type="text"
+                                    name="careof"
+                                    value={form.careof}
+                                    onChange={handleChange}
+                                    disabled={isDisabled}
+                                    ref={careOfRef}
+                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
+                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-black">Mobile</label>
                                 <input
                                     type="text"
@@ -785,19 +798,7 @@ const DailyMilkCollectionPage = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-black">Care of</label>
-                                <input
-                                    type="text"
-                                    name="careof"
-                                    value={form.careof}
-                                    onChange={handleChange}
-                                    disabled={isDisabled}
-                                    ref={careOfRef}
-                                    onKeyDown={(e) => e.key === 'Enter' && snfRef.current?.focus()}
-                                    className={`w-full h-5 px-4 py-4 rounded-sm border border-gray-600 bg-white text-sm placeholder-gray-500 text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${isDisabled ? 'bg-gray-300 opacity-60' : ''}`}
-                                />
-                            </div>
+                            
 
                         </div>
 
