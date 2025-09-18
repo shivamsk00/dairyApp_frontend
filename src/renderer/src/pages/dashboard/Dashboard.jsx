@@ -41,6 +41,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetchDashboardData();
+      console.log("response", res)
       const data = res?.data || {};
 
       const purchased = Number(data.total_milk?.total_milk_purchased) || 0;
