@@ -236,7 +236,7 @@ const ReportsPage = () => {
           </div>
         </form>
 
-        {summaryData && (
+        {/* {summaryData && (
           <div className="mt-4 max-w-lg mx-auto h-48 bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
             <p className="text-xl">
               Total Milk Collected: <span className="text-green-700 font-bold">{summaryData?.total_milk_collections.toFixed(2)} L</span>
@@ -255,7 +255,7 @@ const ReportsPage = () => {
             </p>
 
           </div>
-        )}
+        )} */}
       </div>
 
 
