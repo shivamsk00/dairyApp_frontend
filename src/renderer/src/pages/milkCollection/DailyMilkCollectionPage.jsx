@@ -22,7 +22,7 @@ const DairyMilkCollectionPage = () => {
     const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
     const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
     const getMilkRate = useHomeStore(state => state.getMilkRate);
-    
+
     // State variables
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -373,11 +373,11 @@ const DairyMilkCollectionPage = () => {
             const fat = form.fat?.trim();
             const clr = form.clr?.trim();
             const snfRaw = form.snf?.trim();
-            
+
             if (!(fat && (clr || snfRaw))) return;
-            
+
             const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
-            
+
             try {
                 const res = await getMilkRate(fat, clr, snfForApi);
                 setForm((prev) => ({
@@ -653,12 +653,12 @@ const DairyMilkCollectionPage = () => {
 
                         {/* Submit Section */}
                         <div className="flex items-center justify-between pt-4">
-                            <ToggleButton 
-                                label="Auto Print" 
-                                enabled={toggle} 
-                                onToggle={(val) => setToggle(val)} 
+                            <ToggleButton
+                                label="Auto Print"
+                                enabled={toggle}
+                                onToggle={(val) => setToggle(val)}
                             />
-                            
+
                             <div className="flex gap-2">
                                 <button
                                     type="button"
@@ -667,7 +667,7 @@ const DairyMilkCollectionPage = () => {
                                 >
                                     Reset
                                 </button>
-                                
+
                                 <button
                                     type="submit"
                                     ref={submitRef}
@@ -744,187 +744,212 @@ const DairyMilkCollectionPage = () => {
                     </div>
 
                     {/* Table */}
-                    <div className="flex-1 overflow-auto pb-20">
-                        <table className="w-full text-sm ">
-                            <thead className="bg-gray-50 border-b sticky top-0">
-                                <tr>
-                                    {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total', 'Balance', 'Actions'].map(header => (
-                                        <th key={header} className="px-2 py-2 text-left text-xs font-medium text-gray-600">
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {morningCollection.length === 0 && eveningCollection.length === 0 ? (
+                    <div className="flex flex-col h-full">
+                        {/* Fixed Header */}
+                        <div className="bg-gray-50 border-b">
+                            <table className="w-full text-sm">
+                                <thead>
                                     <tr>
-                                        <td colSpan="13" className="text-center text-gray-500 py-8">
-                                            No data available
+                                        {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total', 'Balance', 'Actions'].map(header => (
+                                            <th key={header} className="px-2 py-2 text-left text-xs font-medium text-gray-600 w-auto">
+                                                {header}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                        {/* Scrollable Body */}
+                        <div className="h-[65%] overflow-y-auto">
+                            <table className="w-full text-sm">
+                                <tbody>
+                                    {morningCollection.length === 0 && eveningCollection.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="13" className="text-center text-gray-500 py-8">
+                                                No data available
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        <>
+                                            {isShift === 'morning' && morningCollection.length > 0 && (
+                                                <>
+                                                    <tr className="bg-orange-100">
+                                                        <td colSpan="13" className="px-2 py-2 text-center font-semibold text-orange-800 text-xs">
+                                                            Morning Collection ({morningCollection.length})
+                                                        </td>
+                                                    </tr>
+                                                    {morningCollection.map((item, i) => (
+                                                        <tr key={`morning-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                                                            <td className="px-2 py-1 text-xs w-12">{i + 1}</td>
+                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 w-20">{item.customer_account_number}</td>
+                                                            <td className="px-2 py-1 text-xs w-32">{item.name}</td>
+                                                            <td className="px-2 py-1 text-xs w-24">{item.date}</td>
+                                                            <td className="px-2 py-1 w-20">
+                                                                <span className="px-1 py-0.5 text-xs bg-orange-100 text-orange-800 rounded">
+                                                                    {item.shift}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-2 py-1 text-xs font-medium w-16">{item.quantity}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">{item.fat}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">{item.snf}</td>
+                                                            <td className="px-2 py-1 text-xs text-green-600 w-20">₹{item.base_rate}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">₹{item.other_price}</td>
+                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 w-20">₹{item.total_amount}</td>
+                                                            <td className="px-2 py-1 text-xs text-blue-600 w-20">₹{item?.customer?.wallet || 0}</td>
+                                                            <td className="px-2 py-1 w-32">
+                                                                <div className="flex gap-1">
+                                                                    <button
+                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs"
+                                                                        onClick={() => handlePrint(item)}
+                                                                        title="Print"
+                                                                    >
+                                                                        <BsFillPrinterFill size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs"
+                                                                        onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
+                                                                        title="View"
+                                                                    >
+                                                                        <FaEye size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs"
+                                                                        onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
+                                                                        title="Edit"
+                                                                    >
+                                                                        <FaPen size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs"
+                                                                        onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
+                                                                        title="Delete"
+                                                                    >
+                                                                        <FaTrashCan size={10} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </>
+                                            )}
+
+                                            {isShift === 'evening' && eveningCollection.length > 0 && (
+                                                <>
+                                                    <tr className="bg-purple-100">
+                                                        <td colSpan="13" className="px-2 py-2 text-center font-semibold text-purple-800 text-xs">
+                                                            Evening Collection ({eveningCollection.length})
+                                                        </td>
+                                                    </tr>
+                                                    {eveningCollection.map((item, i) => (
+                                                        <tr key={`evening-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                                                            <td className="px-2 py-1 text-xs w-12">{i + 1}</td>
+                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 w-20">{item.customer_account_number}</td>
+                                                            <td className="px-2 py-1 text-xs w-32">{item.name}</td>
+                                                            <td className="px-2 py-1 text-xs w-24">{item.date}</td>
+                                                            <td className="px-2 py-1 w-20">
+                                                                <span className="px-1 py-0.5 text-xs bg-purple-100 text-purple-800 rounded">
+                                                                    {item.shift}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-2 py-1 text-xs font-medium w-16">{item.quantity}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">{item.fat}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">{item.snf}</td>
+                                                            <td className="px-2 py-1 text-xs text-green-600 w-20">₹{item.base_rate}</td>
+                                                            <td className="px-2 py-1 text-xs w-16">₹{item.other_price}</td>
+                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 w-20">₹{item.total_amount}</td>
+                                                            <td className="px-2 py-1 text-xs text-blue-600 w-20">₹{item?.customer?.wallet || 0}</td>
+                                                            <td className="px-2 py-1 w-32">
+                                                                <div className="flex gap-1">
+                                                                    <button
+                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs"
+                                                                        onClick={() => handlePrint(item)}
+                                                                        title="Print"
+                                                                    >
+                                                                        <BsFillPrinterFill size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs"
+                                                                        onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
+                                                                        title="View"
+                                                                    >
+                                                                        <FaEye size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs"
+                                                                        onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
+                                                                        title="Edit"
+                                                                    >
+                                                                        <FaPen size={10} />
+                                                                    </button>
+                                                                    <button
+                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs"
+                                                                        onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
+                                                                        title="Delete"
+                                                                    >
+                                                                        <FaTrashCan size={10} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Fixed Footer Statistics */}
+                        <div className="bg-gray-50 border-t pt-5">
+                            <table className="w-full text-sm">
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan="13" className="p-0">
+                                            <div className="grid grid-cols-6 gap-4 text-xs p-3">
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Avg. FAT</p>
+                                                    <p className="font-bold text-blue-600">
+                                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Avg. SNF</p>
+                                                    <p className="font-bold text-blue-600">
+                                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Avg. Rate</p>
+                                                    <p className="font-bold text-green-600">
+                                                        ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Other</p>
+                                                    <p className="font-bold text-orange-600">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Milk</p>
+                                                    <p className="font-bold text-purple-600">
+                                                        {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-semibold text-gray-700">Total</p>
+                                                    <p className="font-bold text-green-700">
+                                                        ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
-                                ) : (
-                                    <>
-                                        {isShift === 'morning' && morningCollection.length > 0 && (
-                                            <>
-                                                <tr className="bg-orange-100">
-                                                    <td colSpan="13" className="px-2 py-2 text-center font-semibold text-orange-800 text-xs">
-                                                        Morning Collection ({morningCollection.length})
-                                                    </td>
-                                                </tr>
-                                                {morningCollection.map((item, i) => (
-                                                    <tr key={`morning-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                        <td className="px-2 py-1 text-xs">{i + 1}</td>
-                                                        <td className="px-2 py-1 text-xs font-medium text-blue-600">{item.customer_account_number}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.name}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.date}</td>
-                                                        <td className="px-2 py-1">
-                                                            <span className="px-1 py-0.5 text-xs bg-orange-100 text-orange-800 rounded">
-                                                                {item.shift}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-2 py-1 text-xs font-medium">{item.quantity}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.fat}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.snf}</td>
-                                                        <td className="px-2 py-1 text-xs text-green-600">₹{item.base_rate}</td>
-                                                        <td className="px-2 py-1 text-xs">₹{item.other_price}</td>
-                                                        <td className="px-2 py-1 text-xs font-bold text-green-700">₹{item.total_amount}</td>
-                                                        <td className="px-2 py-1 text-xs text-blue-600">₹{item?.customer?.wallet || 0}</td>
-                                                        <td className="px-2 py-1">
-                                                            <div className="flex gap-1">
-                                                                <button 
-                                                                    className="p-1 bg-blue-100 text-blue-600 rounded text-xs" 
-                                                                    onClick={() => handlePrint(item)}
-                                                                >
-                                                                    <BsFillPrinterFill size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-green-100 text-green-600 rounded text-xs" 
-                                                                    onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
-                                                                >
-                                                                    <FaEye size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs" 
-                                                                    onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
-                                                                >
-                                                                    <FaPen size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-red-100 text-red-600 rounded text-xs" 
-                                                                    onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
-                                                                >
-                                                                    <FaTrashCan size={10} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </>
-                                        )}
-
-                                        {isShift === 'evening' && eveningCollection.length > 0 && (
-                                            <>
-                                                <tr className="bg-purple-100">
-                                                    <td colSpan="13" className="px-2 py-2 text-center font-semibold text-purple-800 text-xs">
-                                                        Evening Collection ({eveningCollection.length})
-                                                    </td>
-                                                </tr>
-                                                {eveningCollection.map((item, i) => (
-                                                    <tr key={`evening-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                        <td className="px-2 py-1 text-xs">{i + 1}</td>
-                                                        <td className="px-2 py-1 text-xs font-medium text-blue-600">{item.customer_account_number}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.name}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.date}</td>
-                                                        <td className="px-2 py-1">
-                                                            <span className="px-1 py-0.5 text-xs bg-purple-100 text-purple-800 rounded">
-                                                                {item.shift}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-2 py-1 text-xs font-medium">{item.quantity}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.fat}</td>
-                                                        <td className="px-2 py-1 text-xs">{item.snf}</td>
-                                                        <td className="px-2 py-1 text-xs text-green-600">₹{item.base_rate}</td>
-                                                        <td className="px-2 py-1 text-xs">₹{item.other_price}</td>
-                                                        <td className="px-2 py-1 text-xs font-bold text-green-700">₹{item.total_amount}</td>
-                                                        <td className="px-2 py-1 text-xs text-blue-600">₹{item?.customer?.wallet || 0}</td>
-                                                        <td className="px-2 py-1">
-                                                            <div className="flex gap-1">
-                                                                <button 
-                                                                    className="p-1 bg-blue-100 text-blue-600 rounded text-xs" 
-                                                                    onClick={() => handlePrint(item)}
-                                                                >
-                                                                    <BsFillPrinterFill size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-green-100 text-green-600 rounded text-xs" 
-                                                                    onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
-                                                                >
-                                                                    <FaEye size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs" 
-                                                                    onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
-                                                                >
-                                                                    <FaPen size={10} />
-                                                                </button>
-                                                                <button 
-                                                                    className="p-1 bg-red-100 text-red-600 rounded text-xs" 
-                                                                    onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
-                                                                >
-                                                                    <FaTrashCan size={10} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </tbody>
-                        </table>
-
-                        {/* Footer Statistics */}
-                        <div className="bg-gray-50 border-t p-3">
-                            <div className="grid grid-cols-6 gap-4 text-xs">
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Avg. FAT</p>
-                                    <p className="font-bold text-blue-600">
-                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
-                                    </p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Avg. SNF</p>
-                                    <p className="font-bold text-blue-600">
-                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
-                                    </p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Avg. Rate</p>
-                                    <p className="font-bold text-green-600">
-                                        ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
-                                    </p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Other</p>
-                                    <p className="font-bold text-orange-600">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Milk</p>
-                                    <p className="font-bold text-purple-600">
-                                        {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
-                                    </p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-semibold text-gray-700">Total</p>
-                                    <p className="font-bold text-green-700">
-                                        ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
-                                    </p>
-                                </div>
-                            </div>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
+
                 </div>
             </div>
 
