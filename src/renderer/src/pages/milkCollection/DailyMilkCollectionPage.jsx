@@ -744,14 +744,29 @@ const DairyMilkCollectionPage = () => {
                     </div>
 
                     {/* Table */}
-                    <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-full relative">
                         {/* Fixed Header */}
                         <div className="bg-gray-50 border-b">
-                            <table className="w-full text-sm">
+                            <table className="w-full text-sm table-fixed">
+                                <colgroup>
+                                    <col style={{ width: '40px' }} />     {/* SR */}
+                                    <col style={{ width: '80px' }} />     {/* AC No */}
+                                    <col style={{ width: '120px' }} />    {/* Name */}
+                                    <col style={{ width: '80px' }} />     {/* Date */}
+                                    <col style={{ width: '60px' }} />     {/* Shift */}
+                                    <col style={{ width: '60px' }} />     {/* Qty */}
+                                    <col style={{ width: '50px' }} />     {/* FAT */}
+                                    <col style={{ width: '50px' }} />     {/* SNF */}
+                                    <col style={{ width: '70px' }} />     {/* Rate */}
+                                    <col style={{ width: '60px' }} />     {/* Other */}
+                                    <col style={{ width: '70px' }} />     {/* Total */}
+                                    <col style={{ width: '70px' }} />     {/* Balance */}
+                                    <col style={{ width: '130px' }} />    {/* Actions */}
+                                </colgroup>
                                 <thead>
                                     <tr>
                                         {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total', 'Balance', 'Actions'].map(header => (
-                                            <th key={header} className="px-2 py-2 text-left text-xs font-medium text-gray-600 w-auto">
+                                            <th key={header} className="px-2 py-2 text-left text-xs font-medium text-gray-600 truncate">
                                                 {header}
                                             </th>
                                         ))}
@@ -760,9 +775,24 @@ const DairyMilkCollectionPage = () => {
                             </table>
                         </div>
 
-                        {/* Scrollable Body */}
-                        <div className="h-[65%] overflow-y-auto">
-                            <table className="w-full text-sm">
+                        {/* Scrollable Body with bottom padding for footer space */}
+                        <div className="flex-1 overflow-y-auto pb-80">
+                            <table className="w-full text-sm table-fixed">
+                                <colgroup>
+                                    <col style={{ width: '40px' }} />     {/* SR */}
+                                    <col style={{ width: '80px' }} />     {/* AC No */}
+                                    <col style={{ width: '120px' }} />    {/* Name */}
+                                    <col style={{ width: '80px' }} />     {/* Date */}
+                                    <col style={{ width: '60px' }} />     {/* Shift */}
+                                    <col style={{ width: '60px' }} />     {/* Qty */}
+                                    <col style={{ width: '50px' }} />     {/* FAT */}
+                                    <col style={{ width: '50px' }} />     {/* SNF */}
+                                    <col style={{ width: '70px' }} />     {/* Rate */}
+                                    <col style={{ width: '60px' }} />     {/* Other */}
+                                    <col style={{ width: '70px' }} />     {/* Total */}
+                                    <col style={{ width: '70px' }} />     {/* Balance */}
+                                    <col style={{ width: '130px' }} />    {/* Actions */}
+                                </colgroup>
                                 <tbody>
                                     {morningCollection.length === 0 && eveningCollection.length === 0 ? (
                                         <tr>
@@ -781,47 +811,47 @@ const DairyMilkCollectionPage = () => {
                                                     </tr>
                                                     {morningCollection.map((item, i) => (
                                                         <tr key={`morning-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                            <td className="px-2 py-1 text-xs w-12">{i + 1}</td>
-                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 w-20">{item.customer_account_number}</td>
-                                                            <td className="px-2 py-1 text-xs w-32">{item.name}</td>
-                                                            <td className="px-2 py-1 text-xs w-24">{item.date}</td>
-                                                            <td className="px-2 py-1 w-20">
-                                                                <span className="px-1 py-0.5 text-xs bg-orange-100 text-orange-800 rounded">
+                                                            <td className="px-2 py-1 text-xs truncate">{i + 1}</td>
+                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 truncate">{item.customer_account_number}</td>
+                                                            <td className="px-2 py-1 text-xs truncate" title={item.name}>{item.name}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.date}</td>
+                                                            <td className="px-2 py-1 truncate">
+                                                                <span className="px-1 py-0.5 text-xs bg-orange-100 text-orange-800 rounded block text-center">
                                                                     {item.shift}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-2 py-1 text-xs font-medium w-16">{item.quantity}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">{item.fat}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">{item.snf}</td>
-                                                            <td className="px-2 py-1 text-xs text-green-600 w-20">₹{item.base_rate}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">₹{item.other_price}</td>
-                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 w-20">₹{item.total_amount}</td>
-                                                            <td className="px-2 py-1 text-xs text-blue-600 w-20">₹{item?.customer?.wallet || 0}</td>
-                                                            <td className="px-2 py-1 w-32">
-                                                                <div className="flex gap-1">
+                                                            <td className="px-2 py-1 text-xs font-medium truncate">{item.quantity}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.fat}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.snf}</td>
+                                                            <td className="px-2 py-1 text-xs text-green-600 truncate">₹{item.base_rate}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">₹{item.other_price}</td>
+                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 truncate">₹{item.total_amount}</td>
+                                                            <td className="px-2 py-1 text-xs text-blue-600 truncate">₹{item?.customer?.wallet || 0}</td>
+                                                            <td className="px-2 py-1">
+                                                                <div className="flex gap-0.5 justify-center">
                                                                     <button
-                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs"
+                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 transition-colors"
                                                                         onClick={() => handlePrint(item)}
                                                                         title="Print"
                                                                     >
                                                                         <BsFillPrinterFill size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs"
+                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs hover:bg-green-200 transition-colors"
                                                                         onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
                                                                         title="View"
                                                                     >
                                                                         <FaEye size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs"
+                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs hover:bg-yellow-200 transition-colors"
                                                                         onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
                                                                         title="Edit"
                                                                     >
                                                                         <FaPen size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs"
+                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs hover:bg-red-200 transition-colors"
                                                                         onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
                                                                         title="Delete"
                                                                     >
@@ -843,47 +873,47 @@ const DairyMilkCollectionPage = () => {
                                                     </tr>
                                                     {eveningCollection.map((item, i) => (
                                                         <tr key={`evening-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                            <td className="px-2 py-1 text-xs w-12">{i + 1}</td>
-                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 w-20">{item.customer_account_number}</td>
-                                                            <td className="px-2 py-1 text-xs w-32">{item.name}</td>
-                                                            <td className="px-2 py-1 text-xs w-24">{item.date}</td>
-                                                            <td className="px-2 py-1 w-20">
-                                                                <span className="px-1 py-0.5 text-xs bg-purple-100 text-purple-800 rounded">
+                                                            <td className="px-2 py-1 text-xs truncate">{i + 1}</td>
+                                                            <td className="px-2 py-1 text-xs font-medium text-blue-600 truncate">{item.customer_account_number}</td>
+                                                            <td className="px-2 py-1 text-xs truncate" title={item.name}>{item.name}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.date}</td>
+                                                            <td className="px-2 py-1 truncate">
+                                                                <span className="px-1 py-0.5 text-xs bg-purple-100 text-purple-800 rounded block text-center">
                                                                     {item.shift}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-2 py-1 text-xs font-medium w-16">{item.quantity}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">{item.fat}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">{item.snf}</td>
-                                                            <td className="px-2 py-1 text-xs text-green-600 w-20">₹{item.base_rate}</td>
-                                                            <td className="px-2 py-1 text-xs w-16">₹{item.other_price}</td>
-                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 w-20">₹{item.total_amount}</td>
-                                                            <td className="px-2 py-1 text-xs text-blue-600 w-20">₹{item?.customer?.wallet || 0}</td>
-                                                            <td className="px-2 py-1 w-32">
-                                                                <div className="flex gap-1">
+                                                            <td className="px-2 py-1 text-xs font-medium truncate">{item.quantity}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.fat}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">{item.snf}</td>
+                                                            <td className="px-2 py-1 text-xs text-green-600 truncate">₹{item.base_rate}</td>
+                                                            <td className="px-2 py-1 text-xs truncate">₹{item.other_price}</td>
+                                                            <td className="px-2 py-1 text-xs font-bold text-green-700 truncate">₹{item.total_amount}</td>
+                                                            <td className="px-2 py-1 text-xs text-blue-600 truncate">₹{item?.customer?.wallet || 0}</td>
+                                                            <td className="px-2 py-1">
+                                                                <div className="flex gap-0.5 justify-center">
                                                                     <button
-                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs"
+                                                                        className="p-1 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 transition-colors"
                                                                         onClick={() => handlePrint(item)}
                                                                         title="Print"
                                                                     >
                                                                         <BsFillPrinterFill size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs"
+                                                                        className="p-1 bg-green-100 text-green-600 rounded text-xs hover:bg-green-200 transition-colors"
                                                                         onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
                                                                         title="View"
                                                                     >
                                                                         <FaEye size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs"
+                                                                        className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs hover:bg-yellow-200 transition-colors"
                                                                         onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
                                                                         title="Edit"
                                                                     >
                                                                         <FaPen size={10} />
                                                                     </button>
                                                                     <button
-                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs"
+                                                                        className="p-1 bg-red-100 text-red-600 rounded text-xs hover:bg-red-200 transition-colors"
                                                                         onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
                                                                         title="Delete"
                                                                     >
@@ -901,54 +931,49 @@ const DairyMilkCollectionPage = () => {
                             </table>
                         </div>
 
-                        {/* Fixed Footer Statistics */}
-                        <div className="bg-gray-50 border-t pt-5">
-                            <table className="w-full text-sm">
-                                <tfoot>
-                                    <tr>
-                                        <td colSpan="13" className="p-0">
-                                            <div className="grid grid-cols-6 gap-4 text-xs p-3">
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Avg. FAT</p>
-                                                    <p className="font-bold text-blue-600">
-                                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
-                                                    </p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Avg. SNF</p>
-                                                    <p className="font-bold text-blue-600">
-                                                        {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
-                                                    </p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Avg. Rate</p>
-                                                    <p className="font-bold text-green-600">
-                                                        ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
-                                                    </p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Other</p>
-                                                    <p className="font-bold text-orange-600">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Milk</p>
-                                                    <p className="font-bold text-purple-600">
-                                                        {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
-                                                    </p>
-                                                </div>
-                                                <div className="text-center">
-                                                    <p className="font-semibold text-gray-700">Total</p>
-                                                    <p className="font-bold text-green-700">
-                                                        ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                        {/* Completely Fixed Footer at Bottom - Will NOT scroll */}
+                        <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t z-10">
+                            <div className="p-3">
+                                <div className="grid grid-cols-6 gap-4 text-xs">
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Avg. FAT</p>
+                                        <p className="font-bold text-blue-600">
+                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Avg. SNF</p>
+                                        <p className="font-bold text-blue-600">
+                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Avg. Rate</p>
+                                        <p className="font-bold text-green-600">
+                                            ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Other</p>
+                                        <p className="font-bold text-orange-600">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Milk</p>
+                                        <p className="font-bold text-purple-600">
+                                            {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
+                                        </p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-semibold text-gray-700">Total</p>
+                                        <p className="font-bold text-green-700">
+                                            ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
 
                 </div>
             </div>
