@@ -81,36 +81,6 @@ const EditCustomerPage = () => {
     }, [])
 
 
-
-
-    // useEffect(() => {
-    //     if (!customer) {
-    //         toast.error('No customer data provided.');
-    //         navigate('/customer');
-    //     } else {
-    //         setCustomerData({
-    //             customer_type: customer.customer_type || '',
-    //             name: customer.name || '',
-    //             email: customer.email || '',
-    //             mobile: customer.mobile || '',
-    //             careof: customer.careof || '',
-    //             contact_person: customer.contact_person || '',
-    //             address: customer.address || '',
-    //             city: customer.city || '',
-    //             state: customer.state || '',
-    //             wallet: customer.wallet || '',
-    //             pincode: customer.pincode || '',
-    //             designation: customer.designation || '',
-    //             account_number: customer.account_number || '',
-    //         });
-    //     }
-    // }, [customer]);
-
-
-
-
-
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setCustomerData(prev => ({ ...prev, [name]: value }));
