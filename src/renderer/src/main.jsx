@@ -33,7 +33,7 @@ style.textContent = `
   body, html {
     zoom: 1 !important;
     transform: scale(1) !important;
-    font-size: 14px !important;
+    font-size: 16px !important;
   }
 `;
 document.head.appendChild(style);
