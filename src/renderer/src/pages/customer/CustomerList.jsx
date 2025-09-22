@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './customer.css'
-import { FaDotCircle, FaEye, FaPen, FaTrashAlt, FaSave, FaTimes, FaEdit, FaBuilding, FaPlus, FaSearch, FaFilter,  } from 'react-icons/fa'
+import { FaDotCircle, FaEye, FaPen, FaTrashAlt, FaSave, FaTimes, FaEdit, FaBuilding, FaPlus, FaSearch, FaFilter, FaTicketAlt } from 'react-icons/fa'
 import { User, Phone, MapPin, Building2, CreditCard, Mail, UserCheck, Briefcase, MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useHomeStore from '../../zustand/useHomeStore'
@@ -218,8 +218,7 @@ const CustomerList = () => {
         item.account_number?.toString().includes(val) ||
         item.mobile?.toString().includes(val) ||
         item.email?.toLowerCase().includes(val) ||
-        item.city?.toLowerCase().includes(val) ||
-        item.state?.toLowerCase().includes(val) ||
+        item.subsidy_code?.toLowerCase().includes(val) ||
         item.customer_type?.toLowerCase().includes(val)
       )
     })
@@ -301,7 +300,7 @@ const CustomerList = () => {
               <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by name, account number, mobile, email, city..."
+                placeholder="Search by name, account number, mobile, email, subsidy code..."
                 value={searchCustomer}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
@@ -363,10 +362,11 @@ const CustomerList = () => {
         </div>
       )}
 
-      {/* Table View */}
+      {/* Responsive Table View */}
       {!loading && viewMode === 'table' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden lg:block">
             <div className="overflow-y-auto max-h-[70vh]">
               <table className="w-full">
                 {/* Table Header - Sticky */}
@@ -378,7 +378,7 @@ const CustomerList = () => {
                       onClick={() => handleSort('account_number')}
                     >
                       <div className="flex items-center gap-2">
-                        Account No.
+                        Acc. No.
                         {sortConfig.key === 'account_number' && (
                           <span className="text-orange-500">
                             {sortConfig.direction === 'asc' ? '↑' : '↓'}
@@ -387,7 +387,7 @@ const CustomerList = () => {
                       </div>
                     </th>
                     <th 
-                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[200px]"
+                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[180px]"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-2">
@@ -399,12 +399,23 @@ const CustomerList = () => {
                         )}
                       </div>
                     </th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[130px]">Mobile</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[180px]">Email</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[200px]">Address</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[120px]">City</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[130px]">Wallet</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[100px]">Status</th>
+                    <th 
+                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[130px]"
+                      onClick={() => handleSort('subsidy_code')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Subsidy Code
+                        {sortConfig.key === 'subsidy_code' && (
+                          <span className="text-orange-500">
+                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[120px]">Mobile</th>
+                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[160px]">Email</th>
+                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[180px]">Address</th>
+                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[100px]">Wallet</th>
                     <th className="text-center p-4 border-b font-semibold text-gray-700 w-32 sticky right-0 bg-gray-50">Actions</th>
                   </tr>
                 </thead>
@@ -431,7 +442,7 @@ const CustomerList = () => {
                             disabled={true}
                             value={editFormData.account_number}
                             onChange={(e) => handleInputChange('account_number', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-gray-100 cursor-not-allowed"
                             placeholder="Account No."
                           />
                         ) : (
@@ -460,6 +471,26 @@ const CustomerList = () => {
                                 <div className="text-xs text-gray-500">c/o {row.careof}</div>
                               )}
                             </div>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* CM Subsidy Code */}
+                      <td className="p-4">
+                        {editingRowId === row.id ? (
+                          <input
+                            type="text"
+                            value={editFormData.subsidy_code}
+                            onChange={(e) => handleInputChange('subsidy_code', e.target.value)}
+                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            placeholder="Subsidy Code"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-2 text-gray-700">
+                            <FaTicketAlt className="w-4 h-4 text-gray-500" />
+                            <span className="font-mono text-sm">
+                              {row.subsidy_code || <span className="text-gray-400 italic">N/A</span>}
+                            </span>
                           </div>
                         )}
                       </td>
@@ -499,7 +530,7 @@ const CustomerList = () => {
                           <div className="flex items-center gap-2 text-gray-700">
                             <Mail className="w-4 h-4 text-gray-500" />
                             {row.email ? (
-                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-sm truncate">
+                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-sm truncate max-w-[140px]">
                                 {row.email}
                               </a>
                             ) : (
@@ -523,32 +554,10 @@ const CustomerList = () => {
                           <div className="flex items-start gap-2 text-gray-700">
                             <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                             <div className="text-sm">
-                              <div className="line-clamp-2" title={row.address}>
+                              <div className="line-clamp-2 max-w-[160px]" title={row.address}>
                                 {row.address || 'N/A'}
                               </div>
-                              {row.city && row.state && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {row.city}, {row.state} {row.pincode}
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* City */}
-                      <td className="p-4">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="text"
-                            value={editFormData.city}
-                            onChange={(e) => handleInputChange('city', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            placeholder="City"
-                          />
-                        ) : (
-                          <div className="text-gray-700 text-sm">
-                            {row.city || 'N/A'}
                           </div>
                         )}
                       </td>
@@ -570,33 +579,6 @@ const CustomerList = () => {
                             ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', { 
                               minimumFractionDigits: 2 
                             })}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="p-4">
-                        {editingRowId === row.id ? (
-                          <select
-                            value={editFormData.status}
-                            onChange={(e) => handleInputChange('status', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          >
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                          </select>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <FaDotCircle 
-                              className={`w-3 h-3 ${row.status == '1' ? 'text-green-500' : 'text-red-500'}`}
-                            />
-                            <span className={`text-sm font-medium px-2 py-1 rounded-full ${
-                              row.status == '1' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                            }`}>
-                              {row.status == '1' ? 'Active' : 'Inactive'}
-                            </span>
                           </div>
                         )}
                       </td>
@@ -652,25 +634,93 @@ const CustomerList = () => {
                   ))}
                 </tbody>
               </table>
-
-              {/* No Data State */}
-              {currentData.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium">No customers found</p>
-                  <p className="text-gray-400 text-sm mt-2">Try adjusting your search criteria or add a new customer</p>
-                </div>
-              )}
             </div>
           </div>
 
+          {/* Mobile Responsive Cards (lg:hidden) */}
+          <div className="lg:hidden">
+            <div className="space-y-4 p-4">
+              {currentData.map((customer, index) => (
+                <div key={customer.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xs font-bold">
+                        {startIndex + index + 1}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-sm">{customer.name}</h3>
+                        <p className="text-xs text-blue-600">A/c: {customer.account_number}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
+                        onClick={() => {
+                          fetchCustomerDetail(customer.id)
+                          setIsModalOpen(true)
+                        }}
+                        title="View Details"
+                      >
+                        <FaEye className="w-3 h-3" />
+                      </button>
+                      <button
+                        className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+                        onClick={() => handleEditClick(customer)}
+                        title="Edit"
+                      >
+                        <FaEdit className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone className="w-3 h-3" />
+                      <a href={`tel:${customer.mobile}`} className="hover:text-blue-600">
+                        {customer.mobile}
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <FaTicketAlt className="w-3 h-3" />
+                      <span className="truncate">{customer.subsidy_code || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Mail className="w-3 h-3" />
+                      <span className="truncate">{customer.email || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-green-600 font-bold">
+                      <span>₹</span>
+                      <span>{parseFloat(customer.wallet || 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {customer.address && (
+                    <div className="mt-2 flex items-start gap-2 text-xs text-gray-600">
+                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span className="line-clamp-2">{customer.address}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* No Data State */}
+          {currentData.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg font-medium">No customers found</p>
+              <p className="text-gray-400 text-sm mt-2">Try adjusting your search criteria or add a new customer</p>
+            </div>
+          )}
+
           {/* Pagination */}
           {filteredData.length > itemsPerPage && (
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+            <div className="bg-gray-50 px-4 lg:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-sm text-gray-700 text-center sm:text-left">
                 Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} customers
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-center">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -679,7 +729,7 @@ const CustomerList = () => {
                   Previous
                 </button>
                 
-                <div className="flex items-center gap-1">
+                <div className="hidden sm:flex items-center gap-1">
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1
                     if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
@@ -703,6 +753,11 @@ const CustomerList = () => {
                   })}
                 </div>
 
+                {/* Mobile page indicator */}
+                <div className="sm:hidden text-sm text-gray-600 px-3 py-2">
+                  Page {currentPage} of {totalPages}
+                </div>
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
@@ -716,7 +771,7 @@ const CustomerList = () => {
         </div>
       )}
 
-      {/* Card View */}
+      {/* Enhanced Card View */}
       {!loading && viewMode === 'card' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentData.map((customer) => (
@@ -731,19 +786,13 @@ const CustomerList = () => {
                     <p className="text-sm text-blue-600">{customer.account_number}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <FaDotCircle 
-                    className={`w-3 h-3 ${customer.status == '1' ? 'text-green-500' : 'text-red-500'}`}
-                  />
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    customer.status == '1' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}>
-                    {customer.status == '1' ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
               </div>
 
               <div className="space-y-3 mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <FaTicketAlt className="w-4 h-4" />
+                  <span className="font-mono">{customer.subsidy_code || 'No subsidy code'}</span>
+                </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Phone className="w-4 h-4" />
                   <span>{customer.mobile}</span>
@@ -777,20 +826,20 @@ const CustomerList = () => {
                   <FaEye className="w-3 h-3" />
                   View
                 </button>
-                <button
+                {/* <button
                   className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
                   onClick={() => handleEditClick(customer)}
                 >
                   <FaEdit className="w-3 h-3" />
                   Edit
-                </button>
+                </button> */}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Customer Detail Modal (keeping your original modal code) */}
+      {/* Customer Detail Modal (keeping your original modal code but updated) */}
       {isModalOpen && selectedCustomer && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
@@ -843,6 +892,13 @@ const CustomerList = () => {
                         <FaBuilding className="inline w-4 h-4 mr-2" />
                         {selectedCustomer.customer_type || 'Regular'}
                       </span>
+                    </div>
+
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold">CM Subsidy Code</p>
+                      <div className="mt-1 text-sm font-bold text-purple-600 font-mono">
+                        {selectedCustomer.subsidy_code || 'N/A'}
+                      </div>
                     </div>
 
                     <div className="text-center">
@@ -921,8 +977,9 @@ const CustomerList = () => {
                     icon={<Building2 className="w-4 h-4" />}
                   />
                   <InfoCard
-                    label="Subsidy Code"
+                    label="CM Subsidy Code"
                     value={selectedCustomer.subsidy_code}
+                    icon={<FaTicketAlt className="w-4 h-4" />}
                   />
                   <InfoCard
                     label="Aadhar Number"
@@ -1040,6 +1097,8 @@ const InfoCard = ({ label, value, icon }) => {
                     minimumFractionDigits: 2
                   })}
                 </span>
+              ) : label.includes('Subsidy Code') ? (
+                <span className="font-mono text-sm text-purple-600">{value}</span>
               ) : label.includes('Account') && value.length > 10 ? (
                 <span className="font-mono text-sm">{value}</span>
               ) : (
