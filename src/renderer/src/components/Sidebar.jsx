@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useToggleStore from '../zustand/useToggleStore';
-import { MdOutlineDashboard } from 'react-icons/md';
+import { MdOutlineDashboard, MdMenu, MdClose } from 'react-icons/md';
 import { FaChartBar, FaDatabase, FaFileAlt, FaRupeeSign, FaUser, FaChevronDown } from 'react-icons/fa';
 import { GiCash, GiHeavyCollar } from 'react-icons/gi';
 import { FaArrowTrendUp, FaGear, FaListCheck, FaMoneyBillTrendUp } from 'react-icons/fa6';
@@ -8,20 +8,20 @@ import { NavLink, useLocation } from 'react-router-dom';
 import dairyLogo from "../assets/dairyLogo.png";
 import { TbReceiptRupee } from 'react-icons/tb';
 
-const Sidbar = () => {
+const Sidebar = () => {
   const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false);
   const [isCustomerCollectionOpen, setIsCustomerCollectionOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const isMenu = useToggleStore(state => state.isMenu);
   const location = useLocation();
-
-  const [version, setVersion] = useState('')
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
-    window.api.getAppVersion().then(setVersion)
-    console.log("App Version:", version);
-  }, [version]);
+    window.api?.getAppVersion?.().then(setVersion);
+  }, []);
 
   useEffect(() => {
     window.api?.onSecondWindowClosed?.(() => {
@@ -33,7 +33,6 @@ const Sidbar = () => {
       setActiveItem(null);
     });
 
-    // Auto open submenu if route matches
     if (
       location.pathname.startsWith('/subscribe') ||
       location.pathname.startsWith('/subscribe-history')
@@ -42,156 +41,188 @@ const Sidbar = () => {
     }
   }, [location.pathname]);
 
+  // Close mobile menu when route changes (mobile navigation)
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const linkClasses = ({ isActive }) =>
-    `flex items-center gap-2 px-4 py-3 rounded-md transition-colors 
-     ${isActive ? 'bg-slate-700 text-white' : 'text-gray-200 hover:bg-slate-700 hover:text-white'}`;
+    `group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 font-medium
+     ${isActive 
+       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105' 
+       : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
+     }
+     ${isCollapsed ? 'justify-center px-2' : ''}`;
+
+  const menuItems = [
+    { path: '/', icon: <MdOutlineDashboard size={20} />, label: 'Dashboard' },
+    { path: '/customer', icon: <FaUser size={18} />, label: 'Customers' },
+    { path: '/milkCorrection', icon: <FaListCheck size={18} />, label: 'All Milk Correction' },
+    { path: '/alldairymaster', icon: <FaMoneyBillTrendUp size={18} />, label: 'Head Dairy Master' },
+    { path: '/milkDispatch', icon: <FaMoneyBillTrendUp size={18} />, label: 'Milk Dispatch' },
+    { path: '/dailyMilkSale', icon: <FaArrowTrendUp size={18} />, label: 'Open Milk Sale' },
+    { path: '/ratechart', icon: <FaChartBar size={18} />, label: 'Rate Chart' },
+    { path: '/snfchart', icon: <FaChartBar size={18} />, label: 'SNF Chart' },
+    { path: '/paymentregister', icon: <FaRupeeSign size={18} />, label: 'Payments Register' },
+    { path: '/reports', icon: <FaFileAlt size={18} />, label: 'Reports' },
+    { path: '/inventory', icon: <FaDatabase size={18} />, label: 'Inventory' },
+    { path: '/cashentry', icon: <GiCash size={18} />, label: 'Cash Entries' },
+    { path: '/settings', icon: <FaGear size={18} />, label: 'Settings' },
+  ];
+
+  const specialItems = [
+    {
+      id: 'milk-collection',
+      icon: <GiHeavyCollar size={18} />,
+      label: 'Milk Collection',
+      onClick: () => {
+        if (isSecondWindowOpen) return;
+        window.api?.openSecondWindow?.();
+        setIsSecondWindowOpen(true);
+        setActiveItem('milk-collection');
+      },
+      isDisabled: isSecondWindowOpen
+    },
+    {
+      id: 'customer-collection',
+      icon: <GiHeavyCollar size={18} />,
+      label: 'Products Sold',
+      onClick: () => {
+        if (isCustomerCollectionOpen) return;
+        window.api?.openCusomerWindow?.();
+        setIsCustomerCollectionOpen(true);
+        setActiveItem('customer-collection');
+      },
+      isDisabled: isCustomerCollectionOpen
+    }
+  ];
 
   return (
-    <div className="bg-slate-800 text-white w-72 h-screen flex flex-col shadow-lg overflow-y-auto">
-      <div className="p-4 bg-slate-800 flex justify-center">
-        {/* <img src={dairyLogo} alt="Logo" className="h-14 object-contain" /> */}
-        <h1 className='text-xl font-bold'>सरस डेयरी</h1>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 text-white rounded-lg shadow-lg"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+      </button>
 
-      <ul className="flex-1 overflow-y-auto p-2 space-y-1">
-        <NavLink to="/" className={linkClasses}>
-          <MdOutlineDashboard /> <span>Dashboard</span>
-        </NavLink>
+      {/* Backdrop for mobile */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-        <NavLink to="/customer" className={linkClasses}>
-          <FaUser /> <span>Customers</span>
-        </NavLink>
-
-        <li
-          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'milk-collection'
-            ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
-            : 'text-gray-200 hover:bg-slate-700 hover:text-white'
-            }`}
-          onClick={() => {
-            if (isSecondWindowOpen) return;
-            window.api.openSecondWindow();
-            setIsSecondWindowOpen(true);
-            setActiveItem('milk-collection');
-          }}
-        >
-          <GiHeavyCollar /> <span>Milk Collection</span>
-        </li>
-          <NavLink to="/milkCorrection" className={linkClasses}>
-          <FaListCheck /> <span>All Milk Correction</span>
-        </NavLink>
-
-        <NavLink to="/alldairymaster" className={linkClasses}>
-          <FaMoneyBillTrendUp /> <span>Head Dairy Master</span>
-        </NavLink>
-
-        <NavLink to="/milkDispatch" className={linkClasses}>
-          <FaMoneyBillTrendUp /> <span>Milk Dispatch</span>
-        </NavLink>
-
-        <NavLink to="/dailyMilkSale" className={linkClasses}>
-          <FaArrowTrendUp /> <span>Open Milk Sale</span>
-        </NavLink>
-
-        <NavLink to="/ratechart" className={linkClasses}>
-          <FaChartBar /> <span>Rate Chart</span>
-        </NavLink>
-
-        <NavLink to="/snfchart" className={linkClasses}>
-          <FaChartBar /> <span>SNF Chart</span>
-        </NavLink>
-
-        <NavLink to="/paymentregister" className={linkClasses}>
-          <FaRupeeSign /> <span>Payments Register</span>
-        </NavLink>
-
-        <NavLink to="/reports" className={linkClasses}>
-          <FaFileAlt /> <span>Reports</span>
-        </NavLink>
-
-        <NavLink to="/inventory" className={linkClasses}>
-          <FaDatabase /> <span>Inventory</span>
-        </NavLink>
-        <NavLink to="/cashentry" className={linkClasses}>
-          <GiCash /> <span>Cash Entries</span>
-        </NavLink>
-      
-
-        <li
-          className={`flex items-center gap-2 px-4 py-3 rounded-md transition-all cursor-pointer ${activeItem === 'customer-collection'
-            ? 'bg-slate-700 text-white cursor-not-allowed opacity-50'
-            : 'text-gray-200 hover:bg-slate-700 hover:text-white'
-            }`}
-          onClick={() => {
-            if (isCustomerCollectionOpen) return;
-            window.api.openCusomerWindow();
-            setIsCustomerCollectionOpen(true);
-            setActiveItem('customer-collection');
-          }}
-        >
-          <GiHeavyCollar /> <span>Products Sold</span>
-        </li>
-
-        {/* Subscription Dropdown */}
-        {/* <li>
-          <div
-            onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
-            className={`flex items-center justify-between px-4 py-3 rounded-md cursor-pointer transition-colors ${
-              location.pathname.startsWith('/subscribe') || location.pathname.startsWith('/subscribe-history')
-                ? 'bg-slate-700 text-white'
-                : 'text-gray-200 hover:bg-slate-700 hover:text-white'
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <TbReceiptRupee /> <span>Subscription</span>
-            </span>
-            <FaChevronDown
-              className={`transition-transform duration-300 ${
-                isSubMenuOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-            />
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40 flex flex-col
+          bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900
+          text-white shadow-2xl transition-all duration-300 ease-in-out
+          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isCollapsed ? 'w-20' : 'w-72'}
+          border-r border-slate-700/50
+        `}
+      >
+        {/* Header */}
+        <div className="relative p-6 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="flex items-center justify-between">
+            {!isCollapsed && (
+              <div className="flex items-center gap-3">
+                {/* <img src={dairyLogo} alt="Logo" className="h-10 w-10 object-contain" /> */}
+                <div>
+                  <h1 className="text-xl font-bold text-white">सरस डेयरी</h1>
+                  <p className="text-blue-100 text-xs opacity-90">Dairy Management</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Desktop Toggle Button */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden lg:block p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <MdMenu size={20} />
+            </button>
           </div>
+        </div>
 
-          {isSubMenuOpen && (
-            <ul className="ml-8 mt-1 space-y-1 text-sm">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+          <div className="space-y-2">
+            {/* Regular Menu Items */}
+            {menuItems.map((item) => (
               <NavLink
-                to="/subscribe"
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-300 hover:bg-slate-700 hover:text-white'
-                  }`
-                }
+                key={item.path}
+                to={item.path}
+                className={linkClasses}
+                title={isCollapsed ? item.label : ''}
               >
-                Subscription Plans
+                <span className="flex-shrink-0">{item.icon}</span>
+                {!isCollapsed && (
+                  <span className="truncate transition-opacity duration-300">
+                    {item.label}
+                  </span>
+                )}
               </NavLink>
-              <NavLink
-                to="/subscribe-history"
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-300 hover:bg-slate-700 hover:text-white'
-                  }`
-                }
+            ))}
+
+            {/* Special Items - FIXED CODE */}
+            {specialItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={item.onClick}
+                disabled={item.isDisabled}
+                className={`
+                  w-full group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl 
+                  transition-all duration-300 font-medium
+                  ${item.isDisabled
+                    ? 'bg-slate-700/50 text-gray-400 cursor-not-allowed opacity-50'
+                    : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
+                  }
+                  ${activeItem === item.id ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg' : ''}
+                  ${isCollapsed ? 'justify-center px-2' : ''}
+                `}
+                title={isCollapsed ? item.label : ''}
               >
-                Subscription History
-              </NavLink>
-            </ul>
-          )}
-        </li> */}
+                <span className={`flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`}>{item.icon}</span>
+                {!isCollapsed && (
+                  <span className="truncate transition-opacity duration-300">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </nav>
 
-        <NavLink to="/settings" className={linkClasses}>
-          <FaGear /> <span>Settings</span>
-        </NavLink>
-      </ul>
+        {/* Footer */}
+        {!isCollapsed && (
+          <div className="p-4 bg-slate-900/50 border-t border-slate-700/50">
+            <div className="text-center space-y-1">
+              <p className="text-xs text-gray-400">Version {version}</p>
+              <p className="text-xs text-gray-500">
+                © 2025 | Powered by Production House
+              </p>
+            </div>
+          </div>
+        )}
 
-      <div className="p-4 bg-slate-800 text-center text-sm">
-        <p>Version {version}</p>
-        <p>© 2025 | Powered by Production House </p>
+        {/* Collapsed Footer */}
+        {isCollapsed && (
+          <div className="p-2 bg-slate-900/50 border-t border-slate-700/50">
+            <div className="text-center">
+              <p className="text-xs text-gray-400 font-bold">{version}</p>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
-export default Sidbar;
+export default Sidebar;
