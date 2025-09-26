@@ -31,4 +31,11 @@ const sideBarMenuList = [
   }
 ]
 
-export { loginBg, sideBarMenuList }
+const colors = {
+  buttonColor: '#FF6C2F',
+  themeBgColor: '#F9F7F7',
+  cardBgColor: '#fff'
+}
+
+
+export { loginBg, sideBarMenuList, colors }
