@@ -82,32 +82,32 @@ const Sidebar = () => {
     { path: '/settings', icon: <FaGear size={18} />, label: 'Settings' },
   ];
 
-  // const specialItems = [
-  //   {
-  //     id: 'milk-collection',
-  //     icon: <GiHeavyCollar size={18} />,
-  //     label: 'Milk Collection',
-  //     onClick: () => {
-  //       if (isSecondWindowOpen) return;
-  //       window.api?.openSecondWindow?.();
-  //       setIsSecondWindowOpen(true);
-  //       setActiveItem('milk-collection');
-  //     },
-  //     isDisabled: isSecondWindowOpen
-  //   },
-  //   {
-  //     id: 'customer-collection',
-  //     icon: <GiHeavyCollar size={18} />,
-  //     label: 'Products Sold',
-  //     onClick: () => {
-  //       if (isCustomerCollectionOpen) return;
-  //       window.api?.openCusomerWindow?.();
-  //       setIsCustomerCollectionOpen(true);
-  //       setActiveItem('customer-collection');
-  //     },
-  //     isDisabled: isCustomerCollectionOpen
-  //   }
-  // ];
+  const specialItems = [
+    {
+      id: 'milk-collection',
+      icon: <GiHeavyCollar size={18} />,
+      label: 'Milk Collection',
+      onClick: () => {
+        if (isSecondWindowOpen) return;
+        window.api?.openSecondWindow?.();
+        setIsSecondWindowOpen(true);
+        setActiveItem('milk-collection');
+      },
+      isDisabled: isSecondWindowOpen
+    },
+    {
+      id: 'customer-collection',
+      icon: <GiHeavyCollar size={18} />,
+      label: 'Products Sold',
+      onClick: () => {
+        if (isCustomerCollectionOpen) return;
+        window.api?.openCusomerWindow?.();
+        setIsCustomerCollectionOpen(true);
+        setActiveItem('customer-collection');
+      },
+      isDisabled: isCustomerCollectionOpen
+    }
+  ];
 
   return (
     <>
