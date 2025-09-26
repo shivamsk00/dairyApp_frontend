@@ -48,14 +48,26 @@ const Sidebar = () => {
 
   const linkClasses = ({ isActive }) =>
     `group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 font-medium
-     ${isActive 
-       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105' 
-       : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
-     }
+     ${isActive
+      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105'
+      : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
+    }
      ${isCollapsed ? 'justify-center px-2' : ''}`;
 
   const menuItems = [
     { path: '/', icon: <MdOutlineDashboard size={20} />, label: 'Dashboard' },
+    {
+      id: 'milk-collection',
+      icon: <GiHeavyCollar size={18} />,
+      label: 'Milk Collection',
+      onClick: () => {
+        if (isSecondWindowOpen) return;
+        window.api?.openSecondWindow?.();
+        setIsSecondWindowOpen(true);
+        setActiveItem('milk-collection');
+      },
+      isDisabled: isSecondWindowOpen
+    },
     { path: '/customer', icon: <FaUser size={18} />, label: 'Customers' },
     { path: '/milkCorrection', icon: <FaListCheck size={18} />, label: 'All Milk Correction' },
     { path: '/alldairymaster', icon: <FaMoneyBillTrendUp size={18} />, label: 'Head Dairy Master' },
@@ -70,32 +82,32 @@ const Sidebar = () => {
     { path: '/settings', icon: <FaGear size={18} />, label: 'Settings' },
   ];
 
-  const specialItems = [
-    {
-      id: 'milk-collection',
-      icon: <GiHeavyCollar size={18} />,
-      label: 'Milk Collection',
-      onClick: () => {
-        if (isSecondWindowOpen) return;
-        window.api?.openSecondWindow?.();
-        setIsSecondWindowOpen(true);
-        setActiveItem('milk-collection');
-      },
-      isDisabled: isSecondWindowOpen
-    },
-    {
-      id: 'customer-collection',
-      icon: <GiHeavyCollar size={18} />,
-      label: 'Products Sold',
-      onClick: () => {
-        if (isCustomerCollectionOpen) return;
-        window.api?.openCusomerWindow?.();
-        setIsCustomerCollectionOpen(true);
-        setActiveItem('customer-collection');
-      },
-      isDisabled: isCustomerCollectionOpen
-    }
-  ];
+  // const specialItems = [
+  //   {
+  //     id: 'milk-collection',
+  //     icon: <GiHeavyCollar size={18} />,
+  //     label: 'Milk Collection',
+  //     onClick: () => {
+  //       if (isSecondWindowOpen) return;
+  //       window.api?.openSecondWindow?.();
+  //       setIsSecondWindowOpen(true);
+  //       setActiveItem('milk-collection');
+  //     },
+  //     isDisabled: isSecondWindowOpen
+  //   },
+  //   {
+  //     id: 'customer-collection',
+  //     icon: <GiHeavyCollar size={18} />,
+  //     label: 'Products Sold',
+  //     onClick: () => {
+  //       if (isCustomerCollectionOpen) return;
+  //       window.api?.openCusomerWindow?.();
+  //       setIsCustomerCollectionOpen(true);
+  //       setActiveItem('customer-collection');
+  //     },
+  //     isDisabled: isCustomerCollectionOpen
+  //   }
+  // ];
 
   return (
     <>
@@ -139,7 +151,7 @@ const Sidebar = () => {
                 </div>
               </div>
             )}
-            
+
             {/* Desktop Toggle Button */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
