@@ -48,65 +48,60 @@ const Sidebar = () => {
 
   const linkClasses = ({ isActive }) =>
     `group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 font-medium
-     ${isActive
-      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105'
-      : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
-    }
+     ${isActive 
+       ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105' 
+       : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
+     }
      ${isCollapsed ? 'justify-center px-2' : ''}`;
 
-  const menuItems = [
-    { path: '/', icon: <MdOutlineDashboard size={20} />, label: 'Dashboard' },
-    {
-      id: 'milk-collection',
-      icon: <GiHeavyCollar size={18} />,
-      label: 'Milk Collection',
-      onClick: () => {
-        if (isSecondWindowOpen) return;
-        window.api?.openSecondWindow?.();
-        setIsSecondWindowOpen(true);
-        setActiveItem('milk-collection');
-      },
-      isDisabled: isSecondWindowOpen
-    },
-    { path: '/customer', icon: <FaUser size={18} />, label: 'Customers' },
-    { path: '/milkCorrection', icon: <FaListCheck size={18} />, label: 'All Milk Correction' },
-    { path: '/alldairymaster', icon: <FaMoneyBillTrendUp size={18} />, label: 'Head Dairy Master' },
-    { path: '/milkDispatch', icon: <FaMoneyBillTrendUp size={18} />, label: 'Milk Dispatch' },
-    { path: '/dailyMilkSale', icon: <FaArrowTrendUp size={18} />, label: 'Open Milk Sale' },
-    { path: '/ratechart', icon: <FaChartBar size={18} />, label: 'Rate Chart' },
-    { path: '/snfchart', icon: <FaChartBar size={18} />, label: 'SNF Chart' },
-    { path: '/paymentregister', icon: <FaRupeeSign size={18} />, label: 'Payments Register' },
-    { path: '/reports', icon: <FaFileAlt size={18} />, label: 'Reports' },
-    { path: '/inventory', icon: <FaDatabase size={18} />, label: 'Inventory' },
-    { path: '/cashentry', icon: <GiCash size={18} />, label: 'Cash Entries' },
-    { path: '/settings', icon: <FaGear size={18} />, label: 'Settings' },
-  ];
+  // Function to handle special button clicks
+  const handleMilkCollectionClick = () => {
+    if (isSecondWindowOpen) return;
+    window.api?.openSecondWindow?.();
+    setIsSecondWindowOpen(true);
+    setActiveItem('milk-collection');
+  };
 
-  const specialItems = [
-    {
+  const handleProductsSoldClick = () => {
+    if (isCustomerCollectionOpen) return;
+    window.api?.openCusomerWindow?.();
+    setIsCustomerCollectionOpen(true);
+    setActiveItem('customer-collection');
+  };
+
+  // Combined menu items with special items included
+  const menuItems = [
+    { path: '/', icon: <MdOutlineDashboard size={20} />, label: 'Dashboard', type: 'link' },
+    { 
       id: 'milk-collection',
-      icon: <GiHeavyCollar size={18} />,
-      label: 'Milk Collection',
-      onClick: () => {
-        if (isSecondWindowOpen) return;
-        window.api?.openSecondWindow?.();
-        setIsSecondWindowOpen(true);
-        setActiveItem('milk-collection');
-      },
-      isDisabled: isSecondWindowOpen
+      icon: <GiHeavyCollar size={18} />, 
+      label: 'Milk Collection', 
+      type: 'button',
+      onClick: handleMilkCollectionClick,
+      isDisabled: isSecondWindowOpen,
+      isActive: activeItem === 'milk-collection'
     },
-    {
+    { path: '/milkCorrection', icon: <FaListCheck size={18} />, label: 'All Milk Correction', type: 'link' },
+    { path: '/customer', icon: <FaUser size={18} />, label: 'Customers', type: 'link' },
+    { path: '/alldairymaster', icon: <FaMoneyBillTrendUp size={18} />, label: 'Head Dairy Master', type: 'link' },
+    { path: '/milkDispatch', icon: <FaMoneyBillTrendUp size={18} />, label: 'Milk Dispatch', type: 'link' },
+    { path: '/dailyMilkSale', icon: <FaArrowTrendUp size={18} />, label: 'Open Milk Sale', type: 'link' },
+    { 
       id: 'customer-collection',
-      icon: <GiHeavyCollar size={18} />,
-      label: 'Products Sold',
-      onClick: () => {
-        if (isCustomerCollectionOpen) return;
-        window.api?.openCusomerWindow?.();
-        setIsCustomerCollectionOpen(true);
-        setActiveItem('customer-collection');
-      },
-      isDisabled: isCustomerCollectionOpen
-    }
+      icon: <GiHeavyCollar size={18} />, 
+      label: 'Products Sold', 
+      type: 'button',
+      onClick: handleProductsSoldClick,
+      isDisabled: isCustomerCollectionOpen,
+      isActive: activeItem === 'customer-collection'
+    },
+    { path: '/ratechart', icon: <FaChartBar size={18} />, label: 'Rate Chart', type: 'link' },
+    { path: '/snfchart', icon: <FaChartBar size={18} />, label: 'SNF Chart', type: 'link' },
+    { path: '/paymentregister', icon: <FaRupeeSign size={18} />, label: 'Payments Register', type: 'link' },
+    { path: '/reports', icon: <FaFileAlt size={18} />, label: 'Reports', type: 'link' },
+    { path: '/inventory', icon: <FaDatabase size={18} />, label: 'Inventory', type: 'link' },
+    { path: '/cashentry', icon: <GiCash size={18} />, label: 'Cash Entries', type: 'link' },
+    { path: '/settings', icon: <FaGear size={18} />, label: 'Settings', type: 'link' },
   ];
 
   return (
@@ -151,7 +146,7 @@ const Sidebar = () => {
                 </div>
               </div>
             )}
-
+            
             {/* Desktop Toggle Button */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
@@ -166,49 +161,67 @@ const Sidebar = () => {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
           <div className="space-y-2">
-            {/* Regular Menu Items */}
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={linkClasses}
-                title={isCollapsed ? item.label : ''}
-              >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="truncate transition-opacity duration-300">
-                    {item.label}
-                  </span>
-                )}
-              </NavLink>
-            ))}
+            {/* Combined Menu Items - Both Links and Buttons */}
+            {menuItems.map((item) => {
+              // Regular NavLink items
+              if (item.type === 'link') {
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={linkClasses}
+                    title={isCollapsed ? item.label : ''}
+                  >
+                    <span className="flex-shrink-0">{item.icon}</span>
+                    {!isCollapsed && (
+                      <span className="truncate transition-opacity duration-300">
+                        {item.label}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              }
 
-            {/* Special Items - FIXED CODE */}
-            {specialItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={item.onClick}
-                disabled={item.isDisabled}
-                className={`
-                  w-full group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl 
-                  transition-all duration-300 font-medium
-                  ${item.isDisabled
-                    ? 'bg-slate-700/50 text-gray-400 cursor-not-allowed opacity-50'
-                    : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
-                  }
-                  ${activeItem === item.id ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg' : ''}
-                  ${isCollapsed ? 'justify-center px-2' : ''}
-                `}
-                title={isCollapsed ? item.label : ''}
-              >
-                <span className={`flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`}>{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="truncate transition-opacity duration-300">
-                    {item.label}
-                  </span>
-                )}
-              </button>
-            ))}
+              // Special button items (Milk Collection, Products Sold)
+              if (item.type === 'button') {
+                return (
+                  <button
+                    key={item.id}
+                    onClick={item.onClick}
+                    disabled={item.isDisabled}
+                    className={`
+                      w-full group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl 
+                      transition-all duration-300 font-medium
+                      ${item.isDisabled
+                        ? 'bg-slate-700/50 text-gray-400 cursor-not-allowed opacity-50'
+                        : item.isActive
+                        ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg scale-105'
+                        : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
+                      }
+                      ${isCollapsed ? 'justify-center px-2' : ''}
+                    `}
+                    title={isCollapsed ? item.label : ''}
+                  >
+                    <span className={`flex-shrink-0 ${isCollapsed ? 'mx-auto' : ''}`}>
+                      {item.icon}
+                    </span>
+                    {!isCollapsed && (
+                      <span className="truncate transition-opacity duration-300">
+                        {item.label}
+                      </span>
+                    )}
+                    {/* Loading indicator for disabled buttons */}
+                    {!isCollapsed && item.isDisabled && (
+                      <div className="ml-auto">
+                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </button>
+                );
+              }
+
+              return null;
+            })}
           </div>
         </nav>
 
