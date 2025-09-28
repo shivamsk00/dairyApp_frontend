@@ -414,12 +414,12 @@ const RateChartPage = () => {
             📤 Export Excel
           </button>
           
-          <button
+          {/* <button
             onClick={handleClear}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors duration-200 flex items-center gap-2"
           >
             🗑️ Clear
-          </button>
+          </button> */}
           
           <button
             onClick={handleSave}
