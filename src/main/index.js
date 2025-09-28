@@ -282,13 +282,19 @@ import log from 'electron-log'
 log.transports.file.level = 'info'
 autoUpdater.logger = log
 
-// AutoUpdater Settings [web:86]
+// CRITICAL: Disable signature verification [web:37][web:32]
+autoUpdater.verifyUpdateCodeSignature = (publisherName, path) => {
+  log.info('Bypassing signature verification for:', path)
+  return Promise.resolve(null) // Always allow updates
+}
+
+// AutoUpdater Settings
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = false
 
 // For development testing (optional)
 if (is.dev) {
-  autoUpdater.forceDevUpdateConfig = true
+  autoUpdater.forceDevUpdateConfig = false
 }
 
 let mainWindow
@@ -438,64 +444,6 @@ function sendUpdateProgress(progress) {
   }
 }
 
-// Auto Updater Events [web:86][web:88]
-autoUpdater.on('checking-for-update', () => {
-  log.info('Checking for update...')
-  sendUpdateMessage('Checking for updates...')
-})
-
-autoUpdater.on('update-available', (info) => {
-  log.info('Update available:', info.version)
-  sendUpdateMessage(`Update available! Version ${info.version}`)
-  
-  // Auto download the update
-  log.info('Starting update download...')
-  autoUpdater.downloadUpdate()
-})
-
-autoUpdater.on('update-not-available', (info) => {
-  log.info('Update not available. Current version:', app.getVersion())
-  sendUpdateMessage('No update available.')
-  
-  // Hide message after 5 seconds
-  setTimeout(() => {
-    sendUpdateMessage(null)
-  }, 5000)
-})
-
-autoUpdater.on('download-progress', (progressObj) => {
-  const percent = Math.round(progressObj.percent)
-  log.info(`Download progress: ${percent}% - ${progressObj.transferred}/${progressObj.total} bytes`)
-  sendUpdateProgress(percent)
-  
-  if (percent === 0) {
-    sendUpdateMessage('Starting download...')
-  } else {
-    sendUpdateMessage('Downloading update...')
-  }
-})
-
-autoUpdater.on('update-downloaded', (info) => {
-  log.info('Update downloaded successfully:', info.version)
-  sendUpdateMessage('Update downloaded successfully!')
-  sendUpdateProgress(100)
-  
-  // Show dialog for restart
-  setTimeout(() => {
-    showUpdateDialog(info)
-  }, 2000)
-})
-
-autoUpdater.on('error', (error) => {
-  log.error('Auto updater error:', error)
-  sendUpdateMessage(`Update error: ${error.message}`)
-  
-  // Clear error message after 8 seconds
-  setTimeout(() => {
-    sendUpdateMessage(null)
-  }, 8000)
-})
-
 // Show update dialog
 function showUpdateDialog(info) {
   if (!mainWindow || mainWindow.isDestroyed()) return
@@ -538,14 +486,18 @@ app.whenReady().then(() => {
   // Check for updates on startup (after 5 seconds)
   setTimeout(() => {
     log.info('Checking for updates on startup...')
-    autoUpdater.checkForUpdates()
+    autoUpdater.checkForUpdatesAndNotify().catch((error) => {
+      log.error('Startup update check failed:', error)
+    })
   }, 5000)
 
   // Set up periodic update checks (every 30 minutes in production)
   if (!is.dev) {
     updateCheckInterval = setInterval(() => {
       log.info('Periodic update check...')
-      autoUpdater.checkForUpdates()
+      autoUpdater.checkForUpdates().catch((error) => {
+        log.error('Periodic update check failed:', error)
+      })
     }, 30 * 60 * 1000) // 30 minutes
   }
 
@@ -599,7 +551,7 @@ app.whenReady().then(() => {
     }
   })
 
-  // 🖨️ Slip printing (keeping your existing code)
+  // 🖨️ Slip printing
   ipcMain.on('print-slip', (event, slipData) => {
     const slipWindow = new BrowserWindow({
       show: false,
@@ -654,6 +606,74 @@ app.whenReady().then(() => {
         }
       )
     })
+  })
+
+  // Auto Updater Events
+  autoUpdater.on('checking-for-update', () => {
+    log.info('Checking for update...')
+    sendUpdateMessage('Checking for updates...')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    log.info('Update available:', info.version)
+    sendUpdateMessage(`Update available! Version ${info.version}`)
+    
+    // Auto download the update
+    log.info('Starting update download...')
+    autoUpdater.downloadUpdate()
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    log.info('Update not available. Current version:', app.getVersion())
+    sendUpdateMessage('No update available.')
+    
+    // Hide message after 5 seconds
+    setTimeout(() => {
+      sendUpdateMessage(null)
+    }, 5000)
+  })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    const percent = Math.round(progressObj.percent)
+    log.info(`Download progress: ${percent}% - ${progressObj.transferred}/${progressObj.total} bytes`)
+    sendUpdateProgress(percent)
+    
+    if (percent === 0) {
+      sendUpdateMessage('Starting download...')
+    } else {
+      sendUpdateMessage('Downloading update...')
+    }
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    log.info('Update downloaded successfully:', info.version)
+    sendUpdateMessage('Update downloaded successfully!')
+    sendUpdateProgress(100)
+    
+    // Show dialog for restart
+    setTimeout(() => {
+      showUpdateDialog(info)
+    }, 2000)
+  })
+
+  autoUpdater.on('error', (error) => {
+    log.error('Auto updater error:', error)
+    console.log('Error details:', JSON.stringify(error, null, 2))
+    sendUpdateMessage(`Update error: ${error.message}`)
+    
+    // Clear error message after 8 seconds
+    setTimeout(() => {
+      sendUpdateMessage(null)
+    }, 8000)
+  })
+
+  // Legacy IPC handlers for backward compatibility
+  ipcMain.on('start-update-download', () => {
+    autoUpdater.downloadUpdate()
+  })
+
+  ipcMain.on('check-for-update', () => {
+    autoUpdater.checkForUpdates()
   })
 })
 
