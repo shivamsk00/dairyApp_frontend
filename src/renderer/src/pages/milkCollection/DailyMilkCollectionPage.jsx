@@ -746,7 +746,7 @@ const DairyMilkCollectionPage = () => {
                         </div>
                     </div>
                        {/* Completely Fixed Footer at Bottom - Will NOT scroll */}
-                        <div className=" bottom-0 left-0 right-0 bg-black border-t z-10">
+                        {/* <div className=" bottom-0 left-0 right-0 bg-black border-t z-10">
                             <div className="p-3">
                                 <div className="grid grid-cols-6 gap-4 text-xs">
                                     <div className="text-center border-r">
@@ -785,7 +785,7 @@ const DairyMilkCollectionPage = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                     {/* Table */}
                     <div className="flex flex-col h-full relative">

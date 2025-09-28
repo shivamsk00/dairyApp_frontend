@@ -3,7 +3,7 @@ import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
 import * as XLSX from 'xlsx';
 
-// Constants - Updated to match your database structure
+// Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = [];
 for (let i = 7.2; i <= 10.2; i += 0.1) {
   SNF_VALUES.push(parseFloat(i.toFixed(1)));
@@ -60,7 +60,6 @@ const RateChartPage = () => {
         const transformedData = updatedData.map(item => ({
           fat: parseFloat(item.fat),
           snfRates: SNF_VALUES.map(snf => {
-            // Fixed key generation to match database structure
             const key = `snf_${snf.toFixed(1).replace('.', '_')}`;
             return {
               snf,
@@ -82,295 +81,241 @@ const RateChartPage = () => {
     }
   };
 
-// Fixed import function to handle snf_X_Y format headers
-const handleImport = (event) => {
-  const file = event.target.files[0];
-  
-  console.log("🔍 Import Debug - File selected:", file);
-  
-  if (!file) {
-    CustomToast.error("No file selected.");
-    return;
-  }
-
-  // Validate file type
-  const validTypes = [
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  ];
-  
-  if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-    CustomToast.error("Please select a valid Excel file (.xlsx or .xls)");
-    return;
-  }
-
-  setDebugging(true);
-  console.log("🔍 Starting file read process...");
-
-  const reader = new FileReader();
-  
-  reader.onerror = (error) => {
-    console.error("❌ FileReader error:", error);
-    CustomToast.error("Error reading file");
-    setDebugging(false);
-  };
-
-  // Main load handler
-  reader.onload = (e) => {
-    console.log("✅ FileReader onload triggered");
+  // Flexible import function that works with any SNF columns
+  const handleImport = (event) => {
+    const file = event.target.files[0];
     
-    try {
-      const data = new Uint8Array(e.target.result);
-      console.log("🔍 Data length:", data.length);
+    console.log("🔍 Import Debug - File selected:", file);
+    
+    if (!file) {
+      CustomToast.error("No file selected.");
+      return;
+    }
+
+    // Validate file type
+    const validTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      CustomToast.error("Please select a valid Excel file (.xlsx or .xls)");
+      return;
+    }
+
+    setDebugging(true);
+    console.log("🔍 Starting file read process...");
+
+    const reader = new FileReader();
+    
+    reader.onerror = (error) => {
+      console.error("❌ FileReader error:", error);
+      CustomToast.error("Error reading file");
+      setDebugging(false);
+    };
+
+    reader.onload = (e) => {
+      console.log("✅ FileReader onload triggered");
       
-      if (data.length === 0) {
-        throw new Error("File is empty or corrupted");
-      }
-
-      const workbook = XLSX.read(data, { type: 'array' });
-      console.log("🔍 Workbook sheets:", workbook.SheetNames);
-      
-      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-        throw new Error("No sheets found in the Excel file");
-      }
-
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      
-      // Get sheet range
-      const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
-      console.log("🔍 Sheet range:", range);
-
-      // Read header row directly
-      const headerRow = [];
-      const headerRowIndex = range.s.r; // First row
-      
-      console.log("🔍 Reading header row at index:", headerRowIndex);
-      
-      // Read all columns in the header row
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: headerRowIndex, c: col });
-        const cell = sheet[cellAddress];
+      try {
+        const data = new Uint8Array(e.target.result);
+        console.log("🔍 Data length:", data.length);
         
-        let cellValue = '';
-        if (cell) {
-          if (cell.t === 'n') { // number
-            cellValue = cell.v;
-          } else if (cell.t === 's') { // string
-            cellValue = cell.v;
-          } else if (cell.w) { // formatted value
-            cellValue = cell.w;
-          } else if (cell.v !== undefined) {
-            cellValue = cell.v;
-          }
-        }
-        
-        console.log(`🔍 Cell ${cellAddress}: type=${cell?.t}, value=${cellValue}, raw=${cell?.v}`);
-        headerRow.push(cellValue);
-      }
-
-      console.log("🔍 Complete header row:", headerRow);
-
-      if (headerRow.length === 0) {
-        throw new Error("No header row data found");
-      }
-
-      // Process SNF headers (skip first column which should be FAT/SNF label)
-      const rawSnfHeaders = headerRow.slice(1);
-      console.log("🔍 Raw SNF headers:", rawSnfHeaders);
-
-      // Function to convert snf_X_Y format to decimal number
-      const convertSnfHeaderToNumber = (header) => {
-        if (typeof header !== 'string') return null;
-        
-        // Check if it matches snf_X_Y pattern
-        const match = header.match(/^snf_(\d+)_(\d+)$/);
-        if (match) {
-          const wholePart = parseInt(match[1]);
-          const decimalPart = parseInt(match[2]);
-          const result = parseFloat(`${wholePart}.${decimalPart}`);
-          console.log(`🔍 Converted "${header}" to ${result}`);
-          return result;
-        }
-        
-        // Try to parse as direct number
-        const directNumber = parseFloat(header);
-        if (!isNaN(directNumber)) {
-          console.log(`🔍 Direct number "${header}" = ${directNumber}`);
-          return directNumber;
-        }
-        
-        console.log(`🔍 Could not parse header "${header}"`);
-        return null;
-      };
-
-      // Process headers with conversion
-      const processedHeaders = [];
-      for (let i = 0; i < rawSnfHeaders.length; i++) {
-        const val = rawSnfHeaders[i];
-        
-        console.log(`🔍 Processing header ${i}: "${val}" (type: ${typeof val})`);
-        
-        // Skip empty values
-        if (val === null || val === undefined || val === '') {
-          console.log(`🔍 Skipping empty header at index ${i}`);
-          continue;
+        if (data.length === 0) {
+          throw new Error("File is empty or corrupted");
         }
 
-        // Convert snf_X_Y format to decimal
-        const numVal = convertSnfHeaderToNumber(val);
+        const workbook = XLSX.read(data, { type: 'array' });
+        console.log("🔍 Workbook sheets:", workbook.SheetNames);
         
-        if (numVal === null || isNaN(numVal) || numVal <= 0) {
-          console.warn(`🔍 Invalid header at index ${i}: "${val}" -> ${numVal}`);
-          continue;
+        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+          throw new Error("No sheets found in the Excel file");
         }
+
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
         
-        // Round to 1 decimal place
-        const rounded = parseFloat(numVal.toFixed(1));
-        processedHeaders.push({ index: i, value: rounded, original: val });
-        console.log(`🔍 Added valid header: ${rounded} (from "${val}") at index ${i}`);
-      }
-
-      console.log("🔍 Final processed headers:", processedHeaders);
-
-      if (processedHeaders.length === 0) {
-        throw new Error(`No valid SNF headers found. Raw headers were: ${rawSnfHeaders.slice(0, 10).join(', ')}... Expected format: snf_8_0, snf_8_1, etc. or direct numbers like 8.0, 8.1, etc.`);
-      }
-
-      // Validate against expected SNF range
-      const minExpected = 7.2;
-      const maxExpected = 10.2;
-      const validHeaders = processedHeaders.filter(h => h.value >= minExpected && h.value <= maxExpected);
-      
-      console.log(`🔍 Headers in valid range (${minExpected}-${maxExpected}):`, validHeaders);
-
-      if (validHeaders.length === 0) {
-        throw new Error(`No SNF headers found in expected range ${minExpected}-${maxExpected}. Found: ${processedHeaders.map(h => `${h.value} (from "${h.original}")`).join(', ')}`);
-      }
-
-      // Create header mapping
-      const headerMapping = validHeaders.map(h => ({
-        excelIndex: h.index + 1, // +1 because we skipped first column
-        snfValue: h.value,
-        originalHeader: h.original
-      }));
-
-      console.log("🔍 Header mapping:", headerMapping);
-
-      // Read data rows directly
-      const dataRows = [];
-      console.log(`🔍 Reading data rows from ${range.s.r + 1} to ${range.e.r}`);
-
-      for (let row = range.s.r + 1; row <= range.e.r; row++) {
-        const rowData = [];
-        
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-          const cell = sheet[cellAddress];
-          
-          let cellValue = '';
-          if (cell) {
-            if (cell.t === 'n') { // number
-              cellValue = cell.v;
-            } else if (cell.t === 's') { // string
-              cellValue = cell.v;
-            } else if (cell.w) { // formatted value
-              cellValue = cell.w;
-            } else if (cell.v !== undefined) {
-              cellValue = cell.v;
-            }
-          }
-          
-          rowData.push(cellValue);
-        }
-        
-        // Only add rows that have some data
-        if (rowData.some(val => val !== null && val !== undefined && val !== '')) {
-          dataRows.push(rowData);
-        }
-      }
-
-      console.log(`🔍 Read ${dataRows.length} data rows`);
-      if (dataRows.length > 0) {
-        console.log("🔍 Sample data rows:", dataRows.slice(0, 3));
-      }
-
-      // Build rate data using header mapping
-      const newRateData = FAT_VALUES.map(fat => {
-        // Find matching row in Excel data
-        const matchingRowIndex = dataRows.findIndex(row => {
-          if (!row || !row[0]) return false;
-          
-          const fatVal = safeToNumber(row[0]);
-          if (fatVal === null) return false;
-          
-          return Math.abs(parseFloat(fatVal.toFixed(1)) - fat) < 0.01;
+        // Convert to JSON with proper handling
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { 
+          header: 1,
+          raw: true,
+          defval: ''
         });
 
-        let rowData = [];
-        if (matchingRowIndex !== -1) {
-          rowData = dataRows[matchingRowIndex] || [];
+        console.log("🔍 Excel Data Preview:", jsonData.slice(0, 3));
+        console.log("🔍 Total Excel rows:", jsonData.length);
+
+        if (jsonData.length < 2) {
+          throw new Error("Excel file needs at least header row and one data row");
         }
 
-        return {
-          fat,
-          snfRates: SNF_VALUES.map((snf) => {
-            let rate = '';
+        // Get headers - Excel structure: [empty/label, 8, 8.1, 8.2, ...]
+        const headers = jsonData[0];
+        console.log("🔍 Raw Headers:", headers);
+        
+        // Skip first column and get all SNF headers
+        const snfHeaders = headers.slice(1).filter(h => h !== null && h !== undefined && h !== '');
+        console.log("🔍 Found SNF Headers:", snfHeaders);
+        console.log("🔍 SNF Headers types:", snfHeaders.map(h => `${h} (${typeof h})`));
+
+        if (snfHeaders.length === 0) {
+          throw new Error("No SNF headers found in first row");
+        }
+
+        // Create mapping for available headers with flexible matching
+        const headerMap = new Map();
+        snfHeaders.forEach((header, index) => {
+          let numericValue;
+          
+          if (typeof header === 'number') {
+            numericValue = header;
+          } else if (typeof header === 'string') {
+            numericValue = parseFloat(header.trim());
+          }
+          
+          if (!isNaN(numericValue) && numericValue > 0) {
+            // Round to 1 decimal place to handle precision issues
+            const roundedValue = parseFloat(numericValue.toFixed(1));
+            headerMap.set(roundedValue, index + 1); // +1 because we skip first column
+            console.log(`🔍 Mapped header "${header}" -> ${roundedValue} at column ${index + 1}`);
+          } else {
+            console.warn(`🔍 Skipping invalid header: "${header}"`);
+          }
+        });
+
+        console.log("🔍 Header Mapping:", Array.from(headerMap.entries()));
+
+        if (headerMap.size === 0) {
+          throw new Error(`No valid numeric headers found. Headers were: ${snfHeaders.join(', ')}`);
+        }
+
+        // Check how many of our expected SNF values match
+        const matchedSnfValues = SNF_VALUES.filter(snf => headerMap.has(snf));
+        console.log("🔍 Matched SNF values from our range:", matchedSnfValues);
+        
+        if (matchedSnfValues.length === 0) {
+          // No exact matches, let's see what we can use
+          const availableHeaders = Array.from(headerMap.keys()).sort((a, b) => a - b);
+          console.log("🔍 Available headers in Excel:", availableHeaders);
+          console.log("🔍 Expected SNF range:", `${SNF_VALUES[0]} to ${SNF_VALUES[SNF_VALUES.length - 1]}`);
+          
+          CustomToast.error(`Excel headers (${availableHeaders.join(', ')}) don't match expected SNF range (${SNF_VALUES[0]} to ${SNF_VALUES[SNF_VALUES.length - 1]}). Please check your Excel file headers.`);
+          return;
+        }
+
+        // Process data rows
+        const dataRows = jsonData.slice(1);
+        console.log("🔍 Processing", dataRows.length, "data rows");
+
+        // Filter out empty rows
+        const validDataRows = dataRows.filter(row => 
+          row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell !== '')
+        );
+
+        console.log("🔍 Valid data rows:", validDataRows.length);
+        if (validDataRows.length > 0) {
+          console.log("🔍 Sample data rows:", validDataRows.slice(0, 3));
+        }
+
+        // Build new rate data
+        const newRateData = FAT_VALUES.map(fat => {
+          // Find row with matching FAT value
+          const excelRow = validDataRows.find(row => {
+            const rowFat = safeToNumber(row[0]);
+            if (rowFat === null) return false;
             
-            // Find the corresponding column in Excel data using header mapping
-            const mappingEntry = headerMapping.find(m => Math.abs(m.snfValue - snf) < 0.01);
+            const difference = Math.abs(rowFat - fat);
+            const isMatch = difference < 0.01;
             
-            if (mappingEntry && mappingEntry.excelIndex < rowData.length) {
-              const cellValue = rowData[mappingEntry.excelIndex];
-              
-              if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
-                const numValue = safeToNumber(cellValue);
-                if (numValue !== null) {
-                  rate = cellValue.toString();
-                }
-              }
+            if (isMatch) {
+              console.log(`🔍 Found match for FAT ${fat}: Excel row has ${rowFat}`);
             }
             
-            return { snf, rate };
-          }),
-        };
-      });
+            return isMatch;
+          });
 
-      // Count populated cells for feedback
-      const populatedCells = newRateData.reduce((count, row) => 
-        count + row.snfRates.filter(cell => cell.rate !== '').length, 0
-      );
+          return {
+            fat,
+            snfRates: SNF_VALUES.map(snf => {
+              let rate = '';
+              
+              // Check if this SNF value exists in Excel headers
+              if (headerMap.has(snf) && excelRow) {
+                const columnIndex = headerMap.get(snf);
+                const cellValue = excelRow[columnIndex];
+                
+                if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
+                  const numValue = safeToNumber(cellValue);
+                  if (numValue !== null) {
+                    rate = cellValue.toString();
+                    console.log(`🔍 Set rate for FAT ${fat}, SNF ${snf}: "${rate}"`);
+                  }
+                }
+              }
+              
+              return { snf, rate };
+            })
+          };
+        });
 
-      console.log(`🔍 Import complete: ${populatedCells} cells populated out of ${newRateData.length * SNF_VALUES.length} total cells`);
-      console.log(`🔍 Header mapping used:`, headerMapping.map(m => `${m.originalHeader} -> ${m.snfValue}`));
+        // Count imported cells
+        let importedCells = 0;
+        let totalPossibleCells = 0;
+        
+        newRateData.forEach(row => {
+          row.snfRates.forEach(cell => {
+            if (headerMap.has(cell.snf)) {
+              totalPossibleCells++;
+              if (cell.rate !== '') {
+                importedCells++;
+              }
+            }
+          });
+        });
 
-      setRateData(newRateData);
-      CustomToast.success(`Excel data imported successfully! Processed ${dataRows.length} data rows, populated ${populatedCells} cells. Mapped ${headerMapping.length} SNF columns.`);
-      
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        console.log("🔍 Import Summary:");
+        console.log("- Available headers in Excel:", snfHeaders.length);
+        console.log("- Matched headers with our range:", matchedSnfValues.length);  
+        console.log("- Valid data rows:", validDataRows.length);
+        console.log("- Total possible cells:", totalPossibleCells);
+        console.log("- Imported cells:", importedCells);
+        console.log("- Import success rate:", totalPossibleCells > 0 ? `${((importedCells/totalPossibleCells)*100).toFixed(1)}%` : '0%');
+
+        if (importedCells === 0) {
+          const availableHeaders = Array.from(headerMap.keys()).sort((a, b) => a - b);
+          const expectedHeaders = matchedSnfValues.sort((a, b) => a - b);
+          
+          throw new Error(
+            `No data imported!\n` +
+            `Excel headers found: ${availableHeaders.join(', ')}\n` +
+            `Matching expected headers: ${expectedHeaders.join(', ')}\n` +
+            `Valid data rows: ${validDataRows.length}\n` +
+            `Please check that your Excel file has numeric data in the matching columns.`
+          );
+        }
+
+        setRateData(newRateData);
+        CustomToast.success(`Successfully imported ${importedCells} values from ${validDataRows.length} rows! (${matchedSnfValues.length}/${SNF_VALUES.length} columns matched)`);
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+      } catch (error) {
+        console.error('❌ Import Error:', error);
+        CustomToast.error(`Import failed: ${error.message}`);
+      } finally {
+        setDebugging(false);
       }
-      
-    } catch (error) {
-      console.error('❌ Import processing error:', error);
-      CustomToast.error(`Import failed: ${error.message}`);
-    } finally {
-      setDebugging(false);
-    }
+    };
+
+    reader.readAsArrayBuffer(file);
   };
-
-  // Start reading the file
-  console.log("🔍 Starting to read file as ArrayBuffer...");
-  reader.readAsArrayBuffer(file);
-};
-
-
 
   const handleExport = () => {
     try {
       // Prepare data for export
       const exportData = [
-        // Header row - match the format from your screenshot
+        // Header row
         ['FAT / SNF', ...SNF_VALUES.map(snf => snf.toFixed(1))],
         // Data rows
         ...rateData.map(row => [
@@ -380,9 +325,6 @@ const handleImport = (event) => {
       ];
 
       const worksheet = XLSX.utils.aoa_to_sheet(exportData);
-      
-      // Add some styling to match your format
-      const range = XLSX.utils.decode_range(worksheet['!ref']);
       
       // Set column widths
       const colWidths = [{ wch: 10 }]; // FAT column
@@ -472,12 +414,12 @@ const handleImport = (event) => {
             📤 Export Excel
           </button>
           
-          {/* <button
+          <button
             onClick={handleClear}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors duration-200 flex items-center gap-2"
           >
             🗑️ Clear
-          </button> */}
+          </button>
           
           <button
             onClick={handleSave}
@@ -498,7 +440,7 @@ const handleImport = (event) => {
         <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></div>
-            <span className="text-yellow-800 font-medium">Processing Excel file... Check console for detailed logs.</span>
+            <span className="text-yellow-800 font-medium">Processing Excel file... Check browser console for detailed logs.</span>
           </div>
         </div>
       )}
