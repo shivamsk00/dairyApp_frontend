@@ -43,15 +43,13 @@ const formatDate = (dateString) => {
 
 const ReportsPage = () => {
   const [summaryData, setSummaryData] = useState(null);
-  const [isLoading, setLoading] = useState(false)
+  const [isLoading, setLoading] = useState(false);
   const [form, setForm] = useState({
     term: 'date_range',
     start_date: getToday(),
     end_date: getToday(),
     customer_account_number: ''
   });
-
-
 
   const reportCustomer = useHomeStore(state => state.reportCustomer);
 
@@ -87,14 +85,15 @@ const ReportsPage = () => {
       end_date: formatInputDate(form.end_date)
     };
 
-    setLoading(true)
+    setLoading(true);
     try {
       const res = await reportCustomer(payload);
       if (res?.status_code == 200 && res?.data) {
-        
+        console.log("report data", res.data);
+
         setSummaryData(res.data);
         toast.success("Report generated successfully");
-        setLoading(false)
+        setLoading(false);
       } else {
         setSummaryData(null);
         toast.error(res?.message || "Failed to generate report");
@@ -103,10 +102,9 @@ const ReportsPage = () => {
       console.error("Error generating report:", error);
       toast.error("Failed to generate report");
       setSummaryData(null);
-      setLoading(false)
-
+      setLoading(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -132,7 +130,7 @@ const ReportsPage = () => {
       Shift: entry.shift,
       Milk_Type: entry.milk_type,
       Quantity: entry.quantity,
-      CLR: entry.clr,
+      CLR: entry.clr || 'N/A',
       Fat: entry.fat,
       SNF: entry.snf,
       Base_Rate: entry.base_rate,
@@ -149,18 +147,31 @@ const ReportsPage = () => {
     toast.success("Report exported successfully");
   };
 
-  const isFormValid = form.customer_account_number && form.start_date && form.end_date;
+  // Calculate average Fat and SNF
+  const calculateAverages = () => {
+    if (!summaryData?.milk_collections?.length) return { avgFat: 0, avgSNF: 0 };
 
-  // Report All Data
+    const totalFat = summaryData.milk_collections.reduce((sum, entry) => sum + parseFloat(entry.fat || 0), 0);
+    const totalSNF = summaryData.milk_collections.reduce((sum, entry) => sum + parseFloat(entry.snf || 0), 0);
+    const count = summaryData.milk_collections.length;
+
+    return {
+      avgFat: (totalFat / count).toFixed(2),
+      avgSNF: (totalSNF / count).toFixed(2)
+    };
+  };
+
+  const isFormValid = form.customer_account_number && form.start_date && form.end_date;
+  const { avgFat, avgSNF } = calculateAverages();
 
   return (
     <div className="p-2">
       <div className="flex flex-col lg:flex-row gap-2">
         <form
-          className="bg-gray-800 text-white  rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-2"
+          className="w-full lg:w-1/2 flex flex-col gap-2"
           onSubmit={handleGenerate}
         >
-          <div className="bg-white text-black p-6 rounded shadow">
+          <div className="bg-white text-black p-6 rounded-lg shadow-lg border border-gray-200">
             <h2 className="text-xl font-semibold text-orange-600 mb-4">Customer Milk Collection Report</h2>
 
             {/* From and To Date - 1st Row */}
@@ -173,7 +184,7 @@ const ReportsPage = () => {
                   value={form.start_date}
                   onChange={handleChange}
                   readOnly={form.term !== 'date_range'}
-                  className="border rounded px-3 py-2 w-full"
+                  className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
               <div className="w-full">
@@ -184,7 +195,7 @@ const ReportsPage = () => {
                   value={form.end_date}
                   onChange={handleChange}
                   readOnly={form.term !== 'date_range'}
-                  className="border rounded px-3 py-2 w-full"
+                  className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -197,7 +208,7 @@ const ReportsPage = () => {
                   name="term"
                   value={form.term}
                   onChange={handleChange}
-                  className="border rounded px-3 py-2 w-full"
+                  className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="date_range">Date Range</option>
                   <option value="this_week">This Week</option>
@@ -211,58 +222,156 @@ const ReportsPage = () => {
                   name="customer_account_number"
                   value={form.customer_account_number}
                   onChange={handleChange}
-                  className="border rounded px-3 py-2 w-full"
+                  placeholder="Enter Customer Account Number"
+                  className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`text-white px-4 py-2 rounded ${isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${isFormValid && !isLoading
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+                  : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  }`}
               >
-                {isLoading ? "Please wait..." : "Generate Report"}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Please wait...</span>
+                  </div>
+                ) : (
+                  "Generate Report"
+                )}
               </button>
+
               <button
                 type="button"
                 onClick={handleReset}
                 disabled={isLoading}
-                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset
               </button>
+
+              {summaryData && (
+                <button
+                  type="button"
+                  onClick={exportToExcel}
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Export Excel</span>
+                </button>
+              )}
             </div>
           </div>
         </form>
 
-        {/* {summaryData && (
-          <div className="mt-4 max-w-lg mx-auto h-48 bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow-lg flex flex-col justify-center space-y-4 font-semibold text-right">
-            <p className="text-xl">
-              Total Milk Collected: <span className="text-green-700 font-bold">{summaryData?.total_milk_collections.toFixed(2)} L</span>
-            </p>
-            <p className="text-xl">
-              Total Amount:
-              <span className="text-green-700 font-bold">
-                ₹{Number(summaryData.milk_total_amount).toFixed(2)}
-              </span>
-            </p>
-            <p className="text-xl">
-              Wallet Balance:{" "}
-              <span className={summaryData.customer_wallet < 0 ? "text-red-600 font-bold" : "text-green-600 font-bold"}>
-                ₹{Number(summaryData.customer_wallet).toFixed(2)}
-              </span>
-            </p>
 
+        {/* Enhanced Summary Card with Fat and SNF */}
+        {summaryData && (
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl p-6 shadow-lg">
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-indigo-800">
+                📊 Report Summary
+              </h3>
+
+              {/* Customer Details */}
+              <div className=" rounded-lg p-3">
+                <div className="flex flex-col space-y-2 items-center">
+                  <div className="flex space-x-2 items-center">
+                    <span className="text-sm text-gray-600">Customer:</span>
+                    <span className="font-semibold text-indigo-700">{summaryData.customer_name}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-sm text-gray-600">Account No:</span>
+                    <span className="font-bold text-indigo-800 bg-indigo-100 px-2 py-1 rounded-md text-sm">
+                      {summaryData.milk_collections?.[0]?.customer_account_number || form.customer_account_number || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Milk Collection Summary */}
+              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  🥛 Milk Collection
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Quantity:</span>
+                    <span className="font-bold text-blue-600">
+                      {summaryData?.total_milk_collections?.toFixed(2)} L
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Milk Amount:</span>
+                    <span className="font-bold text-green-600">
+                      ₹{Number(summaryData.milk_total_amount).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Avg Fat:</span>
+                    <span className="font-bold text-yellow-600">
+                      {avgFat}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Avg SNF:</span>
+                    <span className="font-bold text-purple-600">
+                      {avgSNF}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Summary */}
+              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  💰 Financial Summary
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Product Sales:</span>
+                    <span className="font-bold text-orange-600">
+                      ₹{Number(summaryData.product_total_amount || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Amount:</span>
+                    <span className="font-bold text-indigo-600">
+                      ₹{Number(summaryData.net_milk_balance || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-gray-700 font-medium">Current Balance:</span>
+                    <span className={`font-bold ${Number(summaryData.customer_wallet) < 0
+                      ? 'text-red-600'
+                      : 'text-green-600'
+                      }`}>
+                      ₹{Number(summaryData.customer_wallet).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )} */}
+        )}
+
       </div>
 
-
-
       {summaryData && <MergedReportTable summaryData={summaryData} />}
-
     </div>
   );
 };
