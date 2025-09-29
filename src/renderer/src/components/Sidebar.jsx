@@ -83,6 +83,7 @@ const Sidebar = () => {
     },
     { path: '/milkCorrection', icon: <FaListCheck size={18} />, label: 'All Milk Correction', type: 'link' },
     { path: '/customer', icon: <FaUser size={18} />, label: 'Customers', type: 'link' },
+    { path: '/cmsubsidylist', icon: <FaUser size={18} />, label: 'CM Subsidy List', type: 'link' },
     { path: '/alldairymaster', icon: <FaMoneyBillTrendUp size={18} />, label: 'Head Dairy Master', type: 'link' },
     { path: '/milkDispatch', icon: <FaMoneyBillTrendUp size={18} />, label: 'Milk Dispatch', type: 'link' },
     { path: '/dailyMilkSale', icon: <FaArrowTrendUp size={18} />, label: 'Open Milk Sale', type: 'link' },
@@ -95,7 +96,7 @@ const Sidebar = () => {
       isDisabled: isCustomerCollectionOpen,
       isActive: activeItem === 'customer-collection'
     },
-    { path: '/lastmonthaccounting', icon: <FaChartBar size={18} />, label: 'Last Month Hisaab', type: 'link' },
+    // { path: '/lastmonthaccounting', icon: <FaChartBar size={18} />, label: 'Last Month Hisaab', type: 'link' },
     { path: '/ratechart', icon: <FaChartBar size={18} />, label: 'Rate Chart', type: 'link' },
     { path: '/snfchart', icon: <FaChartBar size={18} />, label: 'SNF Chart', type: 'link' },
     { path: '/paymentregister', icon: <FaRupeeSign size={18} />, label: 'Payments Register', type: 'link' },

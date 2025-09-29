@@ -201,7 +201,7 @@ const MergedTableExact = ({ summaryData }) => {
                 <td className="border px-2 py-2 w-16 text-center">
                   <div>
                     <div className="text-yellow-300 text-xs">Avg Fat</div>
-                    <div className="font-bold">{milkEntryCount > 0 ? (totalFat / milkEntryCount).toFixed(1) : '0.0'}%</div>
+                    <div className="font-bold">{milkEntryCount > 0 ? (totalFat / milkEntryCount).toFixed(1) : '0.0'}</div>
                   </div>
                 </td>
 
@@ -209,7 +209,7 @@ const MergedTableExact = ({ summaryData }) => {
                 <td className="border px-2 py-2 w-16 text-center">
                   <div>
                     <div className="text-purple-300 text-xs">Avg SNF</div>
-                    <div className="font-bold">{milkEntryCount > 0 ? (totalSNF / milkEntryCount).toFixed(1) : '0.0'}%</div>
+                    <div className="font-bold">{milkEntryCount > 0 ? (totalSNF / milkEntryCount).toFixed(1) : '0.0'}</div>
                   </div>
                 </td>
 

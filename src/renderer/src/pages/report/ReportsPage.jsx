@@ -324,13 +324,13 @@ const ReportsPage = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Avg Fat:</span>
                     <span className="font-bold text-yellow-600">
-                      {avgFat}%
+                      {avgFat}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Avg SNF:</span>
                     <span className="font-bold text-purple-600">
-                      {avgSNF}%
+                      {avgSNF}
                     </span>
                   </div>
                 </div>

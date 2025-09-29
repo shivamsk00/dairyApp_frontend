@@ -425,11 +425,11 @@ const DairyMilkCollectionPage = () => {
             <div className="flex flex-col md:flex-row w-full h-full">
                 {/* === Left: Form Section === */}
                 <div className="w-full md:w-[25%] bg-white border-r border-gray-300 flex flex-col">
-                    <form onSubmit={handleSubmit} className="p-4 space-y-4 flex-1 overflow-y-auto">
+                    <form onSubmit={handleSubmit} className="p-4 space-y-4 flex-1 overflow-y-auto " >
                         {/* Milk Type & Shift */}
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 ">
                             {/* Milk Type */}
-                            <div className="w-1/2">
+                            <div className="w-1/2 ">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Milk Type:</label>
                                 <div className="flex gap-1">
                                     {['cow', 'buffalo', 'other'].map((type) => (
@@ -700,97 +700,57 @@ const DairyMilkCollectionPage = () => {
                         <h2 className="text-lg font-semibold text-gray-800 mb-3">Daily Summary</h2>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             {/* Morning */}
-                            <div className="bg-orange-50 p-3 rounded border border-orange-200">
-                                <h3 className="font-semibold text-orange-700 mb-2">Morning</h3>
+                            <div className="bg-blue-500 p-3 rounded border border-orange-200">
+                                <h3 className="font-semibold text-white mb-2">Morning</h3>
                                 <div className="space-y-1">
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Milk:</span>
                                         <span className="font-semibold">{dayTotal?.morning_total_milk.toFixed(2)} L</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Amount:</span>
-                                        <span className="font-bold text-green-600">₹{dayTotal?.morning_total_amount.toFixed(2)}</span>
+                                        <span className="font-bold text-white">₹{dayTotal?.morning_total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Evening */}
-                            <div className="bg-purple-50 p-3 rounded border border-purple-200">
-                                <h3 className="font-semibold text-purple-700 mb-2">Evening</h3>
+                            <div className="bg-orange-500 p-3 rounded border border-purple-200">
+                                <h3 className="font-semibold text-white mb-2">Evening</h3>
                                 <div className="space-y-1">
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Milk:</span>
                                         <span className="font-semibold">{dayTotal?.evening_total_milk.toFixed(2)} L</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Amount:</span>
-                                        <span className="font-bold text-green-600">₹{dayTotal?.evening_total_amount.toFixed(2)}</span>
+                                        <span className="font-bold text-white">₹{dayTotal?.evening_total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Total */}
-                            <div className="bg-green-50 p-3 rounded border border-green-200">
-                                <h3 className="font-semibold text-green-700 mb-2">Total</h3>
+                            <div className="bg-green-500 p-3 rounded border border-green-200">
+                                <h3 className="font-semibold text-white mb-2">Total</h3>
                                 <div className="space-y-1">
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Milk:</span>
                                         <span className="font-semibold">{dayTotal?.milk_total.toFixed(2)} L</span>
                                     </div>
-                                    <div className="flex justify-between">
+                                    <div className="flex justify-between text-white">
                                         <span>Amount:</span>
-                                        <span className="font-bold text-green-600">₹{dayTotal?.total_amount.toFixed(2)}</span>
+                                        <span className="font-bold text-white">₹{dayTotal?.total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                       {/* Completely Fixed Footer at Bottom - Will NOT scroll */}
-                        {/* <div className=" bottom-0 left-0 right-0 bg-black border-t z-10">
-                            <div className="p-3">
-                                <div className="grid grid-cols-6 gap-4 text-xs">
-                                    <div className="text-center border-r">
-                                        <p className="font-semibold text-white">Avg. FAT</p>
-                                        <p className="font-bold text-[16px] text-white">
-                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
-                                        </p>
-                                    </div>
-                                    <div className="text-center border-r">
-                                        <p className="font-semibold text-white">Avg. SNF</p>
-                                        <p className="font-bold text-[16px] text-orange-400">
-                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
-                                        </p>
-                                    </div>
-                                    <div className="text-center border-r">
-                                        <p className="font-semibold text-white">Avg. Rate</p>
-                                        <p className="font-bold text-green-400 text-[16px]">
-                                            ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
-                                        </p>
-                                    </div>
-                                    <div className="text-center border-r">
-                                        <p className="font-semibold text-white">Other</p>
-                                        <p className="font-bold text-white text-[16px]">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
-                                    </div>
-                                    <div className="text-center border-r">
-                                        <p className="font-semibold text-white">Milk</p>
-                                        <p className="font-bold text-orange-400 text-[16px]">
-                                            {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-white">Total</p>
-                                        <p className="font-bold text-green-400 text-[16px]">
-                                            ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
+
 
                     {/* Table */}
                     <div className="flex flex-col h-full relative">
                         {/* Fixed Header */}
-                        <div className="bg-gray-50 border-b">
+                        <div className="bg-black border-b">
                             <table className="w-full text-xl table-fixed">
                                 <colgroup>
                                     <col style={{ width: '40px' }} />     {/* SR */}
@@ -810,7 +770,7 @@ const DairyMilkCollectionPage = () => {
                                 <thead>
                                     <tr>
                                         {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total', 'Balance', 'Actions'].map(header => (
-                                            <th key={header} className="px-2 py-2 text-center text-[16px] font-bold text-black truncate">
+                                            <th key={header} className="px-2 py-2 text-center text-[16px] font-bold text-white truncate">
                                                 {header}
                                             </th>
                                         ))}
@@ -849,7 +809,7 @@ const DairyMilkCollectionPage = () => {
                                             {isShift === 'morning' && morningCollection.length > 0 && (
                                                 <>
                                                     <tr className="bg-orange-100">
-                                                        <td colSpan="13" className="px-2 py-2 text-center font-semibold text-orange-800 text-xs">
+                                                        <td colSpan="13" className="px-2 py-2 text-center font-semibold text-blue-800 text-xs">
                                                             Morning Collection ({morningCollection.length})
                                                         </td>
                                                     </tr>
@@ -978,42 +938,7 @@ const DairyMilkCollectionPage = () => {
                         {/* Completely Fixed Footer at Bottom - Will NOT scroll */}
                         <div className="fixed bottom-0 left-0 right-0 bg-gray-50 border-t z-10">
                             <div className="p-3">
-                                {/* <div className="grid grid-cols-6 gap-4 text-xs">
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Avg. FAT</p>
-                                        <p className="font-bold text-blue-600">
-                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_fat : milkCollectiionAvergeData?.evening_avg_fat}%
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Avg. SNF</p>
-                                        <p className="font-bold text-blue-600">
-                                            {isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_snf : milkCollectiionAvergeData?.evening_avg_snf}%
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Avg. Rate</p>
-                                        <p className="font-bold text-green-600">
-                                            ₹{isShift === 'morning' ? milkCollectiionAvergeData?.morning_avg_base_rate : milkCollectiionAvergeData?.evening_avg_base_rate}
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Other</p>
-                                        <p className="font-bold text-orange-600">₹{Number(milkCollectiionAvergeData?.other_price_total).toFixed(2) || 0}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Milk</p>
-                                        <p className="font-bold text-purple-600">
-                                            {isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_milk).toFixed(2) || 0 : Number(milkCollectiionAvergeData?.evening_total_milk).toFixed(2) || 0} L
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="font-semibold text-gray-700">Total</p>
-                                        <p className="font-bold text-green-700">
-                                            ₹{isShift === 'morning' ? Number(milkCollectiionAvergeData?.morning_total_amount).toFixed(2) : Number(milkCollectiionAvergeData?.evening_total_amount).toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div> */}
+
                             </div>
                         </div>
                     </div>

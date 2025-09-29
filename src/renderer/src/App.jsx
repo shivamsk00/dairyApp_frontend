@@ -39,6 +39,7 @@ import CashEntryPage from './pages/cashentry/CashEntryPage';
 import MilkCorrectionPage from './pages/milkCorrection/MilkCorrectionPage';
 import UpdateHistoryPage from './pages/updatehistory/UpdateHistoryPage';
 import LastMonthAccounting from './pages/lastMonthAccounting/LastMonthAccounting';
+import CmSubsidyList from './pages/cmSubsidyList/CmSubsidyList';
 
 function App() {
 
@@ -113,6 +114,8 @@ function App() {
           {/* Last Month Accounting */}
           <Route path="lastmonthaccounting" element={<LastMonthAccounting />} />
 
+          {/* Cm Subsidy */}
+          <Route path="cmsubsidylist" element={<CmSubsidyList />} />
 
         </Route>
 
