@@ -91,6 +91,7 @@ const ReportsPage = () => {
     try {
       const res = await reportCustomer(payload);
       if (res?.status_code == 200 && res?.data) {
+        
         setSummaryData(res.data);
         toast.success("Report generated successfully");
         setLoading(false)

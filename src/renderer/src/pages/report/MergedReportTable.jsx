@@ -141,8 +141,11 @@ const MergedTableExact = ({ summaryData }) => {
                 <td className="border px-2 py-2 w-60 text-sm">Product Price ₹{totalProductAmount.toFixed(2)}</td>
                 <td className="border px-2 py-2 text-green-500 w-24 text-sm">Received Amount ₹{totalDebit.toFixed(2)}</td>
                 <td className="border px-2 py-2 text-red-500 w-48 text-sm"> Given Amount ₹{totalCredit.toFixed(2)}</td>
-                <td className="border px-2 py-2 w-40" colSpan={2}>
+                <td className="border px-2 py-2 w-40" colSpan={1}>
                   Total Paybal Amount: ₹{parseFloat(summaryData.net_milk_balance || 0).toFixed(2)}
+                </td>
+                <td className="border px-2 py-2 w-40" colSpan={1}>
+                  Current Balance  ₹{parseFloat(summaryData.customer_wallet || 0).toFixed(2)}
                 </td>
               </tr>
             </tfoot>

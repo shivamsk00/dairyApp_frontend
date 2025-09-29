@@ -38,6 +38,7 @@ import HeadDairyPage from './pages/headDairy/HeadDairyPage';
 import CashEntryPage from './pages/cashentry/CashEntryPage';
 import MilkCorrectionPage from './pages/milkCorrection/MilkCorrectionPage';
 import UpdateHistoryPage from './pages/updatehistory/UpdateHistoryPage';
+import LastMonthAccounting from './pages/lastMonthAccounting/LastMonthAccounting';
 
 function App() {
 
@@ -96,9 +97,11 @@ function App() {
           <Route path="snfchart" element={<SnfChartPage />} />
           <Route path="AddProductPage" element={<AddProductPage />} />
           <Route path="editProduct" element={<EditProductPage />} />
+
           {/* product stock  */}
           <Route path="addStock" element={<AddStockPage />} />
           <Route path="editStock" element={<EditeStockPage />} />
+
           {/* Head Dairy  */}
           <Route path="headDairy" element={<AddHeadDairy />} />
           <Route path="alldairymaster" element={<HeadDairyPage />} />
@@ -106,6 +109,9 @@ function App() {
           <Route path="cashentry" element={<CashEntryPage />} />
           <Route path="milkCorrection" element={<MilkCorrectionPage />} />
           <Route path="update-history" element={<UpdateHistoryPage />} />
+
+          {/* Last Month Accounting */}
+          <Route path="lastmonthaccounting" element={<LastMonthAccounting />} />
 
 
         </Route>
