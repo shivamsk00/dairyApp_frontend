@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = [];
-for (let i = 7.2; i <= 10.2; i += 0.1) {
+for (let i = 8.0; i <= 9.5; i += 0.1) {
   SNF_VALUES.push(parseFloat(i.toFixed(1)));
 }
 const FAT_VALUES = Array.from({ length: 71 }, (_, i) => parseFloat((3.0 + i * 0.1).toFixed(1)));

@@ -95,6 +95,7 @@ const Sidebar = () => {
       isDisabled: isCustomerCollectionOpen,
       isActive: activeItem === 'customer-collection'
     },
+    { path: '/lastmonthaccounting', icon: <FaChartBar size={18} />, label: 'Last Month Hisaab', type: 'link' },
     { path: '/ratechart', icon: <FaChartBar size={18} />, label: 'Rate Chart', type: 'link' },
     { path: '/snfchart', icon: <FaChartBar size={18} />, label: 'SNF Chart', type: 'link' },
     { path: '/paymentregister', icon: <FaRupeeSign size={18} />, label: 'Payments Register', type: 'link' },
