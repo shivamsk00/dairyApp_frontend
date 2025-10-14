@@ -56,14 +56,7 @@ const MergedTableExact = ({ summaryData }) => {
 
   return (
     <div className="p-4 mt-10 overflow-x-auto">
-      {/* <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-800 p-4 rounded-lg shadow mb-4">
-        <p className="text-lg font-semibold">
-          Account No: <span className="font-bold">{summaryData.milk_collections[0]?.customer_account_number || 'N/A'}</span>
-        </p>
-        <p className="text-lg font-semibold">
-          Customer Name: <span className="font-bold">{summaryData.customer_name || 'N/A'}</span>
-        </p>
-      </div> */}
+     
 
       <div className="relative border rounded overflow-hidden max-h-[70vh]">
         <div className="overflow-auto max-h-[calc(70vh-7rem)]">
@@ -267,7 +260,18 @@ const MergedTableExact = ({ summaryData }) => {
                 <td className="border px-2 py-2 w-32 text-center">
                   <div>
                     <div className="text-indigo-300 text-xs">Total Amount</div>
-                    <div className="font-bold">₹{parseFloat(summaryData.net_milk_balance || 0).toFixed(2)}</div>
+                    {/* <div className="font-bold">
+                     
+                      ₹{parseFloat(summaryData.net_milk_balance || 0).toFixed(2)}
+                      </div> */}
+                       <div className={`font-bold ${
+          (totalMilkAmount + totalDebit - totalProductAmount - totalCredit) < 0 
+            ? 'text-red-300' 
+            : 'text-green-300'
+        }`}>
+          {/* ✅ CORRECT FORMULA: Milk + Received - Products - Given */}
+          ₹{(totalMilkAmount + totalDebit - totalProductAmount - totalCredit).toFixed(2)}
+        </div>
                   </div>
                 </td>
               </tr>

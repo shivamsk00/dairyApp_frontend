@@ -341,7 +341,8 @@ const useHomeStore = create((set) => ({
   allProductGet: async (page) => {
     try {
       // set({loading:true})
-      const res = await api.get(`/all-product?page=${page}`)
+      // const res = await api.get(`/all-product?page=${page}`)
+      const res = await api.get(`/all-product`)
       // set({loading:false})
       return res.data
     } catch (error) {

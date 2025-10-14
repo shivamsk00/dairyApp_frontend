@@ -688,8 +688,8 @@ const handleEditClick = async (entry) => {
   const noteRef = useRef();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 ">
+      <div className="max-w-8xl mx-auto">
         
         {/* Header Section */}
         <div className="mb-8">
@@ -705,7 +705,7 @@ const handleEditClick = async (entry) => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
@@ -755,7 +755,7 @@ const handleEditClick = async (entry) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Form Section */}
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-2xl border border-slate-200 p-8 mb-8">
@@ -949,7 +949,7 @@ const handleEditClick = async (entry) => {
               <p className="text-lg font-semibold text-slate-600 mt-6">Loading transactions...</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-y-auto h-[70vh]">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-slate-50 to-slate-100 border-b-2 border-slate-200">
                   <tr>
