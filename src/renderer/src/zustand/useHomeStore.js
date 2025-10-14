@@ -555,6 +555,29 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+  // Edit cash entrys
+  editCashEntryFetch: async (cash_entry_id) => {
+    try {
+      const res = await api.get(`/edit-payment/${cash_entry_id}`)
+      console.log('cash Entry edit data response on Home store screen', res.data);
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+  // Update Cash Entries Api
+  updateCashEntry: async (cash_entry_id, cashEntryData) => {
+    try {
+      // set({loading:true})
+      const res = await api.post(`/update-payment/${cash_entry_id}`, cashEntryData)
+      // set({loading:false})
+      return res.data
+    } catch (error) {
+      return error.response.data
+    }
+  },
+
+
 
   // MILK CORRECTION
   getMilkCorrectionData: async (milkCorrectionData) => {

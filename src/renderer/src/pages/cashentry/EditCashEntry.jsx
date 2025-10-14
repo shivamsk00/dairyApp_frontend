@@ -171,7 +171,7 @@ const EditCashEntryModal = ({ isOpen, onClose, productData }) => {
         transaction_type: form.transaction_type,
       };
 
-      
+
 
       const res = await updateProductSale(productData.id, customerCollectionData);
       if (res.status_code === 200) {

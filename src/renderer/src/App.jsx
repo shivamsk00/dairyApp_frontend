@@ -40,6 +40,7 @@ import MilkCorrectionPage from './pages/milkCorrection/MilkCorrectionPage';
 import UpdateHistoryPage from './pages/updatehistory/UpdateHistoryPage';
 import LastMonthAccounting from './pages/lastMonthAccounting/LastMonthAccounting';
 import CmSubsidyList from './pages/cmSubsidyList/CmSubsidyList';
+import EditCashEntryModal from './pages/cashentry/EditCashEntry';
 
 function App() {
 
@@ -108,6 +109,7 @@ function App() {
           <Route path="alldairymaster" element={<HeadDairyPage />} />
           <Route path="editHeadDairy" element={<EditHeadDairy />} />
           <Route path="cashentry" element={<CashEntryPage />} />
+          <Route path="editCashEntry" element={<EditCashEntryModal />} />
           <Route path="milkCorrection" element={<MilkCorrectionPage />} />
           <Route path="update-history" element={<UpdateHistoryPage />} />
 
