@@ -459,7 +459,7 @@ const RateChartPage = () => {
 
       {/* Table Container */}
       <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="h-full overflow-auto">
+        <div className="h-full overflow-auto table-scrollbar table-scroll-bg">
           <table className="w-full border-collapse text-sm">
             {/* Sticky Header */}
             <thead className="sticky top-0 z-20 bg-slate-700 text-white">

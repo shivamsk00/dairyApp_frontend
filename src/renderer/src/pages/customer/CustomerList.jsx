@@ -329,21 +329,19 @@ const CustomerList = () => {
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'table' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'table'
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Table
               </button>
               <button
                 onClick={() => setViewMode('card')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'card' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'card'
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 Cards
               </button>
@@ -367,13 +365,13 @@ const CustomerList = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           {/* Desktop Table */}
           <div className="hidden lg:block">
-            <div className="overflow-y-auto max-h-[70vh]">
+            <div className="overflow-x-auto overflow-y-auto h-[65vh] table-scrollbar table-scroll-bg">
               <table className="w-full">
                 {/* Table Header - Sticky */}
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
                     <th className="text-left p-4 border-b font-semibold text-gray-700 w-16">Sr.</th>
-                    <th 
+                    <th
                       className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[120px]"
                       onClick={() => handleSort('account_number')}
                     >
@@ -386,7 +384,7 @@ const CustomerList = () => {
                         )}
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[180px]"
                       onClick={() => handleSort('name')}
                     >
@@ -399,7 +397,7 @@ const CustomerList = () => {
                         )}
                       </div>
                     </th>
-                    <th 
+                    <th
                       className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[130px]"
                       onClick={() => handleSort('subsidy_code')}
                     >
@@ -423,11 +421,10 @@ const CustomerList = () => {
                 {/* Table Body */}
                 <tbody>
                   {currentData.map((row, index) => (
-                    <tr 
-                      key={row.id} 
-                      className={`hover:bg-gray-50 border-b transition-colors ${
-                        editingRowId === row.id ? 'bg-blue-50 border-blue-200' : ''
-                      }`}
+                    <tr
+                      key={row.id}
+                      className={`hover:bg-gray-50 border-b transition-colors ${editingRowId === row.id ? 'bg-blue-50 border-blue-200' : ''
+                        }`}
                     >
                       {/* Serial Number */}
                       <td className="p-4 text-gray-600 font-medium">
@@ -576,8 +573,8 @@ const CustomerList = () => {
                           />
                         ) : (
                           <div className="text-green-600 font-bold text-sm">
-                            ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', { 
-                              minimumFractionDigits: 2 
+                            ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', {
+                              minimumFractionDigits: 2
                             })}
                           </div>
                         )}
@@ -672,7 +669,7 @@ const CustomerList = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="flex items-center gap-2 text-gray-600">
                       <Phone className="w-3 h-3" />
@@ -728,7 +725,7 @@ const CustomerList = () => {
                 >
                   Previous
                 </button>
-                
+
                 <div className="hidden sm:flex items-center gap-1">
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1
@@ -737,11 +734,10 @@ const CustomerList = () => {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                            currentPage === page
+                          className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === page
                               ? 'text-orange-600 bg-orange-100'
                               : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           {page}
                         </button>
@@ -857,11 +853,10 @@ const CustomerList = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${
-                    selectedCustomer.status === '1'
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${selectedCustomer.status === '1'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
-                  }`}>
+                    }`}>
                     <FaDotCircle className="w-3 h-3" />
                     {selectedCustomer.status === '1' ? 'Active Customer' : 'Inactive Customer'}
                   </span>
@@ -884,11 +879,10 @@ const CustomerList = () => {
                   <div className="flex items-center gap-6">
                     <div className="text-center">
                       <p className="text-xs text-gray-500 uppercase font-semibold">Customer Type</p>
-                      <span className={`inline-block mt-1 px-4 py-2 rounded-lg font-medium ${
-                        selectedCustomer.customer_type === 'Seller' ? 'bg-green-100 text-green-700' :
-                        selectedCustomer.customer_type === 'Buyer' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span className={`inline-block mt-1 px-4 py-2 rounded-lg font-medium ${selectedCustomer.customer_type === 'Seller' ? 'bg-green-100 text-green-700' :
+                          selectedCustomer.customer_type === 'Buyer' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                        }`}>
                         <FaBuilding className="inline w-4 h-4 mr-2" />
                         {selectedCustomer.customer_type || 'Regular'}
                       </span>
@@ -1028,7 +1022,7 @@ const CustomerList = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete Customer</h3>
               <p className="text-gray-600 mb-6">
-                Are you sure you want to delete <strong>{customerToDelete?.name}</strong>? 
+                Are you sure you want to delete <strong>{customerToDelete?.name}</strong>?
                 This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-center">

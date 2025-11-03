@@ -449,7 +449,7 @@ const CmSubsidyList = () => {
       {!loading && (
         <div className="mx-4">
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-auto h-[65vh] table-scrollbar table-scroll-bg">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>

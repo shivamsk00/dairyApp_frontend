@@ -1973,7 +1973,7 @@ const CustomerCollection = () => {
                 </form>
 
                 {/* Table Section */}
-                <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-y-auto h-[70vh]">
+                <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-y-auto h-[70vh] table-scrollbar table-scroll-bg">
 
           
                     {/* Table Header with Search/Filter */}

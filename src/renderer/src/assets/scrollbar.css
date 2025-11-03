@@ -34,3 +34,51 @@
     background: #6366f1;
     /* hover color */
 }
+
+/* Utility to hide scrollbars but keep scrolling functional */
+.hide-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* For other browsers fallback */
+    -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Thicker, prettier scrollbar for tables */
+.table-scrollbar {
+    /* thumb color, track color for modern browsers */
+    scrollbar-color: #7c3aed #f1f5f9;
+    /* make it larger on browsers that support it */
+    scrollbar-width: 14px;
+}
+
+.table-scrollbar::-webkit-scrollbar {
+    width: 14px;
+    height: 8px;
+}
+
+.table-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9; /* light track */
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.02);
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7c3aed, #5b21b6);
+    border-radius: 8px;
+    border: 3px solid #f1f5f9; /* gives a nice gap between thumb and track */
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6d28d9, #4c1d95);
+}
+
+/* Subtle background for the scroll container to make scrollbar stand out */
+.table-scroll-bg {
+    background: linear-gradient(180deg, rgba(99,102,241,0.03), rgba(15,23,42,0.01));
+}
