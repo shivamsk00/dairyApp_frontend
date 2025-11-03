@@ -12,6 +12,7 @@ import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 import CommonHeader from '../../components/CommonHeader';
 import ToggleButton from '../../components/ToggleButton';
 import { BsFillPrinterFill } from 'react-icons/bs';
+import '../../assets/scrollbar.css'
 
 const DairyMilkCollectionPage = () => {
     const nav = useNavigate()
@@ -424,7 +425,7 @@ const DairyMilkCollectionPage = () => {
 
             <div className="flex flex-col md:flex-row w-full h-full">
                 {/* === Left: Form Section === */}
-                <div className="w-full md:w-[25%] bg-white border-r border-gray-300 flex flex-col">
+                <div className="w-full md:w-[25%] bg-orange-300 border-r border-gray-600 flex flex-col">
                     <form onSubmit={handleSubmit} className="p-4 space-y-4 flex-1 overflow-y-auto " >
                         {/* Milk Type & Shift */}
                         <div className="flex gap-4 ">
@@ -748,9 +749,9 @@ const DairyMilkCollectionPage = () => {
 
 
                     {/* Table */}
-                    <div className="flex flex-col h-full relative">
+                    <div className="flex flex-col h-full relative scrollable-table">
                         {/* Fixed Header */}
-                        <div className="bg-black border-b">
+                        <div className="bg-black border-b  w-full">
                             <table className="w-full text-xl table-fixed">
                                 <colgroup>
                                     <col style={{ width: '40px' }} />     {/* SR */}
