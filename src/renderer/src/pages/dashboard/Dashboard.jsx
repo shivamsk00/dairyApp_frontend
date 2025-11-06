@@ -62,7 +62,7 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen ">
       <div className="max-w-8xl mx-auto space-y-6">
         
         {/* Top KPI Cards */}
