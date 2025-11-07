@@ -3,6 +3,7 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: 'https://dairy.productionhouse.store/api/' // 🟡 Yaha tumhari real API base URL daalo
+  // baseURL: 'http://127.0.0.1:8000/api/' // 🟡 Yaha tumhari real API base URL daalo
   // baseURL: 'https://test.productionhouse.store/api/' // 🟡 Yaha tumhari real API base URL daalo
 })
 

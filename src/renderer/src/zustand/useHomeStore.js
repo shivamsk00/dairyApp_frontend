@@ -525,7 +525,7 @@ const useHomeStore = create((set) => ({
     }
   },
 
-  // Cash Entries Api
+  // ////////////////////////////////////////////Cash Entries Api///////////////////////////////////////////
   submitCashEntry: async (cashEntriesData) => {
     console.log('cashEntriesData', cashEntriesData)
     try {
@@ -578,9 +578,30 @@ const useHomeStore = create((set) => ({
     }
   },
 
+  // In your useHomeStore
+dateWiseMilkEntries:async (data) => {
+  try {
+    const response = await api.post('/date-wise-milk-entries', data)
+    return response.data
+  } catch (error) {
+    console.error('Error:', error)
+    throw error
+  }
+},
+
+bulkRecordPayment:async (data) => {
+  try {
+    const response = await api.post('/bulk-record-payment', data)
+    return response.data
+  } catch (error) {
+    console.error('Error:', error)
+    throw error
+  }
+},
 
 
-  // MILK CORRECTION
+
+  ////////////////////////////////////////////////// MILK CORRECTION//////////////////////////////////////////////////
   getMilkCorrectionData: async (milkCorrectionData) => {
     try {
       // set({loading:true})
