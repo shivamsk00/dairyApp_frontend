@@ -55,7 +55,7 @@ const Dashboard = () => {
     productsInStock: 48,
     productsSoldToday: 32,
   };
-  
+
   const totalCollection = dashboardImage.morningShiftCollection + dashboardImage.eveningShiftCollection;
   const morningCollectionRate = (dashboardImage.morningShiftCollection / totalCollection) * 100;
   const eveningCollectionRate = (dashboardImage.eveningShiftCollection / totalCollection) * 100;
@@ -64,30 +64,30 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen ">
       <div className="max-w-8xl mx-auto space-y-6">
-        
+
         {/* Top KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KpiCard 
-            title="Total Customers" 
+          <KpiCard
+            title="Total Customers"
             value={dashboardImage.totalCustomers}
             icon={<FaUsers className="text-white" />}
             color="bg-blue-500"
           />
-          <KpiCard 
-            title="Today's Collection" 
+          <KpiCard
+            title="Today's Collection"
             value={`${dashboardImage.todaysCollection} L`}
             subtitle="morning + evening"
             icon={<FaBoxOpen className="text-white" />}
             color="bg-green-500"
           />
-          <KpiCard 
-            title="Today's Revenue" 
+          <KpiCard
+            title="Today's Revenue"
             value={`₹${dashboardImage.todaysRevenue.toLocaleString()}`}
             icon={<FaMoneyBillWave className="text-white" />}
             color="bg-yellow-500"
           />
-          <KpiCard 
-            title="Profit Margin" 
+          <KpiCard
+            title="Profit Margin"
             value={`${dashboardImage.profitMargin}%`}
             icon={<FaChartLine className="text-white" />}
             color="bg-teal-500"
@@ -98,26 +98,26 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-lg font-semibold text-gray-800">Shift-wise Collection</h2>
           <p className="text-sm text-gray-500 mb-6">Morning vs Evening milk collection comparison</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
             {/* Morning Shift */}
-            <ShiftCard 
+            <ShiftCard
               shift="Morning Shift"
               collection={dashboardImage.morningShiftCollection}
               rate={morningCollectionRate}
               fat={dashboardImage.morningFat}
               snf={dashboardImage.morningSnf}
-              icon={<FaSun className="text-yellow-500"/>}
+              icon={<FaSun className="text-yellow-500" />}
               color="yellow"
             />
             {/* Evening Shift */}
-            <ShiftCard 
+            <ShiftCard
               shift="Evening Shift"
               collection={dashboardImage.eveningShiftCollection}
               rate={eveningCollectionRate}
               fat={dashboardImage.eveningFat}
               snf={dashboardImage.eveningSnf}
-              icon={<FaMoon className="text-blue-500"/>}
+              icon={<FaMoon className="text-blue-500" />}
               color="blue"
             />
           </div>
@@ -136,17 +136,17 @@ const Dashboard = () => {
               <h2 className="text-lg font-semibold text-gray-800">Weekly Performance</h2>
               <p className="text-sm text-gray-500 mb-4">Revenue and milk collection details</p>
               <div style={{ height: '300px' }}>
-                <Bar 
-                  data={weeklyPerformanceData} 
-                  options={{ 
-                    responsive: true, 
+                <Bar
+                  data={weeklyPerformanceData}
+                  options={{
+                    responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } },
                     scales: {
                       y: { beginAtZero: true, grid: { display: false } },
                       x: { grid: { display: false } }
                     }
-                  }} 
+                  }}
                 />
               </div>
             </div>
@@ -211,21 +211,21 @@ const Dashboard = () => {
 
         {/* Export Reports */}
         <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-center">
-            <div>
-                <h3 className="text-md font-semibold text-gray-800">Export Reports</h3>
-                <p className="text-sm text-gray-500">Download daily, weekly, or monthly reports</p>
-            </div>
-            <div className="flex items-center gap-2 mt-3 sm:mt-0">
-                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option>Today</option>
-                    <option>This Week</option>
-                    <option>This Month</option>
-                </select>
-                <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors">
-                    <FaFileExport />
-                    <span>Export Report</span>
-                </button>
-            </div>
+          <div>
+            <h3 className="text-md font-semibold text-gray-800">Export Reports</h3>
+            <p className="text-sm text-gray-500">Download daily, weekly, or monthly reports</p>
+          </div>
+          <div className="flex items-center gap-2 mt-3 sm:mt-0">
+            <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+              <option>Today</option>
+              <option>This Week</option>
+              <option>This Month</option>
+            </select>
+            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors">
+              <FaFileExport />
+              <span>Export Report</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -273,24 +273,23 @@ const ShiftCard = ({ shift, collection, rate, fat, snf, icon, color }) => (
 );
 
 const ProductCard = ({ title, value, change, icon }) => (
-    <div className="bg-white p-5 rounded-lg shadow-sm flex justify-between items-start">
-        <div>
-            <div className="flex items-center gap-2 text-gray-500 mb-2">
-                {icon}
-                <p className="text-sm font-medium">{title}</p>
-            </div>
-            <p className="text-3xl font-bold text-gray-800">{value}</p>
-        </div>
-        <p className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">{change}</p>
+  <div className="bg-white p-5 rounded-lg shadow-sm flex justify-between items-start">
+    <div>
+      <div className="flex items-center gap-2 text-gray-500 mb-2">
+        {icon}
+        <p className="text-sm font-medium">{title}</p>
+      </div>
+      <p className="text-3xl font-bold text-gray-800">{value}</p>
     </div>
+    <p className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">{change}</p>
+  </div>
 );
 
 const QuickActionButton = ({ text, icon, primary = false }) => (
-  <button className={`w-full flex items-center gap-3 p-3 rounded-lg text-left text-sm font-medium transition-colors ${
-    primary
+  <button className={`w-full flex items-center gap-3 p-3 rounded-lg text-left text-sm font-medium transition-colors ${primary
       ? 'bg-blue-600 text-white shadow hover:bg-blue-700'
       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-  }`}>
+    }`}>
     {icon}
     <span>{text}</span>
   </button>
