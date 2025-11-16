@@ -105,6 +105,7 @@ const MilkCorrectionPage = () => {
             fat: data.fat,
             snf: data.snf,
             rate: `${data.base_rate} / Ltr`,
+            other_price: data.other_price,
             total: data.total_amount
         };
 
@@ -148,11 +149,10 @@ const MilkCorrectionPage = () => {
             selector: row => row.milk_type,
             sortable: true,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    row.milk_type === 'cow' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.milk_type === 'cow'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {row.milk_type}
                 </span>
             )
@@ -161,11 +161,10 @@ const MilkCorrectionPage = () => {
             name: 'Shift',
             selector: row => row.shift,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    row.shift === 'morning' 
-                        ? 'bg-orange-100 text-orange-800' 
-                        : 'bg-purple-100 text-purple-800'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.shift === 'morning'
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-purple-100 text-purple-800'
+                    }`}>
                     {row.shift === 'morning' ? 'M' : 'E'}
                 </span>
             )
@@ -207,6 +206,15 @@ const MilkCorrectionPage = () => {
             )
         },
         {
+            name: 'Other Rate',
+            selector: row => row.other_price,
+            cell: row => (
+                <div className="font-medium text-green-600">
+                    ₹{row.other_price}
+                </div>
+            )
+        },
+        {
             name: 'Amount',
             selector: row => row.total_amount,
             cell: row => (
@@ -219,8 +227,8 @@ const MilkCorrectionPage = () => {
             name: 'Actions',
             cell: row => (
                 <div className="flex gap-1 items-center justify-center">
-                    <button 
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm" 
+                    <button
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm"
                         onClick={() => handlePrint(row)}
                         title="Print"
                     >
@@ -559,6 +567,7 @@ const MilkCorrectionPage = () => {
                                     ['FAT (%)', selectedMilkEntry.fat],
                                     ['SNF (%)', selectedMilkEntry.snf],
                                     ['Rate (₹/Ltr)', selectedMilkEntry.base_rate],
+                                    ['Other Price (₹/Ltr)', selectedMilkEntry.other_price],
                                     ['Total Amount (₹)', selectedMilkEntry.total_amount],
                                     ['Created At', new Date(selectedMilkEntry.created_at).toLocaleString('en-IN')]
                                 ].map(([label, value]) => (
@@ -592,7 +601,7 @@ const MilkCorrectionPage = () => {
                     setEditableEntry(null);
                 }}
                 milkData={editableEntry}
-                onUpdate={handleSubmit}
+               onUpdate={() => handleSubmit()}
             />
 
             {/* Enhanced Delete Confirmation Modal */}

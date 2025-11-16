@@ -147,11 +147,10 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
     e.preventDefault();
     try {
       const res = await editMilkCollectionDetail(milkData.id, form);
-      if (res.status_code == 200) {
-
-        // CustomToast.success(res.message);
-        onClose(); // close modal after success
-        // await onUpdate(e);
+      if (res.status_code === 200) {
+        CustomToast.success(res.message);
+        await onUpdate(); // ← Remove the 'e' parameter
+        onClose();
       } else {
         CustomToast.error(res.message);
       }
@@ -269,6 +268,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
             { label: 'SNF', name: 'snf', type: 'number' },
             // { label: 'Base Rate', name: 'base_rate', type: 'number' },
             { label: 'Rate', name: 'rate', type: 'number' },
+            { label: 'Other Price', name: 'other_price', type: 'number' },
             { label: 'Total Amount', name: 'total_amount', type: 'number' },
           ].map(({ label, name, readOnly = false, type = 'text', options }) => (
             <div key={name}>

@@ -735,6 +735,9 @@
 // export default CashEntryPage
 
 // export default CashEntryPage
+
+// Single Entry Page
+
 import React, { useEffect, useRef, useState } from 'react'
 import CustomToast from '../../helper/costomeToast'
 import useHomeStore from '../../zustand/useHomeStore'
@@ -743,6 +746,7 @@ import { FaPen, FaCheck, FaTimes, FaWallet, FaMoneyBillWave, FaCalendarAlt, FaUs
 import { FaTrashCan, FaArrowTrendUp, FaArrowTrendDown } from 'react-icons/fa6'
 import { HiDocumentText } from 'react-icons/hi2'
 import BulkHisaabComponent from './BulkHisaabComponent'
+import ManualEntries from './ManualEntries'
 
 const CashEntryPage = () => {
   const today = new Date().toISOString().split('T')[0]
@@ -1079,8 +1083,8 @@ const CashEntryPage = () => {
           <button
             onClick={() => setViewMode('single')}
             className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'single'
-                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'
-                : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-indigo-400'
+              ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'
+              : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-indigo-400'
               }`}
           >
             💰 Single Cash Entry
@@ -1088,11 +1092,22 @@ const CashEntryPage = () => {
           <button
             onClick={() => setViewMode('bulk')}
             className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'bulk'
-                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
-                : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-green-400'
+              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+              : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-green-400'
               }`}
           >
             📊 Bulk Hisaab Kitaab
+          </button>
+
+          {/* ✅ NEW: Manual Entry Button */}
+          <button
+            onClick={() => setViewMode('manual')}
+            className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'manual'
+                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white'
+                : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-orange-400'
+              }`}
+          >
+            📋 Manual Voucher Entry
           </button>
         </div>
 
@@ -1482,6 +1497,11 @@ const CashEntryPage = () => {
         {/* BULK HISAAB VIEW */}
         {viewMode === 'bulk' && (
           <BulkHisaabComponent />
+        )}
+
+        {/* MANUAL ENTRY VIEW */}
+        {viewMode === 'manual' && (
+          <ManualEntries />
         )}
 
         {/* Delete Modal */}

@@ -481,14 +481,42 @@ const useHomeStore = create((set) => ({
   },
 
   // <======================= PRODUCT SALE SUBMIT API =======================>
+  // productSaleSubmit: async (productSaleData) => {
+  //   try {
+  //     const res = await api.post('/product-sale-submit', productSaleData)
+  //     return res.data
+  //   } catch (error) {
+  //     console.log('ERROR IN SUBMIT PRODUCT SALE SUBMIT API', error)
+  //   }
+  // },
+
   productSaleSubmit: async (productSaleData) => {
     try {
-      const res = await api.post('/product-sale-submit', productSaleData)
-      return res.data
+        console.log('🌐 API URL:', api.defaults.baseURL + '/product-sale-submit');
+        console.log('📦 Sending:', productSaleData);
+        
+        const res = await api.post('/product-sale-submit', productSaleData);
+        console.log('✅ Success:', res.data);
+        return res.data;
     } catch (error) {
-      console.log('ERROR IN SUBMIT PRODUCT SALE SUBMIT API', error)
+        console.error('❌ API Error:', {
+            status: error.response?.status,
+            message: error.response?.data?.message,
+            url: error.config?.url
+        });
+        
+        // Return error response
+        if (error.response) {
+            return {
+                status_code: error.response.status,
+                message: error.response.data?.message || 'Server error'
+            };
+        }
+        
+        throw error;
     }
-  },
+},
+
   // Get All Sold Products
   getAllSoldProducts: async (page) => {
     try {
