@@ -183,7 +183,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.fat,
             cell: row => (
                 <div className="text-sm font-medium">
-                    {row.fat}%
+                    {row.fat}
                 </div>
             )
         },
@@ -192,7 +192,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.snf,
             cell: row => (
                 <div className="text-sm font-medium">
-                    {row.snf}%
+                    {row.snf}
                 </div>
             )
         },
@@ -511,7 +511,7 @@ const MilkCorrectionPage = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-amber-100 text-sm font-medium">Avg FAT</p>
-                                    <p className="text-2xl font-bold">{averageFat}%</p>
+                                    <p className="text-2xl font-bold">{averageFat}</p>
                                 </div>
                                 <div className="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center">
                                     <span className="text-amber-800 font-bold text-sm">F</span>
@@ -523,7 +523,7 @@ const MilkCorrectionPage = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-purple-100 text-sm font-medium">Avg SNF</p>
-                                    <p className="text-2xl font-bold">{averageSnf}%</p>
+                                    <p className="text-2xl font-bold">{averageSnf}</p>
                                 </div>
                                 <div className="h-8 w-8 rounded-full bg-purple-200 flex items-center justify-center">
                                     <span className="text-purple-800 font-bold text-sm">S</span>

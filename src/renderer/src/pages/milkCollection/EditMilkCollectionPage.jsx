@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
-import { IoMdClose } from 'react-icons/io';
+import { IoMdClose, IoMdCloseCircle } from 'react-icons/io';
+import { FiAlertTriangle } from 'react-icons/fi';
 
 const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail);
@@ -9,6 +10,8 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
   const getMilkRate = useHomeStore(state => state.getMilkRate);
   const [isCustomer, setIscustomer] = useState(true);
+  const [rateFieldsTouched, setRateFieldsTouched] = useState(false);
+  const [showConfirmChange, setShowConfirmChange] = useState(false);
 
   const [form, setForm] = useState({
     milk_type: '',
@@ -55,6 +58,10 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (['fat', 'snf', 'clr'].includes(name)) {
+      setRateFieldsTouched(true);
+    }
 
     setForm(prev => {
       const updated = {
@@ -143,36 +150,72 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const executeUpdate = async () => {
     try {
       const res = await editMilkCollectionDetail(milkData.id, form);
       if (res.status_code === 200) {
         CustomToast.success(res.message);
-        await onUpdate(); // ← Remove the 'e' parameter
+        setShowConfirmChange(false);
+        await onUpdate();
         onClose();
       } else {
         CustomToast.error(res.message);
       }
     } catch (error) {
-      // CustomToast.error("Error updating milk collection.");
       console.error("Error updating milk collection:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if account number has changed
+    const isAccountChanged = form.customer_account_number !== milkData.customer_account_number;
+
+    if (isAccountChanged) {
+      setShowConfirmChange(true);
+    } else {
+      await executeUpdate();
     }
   };
 
 
   useEffect(() => {
-    // const fat = form.fat?.trim();
-    // const clr = form.clr?.trim();
-    // const snf = form.snf?.trim();
-
-    const fat = form.fat?.trim();
-    const clr = form.clr?.trim();
-    const snfRaw = form.snf?.trim();
+    const fat = form.fat?.toString().trim();
+    const clr = form.clr?.toString().trim();
+    const snfRaw = form.snf?.toString().trim();
     const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
 
     // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
     if ((snfForApi || clr) && fat) {
+
+      // Check if values have actually changed from milkData
+      // Convert to numbers for robust comparison
+      const currentFat = parseFloat(fat || '0');
+      const originalFat = parseFloat(milkData?.fat || '0');
+      const currentSnf = parseFloat(snfRaw || '0');
+      const originalSnf = parseFloat(milkData?.snf || '0');
+      const currentClr = parseFloat(clr || '0');
+      const originalClr = parseFloat(milkData?.clr || '0');
+
+      // Check differences with a small epsilon for float safety, or just direct value check
+      const isFatChanged = milkData && Math.abs(currentFat - originalFat) > 0.001;
+      const isSnfChanged = milkData && Math.abs(currentSnf - originalSnf) > 0.001;
+      const isClrChanged = milkData && Math.abs(currentClr - originalClr) > 0.001;
+
+      console.log('Comparison:', {
+        currentFat, originalFat, isFatChanged,
+        currentSnf, originalSnf, isSnfChanged,
+        currentClr, originalClr, isClrChanged,
+        rateFieldsTouched
+      });
+
+      // If we have milkData AND user has NOT touched the fields, skipt fetch.
+      // We rely on the touched state primarily. 
+      if (milkData && !rateFieldsTouched) {
+        return;
+      }
+
       const timeout = setTimeout(() => {
         const getBaseRateFetch = async () => {
           try {
@@ -185,6 +228,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
               clr: res.clr || "",
               snf: res.snf || "",
               base_rate: res.rate || '',
+              rate: res.rate || '', // Update displayed rate as well
             }));
 
             // 🎯 Prioritize meaningful feedback
@@ -206,7 +250,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
       return () => clearTimeout(timeout);
     }
-  }, [form.fat, form.snf, form.clr]);
+  }, [form.fat, form.snf, form.clr, milkData, rateFieldsTouched]);
 
 
 
@@ -309,6 +353,58 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
             </button>
           </div>
         </form>
+
+        {/* Enhanced Confirmation Modal */}
+        {showConfirmChange && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 animate-in zoom-in-95 duration-200">
+
+              {/* Header / Icon */}
+              <div className="bg-amber-50 p-6 flex flex-col items-center justify-center border-b border-amber-100">
+                <div className="h-16 w-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 text-amber-600">
+                  <FiAlertTriangle size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 text-center">Confirm Account Update</h3>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <p className="text-gray-600 text-center mb-6 leading-relaxed">
+                  You are changing the account number from{' '}
+                  <span className="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">
+                    {milkData.customer_account_number}
+                  </span>{' '}
+                  to{' '}
+                  <span className="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-lg border border-green-100">
+                    {form.customer_account_number}
+                  </span>
+                  .
+                  <br /><br />
+                  <span className="text-sm text-gray-500">Are you sure you want to proceed with this update?</span>
+                </p>
+
+                {/* Buttons */}
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => {
+                      setShowConfirmChange(false);
+                      onClose(); // Close the main modal as requested
+                    }}
+                    className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-colors duration-200"
+                  >
+                    NO, Cancel
+                  </button>
+                  <button
+                    onClick={executeUpdate}
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-lg shadow-orange-200 transition-all duration-200"
+                  >
+                    YES, Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
 
