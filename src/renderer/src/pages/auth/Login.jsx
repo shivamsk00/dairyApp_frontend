@@ -103,11 +103,11 @@ const Login = () => {
                             {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                         </span>
                         {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
-                        <div className="text-right mt-1">
+                        {/* <div className="text-right mt-1">
                             <Link to="/forgot_password" className="text-sm text-blue-600 hover:underline">
                                 Forgot password?
                             </Link>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Remember Me */}
@@ -133,12 +133,12 @@ const Login = () => {
                     </button>
 
                     {/* Register Link */}
-                    <div className="text-center mt-4">
+                    {/* <div className="text-center mt-4">
                         <span className="text-gray-600">Not registered yet?</span>{' '}
                         <Link to="/register" className="text-blue-600 hover:underline font-medium">
                             Create an Account
                         </Link>
-                    </div>
+                    </div> */}
 
                     <footer className="text-center text-xs text-gray-500 mt-6">@Production House All rights reserved.</footer>
                 </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import * as XLSX from 'xlsx'
 import { FaSearch, FaEye, FaPen } from 'react-icons/fa'
-import { User, Phone, Mail, MapPin, Calendar, BarChart3 } from 'lucide-react'
+import { User, Phone, Mail, MapPin, Calendar, BarChart3, Download } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import { toast } from 'react-toastify'
@@ -45,7 +46,7 @@ const formatInputDate = (isoDateStr) => {
 const CmSubsidyList = () => {
   const getAllCustomer = useHomeStore((state) => state.getAllCustomer)
   const reportCustomer = useHomeStore((state) => state.reportCustomer)
-  
+
   const [customers, setCustomers] = useState([])
   const [filteredCustomers, setFilteredCustomers] = useState([])
   const [loading, setLoading] = useState(false)
@@ -53,7 +54,7 @@ const CmSubsidyList = () => {
   const [reportData, setReportData] = useState([])
   const [showDateFilter, setShowDateFilter] = useState(false)
   const [subsidyAmount, setSubsidyAmount] = useState('') // NEW: Added subsidy amount state
-  
+
   // Date filter form
   const [dateForm, setDateForm] = useState({
     term: 'date_range',
@@ -64,32 +65,32 @@ const CmSubsidyList = () => {
   // Fetch customers and filter only those with subsidy codes
   const fetchCustomersWithSubsidy = async () => {
     if (loading) return
-    
+
     try {
       setLoading(true)
       const response = await getAllCustomer('')
-      
+
       if (response && response.status_code === "200") {
         console.log('API Response:', response)
-        
+
         // Filter customers who have subsidy_code (not null, not empty, not "N/A")
-        const subsidyCustomers = response.data.filter(customer => 
-          customer.subsidy_code && 
-          customer.subsidy_code.trim() !== '' && 
+        const subsidyCustomers = response.data.filter(customer =>
+          customer.subsidy_code &&
+          customer.subsidy_code.trim() !== '' &&
           customer.subsidy_code !== null &&
           customer.subsidy_code.toLowerCase() !== 'n/a'
         )
-        
+
         subsidyCustomers.sort((a, b) => {
           // Handle null or undefined subsidy_code by treating them as large numbers
           const codeA = a.subsidy_code ? Number(a.subsidy_code) : Number.MAX_SAFE_INTEGER;
           const codeB = b.subsidy_code ? Number(b.subsidy_code) : Number.MAX_SAFE_INTEGER;
           return codeA - codeB;
         });
-        
+
         console.log('Subsidy Customers Found:', subsidyCustomers.length)
         console.log('Filtered Customers:', subsidyCustomers)
-        
+
         setCustomers(subsidyCustomers)
         setFilteredCustomers(subsidyCustomers)
       } else {
@@ -129,7 +130,7 @@ const CmSubsidyList = () => {
     try {
       setLoading(true)
       console.log('Starting report generation for', customers.length, 'CM subsidy customers')
-      
+
       // Create an array of promises for all customer reports
       const reportPromises = customers.map(customer => {
         const payload = {
@@ -148,7 +149,7 @@ const CmSubsidyList = () => {
       // Process results and extract relevant data
       const processedData = results.map((result, index) => {
         const customer = customers[index];
-        
+
         if (result?.status_code == 200 && result?.data) {
           return {
             customer_account_number: customer.account_number,
@@ -177,13 +178,13 @@ const CmSubsidyList = () => {
 
       console.log('Processed report data:', processedData)
       setReportData(processedData);
-      
+
       // Update filtered customers with report data
       const updatedCustomers = customers.map(customer => {
-        const reportInfo = processedData.find(report => 
+        const reportInfo = processedData.find(report =>
           report.customer_account_number === customer.account_number
         );
-        
+
         return {
           ...customer,
           total_milk_collections: reportInfo?.total_milk_collections || 0,
@@ -192,12 +193,12 @@ const CmSubsidyList = () => {
           net_milk_balance: reportInfo?.net_milk_balance || 0
         };
       });
-      
+
       setFilteredCustomers(updatedCustomers);
-      
+
       const successfulReports = processedData.filter(data => data.total_milk_collections > 0 || data.milk_total_amount > 0).length;
       toast.success(`Report data loaded for ${processedData.length} CM subsidy customers. ${successfulReports} customers have milk collections in this period.`);
-      
+
     } catch (error) {
       console.error("Error generating report data:", error);
       toast.error("Failed to generate report data for CM subsidy customers");
@@ -246,21 +247,63 @@ const CmSubsidyList = () => {
     setFilteredCustomers(filtered)
   }
 
-  // MODIFIED: Calculate totals for CM subsidy customers with subsidy
+  // NEW: Handle Excel Export
+  const handleExportExcel = () => {
+    if (displayCustomers.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    const dataToExport = displayCustomers.map((customer, index) => {
+      const baseData = {
+        'Sr. No.': index + 1,
+        'Account No': customer.account_number,
+        'Customer Name': customer.name,
+        'Subsidy Code': customer.subsidy_code,
+        'Mobile': customer.mobile || '',
+      };
+
+      if (reportData.length > 0) {
+        const subsidyRate = parseFloat(subsidyAmount) || 0;
+        const totalMilk = customer.total_milk_collections || 0;
+        const subsidyValue = totalMilk * subsidyRate;
+
+        return {
+          ...baseData,
+          'Total Milk (L)': totalMilk.toFixed(2),
+          'Milk Amount (₹)': (customer.milk_total_amount || 0).toFixed(2),
+          'Subsidy (₹)': subsidyValue.toFixed(2)
+        };
+      }
+
+      return baseData;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CM Subsidy Customers");
+
+    // Generate filename with date
+    const fileName = `CM_Subsidy_List_${getToday()}.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
+    toast.success("Excel file downloaded successfully");
+  };
+
   const calculateTotals = () => {
-    if (reportData.length === 0) return { totalMilk: 0, totalAmount: 0, totalProductAmount: 0, totalNetBalance: 0, totalWithSubsidy: 0 };
-    
+    if (reportData.length === 0) return { totalMilk: 0, totalAmount: 0, totalProductAmount: 0, totalNetBalance: 0, totalSubsidy: 0 };
+
     // NEW: Filter customers with milk collections > 0
     const customersWithMilk = filteredCustomers.filter(customer => (customer.total_milk_collections || 0) > 0);
-    const subsidyValue = parseFloat(subsidyAmount) || 0;
-    
+    const subsidyRate = parseFloat(subsidyAmount) || 0;
+
     return customersWithMilk.reduce((acc, customer) => ({
       totalMilk: acc.totalMilk + (customer.total_milk_collections || 0),
       totalAmount: acc.totalAmount + (customer.milk_total_amount || 0),
       totalProductAmount: acc.totalProductAmount + (customer.product_total_amount || 0),
       totalNetBalance: acc.totalNetBalance + (customer.net_milk_balance || 0),
-      totalWithSubsidy: acc.totalWithSubsidy + (customer.milk_total_amount || 0) + subsidyValue // NEW: Add subsidy to milk amount
-    }), { totalMilk: 0, totalAmount: 0, totalProductAmount: 0, totalNetBalance: 0, totalWithSubsidy: 0 });
+      totalSubsidy: acc.totalSubsidy + ((customer.total_milk_collections || 0) * subsidyRate)
+    }), { totalMilk: 0, totalAmount: 0, totalProductAmount: 0, totalNetBalance: 0, totalSubsidy: 0 });
   };
 
   const totals = calculateTotals();
@@ -296,14 +339,24 @@ const CmSubsidyList = () => {
               </div>
             </div>
 
-            {/* Right side - Date Filter Toggle */}
-            <button
-              onClick={() => setShowDateFilter(!showDateFilter)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors"
-            >
-              <Calendar className="w-5 h-5" />
-              {showDateFilter ? 'Hide' : 'Show'} Report Filter
-            </button>
+            {/* Right side - Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleExportExcel}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Download className="w-5 h-5" />
+                Export Excel
+              </button>
+
+              <button
+                onClick={() => setShowDateFilter(!showDateFilter)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Calendar className="w-5 h-5" />
+                {showDateFilter ? 'Hide' : 'Show'} Report Filter
+              </button>
+            </div>
           </div>
 
           {/* Date Filter Section */}
@@ -313,7 +366,7 @@ const CmSubsidyList = () => {
                 <BarChart3 className="w-5 h-5 text-blue-600" />
                 Generate Milk Collection Report for CM Subsidy Customers
               </h3>
-              
+
               {/* Date Filter Form - MODIFIED: Added subsidy input */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                 {/* From Date */}
@@ -374,11 +427,10 @@ const CmSubsidyList = () => {
                   <button
                     onClick={handleGenerateReportData}
                     disabled={!isDateFormValid || loading}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex-1 ${
-                      isDateFormValid && !loading
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-gray-400 cursor-not-allowed text-white'
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex-1 ${isDateFormValid && !loading
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gray-400 cursor-not-allowed text-white'
+                      }`}
                   >
                     {loading ? 'Loading...' : 'Generate'}
                   </button>
@@ -393,7 +445,7 @@ const CmSubsidyList = () => {
 
               {/* MODIFIED: Summary Cards - Updated to include subsidy */}
               {reportData.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
                     <div className="text-sm text-gray-600">Total Milk</div>
                     <div className="text-xl font-bold text-blue-600">{totals.totalMilk.toFixed(2)} L</div>
@@ -403,12 +455,8 @@ const CmSubsidyList = () => {
                     <div className="text-xl font-bold text-green-600">₹{totals.totalAmount.toFixed(2)}</div>
                   </div>
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Subsidy</div>
-                    <div className="text-xl font-bold text-orange-600">₹{subsidyAmount || '0.00'}</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Grand Total</div>
-                    <div className="text-xl font-bold text-purple-600">₹{totals.totalWithSubsidy.toFixed(2)}</div>
+                    <div className="text-sm text-gray-600">Total Subsidy</div>
+                    <div className="text-xl font-bold text-orange-600">₹{totals.totalSubsidy.toFixed(2)}</div>
                   </div>
                 </div>
               )}
@@ -463,7 +511,6 @@ const CmSubsidyList = () => {
                         <th className="text-center p-4 text-sm font-semibold text-gray-700">Total Milk (L)</th>
                         <th className="text-center p-4 text-sm font-semibold text-gray-700">Milk Amount (₹)</th>
                         <th className="text-center p-4 text-sm font-semibold text-gray-700">Subsidy (₹)</th> {/* NEW: Added Subsidy column */}
-                        <th className="text-center p-4 text-sm font-semibold text-gray-700">Grand Total (₹)</th>
                       </>
                     )}
                   </tr>
@@ -475,16 +522,16 @@ const CmSubsidyList = () => {
                     <tr>
                       <td colSpan={reportData.length > 0 ? "9" : "5"} className="px-6 py-12 text-center text-gray-500">
                         <div className="text-lg">
-                          {reportData.length > 0 
+                          {reportData.length > 0
                             ? 'No customers have milk collections in the selected period'
-                            : searchTerm 
-                              ? 'No customers found matching your search' 
+                            : searchTerm
+                              ? 'No customers found matching your search'
                               : 'No customers with CM subsidy codes found'
                           }
                         </div>
                         <div className="text-sm mt-1">
-                          {customers.length === 0 
-                            ? "No customers have valid CM subsidy codes in the database" 
+                          {customers.length === 0
+                            ? "No customers have valid CM subsidy codes in the database"
                             : "Try adjusting your search criteria or date range"}
                         </div>
                       </td>
@@ -555,14 +602,7 @@ const CmSubsidyList = () => {
                             {/* NEW: Subsidy Column */}
                             <td className="p-4 text-center">
                               <span className="text-orange-600 font-semibold">
-                                ₹{subsidyAmount || '0.00'}
-                              </span>
-                            </td>
-
-                            {/* MODIFIED: Grand Total (Milk Amount + Subsidy) */}
-                            <td className="p-4 text-center">
-                              <span className="text-purple-600 font-semibold">
-                                ₹{((customer.milk_total_amount || 0) + (parseFloat(subsidyAmount) || 0)).toFixed(2)}
+                                ₹{((customer.total_milk_collections || 0) * (parseFloat(subsidyAmount) || 0)).toFixed(2)}
                               </span>
                             </td>
                           </>
