@@ -1,10 +1,14 @@
 {
   "name": "dairyapp",
-  "version": "1.0.0",
+  "version": "1.1.5",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "Production House",
   "homepage": "https://electron-vite.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivamsk00/dairyApp_frontend.git"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -15,7 +19,111 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:linux": "npm run build && electron-builder --linux",
+    "build:publish": "npm run build && electron-builder --publish=always",
+    "dist": "npm run build && electron-builder",
+    "release": "npm run build && electron-builder --publish=always"
+  },
+  "build": {
+    "appId": "com.dairy.productionhouse.dairyapp",
+    "productName": "DairyApp",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "resources/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": "resources/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "resources/icon1.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "certificateFile": null,
+      "certificatePassword": null,
+      "publisherName": "Production House",
+      "requestedExecutionLevel": "asInvoker",
+      "verifyUpdateCodeSignature": false
+    },
+    "mac": {
+      "icon": "resources/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "icon": "resources/icon.png",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": false,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DairyApp",
+      "installerIcon": "resources/icon1.ico",
+      "uninstallerIcon": "resources/icon1.ico",
+      "installerHeaderIcon": "resources/icon1.ico",
+      "deleteAppDataOnUninstall": false,
+      "allowElevation": true,
+      "runAfterFinish": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "guid": "12345678-abcd-1234-5678-123456789abc",
+      "warningsAsErrors": false,
+      "displayLanguageSelector": false,
+      "installerLanguages": [
+        "en_US"
+      ],
+      "language": "2033",
+      "multiLanguageInstaller": false,
+      "packElevateHelper": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "shivamsk00",
+        "repo": "dairyApp_frontend",
+        "releaseType": "release",
+        "publishAutoUpdate": true
+      }
+    ],
+    "generateUpdatesFilesForAllChannels": true,
+    "releaseInfo": {
+      "releaseNotesFile": "CHANGELOG.md"
+    }
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -23,10 +131,18 @@
     "@tanstack/react-table": "^8.21.3",
     "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
+    "chart.js": "^4.5.1",
+    "electron-log": "^5.0.0",
+    "electron-updater": "^6.6.2",
+    "lucide-react": "^0.515.0",
     "react-apexcharts": "^1.7.0",
+    "react-chartjs-2": "^5.3.1",
+    "react-data-table-component": "^7.7.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.5.3",
     "react-toastify": "^11.0.5",
+    "styled-components": "^6.1.19",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
