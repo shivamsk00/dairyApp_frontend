@@ -149,7 +149,7 @@ const useHomeStore = create((set) => ({
 
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   getAllCustomer: async (searchCustomer) => {
@@ -157,7 +157,7 @@ const useHomeStore = create((set) => ({
       const res = await api.get(`/all-customer?search_customer=${searchCustomer}`)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   editCustomerValueGet: async ({ customer_id }) => {
@@ -166,7 +166,7 @@ const useHomeStore = create((set) => ({
       const res = await api.get(`/edit-customer/${customer_id}`)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
 
@@ -175,7 +175,7 @@ const useHomeStore = create((set) => ({
       const res = await api.post(`/update-customer/${customer_id}`, customerData)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   deleteCustomer: async (customer_id) => {
@@ -183,7 +183,7 @@ const useHomeStore = create((set) => ({
       const res = await api.post(`delete-customer/${customer_id}`)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   reportCustomer: async (params) => {
@@ -206,7 +206,7 @@ const useHomeStore = create((set) => ({
       )
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
 
@@ -247,9 +247,20 @@ const useHomeStore = create((set) => ({
     }
   },
 
+  getAllMilkEntries: async (params = '') => {
+    try {
+      const res = await api.get(`/all-milk-entries${params}`)
+      console.log('response===>', res)
+      return res.data
+    } catch (error) {
+      console.log('error print in milk collection', error)
+      return error.response.data
+    }
+  },
+
   editMilkCollectionDetail: async (milk_collection_id, milkCollectionData) => {
     try {
-      // set({loading:true})
+      // set({loading:true}) 
       const res = await api.post(
         `/update-milk-collection/${milk_collection_id}`,
         milkCollectionData
@@ -278,7 +289,7 @@ const useHomeStore = create((set) => ({
       const res = await api.post('/head-dairy-master-submit', headDairyData)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   getAllHeadDairyMaster: async () => {
@@ -286,7 +297,7 @@ const useHomeStore = create((set) => ({
       const res = await api.get(`/all-head-dairy-master`)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   updateHeadDairyMaster: async (headDairy_id, headDairyData) => {
@@ -294,7 +305,7 @@ const useHomeStore = create((set) => ({
       const res = await api.post(`/update-head-dairy-master/${headDairy_id}`, headDairyData)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   deleteHeadDairyMaster: async (headDairy_id) => {
@@ -302,7 +313,7 @@ const useHomeStore = create((set) => ({
       const res = await api.post(`delete-head-dairy-master/${headDairy_id}`)
       return res.data
     } catch (error) {
-      return err.response.data
+      return error.response.data
     }
   },
   updateHeadDairyMasterStatus: async (headDairy_id) => {

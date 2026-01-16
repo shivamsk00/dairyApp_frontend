@@ -322,99 +322,97 @@ const MilkCorrectionPage = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-full mx-auto space-y-6">
                 {/* Header */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
-                            <MdLocalDrink className="h-6 w-6 text-white" />
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
+                            <MdLocalDrink className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Milk Correction Dashboard</h1>
-                            <p className="text-gray-600">Manage and track milk collection data</p>
+                            <h1 className="text-lg font-bold text-gray-900">Milk Correction Dashboard</h1>
+                            <p className="text-xs text-gray-600">Manage and track milk collection data</p>
                         </div>
                     </div>
 
                     {/* Enhanced Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
                         {/* Date Range Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                    <MdDateRange className="h-4 w-4 text-blue-500" />
-                                    From Date
-                                </label>
-                                <input
-                                    type="date"
-                                    name="start_date"
-                                    value={form.start_date}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white"
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                    <MdDateRange className="h-4 w-4 text-blue-500" />
-                                    To Date
-                                </label>
-                                <input
-                                    type="date"
-                                    name="end_date"
-                                    value={form.end_date}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white"
-                                    required
-                                />
-                            </div>
+                        <div className="space-y-1">
+                            <label className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                                <MdDateRange className="h-3 w-3 text-blue-500" />
+                                From Date
+                            </label>
+                            <input
+                                type="date"
+                                name="start_date"
+                                value={form.start_date}
+                                onChange={handleChange}
+                                className="w-36 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                                <MdDateRange className="h-3 w-3 text-blue-500" />
+                                To Date
+                            </label>
+                            <input
+                                type="date"
+                                name="end_date"
+                                value={form.end_date}
+                                onChange={handleChange}
+                                className="w-36 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                                required
+                            />
                         </div>
 
                         {/* Filter Options */}
-                        <div className="space-y-3">
-                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                <FaFilter className="h-4 w-4 text-blue-500" />
+                        <div className="space-y-1">
+                            <label className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                                <FaFilter className="h-3 w-3 text-blue-500" />
                                 Filter Options
                             </label>
-                            <div className="flex flex-wrap gap-4">
-                                <label className="flex items-center space-x-3 cursor-pointer">
+                            <div className="flex items-center gap-3 h-[36px]">
+                                <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
                                         type="radio"
                                         name="selection"
                                         value="all"
                                         checked={selection === 'all'}
                                         onChange={() => handleSelectionChange('all')}
-                                        className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-blue-500"
+                                        className="w-3 h-3 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
-                                    <span className="text-sm font-medium text-gray-700">All Records</span>
+                                    <span className="text-[16px] font-medium text-gray-700">All Records</span>
                                 </label>
-                                <label className="flex items-center space-x-3 cursor-pointer">
+                                <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
                                         type="radio"
                                         name="selection"
                                         value="customer"
                                         checked={selection === 'customer'}
                                         onChange={() => handleSelectionChange('customer')}
-                                        className="w-4 h-4 text-blue-600 border-2 border-gray-300 focus:ring-blue-500"
+                                        className="w-3 h-3 text-blue-600 border-gray-300 focus:ring-blue-500"
                                     />
-                                    <span className="text-sm font-medium text-gray-700">By Customer</span>
+                                    <span className="text-[16px] font-medium text-gray-700">By Customer</span>
                                 </label>
                             </div>
                         </div>
 
                         {/* Customer Account Number */}
                         {selection === 'customer' && (
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                    <MdPerson className="h-4 w-4 text-blue-500" />
-                                    Customer Account Number
+                            <div className="space-y-1">
+                                <label className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                                    <MdPerson className="h-3 w-3 text-blue-500" />
+                                    Account No.
                                 </label>
                                 <input
                                     type="number"
                                     name="customer_account_number"
                                     value={form.customer_account_number}
                                     onChange={handleChange}
-                                    placeholder="Enter account number"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white"
+                                    placeholder="Acc No"
+                                    className="w-32 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
                                     required
                                 />
                             </div>
@@ -424,17 +422,17 @@ const MilkCorrectionPage = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                            className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm h-[36px]"
                         >
                             {loading ? (
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     Processing...
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <FaSearch className="h-4 w-4" />
-                                    Search Records
+                                    <FaSearch className="h-3 w-3" />
+                                    Search
                                 </div>
                             )}
                         </button>
@@ -601,7 +599,7 @@ const MilkCorrectionPage = () => {
                     setEditableEntry(null);
                 }}
                 milkData={editableEntry}
-               onUpdate={() => handleSubmit()}
+                onUpdate={() => handleSubmit()}
             />
 
             {/* Enhanced Delete Confirmation Modal */}
