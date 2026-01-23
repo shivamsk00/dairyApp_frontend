@@ -36,10 +36,10 @@ const DairyMilkCollectionPage = () => {
     const [shiftValue, setShiftValue] = useState('morning');
     const [isShift, setIsShift] = useState('morning');
     const [isEditeModal, setIsEditeModal] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isFetchingRate, setIsFetchingRate] = useState(false);
+    const [isFetchingCustomer, setIsFetchingCustomer] = useState(false);
     const [collections, setCollections] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [maxPageButtons, setMaxPageButtons] = useState(5);
     const [toggle, setToggle] = useState(true)
     const [milkCollectiionAvergeData, setMilkCollectionAvergeData] = useState({
         avg_base_rate: '',
@@ -104,8 +104,17 @@ const DairyMilkCollectionPage = () => {
         print: false,
     });
 
+    const lastFetchedAccRef = useRef(null);
+    const lastRateParamsRef = useRef({ fat: '', clr: '', snf: '' });
+
     // FETCH PER CUSTOMER
     const fetchCustomerDetailByAccountNumber = async (accountNo) => {
+        if (!accountNo || isFetchingCustomer) return;
+
+        // Skip if this account was just fetched and name is already set
+        if (lastFetchedAccRef.current === accountNo && form.name) return;
+
+        setIsFetchingCustomer(true);
         try {
             // 1. Try Local DB
             const localData = await getCustomerFromDB(accountNo);
@@ -116,12 +125,10 @@ const DairyMilkCollectionPage = () => {
                     careof: localData.careof || '',
                     mobile: localData.mobile || '',
                 }));
-                // Note: Wallet might be stale in local DB, but name is usually static.
-                // If we want real-time wallet, we might still need API, but for name/mobile speed is improved.
-                // Assuming wallet from local is acceptable for speed, or user accepts it.
-                // For critical data like wallet, we might want to background refresh it.
                 setCustomerWallet(localData.wallet);
                 CustomToast.success("Customer Found")
+                lastFetchedAccRef.current = accountNo;
+                setIsFetchingCustomer(false);
                 return;
             }
 
@@ -137,9 +144,7 @@ const DairyMilkCollectionPage = () => {
                     mobile: res.data.mobile || '',
                 }));
                 setCustomerWallet(res.data.wallet)
-
-                // Optionally update local DB with this new/updated customer
-                // await saveCustomersToDB([res.data]); 
+                lastFetchedAccRef.current = accountNo;
             } else {
                 CustomToast.error(res.message)
                 setForm((prev) => ({
@@ -148,6 +153,7 @@ const DairyMilkCollectionPage = () => {
                     careof: '',
                     mobile: '',
                 }));
+                lastFetchedAccRef.current = null;
             }
         } catch (error) {
             console.error('Error fetching customer details:', error);
@@ -157,26 +163,35 @@ const DairyMilkCollectionPage = () => {
                 careof: '',
                 mobile: '',
             }));
+            lastFetchedAccRef.current = null;
+        } finally {
+            setIsFetchingCustomer(false);
         }
+    };
+
+    // Helper for calculations
+    const calculateTotals = (data) => {
+        const b = parseFloat(data.base_rate) || 0;
+        const o = parseFloat(data.other_price) || 0;
+        const q = parseFloat(data.quantity) || 0;
+        const rate = q * b;
+        const total_amount = rate + o;
+        return {
+            rate: rate.toFixed(2),
+            total_amount: total_amount.toFixed(2),
+        };
     };
 
     // Auto-calculate rate and total amount
     useEffect(() => {
-        const { fat, snf, base_rate, other_price, quantity } = form;
-        const f = parseFloat(fat) || 0;
-        const s = parseFloat(snf) || 0;
-        const b = parseFloat(base_rate) || 0;
-        const o = parseFloat(other_price) || 0;
-        const q = parseFloat(quantity) || 0;
-        const rate = q * b;
-        const total_amount = rate + o;
-
-        setForm((prev) => ({
-            ...prev,
-            rate: rate.toFixed(2),
-            total_amount: total_amount.toFixed(2),
-        }));
-    }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity]);
+        const totals = calculateTotals(form);
+        if (totals.rate !== form.rate || totals.total_amount !== form.total_amount) {
+            setForm((prev) => ({
+                ...prev,
+                ...totals
+            }));
+        }
+    }, [form.base_rate, form.other_price, form.quantity]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -206,42 +221,62 @@ const DairyMilkCollectionPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        form.shift = shiftValue
-        form.milk_type = milkType
+
+        if (isSubmitting) return;
+        if (isFetchingRate) {
+            CustomToast.warn("Fetching rate, please wait...");
+            return;
+        }
+
+        // Final check for empty or invalid data
+        if (!form.customer_account_number || !form.name) {
+            CustomToast.error("Please enter a valid account number");
+            accRef.current?.focus();
+            return;
+        }
+
+        if (!form.quantity || parseFloat(form.quantity) <= 0) {
+            CustomToast.error("Please enter quantity");
+            qtyRef.current?.focus();
+            return;
+        }
+
+        if (!form.total_amount || parseFloat(form.total_amount) <= 0) {
+            CustomToast.error("Total amount must be greater than 0");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Safety recalculation to ensure data integrity even if user entered values very fast
+        const totals = calculateTotals(form);
+        const submitData = {
+            ...form,
+            ...totals,
+            shift: shiftValue,
+            milk_type: milkType
+        };
+
         setCustomerWallet(null)
-        console.log("form value", form)
+        console.log("Submitting milk collection", submitData)
         try {
-            const res = await submitMilkCollection(form);
+            const res = await submitMilkCollection(submitData);
             console.log("submitted milk collection response", res)
             if (res.status_code == 200) {
                 if (toggle) {
-                    handlePrint(form)
+                    handlePrint(submitData)
                 }
 
                 CustomToast.success(res.message)
-                setForm({
-                    customer_account_number: '',
-                    name: '',
-                    careof: '',
-                    mobile: '',
-                    quantity: '',
-                    clr: '',
-                    fat: '',
-                    snf: '',
-                    base_rate: '',
-                    other_price: '0',
-                    rate: '',
-                    total_amount: '',
-                    milk_type: '',
-                    date: today,
-                })
+                resetForm();
                 fetchMilkCollectionDetails()
-                setTimeout(() => accRef.current?.focus(), 300);
             } else {
                 CustomToast.error(res.message || res.errors)
             }
         } catch (error) {
-            CustomToast.error(error)
+            CustomToast.error(error.message || "Something went wrong")
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -311,9 +346,9 @@ const DairyMilkCollectionPage = () => {
     // PRINT HANDLER
     const handlePrint = (data) => {
         // Validate Data
-        if (!data.customer_account_number || !data.quantity || !data.total_amount) {
+        if (!data.customer_account_number || !data.quantity || !data.total_amount || parseFloat(data.total_amount) <= 0) {
             // Use CustomToast or alert
-            CustomToast.error("Cannot print: Missing customer or milk data!");
+            console.warn("Print blocks: Missing or invalid data", data);
             return;
         }
 
@@ -426,28 +461,52 @@ const DairyMilkCollectionPage = () => {
     const handleSnfKeyDown = async (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            if (isFetchingRate) return;
+
             const fat = form.fat?.trim();
             const clr = form.clr?.trim();
             const snfRaw = form.snf?.trim();
 
             if (!(fat && (clr || snfRaw))) return;
 
+            // Prevent redundant rate calculations if parameters haven't changed
+            if (
+                lastRateParamsRef.current.fat === fat &&
+                lastRateParamsRef.current.clr === clr &&
+                lastRateParamsRef.current.snf === snfRaw &&
+                form.base_rate // only skip if we already have a rate
+            ) {
+                otherRateRef.current?.focus();
+                return;
+            }
+
             const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
 
+            setIsFetchingRate(true);
             try {
                 const res = await getMilkRate(fat, clr, snfForApi);
-                setForm((prev) => ({
-                    ...prev,
-                    fat: res.fat || "",
-                    clr: res.clr || "",
-                    snf: res.snf || prev.snf,
-                    base_rate: res.rate || '',
-                }));
-                res.rate
-                    ? CustomToast.success("Rate Found", "top-center")
-                    : CustomToast.warn("RATE not found", "top-center");
+                if (res) {
+                    lastRateParamsRef.current = { fat, clr, snf: snfRaw };
+                    setForm((prev) => {
+                        const updated = {
+                            ...prev,
+                            fat: res.fat || prev.fat,
+                            clr: res.clr || prev.clr,
+                            snf: res.snf || prev.snf,
+                            base_rate: res.rate || '',
+                        };
+                        const totals = calculateTotals(updated);
+                        return { ...updated, ...totals };
+                    });
+                    res.rate
+                        ? CustomToast.success("Rate Found", "top-center")
+                        : CustomToast.warn("RATE not found", "top-center");
+                }
             } catch (err) {
                 console.error("Rate error", err);
+                CustomToast.error("Error fetching rate");
+            } finally {
+                setIsFetchingRate(false);
             }
             otherRateRef.current?.focus();
         }
@@ -730,9 +789,10 @@ const DairyMilkCollectionPage = () => {
                                 <button
                                     type="submit"
                                     ref={submitRef}
-                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded"
+                                    disabled={isSubmitting || isFetchingRate}
+                                    className={`px-4 py-2 text-white text-sm rounded ${isSubmitting || isFetchingRate ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'}`}
                                 >
-                                    Submit
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
                                 </button>
                             </div>
                         </div>
