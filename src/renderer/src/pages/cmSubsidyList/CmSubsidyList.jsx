@@ -131,20 +131,32 @@ const CmSubsidyList = () => {
       setLoading(true)
       console.log('Starting report generation for', customers.length, 'CM subsidy customers')
 
-      // Create an array of promises for all customer reports
-      const reportPromises = customers.map(customer => {
-        const payload = {
-          term: dateForm.term,
-          start_date: formatInputDate(dateForm.start_date),
-          end_date: formatInputDate(dateForm.end_date),
-          customer_account_number: customer.account_number
-        };
-        return reportCustomer(payload);
-      });
+      // Create an array to store all results
+      const results = [];
+      const BATCH_SIZE = 5; // Process 5 requests at a time to prevent server overload
 
-      // Execute all API calls concurrently using Promise.all
-      console.log('Making', reportPromises.length, 'concurrent API calls...')
-      const results = await Promise.all(reportPromises);
+      console.log('Starting batch processing. Total batches:', Math.ceil(customers.length / BATCH_SIZE));
+
+      for (let i = 0; i < customers.length; i += BATCH_SIZE) {
+        const batchCustomers = customers.slice(i, i + BATCH_SIZE);
+
+        // Create promises for current batch
+        const batchPromises = batchCustomers.map(customer => {
+          const payload = {
+            term: dateForm.term,
+            start_date: formatInputDate(dateForm.start_date),
+            end_date: formatInputDate(dateForm.end_date),
+            customer_account_number: customer.account_number
+          };
+          return reportCustomer(payload);
+        });
+
+        // Execute batch
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        console.log(`Processed batch ${Math.floor(i / BATCH_SIZE) + 1} / ${Math.ceil(customers.length / BATCH_SIZE)}`);
+      }
 
       // Process results and extract relevant data
       const processedData = results.map((result, index) => {
@@ -278,6 +290,29 @@ const CmSubsidyList = () => {
 
       return baseData;
     });
+
+    // Calculate totals for the footer row
+    if (reportData.length > 0) {
+      const totalMilkSum = displayCustomers.reduce((sum, customer) => sum + (customer.total_milk_collections || 0), 0);
+      const totalAmountSum = displayCustomers.reduce((sum, customer) => sum + (customer.milk_total_amount || 0), 0);
+      const subsidyRate = parseFloat(subsidyAmount) || 0;
+      const totalSubsidySum = totalMilkSum * subsidyRate;
+
+      // Add empty row for spacing
+      dataToExport.push({});
+
+      // Add Total Row
+      dataToExport.push({
+        'Sr. No.': '',
+        'Account No': '',
+        'Customer Name': 'GRAND TOTAL',
+        'Subsidy Code': '',
+        'Mobile': '',
+        'Total Milk (L)': totalMilkSum.toFixed(2),
+        'Milk Amount (₹)': totalAmountSum.toFixed(2),
+        'Subsidy (₹)': totalSubsidySum.toFixed(2)
+      });
+    }
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
