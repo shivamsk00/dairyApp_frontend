@@ -282,9 +282,9 @@ const CmSubsidyList = () => {
 
         return {
           ...baseData,
-          'Total Milk (L)': totalMilk.toFixed(2),
-          'Milk Amount (₹)': (customer.milk_total_amount || 0).toFixed(2),
-          'Subsidy (₹)': subsidyValue.toFixed(2)
+          'Total Milk (L)': Number(totalMilk.toFixed(2)),
+          'Milk Amount (₹)': Number((customer.milk_total_amount || 0).toFixed(2)),
+          'Subsidy (₹)': Number(subsidyValue.toFixed(2))
         };
       }
 
@@ -308,9 +308,9 @@ const CmSubsidyList = () => {
         'Customer Name': 'GRAND TOTAL',
         'Subsidy Code': '',
         'Mobile': '',
-        'Total Milk (L)': totalMilkSum.toFixed(2),
-        'Milk Amount (₹)': totalAmountSum.toFixed(2),
-        'Subsidy (₹)': totalSubsidySum.toFixed(2)
+        'Total Milk (L)': Number(totalMilkSum.toFixed(2)),
+        'Milk Amount (₹)': Number(totalAmountSum.toFixed(2)),
+        'Subsidy (₹)': Number(totalSubsidySum.toFixed(2))
       });
     }
 
