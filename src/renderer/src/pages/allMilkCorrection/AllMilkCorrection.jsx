@@ -147,8 +147,8 @@ const AllMilkCorrection = () => {
   // Report All Data
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col lg:flex-row gap-6">
+    <div className="">
+      <div className="flex flex-col lg:flex-row ">
         <form className="bg-gray-800 text-white p-6 rounded shadow-xl w-full lg:w-1/2 flex flex-col gap-4">
           <div className="bg-white text-black p-6 rounded shadow">
             <h2 className="text-xl font-semibold text-orange-600 mb-4">

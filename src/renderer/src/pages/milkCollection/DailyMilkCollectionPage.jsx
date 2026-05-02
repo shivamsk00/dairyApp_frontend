@@ -534,17 +534,17 @@ const DairyMilkCollectionPage = () => {
     }
 
     return (
-        <div className="w-full h-screen bg-white flex flex-col overflow-hidden">
+        <div className="w-full  bg-white flex flex-col ">
             <CommonHeader heading={"Daily Milk Collection"} />
 
             <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
                 {/* === Left: Form Section === */}
-                <div className="w-full lg:w-[400px] xl:w-[450px] bg-gradient-to-br from-blue-200 to-indigo-100 border-r border-gray-200 flex flex-col overflow-hidden">
-                    <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-4 flex-1 overflow-y-auto scrollable-table hide-scrollbar" style={{ height: 'calc(100vh - 64px)' }}>
+                <div className="w-full lg:w-[70%] xl:w-[70%] h-fit bg-gradient-to-br from-blue-200 to-indigo-100 border-r border-gray-200 flex flex-col overflow-hidden">
+                    <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-3 flex-1 overflow-y-auto scrollable-table hide-scrollbar">
                         {/* Milk Type & Shift */}
                         <div className="flex gap-4 ">
                             {/* Milk Type */}
-                            <div className="w-1/2 ">
+                            <div className="w-1/3 ">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Milk Type:</label>
                                 <div className="flex gap-1">
                                     {['cow', 'buffalo', 'other'].map((type) => (
@@ -563,8 +563,27 @@ const DairyMilkCollectionPage = () => {
                                 </div>
                             </div>
 
+                            {/* Shift */}
+                            <div className="w-1/3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Shift:</label>
+                                <div className="flex gap-4">
+                                    {['morning', 'evening'].map((shift) => (
+                                        <label key={shift} className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="shift"
+                                                value={shift}
+                                                checked={shiftValue === shift}
+                                                onChange={() => setShiftValue(shift)}
+                                                className="mr-1"
+                                            />
+                                            <span className="capitalize text-sm">{shift}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                             {/* Date */}
-                            <div className="w-1/2">
+                            <div className="w-1/3">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Date:</label>
                                 <input
                                     type="date"
@@ -575,30 +594,12 @@ const DairyMilkCollectionPage = () => {
                                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                                 />
                             </div>
+
                         </div>
 
-                        {/* Shift */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Shift:</label>
-                            <div className="flex gap-4">
-                                {['morning', 'evening'].map((shift) => (
-                                    <label key={shift} className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            name="shift"
-                                            value={shift}
-                                            checked={shiftValue === shift}
-                                            onChange={() => setShiftValue(shift)}
-                                            className="mr-1"
-                                        />
-                                        <span className="capitalize text-sm">{shift}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
 
                         {/* Customer Details */}
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-6 gap-2">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                 <input
@@ -809,23 +810,23 @@ const DairyMilkCollectionPage = () => {
                     </form>
                 </div>
 
-                {/* === Right: Day Total + Table === */}
-                <div className="w-full lg:flex-1 flex flex-col overflow-hidden">
+                {/* === Right: Day Total */}
+                <div className="w-full lg:w-[30%] xl:w-[30%] h-fit lg:flex-1 flex flex-row overflow-hidden">
                     {/* Day Total Card */}
-                    <div className="bg-white border-b border-gray-300 p-3 sm:p-4 flex-shrink-0">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-3">Daily Summary</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
+                    <div className="bg-white w-[100%] border-b border-gray-300 p-2 sm:p-2 flex-shrink-0">
+                        <h2 className="text-sm font-semibold text-gray-800 mb-1">Daily Summary</h2>
+                        <div className="grid w-[100%] grid-cols-3 gap-1 sm:gap-2 text-sm">
                             {/* Morning */}
-                            <div className="bg-blue-500 p-3 rounded border border-orange-200">
+                            <div className="bg-blue-500 p-2 rounded border border-orange-200">
                                 <h3 className="font-semibold text-white mb-2">Morning</h3>
                                 <div className="space-y-1">
                                     <div className="flex justify-between text-white">
-                                        <span>Milk:</span>
-                                        <span className="font-semibold">{dayTotal?.morning_total_milk.toFixed(2)} L</span>
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.morning_total_milk.toFixed(2)} L</span>
                                     </div>
                                     <div className="flex justify-between text-white">
-                                        <span>Amount:</span>
-                                        <span className="font-bold text-white">₹{dayTotal?.morning_total_amount.toFixed(2)}</span>
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.morning_total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -835,12 +836,12 @@ const DairyMilkCollectionPage = () => {
                                 <h3 className="font-semibold text-white mb-2">Evening</h3>
                                 <div className="space-y-1">
                                     <div className="flex justify-between text-white">
-                                        <span>Milk:</span>
-                                        <span className="font-semibold">{dayTotal?.evening_total_milk.toFixed(2)} L</span>
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.evening_total_milk.toFixed(2)} L</span>
                                     </div>
                                     <div className="flex justify-between text-white">
-                                        <span>Amount:</span>
-                                        <span className="font-bold text-white">₹{dayTotal?.evening_total_amount.toFixed(2)}</span>
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.evening_total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -850,12 +851,12 @@ const DairyMilkCollectionPage = () => {
                                 <h3 className="font-semibold text-white mb-2">Total</h3>
                                 <div className="space-y-1">
                                     <div className="flex justify-between text-white">
-                                        <span>Milk:</span>
-                                        <span className="font-semibold">{dayTotal?.milk_total.toFixed(2)} L</span>
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.milk_total.toFixed(2)} L</span>
                                     </div>
                                     <div className="flex justify-between text-white">
-                                        <span>Amount:</span>
-                                        <span className="font-bold text-white">₹{dayTotal?.total_amount.toFixed(2)}</span>
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.total_amount.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -863,6 +864,8 @@ const DairyMilkCollectionPage = () => {
                     </div>
 
 
+                </div>
+            </div>
                     {/* Table */}
                     <div className="flex flex-col flex-1 relative overflow-hidden">
                         {/* Fixed Header */}
@@ -886,7 +889,7 @@ const DairyMilkCollectionPage = () => {
                                 <thead>
                                     <tr>
                                         {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total', 'Balance', 'Actions'].map(header => (
-                                            <th key={header} className="px-2 py-2 text-center text-[16px] font-bold text-white truncate">
+                                            <th key={header} className="px-1 py-1 text-center text-[12px] font-bold text-white truncate">
                                                 {header}
                                             </th>
                                         ))}
@@ -917,7 +920,7 @@ const DairyMilkCollectionPage = () => {
                                     <tbody>
                                         {morningCollection.length === 0 && eveningCollection.length === 0 ? (
                                             <tr>
-                                                <td colSpan="13" className="text-center text-gray-500 py-8">
+                                                <td colSpan="13" className="text-center text-gray-500 text-[12px] py-8">
                                                     No data available
                                                 </td>
                                             </tr>
@@ -932,22 +935,22 @@ const DairyMilkCollectionPage = () => {
                                                         </tr>
                                                         {morningCollection.map((item, i) => (
                                                             <tr key={`morning-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate">{i + 1}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold  text-blue-600 truncate">{item.customer_account_number}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate" title={item.name}>{item.name}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate">{item.date}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate">{i + 1}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold  text-blue-600 truncate">{item.customer_account_number}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate" title={item.name}>{item.name}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate">{item.date}</td>
                                                                 <td className="px-2 py-1 truncate">
-                                                                    <span className="px-1 py-0.5 text-[14px] font-bold bg-orange-100 text-orange-800 rounded block text-center">
+                                                                    <span className="px-1 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-800 rounded block text-center">
                                                                         {item.shift}
                                                                     </span>
                                                                 </td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold  truncate">{item.quantity}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate">{item.fat}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate">{item.snf}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold text-green-600 truncate">₹{item.base_rate}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold truncate">₹{item.other_price}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold  text-green-700 truncate">₹{item.total_amount}</td>
-                                                                <td className="px-2 py-1 text-[14px] font-bold text-blue-600 truncate">₹{item?.customer?.wallet || 0}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold  truncate">{item.quantity}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate">{item.fat}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate">{item.snf}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold text-green-600 truncate">₹{item.base_rate}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold truncate">₹{item.other_price}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold  text-green-700 truncate">₹{item.total_amount}</td>
+                                                                <td className="px-2 py-1 text-[10px] font-bold text-blue-600 truncate">₹{item?.customer?.wallet || 0}</td>
                                                                 <td className="px-2 py-1">
                                                                     <div className="flex gap-0.5 justify-center">
                                                                         <button
@@ -1059,8 +1062,6 @@ const DairyMilkCollectionPage = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
             {isModalOpen && selectedCustomer && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -1137,6 +1138,7 @@ const DairyMilkCollectionPage = () => {
                 isOpen={isEditeModal}
                 onClose={() => setIsEditeModal(false)}
                 milkData={selectedCustomer}
+                onUpdate={fetchMilkCollectionDetails}
             />
         </div>
     );

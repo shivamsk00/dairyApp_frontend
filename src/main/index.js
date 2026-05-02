@@ -300,6 +300,7 @@ if (is.dev) {
 let mainWindow
 let secondWindow
 let customerCollectionWin
+let cashEntryWin
 let childWindow
 let updateCheckInterval
 
@@ -409,6 +410,35 @@ function customerCollection() {
   }
 }
 
+// Cash Entry Window
+function createCashEntryWindow() {
+  cashEntryWin = new BrowserWindow({
+    width: 1500,
+    height: 850,
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  cashEntryWin.on('closed', () => {
+    cashEntryWin = null
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('cash-entry-window-closed')
+    }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    cashEntryWin.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/cash-entry-win`)
+  } else {
+    cashEntryWin.loadFile(join(__dirname, '../renderer/index.html'))
+    cashEntryWin.webContents.once('did-finish-load', () => {
+      cashEntryWin.webContents.executeJavaScript(`window.location.hash = '#/cash-entry-win';`)
+    })
+  }
+}
+
 // Child Modal Window
 function createChildWindow() {
   childWindow = new BrowserWindow({
@@ -505,6 +535,7 @@ app.whenReady().then(() => {
   ipcMain.on('open-child-window', () => createChildWindow())
   ipcMain.on('open-second-window', () => createSecondWindow())
   ipcMain.on('open-cutomer-win', () => customerCollection())
+  ipcMain.on('open-cash-entry-window', () => createCashEntryWindow())
   ipcMain.handle('get-app-version', () => app.getVersion())
 
   // Update related IPC handlers
@@ -548,6 +579,10 @@ app.whenReady().then(() => {
 
     if (childWindow && !childWindow.isDestroyed()) {
       childWindow.close()
+    }
+
+    if (cashEntryWin && !cashEntryWin.isDestroyed()) {
+      cashEntryWin.close()
     }
   })
 

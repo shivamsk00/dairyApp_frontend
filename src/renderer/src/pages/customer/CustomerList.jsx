@@ -259,19 +259,19 @@ const CustomerList = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
       {/* Header Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-        <div className="p-6">
+      <div className="bg-white  shadow-sm border border-gray-200 mb-6">
+        <div className="p-3">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             {/* Title and Info */}
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-orange-100 rounded-xl">
-                <User className="w-8 h-8 text-orange-600" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 ">
+                <User className="w-4 h-4 text-orange-600" />
               </div>
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Customer Management</h1>
-                <p className="text-gray-600 mt-1">Manage and view customer information with advanced features</p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                  <span>Total: {filteredData.length} customers</span>
+                <h1 className="text-xl lg:text-xl font-bold text-gray-900">Customer Management</h1>
+                <p className="text-gray-600 mt-1 text-xs">Manage and view customer information with advanced features</p>
+                <div className="flex items-center gap-4 mt-2 text-gray-500">
+                  <span className='text-[12px] font-bold'>Total: {filteredData.length} customers</span>
                   {editingRowId && (
                     <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full animate-pulse">
                       Editing Mode Active
@@ -285,25 +285,25 @@ const CustomerList = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => nav('/addCustomer')}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl shadow-md transition-all duration-200 flex items-center gap-2 font-medium"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-2 py-2 text-[12px] shadow-md transition-all duration-200 flex items-center gap-2 font-medium"
               >
-                <FaPlus className="w-4 h-4" />
+                <FaPlus className="w-2 h-2" />
                 Add Customer
               </button>
             </div>
           </div>
 
           {/* Search and Filter Bar */}
-          <div className="flex flex-col lg:flex-row gap-4 mt-6 pt-6 border-t border-gray-200">
+          <div className="flex flex-col lg:flex-row gap-4 mt-3 pt-3 ">
             {/* Search */}
             <div className="relative flex-1">
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
               <input
                 type="text"
                 placeholder="Search by name, account number, mobile, email, subsidy code..."
                 value={searchCustomer}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                className="w-full pl-12 pr-4 py-1 border border-gray-300  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
               />
             </div>
 
@@ -316,7 +316,7 @@ const CustomerList = () => {
                   setItemsPerPage(Number(e.target.value))
                   setCurrentPage(1)
                 }}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="border border-gray-300  px-3 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
@@ -326,10 +326,10 @@ const CustomerList = () => {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 p-1">
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'table'
+                className={`px-4 py-1  text-sm font-medium transition-colors ${viewMode === 'table'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -338,7 +338,7 @@ const CustomerList = () => {
               </button>
               <button
                 onClick={() => setViewMode('card')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'card'
+                className={`px-4 py-1  text-sm font-medium transition-colors ${viewMode === 'card'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -352,7 +352,7 @@ const CustomerList = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+        <div className="bg-white shadow-sm border border-gray-200 p-12">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
             <span className="ml-3 text-gray-600">Loading customers...</span>
@@ -362,17 +362,17 @@ const CustomerList = () => {
 
       {/* Responsive Table View */}
       {!loading && viewMode === 'table' && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white  shadow-sm border border-gray-200">
           {/* Desktop Table */}
           <div className="hidden lg:block">
             <div className="overflow-x-auto overflow-y-auto h-[65vh] table-scrollbar table-scroll-bg">
               <table className="w-full">
                 {/* Table Header - Sticky */}
-                <thead className="bg-gray-50 sticky top-0 z-10">
+                <thead className="bg-black text-white sticky top-0 z-10">
                   <tr>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 w-16">Sr.</th>
+                    <th className="text-left p-2 text-[9px] border-b font-semibold  w-16">Sr.</th>
                     <th
-                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[120px]"
+                      className="text-left p-2 text-[9px] border-b font-semibold cursor-pointer hover:bg-gray-100 min-w-[120px]"
                       onClick={() => handleSort('account_number')}
                     >
                       <div className="flex items-center gap-2">
@@ -385,7 +385,7 @@ const CustomerList = () => {
                       </div>
                     </th>
                     <th
-                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[180px]"
+                      className="text-left p-2 text-[9px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[180px]"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-2">
@@ -398,7 +398,7 @@ const CustomerList = () => {
                       </div>
                     </th>
                     <th
-                      className="text-left p-4 border-b font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 min-w-[130px]"
+                      className="text-left p-2 text-[9px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[130px]"
                       onClick={() => handleSort('subsidy_code')}
                     >
                       <div className="flex items-center gap-2">
@@ -410,11 +410,11 @@ const CustomerList = () => {
                         )}
                       </div>
                     </th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[120px]">Mobile</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[160px]">Email</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[180px]">Address</th>
-                    <th className="text-left p-4 border-b font-semibold text-gray-700 min-w-[100px]">Wallet</th>
-                    <th className="text-center p-4 border-b font-semibold text-gray-700 w-32 sticky right-0 bg-gray-50">Actions</th>
+                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[120px]">Mobile</th>
+                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[160px]">Email</th>
+                    {/* <th className="text-left p-2 text-[9px] border-b font-semibold text-gray-700 min-w-[180px]">Address</th> */}
+                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[100px]">Wallet</th>
+                    <th className="text-center p-2 text-[9px] border-b font-semibold w-32 sticky right-0 ">Actions</th>
                   </tr>
                 </thead>
 
@@ -427,12 +427,12 @@ const CustomerList = () => {
                         }`}
                     >
                       {/* Serial Number */}
-                      <td className="p-4 text-gray-600 font-medium">
+                      <td className="p-2 text-[9px] text-gray-600 font-medium">
                         {startIndex + index + 1}
                       </td>
 
                       {/* Account Number */}
-                      <td className="p-4">
+                      <td className="p-2 text-[9px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
@@ -448,7 +448,7 @@ const CustomerList = () => {
                       </td>
 
                       {/* Customer Name */}
-                      <td className="p-4">
+                      <td className="p-2 text-[9px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
@@ -458,14 +458,14 @@ const CustomerList = () => {
                             placeholder="Customer Name"
                           />
                         ) : (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                              <User className="w-4 h-4 text-orange-600" />
-                            </div>
+                          <div className="flex items-center justify-center gap-3">
+                            {/* <div className="w-4 h-4 bg-orange-100 rounded-full flex items-center justify-center">
+                              <User className="w-3 h-3 text-orange-600" />
+                            </div> */}
                             <div>
-                              <div className="font-medium text-gray-900">{row.name}</div>
+                              <div className="text-[9px] text-gray-900">{row.name}</div>
                               {row.careof && (
-                                <div className="text-xs text-gray-500">c/o {row.careof}</div>
+                                <div className="text-[8px] text-gray-500">c/o {row.careof}</div>
                               )}
                             </div>
                           </div>
@@ -473,19 +473,19 @@ const CustomerList = () => {
                       </td>
 
                       {/* CM Subsidy Code */}
-                      <td className="p-4">
+                      <td className="p-2 text-[9px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
                             value={editFormData.subsidy_code}
                             onChange={(e) => handleInputChange('subsidy_code', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 text-[9px] py-1 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             placeholder="Subsidy Code"
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
-                            <FaTicketAlt className="w-4 h-4 text-gray-500" />
-                            <span className="font-mono text-sm">
+                            <FaTicketAlt className="w-3 h-3 text-gray-500" />
+                            <span className="font-mono text-[9px]">
                               {row.subsidy_code || <span className="text-gray-400 italic">N/A</span>}
                             </span>
                           </div>
@@ -493,7 +493,7 @@ const CustomerList = () => {
                       </td>
 
                       {/* Mobile */}
-                      <td className="p-4">
+                      <td className="p-2 text-[9px]">
                         {editingRowId === row.id ? (
                           <input
                             type="tel"
@@ -505,8 +505,8 @@ const CustomerList = () => {
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                            <a href={`tel:${row.mobile}`} className="hover:text-blue-600 transition-colors">
+                            <Phone className="w-3 h-3 text-[9px] text-gray-500" />
+                            <a href={`tel:${row.mobile}`} className="hover:text-blue-600 transition-colors text-[9px]">
                               {row.mobile}
                             </a>
                           </div>
@@ -525,9 +525,9 @@ const CustomerList = () => {
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
-                            <Mail className="w-4 h-4 text-gray-500" />
+                            <Mail className="w-3 h-3 text-[9px] text-gray-500" />
                             {row.email ? (
-                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-sm truncate max-w-[140px]">
+                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-[9px] truncate max-w-[140px]">
                                 {row.email}
                               </a>
                             ) : (
@@ -538,7 +538,7 @@ const CustomerList = () => {
                       </td>
 
                       {/* Address */}
-                      <td className="p-4">
+                      {/* <td className="p-4">
                         {editingRowId === row.id ? (
                           <textarea
                             value={editFormData.address}
@@ -557,7 +557,7 @@ const CustomerList = () => {
                             </div>
                           </div>
                         )}
-                      </td>
+                      </td> */}
 
                       {/* Wallet */}
                       <td className="p-4">
@@ -566,13 +566,13 @@ const CustomerList = () => {
                             type="number"
                             value={editFormData.wallet}
                             onChange={(e) => handleInputChange('wallet', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-1 text-[9px] border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Wallet Amount"
                             min="0"
                             step="0.01"
                           />
                         ) : (
-                          <div className="text-green-600 font-bold text-sm">
+                          <div className="text-green-600 font-bold text-[9px]">
                             ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', {
                               minimumFractionDigits: 2
                             })}

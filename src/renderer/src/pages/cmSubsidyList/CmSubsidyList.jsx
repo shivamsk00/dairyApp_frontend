@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { FaSearch, FaEye, FaPen } from 'react-icons/fa'
+import { FaSearch, FaEye, FaPen, FaWeightHanging } from 'react-icons/fa'
+import { HiDocumentText } from 'react-icons/hi'
 import { User, Phone, Mail, MapPin, Calendar, BarChart3, Download } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
@@ -44,8 +45,8 @@ const formatInputDate = (isoDateStr) => {
 };
 
 const CmSubsidyList = () => {
+  const fetchCmSubsidyCustomerReport = useHomeStore((state) => state.fetchCmSubsidyCustomerReport)
   const getAllCustomer = useHomeStore((state) => state.getAllCustomer)
-  const reportCustomer = useHomeStore((state) => state.reportCustomer)
 
   const [customers, setCustomers] = useState([])
   const [filteredCustomers, setFilteredCustomers] = useState([])
@@ -129,91 +130,22 @@ const CmSubsidyList = () => {
   const handleGenerateReportData = async () => {
     try {
       setLoading(true)
-      console.log('Starting report generation for', customers.length, 'CM subsidy customers')
+      const payload = {
+        start_date: formatInputDate(dateForm.start_date),
+        end_date: formatInputDate(dateForm.end_date)
+      };
 
-      // Create an array to store all results
-      const results = [];
-      const BATCH_SIZE = 5; // Process 5 requests at a time to prevent server overload
+      const response = await fetchCmSubsidyCustomerReport(payload);
 
-      console.log('Starting batch processing. Total batches:', Math.ceil(customers.length / BATCH_SIZE));
-
-      for (let i = 0; i < customers.length; i += BATCH_SIZE) {
-        const batchCustomers = customers.slice(i, i + BATCH_SIZE);
-
-        // Create promises for current batch
-        const batchPromises = batchCustomers.map(customer => {
-          const payload = {
-            term: dateForm.term,
-            start_date: formatInputDate(dateForm.start_date),
-            end_date: formatInputDate(dateForm.end_date),
-            customer_account_number: customer.account_number
-          };
-          return reportCustomer(payload);
-        });
-
-        // Execute batch
-        const batchResults = await Promise.all(batchPromises);
-        results.push(...batchResults);
-
-        console.log(`Processed batch ${Math.floor(i / BATCH_SIZE) + 1} / ${Math.ceil(customers.length / BATCH_SIZE)}`);
+      if (response && response.status_code === 200) {
+        setReportData(response.data);
+        toast.success("Report data loaded successfully");
+      } else {
+        toast.error(response?.message || "Failed to fetch report");
       }
-
-      // Process results and extract relevant data
-      const processedData = results.map((result, index) => {
-        const customer = customers[index];
-
-        if (result?.status_code == 200 && result?.data) {
-          return {
-            customer_account_number: customer.account_number,
-            customer_name: customer.name,
-            subsidy_code: customer.subsidy_code,
-            total_milk_collections: result.data.total_milk_collections || 0,
-            milk_total_amount: result.data.milk_total_amount || 0,
-            product_total_amount: result.data.product_total_amount || 0,
-            net_milk_balance: result.data.net_milk_balance || 0,
-            customer_wallet: result.data.customer_wallet || 0,
-          };
-        } else {
-          // Return default values if API call failed
-          return {
-            customer_account_number: customer.account_number,
-            customer_name: customer.name,
-            subsidy_code: customer.subsidy_code,
-            total_milk_collections: 0,
-            milk_total_amount: 0,
-            product_total_amount: 0,
-            net_milk_balance: 0,
-            customer_wallet: customer.wallet || 0,
-          };
-        }
-      });
-
-      console.log('Processed report data:', processedData)
-      setReportData(processedData);
-
-      // Update filtered customers with report data
-      const updatedCustomers = customers.map(customer => {
-        const reportInfo = processedData.find(report =>
-          report.customer_account_number === customer.account_number
-        );
-
-        return {
-          ...customer,
-          total_milk_collections: reportInfo?.total_milk_collections || 0,
-          milk_total_amount: reportInfo?.milk_total_amount || 0,
-          product_total_amount: reportInfo?.product_total_amount || 0,
-          net_milk_balance: reportInfo?.net_milk_balance || 0
-        };
-      });
-
-      setFilteredCustomers(updatedCustomers);
-
-      const successfulReports = processedData.filter(data => data.total_milk_collections > 0 || data.milk_total_amount > 0).length;
-      toast.success(`Report data loaded for ${processedData.length} CM subsidy customers. ${successfulReports} customers have milk collections in this period.`);
-
     } catch (error) {
       console.error("Error generating report data:", error);
-      toast.error("Failed to generate report data for CM subsidy customers");
+      toast.error("Failed to generate report data");
       setReportData([]);
     } finally {
       setLoading(false)
@@ -261,56 +193,39 @@ const CmSubsidyList = () => {
 
   // NEW: Handle Excel Export
   const handleExportExcel = () => {
-    if (displayCustomers.length === 0) {
+    if (reportData.length === 0) {
       toast.error("No data to export");
       return;
     }
 
-    const dataToExport = displayCustomers.map((customer, index) => {
-      const baseData = {
-        'Sr. No.': index + 1,
-        'Account No': customer.account_number,
-        'Customer Name': customer.name,
-        'Subsidy Code': customer.subsidy_code,
-        'Mobile': customer.mobile || '',
-      };
-
-      if (reportData.length > 0) {
-        const subsidyRate = parseFloat(subsidyAmount) || 0;
-        const totalMilk = customer.total_milk_collections || 0;
-        const subsidyValue = totalMilk * subsidyRate;
-
-        return {
-          ...baseData,
-          'Total Milk (L)': Number(totalMilk.toFixed(2)),
-          'Milk Amount (₹)': Number((customer.milk_total_amount || 0).toFixed(2)),
-          'Subsidy (₹)': Number(subsidyValue.toFixed(2))
-        };
-      }
-
-      return baseData;
-    });
+    const dataToExport = reportData.map((item) => ({
+      'Document Date': item.document_date,
+      'Shift': item.shift === 'morning' ? 'M' : 'E',
+      'Farmer code': item.farmer_code,
+      'UOM': item.uom,
+      'Milk Type': item.milk_type === 'cow' ? 'C' : 'B',
+      'Milk Qty': item.milk_qty,
+      'Fat %': item.fat,
+      'SNF %': item.snf
+    }));
 
     // Calculate totals for the footer row
     if (reportData.length > 0) {
-      const totalMilkSum = displayCustomers.reduce((sum, customer) => sum + (customer.total_milk_collections || 0), 0);
-      const totalAmountSum = displayCustomers.reduce((sum, customer) => sum + (customer.milk_total_amount || 0), 0);
-      const subsidyRate = parseFloat(subsidyAmount) || 0;
-      const totalSubsidySum = totalMilkSum * subsidyRate;
+      const totalMilkQty = reportData.reduce((sum, item) => sum + (parseFloat(item.milk_qty) || 0), 0);
 
       // Add empty row for spacing
       dataToExport.push({});
 
       // Add Total Row
       dataToExport.push({
-        'Sr. No.': '',
-        'Account No': '',
-        'Customer Name': 'GRAND TOTAL',
-        'Subsidy Code': '',
-        'Mobile': '',
-        'Total Milk (L)': Number(totalMilkSum.toFixed(2)),
-        'Milk Amount (₹)': Number(totalAmountSum.toFixed(2)),
-        'Subsidy (₹)': Number(totalSubsidySum.toFixed(2))
+        'Document Date': 'GRAND TOTAL',
+        'Shift': '',
+        'Farmer code': '',
+        'UOM': '',
+        'Milk Type': '',
+        'Milk Qty': Number(totalMilkQty.toFixed(2)),
+        'Fat %': '',
+        'SNF %': ''
       });
     }
 
@@ -359,17 +274,17 @@ const CmSubsidyList = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-white rounded-2xl shadow-sm mx-4 mt-6 mb-6">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-6">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm mx-4 mt-6 mb-3">
+        <div className="p-4 ">
+          <div className="flex justify-between items-start mb-3">
             {/* Left side - Title and info */}
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <User className="w-6 h-6 text-orange-600" />
+              <div className="w-8 h-8 bg-orange-100  flex items-center justify-center">
+                <User className="w-4 h-4 text-orange-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">CM Subsidy Customer List</h1>
-                <p className="text-gray-600 text-sm">Customers with Chief Minister Subsidy Codes</p>
+                <h1 className="text-xl font-bold text-gray-900">CM Subsidy Customer List</h1>
+                {/* <p className="text-gray-600 text-sm">Customers with Chief Minister Subsidy Codes</p> */}
                 <p className="text-gray-500 text-sm mt-1">Total: {filteredCustomers.length} subsidy customers</p>
               </div>
             </div>
@@ -378,17 +293,17 @@ const CmSubsidyList = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleExportExcel}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors shadow-sm"
+                className="bg-green-600 hover:bg-green-700 text-[12px] text-white px-3 py-2  font-medium flex items-center gap-2 transition-colors shadow-sm"
               >
-                <Download className="w-5 h-5" />
+                <Download className="w-3 h-3" />
                 Export Excel
               </button>
 
               <button
                 onClick={() => setShowDateFilter(!showDateFilter)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors shadow-sm"
+                className="bg-blue-500 hover:bg-blue-600 text-[12px] text-white px-3 py-2  font-medium flex items-center gap-2 transition-colors shadow-sm"
               >
-                <Calendar className="w-5 h-5" />
+                <Calendar className="w-3 h-3" />
                 {showDateFilter ? 'Hide' : 'Show'} Report Filter
               </button>
             </div>
@@ -396,48 +311,65 @@ const CmSubsidyList = () => {
 
           {/* Date Filter Section */}
           {showDateFilter && (
-            <div className="border border-gray-200 rounded-xl p-4 mb-6 bg-gray-50">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
-                Generate Milk Collection Report for CM Subsidy Customers
-              </h3>
+            <div className="border border-gray-200 rounded-xl p-4  bg-gray-50">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-200">
+                <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  Milk Collection Report Generator
+                </h3>
+
+                {reportData.length > 0 && (
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200">
+                      <HiDocumentText className="text-blue-600" />
+                      <span className="text-sm font-bold text-blue-700">{reportData.length} Entries</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-green-100 px-3 py-1.5 rounded-lg border border-green-200">
+                      <FaWeightHanging className="text-green-600 text-xs" />
+                      <span className="text-sm font-bold text-green-700">
+                        {reportData.reduce((acc, item) => acc + (parseFloat(item.milk_qty) || 0), 0).toFixed(2)} {reportData[0]?.uom || 'KG'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Date Filter Form - MODIFIED: Added subsidy input */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                 {/* From Date */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">From Date:</label>
+                  <label className="block text-[12px] font-medium mb-1 text-gray-700">From Date:</label>
                   <input
                     type="date"
                     name="start_date"
                     value={dateForm.start_date}
                     onChange={handleDateChange}
                     readOnly={dateForm.term !== 'date_range'}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300  px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 {/* To Date */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">To Date:</label>
+                  <label className="block text-[12px] font-medium mb-1 text-gray-700">To Date:</label>
                   <input
                     type="date"
                     name="end_date"
                     value={dateForm.end_date}
                     onChange={handleDateChange}
                     readOnly={dateForm.term !== 'date_range'}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 {/* Select Term */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">Select Term:</label>
+                  <label className="block text-[12px] font-medium mb-1 text-gray-700">Select Term:</label>
                   <select
                     name="term"
                     value={dateForm.term}
                     onChange={handleDateChange}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 px-2 py-0.5 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="date_range">Date Range</option>
                     <option value="this_week">This Week</option>
@@ -447,13 +379,13 @@ const CmSubsidyList = () => {
 
                 {/* NEW: Subsidy Amount Input */}
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700">Subsidy Amount (₹):</label>
+                  <label className="block text-[12px] font-medium mb-1 text-gray-700">Subsidy Amount (₹):</label>
                   <input
                     type="number"
                     value={subsidyAmount}
                     onChange={(e) => setSubsidyAmount(e.target.value)}
                     placeholder="Enter subsidy amount"
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
@@ -462,7 +394,7 @@ const CmSubsidyList = () => {
                   <button
                     onClick={handleGenerateReportData}
                     disabled={!isDateFormValid || loading}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors flex-1 ${isDateFormValid && !loading
+                    className={`px-2 py-0.5 text-[12px] font-medium transition-colors flex-1 ${isDateFormValid && !loading
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-gray-400 cursor-not-allowed text-white'
                       }`}
@@ -471,35 +403,31 @@ const CmSubsidyList = () => {
                   </button>
                   <button
                     onClick={handleResetDateFilter}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-0.5 text-[12px] font-medium transition-colors"
                   >
                     Reset
                   </button>
                 </div>
               </div>
 
-              {/* MODIFIED: Summary Cards - Updated to include subsidy */}
-              {reportData.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+              {/* Summary Cards */}
+              {/* {reportData.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-3">
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Total Milk</div>
-                    <div className="text-xl font-bold text-blue-600">{totals.totalMilk.toFixed(2)} L</div>
+                    <div className="text-sm text-gray-600">Total Records</div>
+                    <div className="text-xl font-bold text-blue-600">{reportData.length} Entries</div>
                   </div>
                   <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Milk Amount</div>
-                    <div className="text-xl font-bold text-green-600">₹{totals.totalAmount.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Total Subsidy</div>
-                    <div className="text-xl font-bold text-orange-600">₹{totals.totalSubsidy.toFixed(2)}</div>
+                    <div className="text-sm text-gray-600">Total Milk Qty</div>
+                    <div className="text-xl font-bold text-green-600">{reportData.reduce((acc, item) => acc + (parseFloat(item.milk_qty) || 0), 0).toFixed(2)} {reportData[0]?.uom || 'KG'}</div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           )}
 
           {/* Search bar */}
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <div className="relative flex-1">
               <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -510,7 +438,7 @@ const CmSubsidyList = () => {
                 className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-50"
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -534,18 +462,26 @@ const CmSubsidyList = () => {
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto overflow-y-auto h-[65vh] table-scrollbar table-scroll-bg">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className=" bg-black text-white">
                   <tr>
-                    <th className="text-center p-4 text-sm font-semibold text-gray-700 w-16">Sr.</th>
-                    <th className="text-center p-4 text-sm font-semibold text-gray-700">Acc. No.</th>
-                    <th className="text-center p-4 text-sm font-semibold text-gray-700">Customer Name</th>
-                    <th className="text-center p-4 text-sm font-semibold text-gray-700">CM Subsidy Code</th>
-                    <th className="text-center p-4 text-sm font-semibold text-gray-700">Mobile</th>
-                    {reportData.length > 0 && (
+                    <th className="text-center p-2 text-[10px] font-semibold w-16">Sr.</th>
+                    {reportData.length > 0 ? (
                       <>
-                        <th className="text-center p-4 text-sm font-semibold text-gray-700">Total Milk (L)</th>
-                        <th className="text-center p-4 text-sm font-semibold text-gray-700">Milk Amount (₹)</th>
-                        <th className="text-center p-4 text-sm font-semibold text-gray-700">Subsidy (₹)</th> {/* NEW: Added Subsidy column */}
+                        <th className="text-center p-2 text-[10px] font-semibold ">Document Date</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Shift</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Farmer Code</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">UOM</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Milk Type</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Milk Qty</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Fat %</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">SNF %</th>
+                      </>
+                    ) : (
+                      <>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Acc. No.</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Customer Name</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">CM Subsidy Code</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Mobile</th>
                       </>
                     )}
                   </tr>
@@ -553,95 +489,44 @@ const CmSubsidyList = () => {
 
                 <tbody className="divide-y divide-gray-100">
                   {/* MODIFIED: Use displayCustomers instead of filteredCustomers */}
-                  {displayCustomers.length === 0 ? (
-                    <tr>
-                      <td colSpan={reportData.length > 0 ? "9" : "5"} className="px-6 py-12 text-center text-gray-500">
-                        <div className="text-lg">
-                          {reportData.length > 0
-                            ? 'No customers have milk collections in the selected period'
-                            : searchTerm
-                              ? 'No customers found matching your search'
-                              : 'No customers with CM subsidy codes found'
-                          }
-                        </div>
-                        <div className="text-sm mt-1">
-                          {customers.length === 0
-                            ? "No customers have valid CM subsidy codes in the database"
-                            : "Try adjusting your search criteria or date range"}
-                        </div>
-                      </td>
-                    </tr>
+                  {reportData.length === 0 ? (
+                    filteredCustomers.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                          <div className="text-lg">No CM subsidy customers found</div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCustomers.map((customer, index) => (
+                        <tr key={customer.id} className="hover:bg-gray-50">
+                          <td className="p-2 text-center text-[10px] font-medium">{index + 1}</td>
+                          <td className="p-2 text-center text-[10px] text-blue-600 font-medium">{customer.account_number}</td>
+                          <td className="p-2 text-center text-[10px] font-semibold text-gray-900">{customer.name}</td>
+                          <td className="p-2 text-center">
+                            <span className="px-1  bg-blue-50 rounded-lg text-[10px] font-mono text-blue-800 border border-blue-200">
+                              {customer.subsidy_code}
+                            </span>
+                          </td>
+                          <td className="p-2 text-center text-[10px] text-gray-700">{customer.mobile}</td>
+                        </tr>
+                      ))
+                    )
                   ) : (
-                    displayCustomers.map((customer, index) => (
-                      <tr key={customer.id} className="hover:bg-gray-50">
-                        {/* Serial Number */}
-                        <td className="p-4 text-center">
-                          <span className="text-gray-700 font-medium">{index + 1}</span>
-                        </td>
-
-                        {/* Account Number */}
-                        <td className="p-4 text-center">
-                          <span className="text-blue-600 font-medium">{customer.account_number}</span>
-                        </td>
-
-                        {/* Customer Name */}
-                        <td className="p-4">
-                          <div className="flex items-center justify-center gap-3">
-                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                              <User className="w-4 h-4 text-orange-600" />
-                            </div>
-                            <div className="text-center">
-                              <div className="font-semibold text-gray-900">{customer.name}</div>
-                              {customer.careof && (
-                                <div className="text-xs text-gray-500">c/o {customer.careof}</div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* CM Subsidy Code */}
-                        <td className="p-4 text-center">
-                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg text-sm font-mono text-blue-800 border border-blue-200">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            {customer.subsidy_code}
+                    reportData.map((item, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="p-2 text-[10px] text-center font-medium">{index + 1}</td>
+                        <td className="p-2 text-[10px] text-center">{item.document_date}</td>
+                        <td className="p-2 text-[10px] text-center capitalize">{item.shift === 'morning' ? 'M' : 'E'}</td>
+                        <td className="p-2 text-[10px] text-center">
+                          <span className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-mono text-blue-800 border border-blue-200">
+                            {item.farmer_code}
                           </span>
                         </td>
-
-                        {/* Mobile */}
-                        <td className="p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <Phone className="w-4 h-4 text-gray-400" />
-                            <a href={`tel:${customer.mobile}`} className="text-gray-700 hover:text-blue-600 transition-colors">
-                              {customer.mobile}
-                            </a>
-                          </div>
-                        </td>
-
-                        {/* Report Data Columns (only show if report data exists) */}
-                        {reportData.length > 0 && (
-                          <>
-                            {/* Total Milk */}
-                            <td className="p-4 text-center">
-                              <span className="text-blue-600 font-semibold">
-                                {customer.total_milk_collections ? customer.total_milk_collections.toFixed(2) : '0.00'}
-                              </span>
-                            </td>
-
-                            {/* Milk Amount */}
-                            <td className="p-4 text-center">
-                              <span className="text-green-600 font-semibold">
-                                ₹{customer.milk_total_amount ? customer.milk_total_amount.toFixed(2) : '0.00'}
-                              </span>
-                            </td>
-
-                            {/* NEW: Subsidy Column */}
-                            <td className="p-4 text-center">
-                              <span className="text-orange-600 font-semibold">
-                                ₹{((customer.total_milk_collections || 0) * (parseFloat(subsidyAmount) || 0)).toFixed(2)}
-                              </span>
-                            </td>
-                          </>
-                        )}
+                        <td className="p-2 text-[10px] text-center">{item.uom}</td>
+                        <td className="p-2 text-[10px] text-center capitalize">{item.milk_type === "cow" ? "C" : "B"}</td>
+                        <td className="p-2 text-[10px] text-center font-bold text-blue-600">{item.milk_qty}</td>
+                        <td className="p-2 text-[10px] text-center">{item.fat}</td>
+                        <td className="p-2 text-[10px] text-center">{item.snf}</td>
                       </tr>
                     ))
                   )}
@@ -649,17 +534,10 @@ const CmSubsidyList = () => {
               </table>
             </div>
 
-            {/* MODIFIED: Summary footer */}
-            {displayCustomers.length > 0 && (
+            {reportData.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="text-sm text-gray-600 text-center">
-                  Showing {displayCustomers.length} customers with milk collections
-                  {searchTerm && ` matching "${searchTerm}"`}
-                  {reportData.length > 0 && (
-                    <span className="ml-2 text-blue-600 font-medium">
-                      | Report data from {dateForm.start_date} to {dateForm.end_date}
-                    </span>
-                  )}
+                <div className="text-sm text-gray-600 text-center font-medium">
+                  Showing {reportData.length} records from {dateForm.start_date} to {dateForm.end_date}
                 </div>
               </div>
             )}

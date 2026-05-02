@@ -357,39 +357,39 @@ const ReportsPage = () => {
           onSubmit={handleGenerate}
         >
           <div className="bg-white text-black p-6 rounded-lg shadow-lg border border-gray-200">
-            <h2 className="text-xl font-semibold text-orange-600 mb-4">Customer Milk Collection Report</h2>
+            <h2 className="text-xl font-semibold text-orange-600 mb-2">Customer Milk Collection Report</h2>
 
             {/* From and To Date - 1st Row */}
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1 text-gray-700">From:</label>
+                <label className="block text-[12px] font-medium mb-1 text-gray-700">From:</label>
                 <input
                   type="date"
                   name="start_date"
                   value={form.start_date}
                   onChange={handleChange}
                   readOnly={form.term !== 'date_range'}
-                  className="h-[42px] border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="h-[20px] border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
               <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1 text-gray-700">To:</label>
+                <label className="block text-[12px] font-medium mb-1 text-gray-700">To:</label>
                 <input
                   type="date"
                   name="end_date"
                   value={form.end_date}
                   onChange={handleChange}
                   readOnly={form.term !== 'date_range'}
-                  className="h-[42px] border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="h-[20px] border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
               <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1 text-gray-700">Select Term:</label>
+                <label className="block text-[12px] font-medium mb-1 text-gray-700">Select Term:</label>
                 <select
                   name="term"
                   value={form.term}
                   onChange={handleChange}
-                  className="h-[42px] border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="h-[20px] border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="date_range">Date Range</option>
                   <option value="this_week">This Week</option>
@@ -397,14 +397,14 @@ const ReportsPage = () => {
                 </select>
               </div>
               <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1 text-gray-700">Customer Ac No:</label>
+                <label className="block text-[12px] font-medium mb-1 text-gray-700">Customer Ac No:</label>
                 <input
                   type="text"
                   name="customer_account_number"
                   value={form.customer_account_number}
                   onChange={handleChange}
                   placeholder="Account Number"
-                  className="h-[42px] border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="h-[20px] border border-gray-300 px-2 text-[12px] w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -442,14 +442,14 @@ const ReportsPage = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${isFormValid && !isLoading
+                className={`px-3 py-2 text-[12px] font-medium transition-all duration-200 ${isFormValid && !isLoading
                   ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
                   : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   }`}
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-2 w-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -464,7 +464,7 @@ const ReportsPage = () => {
                 type="button"
                 onClick={handleReset}
                 disabled={isLoading}
-                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-[12px] font-medium transition-all duration-200 bg-gray-500 hover:bg-gray-600 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset
               </button>
@@ -473,7 +473,7 @@ const ReportsPage = () => {
                 <button
                   type="button"
                   onClick={exportToExcel}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
+                  className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white font-medium transition-all duration-200 text-[12px] shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -487,7 +487,7 @@ const ReportsPage = () => {
 
         {/* Enhanced Summary Card with Fat and SNF */}
         {summaryData && (
-          <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl p-6 shadow-lg">
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl p-2 shadow-lg">
             <div className="text-center mb-2">
               <h3 className="text-xl font-bold text-indigo-800">
                 📊 Report Summary | {summaryData?.customer_name} | Acc No. {summaryData.milk_collections?.[0]?.customer_account_number || form.customer_account_number || 'N/A'}
@@ -512,21 +512,21 @@ const ReportsPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Milk Collection Summary */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+              <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-200">
+                <h4 className="text-[12px] font-semibold text-gray-800 mb-1 flex items-center">
                   🥛 Milk Collection
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex justify-between">
                     <div>
-                      <span className="text-gray-600">Quantity: </span>
-                      <span className="font-bold text-blue-600">
+                      <span className="text-gray-600 text-[12px]">Quantity: </span>
+                      <span className="font-bold text-blue-600 text-[12px]">
                         {summaryData?.total_milk_collections?.toFixed(2)} L
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Amount: </span>
-                      <span className="font-bold text-green-600">
+                      <span className="text-gray-600 text-[12px]">Amount: </span>
+                      <span className="font-bold text-green-600 text-[12px]">
                         ₹{totals.totalMilkAmount.toFixed(2)}
                       </span>
                     </div>
@@ -539,14 +539,14 @@ const ReportsPage = () => {
                   </div> */}
                   <div className="flex justify-between">
                     <div>
-                      <span className="text-gray-600">Avg Fat: </span>
-                      <span className="font-bold text-yellow-600">
+                      <span className="text-gray-600 text-[12px]">Avg Fat: </span>
+                      <span className="font-bold text-yellow-600 text-[12px]">
                         {totals.avgFat}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Avg SNF: </span>
-                      <span className="font-bold text-purple-600">
+                      <span className="text-gray-600 text-[12px]">Avg SNF: </span>
+                      <span className="font-bold text-purple-600 text-[12px]">
                         {totals.avgSNF}
                       </span>
                     </div>
@@ -555,27 +555,27 @@ const ReportsPage = () => {
               </div>
 
               {/* Financial Summary */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+              <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-200">
+                <h4 className="text-[12px] font-semibold text-gray-800 mb-1 flex items-center">
                   💰 Financial Summary
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Product Sales:</span>
-                    <span className="font-bold text-orange-600">
+                    <span className="text-gray-600 text-[12px]">Product Sales:</span>
+                    <span className="font-bold text-orange-600 text-[12px]">
                       ₹{totals.totalProductAmount.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <div>
-                      <span className="text-gray-600">Received: </span>
-                      <span className="font-bold text-green-600">
+                      <span className="text-gray-600 text-[12px]">Received: </span>
+                      <span className="font-bold text-green-600 text-[12px]">
                         ₹{totals.totalReceived.toFixed(2)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Given: </span>
-                      <span className="font-bold text-red-600">
+                      <span className="text-gray-600 text-[12px]">Given: </span>
+                      <span className="font-bold text-red-600 text-[12px]">
                         ₹{totals.totalGiven.toFixed(2)}
                       </span>
                     </div>
@@ -586,8 +586,8 @@ const ReportsPage = () => {
                       ₹{totals.totalGiven.toFixed(2)}
                     </span>
                   </div> */}
-                  <div className="flex justify-between border-t pt-2">
-                    <span className="text-gray-700 font-medium">Total Amount:</span>
+                  <div className="flex justify-between border-t">
+                    <span className="text-gray-700 font-medium text-[12px]">Total Amount:</span>
                     <span className={`font-bold ${totals.totalAmount < 0 ? 'text-red-600' : 'text-green-600'}`}>
                       ₹{totals.totalAmount.toFixed(2)}
                     </span>

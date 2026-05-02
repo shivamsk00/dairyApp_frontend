@@ -41,6 +41,9 @@ import UpdateHistoryPage from './pages/updatehistory/UpdateHistoryPage';
 import LastMonthAccounting from './pages/lastMonthAccounting/LastMonthAccounting';
 import CmSubsidyList from './pages/cmSubsidyList/CmSubsidyList';
 import EditCashEntryModal from './pages/cashentry/EditCashEntry';
+import CashEntryNewWin from './pages/cashentry/CashEntryNewWin';
+import ProductCorrection from './pages/productCorrection/ProductCorrection';
+import CashCorrection from './pages/cashCorrection/CashCorrection';
 
 function App() {
 
@@ -111,6 +114,8 @@ function App() {
           <Route path="cashentry" element={<CashEntryPage />} />
           <Route path="editCashEntry" element={<EditCashEntryModal />} />
           <Route path="milkCorrection" element={<MilkCorrectionPage />} />
+          <Route path="productCorrection" element={<ProductCorrection />} />
+          <Route path="cashCorrection" element={<CashCorrection />} />
           <Route path="update-history" element={<UpdateHistoryPage />} />
 
           {/* Last Month Accounting */}
@@ -123,6 +128,7 @@ function App() {
 
         <Route path="milk-collection" element={<MilkCollectionPage />} />
         <Route path="customer-collection" element={<CustomerCollection />} />
+        <Route path="cash-entry-win" element={<CashEntryNewWin />} />
       </Routes>
     </HashRouter>
   );

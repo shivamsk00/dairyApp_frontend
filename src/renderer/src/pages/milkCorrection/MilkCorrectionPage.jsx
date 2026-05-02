@@ -116,11 +116,11 @@ const MilkCorrectionPage = () => {
         {
             name: 'SR NO.',
             cell: (row, index) => (
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                <div className="flex items-center justify-center w-4 h-4 bg-blue-100 text-blue-800 rounded-full text-[8px] font-semibold">
                     {(currentPage - 1) * rowsPerPage + index + 1}
                 </div>
             ),
-            width: '80px',
+            width: 'fit',
             sortable: false,
             center: true
         },
@@ -129,7 +129,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.customer_account_number,
             sortable: true,
             cell: row => (
-                <div className="font-medium text-gray-900">
+                <div className="font-medium text-gray-900 text-[10px]">
                     {row.customer_account_number}
                 </div>
             )
@@ -139,7 +139,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.date,
             sortable: true,
             cell: row => (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 text-[10px]">
                     {new Date(row.date).toLocaleDateString('en-IN')}
                 </div>
             )
@@ -149,7 +149,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.milk_type,
             sortable: true,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.milk_type === 'cow'
+                <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${row.milk_type === 'cow'
                     ? 'bg-green-100 text-green-800'
                     : 'bg-yellow-100 text-yellow-800'
                     }`}>
@@ -161,7 +161,7 @@ const MilkCorrectionPage = () => {
             name: 'Shift',
             selector: row => row.shift,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.shift === 'morning'
+                <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${row.shift === 'morning'
                     ? 'bg-orange-100 text-orange-800'
                     : 'bg-purple-100 text-purple-800'
                     }`}>
@@ -173,7 +173,7 @@ const MilkCorrectionPage = () => {
             name: 'Qty (L)',
             selector: row => row.quantity,
             cell: row => (
-                <div className="font-medium text-blue-600">
+                <div className="font-medium text-blue-600 text-[10px]">
                     {row.quantity}
                 </div>
             )
@@ -182,7 +182,7 @@ const MilkCorrectionPage = () => {
             name: 'FAT',
             selector: row => row.fat,
             cell: row => (
-                <div className="text-sm font-medium">
+                <div className="text-[10px] font-medium">
                     {row.fat}
                 </div>
             )
@@ -191,7 +191,7 @@ const MilkCorrectionPage = () => {
             name: 'SNF',
             selector: row => row.snf,
             cell: row => (
-                <div className="text-sm font-medium">
+                <div className="text-[10px] font-medium">
                     {row.snf}
                 </div>
             )
@@ -200,25 +200,27 @@ const MilkCorrectionPage = () => {
             name: 'Rate',
             selector: row => row.base_rate,
             cell: row => (
-                <div className="font-medium text-green-600">
+                <div className="font-medium text-green-600 text-[10px]">
                     ₹{row.base_rate}
                 </div>
             )
         },
-        {
-            name: 'Other Rate',
-            selector: row => row.other_price,
-            cell: row => (
-                <div className="font-medium text-green-600">
-                    ₹{row.other_price}
-                </div>
-            )
-        },
+        // {
+        //     name: 'Other Rate',
+        //     selector: row => row.other_price,
+        //     cell: row => (
+        //         <div className="font-medium text-green-600 text-[10px]">
+        //             ₹{row.other_price}
+        //         </div>
+        //     ),
+        //     width: 'fit',
+
+        // },
         {
             name: 'Amount',
             selector: row => row.total_amount,
             cell: row => (
-                <div className="font-semibold text-green-700">
+                <div className="font-semibold text-green-700 text-[10px]">
                     ₹{row.total_amount}
                 </div>
             )
@@ -228,41 +230,41 @@ const MilkCorrectionPage = () => {
             cell: row => (
                 <div className="flex gap-1 items-center justify-center">
                     <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2  transition-colors duration-200 shadow-sm"
                         onClick={() => handlePrint(row)}
                         title="Print"
                     >
-                        <BsFillPrinterFill size={12} />
+                        <BsFillPrinterFill size={8} />
                     </button>
                     <button
-                        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm"
+                        className="bg-green-600 hover:bg-green-700 text-white p-2  transition-colors duration-200 shadow-sm"
                         onClick={() => {
                             setSelectedMilkEntry(row);
                             setIsModalOpen(true);
                         }}
                         title="View Details"
                     >
-                        <FaEye size={12} />
+                        <FaEye size={8} />
                     </button>
                     <button
-                        className="bg-amber-600 hover:bg-amber-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-white p-2  transition-colors duration-200 shadow-sm"
                         onClick={() => {
                             setEditableEntry(row);
                             setIsEditModalOpen(true);
                         }}
                         title="Edit"
                     >
-                        <FaPen size={12} />
+                        <FaPen size={8} />
                     </button>
                     <button
-                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm"
+                        className="bg-red-600 hover:bg-red-700 text-white p-2  transition-colors duration-200 shadow-sm"
                         onClick={() => {
                             setMilkToDelete(row);
                             setIsConfirmOpen(true);
                         }}
                         title="Delete"
                     >
-                        <FaTrashAlt size={12} />
+                        <FaTrashAlt size={8} />
                     </button>
                 </div>
             ),
@@ -300,15 +302,15 @@ const MilkCorrectionPage = () => {
             style: {
                 backgroundColor: '#f1f5f9',
                 borderBottom: '1px solid #cbd5e1',
-                fontSize: '14px',
+                fontSize: '10px',
                 fontWeight: '600',
                 color: '#374151'
             },
         },
         rows: {
             style: {
-                minHeight: '60px',
-                fontSize: '13px',
+                minHeight: '40px',
+                fontSize: '10px',
                 '&:hover': {
                     backgroundColor: '#f8fafc',
                     cursor: 'pointer'
@@ -321,17 +323,16 @@ const MilkCorrectionPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
             <div className="max-full mx-auto space-y-6">
                 {/* Header */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+                <div className="bg-white shadow-lg border border-gray-200 p-4">
                     <div className="flex items-center gap-2 mb-4">
-                        <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
-                            <MdLocalDrink className="h-5 w-5 text-white" />
+                        <div className="p-1 bg-gradient-to-r from-blue-500 to-indigo-600 ">
+                            <MdLocalDrink className="h-2 w-2 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold text-gray-900">Milk Correction Dashboard</h1>
-                            <p className="text-xs text-gray-600">Manage and track milk collection data</p>
+                            <h1 className="text-sm font-bold text-gray-900">Milk Correction Dashboard</h1>
                         </div>
                     </div>
 
@@ -444,7 +445,7 @@ const MilkCorrectionPage = () => {
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                                <h2 className="text-xl font-bold text-gray-900">Milk Collection Records</h2>
+                                <h2 className="text-lg font-bold text-gray-900">Milk Collection Records</h2>
                                 <div className="relative">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <input
@@ -485,46 +486,46 @@ const MilkCorrectionPage = () => {
                 {/* Summary Cards */}
                 {totalMilk > 0 && totalAmount > 0 && averageFat > 0 && averageSnf > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-blue-100 text-sm font-medium">Total Milk</p>
-                                    <p className="text-2xl font-bold">{totalMilk.toFixed(2)} L</p>
+                                    <p className="text-blue-100 text-xs font-medium">Total Milk</p>
+                                    <p className="text-lg font-bold">{totalMilk.toFixed(2)} L</p>
                                 </div>
-                                <MdLocalDrink className="h-8 w-8 text-blue-200" />
+                                <MdLocalDrink className="h-6 w-6 text-blue-200" />
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+                        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-green-100 text-sm font-medium">Total Amount</p>
-                                    <p className="text-2xl font-bold">₹{totalAmount.toFixed(2)}</p>
+                                    <p className="text-green-100 text-xs font-medium">Total Amount</p>
+                                    <p className="text-lg font-bold">₹{totalAmount.toFixed(2)}</p>
                                 </div>
-                                <MdAttachMoney className="h-8 w-8 text-green-200" />
+                                <MdAttachMoney className="h-6 w-6 text-green-200" />
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg">
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg p-4 text-white shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-amber-100 text-sm font-medium">Avg FAT</p>
-                                    <p className="text-2xl font-bold">{averageFat}</p>
+                                    <p className="text-amber-100 text-xs font-medium">Avg FAT</p>
+                                    <p className="text-lg font-bold">{averageFat}</p>
                                 </div>
-                                <div className="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center">
-                                    <span className="text-amber-800 font-bold text-sm">F</span>
+                                <div className="h-6 w-6 rounded-full bg-amber-200 flex items-center justify-center">
+                                    <span className="text-amber-800 font-bold text-xs">F</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+                        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-lg">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-purple-100 text-sm font-medium">Avg SNF</p>
-                                    <p className="text-2xl font-bold">{averageSnf}</p>
+                                    <p className="text-purple-100 text-xs font-medium">Avg SNF</p>
+                                    <p className="text-lg font-bold">{averageSnf}</p>
                                 </div>
-                                <div className="h-8 w-8 rounded-full bg-purple-200 flex items-center justify-center">
-                                    <span className="text-purple-800 font-bold text-sm">S</span>
+                                <div className="h-6 w-6 rounded-full bg-purple-200 flex items-center justify-center">
+                                    <span className="text-purple-800 font-bold text-xs">S</span>
                                 </div>
                             </div>
                         </div>

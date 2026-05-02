@@ -12,7 +12,7 @@ import ManualEntries from './ManualEntries'
 
 const CashEntryPage = () => {
   const today = new Date().toISOString().split('T')[0]
-  const [viewMode, setViewMode] = useState('single')
+  const [viewMode, setViewMode] = useState('bulk')
   const [refreshing, setRefreshing] = useState(false) // ✅ NEW: Track refresh state
 
   const allCashEntries = useHomeStore((state) => state.getAllCashEntries)
@@ -347,36 +347,36 @@ const CashEntryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-8xl mx-auto">
+      <div className="max-w-8xl p-2 mx-auto">
 
         {/* ✅ UPDATED: Header Section with Refresh Button */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="flex items-center gap-4 mb-2 justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
-                <FaMoneyBillWave className="text-white text-2xl" />
+              <div className="p-1 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+                <FaMoneyBillWave className="text-white text-xl" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Cash Entry Management</h1>
-                <p className="text-slate-600 mt-1">Track and manage all financial transactions</p>
+                <h1 className="text-xl md:text-xl font-bold text-slate-800">Cash Entry Management</h1>
+                {/* <p className="text-slate-600 mt-1">Track and manage all financial transactions</p> */}
               </div>
             </div>
             {/* ✅ NEW: Refresh Button */}
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-400 disabled:to-slate-400 text-white font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+              className="px-2 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-slate-400 disabled:to-slate-400 text-white font-bold  transition-all text-[12px] transform hover:scale-105 shadow-lg flex items-center gap-2"
               title="Refresh page"
             >
-              <FaSync className={`text-lg ${refreshing ? 'animate-spin' : ''}`} />
+              <FaSync className={`text-[12px] ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </button>
           </div>
         </div>
 
         {/* Toggle Buttons */}
-        <div className="mb-8 flex gap-4">
-          <button
+        <div className="w-[40%] mb-8 flex gap-2">
+          {/* <button
             onClick={() => setViewMode('single')}
             className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'single'
               ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white'
@@ -384,10 +384,10 @@ const CashEntryPage = () => {
               }`}
           >
             💰 Single Cash Entry
-          </button>
+          </button> */}
           <button
             onClick={() => setViewMode('bulk')}
-            className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'bulk'
+            className={`flex-1  py-2 rounded-lg font-bold text-[12px] transition-all transform hover:scale-105 shadow-lg ${viewMode === 'bulk'
               ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
               : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-green-400'
               }`}
@@ -398,184 +398,189 @@ const CashEntryPage = () => {
           {/* ✅ NEW: Manual Entry Button */}
           <button
             onClick={() => setViewMode('manual')}
-            className={`flex-1 px-6 py-3 rounded-lg font-bold text-base transition-all transform hover:scale-105 shadow-lg ${viewMode === 'manual'
+            className={`flex-1  py-2 rounded-lg font-bold text-[12px] transition-all transform hover:scale-105 shadow-lg ${viewMode === 'manual'
               ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white'
               : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-orange-400'
               }`}
           >
             📋 Manual Voucher Entry
           </button>
+          <button
+            onClick={() => {
+              cashEntriesAllDataFetch()
+              setViewMode('history')
+            }}
+            className={`flex-1  py-2 rounded-lg font-bold text-[12px] transition-all transform hover:scale-105 shadow-lg ${viewMode === 'history'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
+              : 'bg-white text-slate-700 border-2 border-slate-200 hover:border-blue-400'
+              }`}
+          >
+            📋 All Cash Entries
+          </button>
         </div>
 
         {/* SINGLE ENTRY VIEW */}
         {viewMode === 'single' && (
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 mb-8 w-full">
+            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-200">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                <FaReceipt className="text-white text-lg" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-800">New Cash Entry</h2>
+            </div>
+
+            {/* Customer Information */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <FaUser className="text-indigo-600" />
+                <h3 className="text-lg font-semibold text-slate-700">Customer Information</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Account Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="customer_account_number"
+                    value={form.customer_account_number}
+                    ref={accRef}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        customer_account_number: value
+                      }))
+                    }}
+                    onBlur={(e) => fetchCustomerDetailByAccountNumber(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        fetchCustomerDetailByAccountNumber(form.customer_account_number);
+                        dateRef.current?.focus();
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm font-bold"
+                    placeholder="Account No."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Customer Name</label>
+                  <input
+                    type="text"
+                    value={form.customer_name}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-sm font-bold"
+                    disabled
+                    placeholder="Name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Wallet Balance</label>
+                  <input
+                    type="text"
+                    value={form.wallet ? `₹${form.wallet}` : '₹0.00'}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-indigo-50 text-indigo-700 font-bold text-sm"
+                    disabled
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="date"
+                      name="date"
+                      value={form.date}
+                      onChange={handleChange}
+                      max={today}
+                      ref={dateRef}
+                      onKeyDown={(e) => e.key === 'Enter' && amountRef.current?.focus()}
+                      className="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Details */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <FaMoneyBillWave className="text-indigo-600" />
+                <h3 className="text-base font-semibold text-slate-700">Transaction Details</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Amount (₹) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={form.amount}
+                      onChange={handleChange}
+                      ref={amountRef}
+                      required
+                      onKeyDown={(e) => e.key === 'Enter' && modeRef.current?.focus()}
+                      className="w-full pl-7 pr-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Transaction Mode <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="credit_debit_mode"
+                    value={form.credit_debit_mode}
+                    onChange={handleChange}
+                    ref={modeRef}
+                    onKeyDown={(e) => e.key === 'Enter' && noteRef.current?.focus()}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
+                  >
+                    <option value="">Select Transaction Type</option>
+                    <option value="received">💰 Received (Credit)</option>
+                    <option value="given">💸 Given (Debit)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Note (Optional)</label>
+                  <input
+                    type="text"
+                    name="note"
+                    value={form.note}
+                    onChange={handleChange}
+                    ref={noteRef}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit(e)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
+                    placeholder="Add a note..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-2 rounded-lg font-bold text-base shadow-md hover:shadow-lg transition-all duration-150"
+            >
+              Submit Cash Entry
+            </button>
+          </form>
+        )}
+
+        {/* TRANSACTION HISTORY VIEW */}
+        {viewMode === 'history' && (
           <>
-            {/* Form Section */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 mb-8 w-full">
-              <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-200">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
-                  <FaReceipt className="text-white text-lg" />
-                </div>
-                <h2 className="text-xl font-bold text-slate-800">New Cash Entry</h2>
-              </div>
-
-              {/* Customer Information */}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <FaUser className="text-indigo-600" />
-                  <h3 className="text-lg font-semibold text-slate-700">Customer Information</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Account Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="customer_account_number"
-                      value={form.customer_account_number}
-                      ref={accRef}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setForm((prev) => ({
-                          ...prev,
-                          customer_account_number: value,
-                          ...(value.trim() === '' && { customer_name: '', wallet: '' }),
-                        }));
-                      }}
-                      onKeyDown={async (e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const accNo = form.customer_account_number.trim();
-                          if (accNo) {
-                            const success = await fetchCustomerDetailByAccountNumber(accNo);
-                            if (success) {
-                              dateRef.current?.focus();
-                            }
-                          }
-                        }
-                      }}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
-                      placeholder="Enter account number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Customer Name</label>
-                    <input
-                      type="text"
-                      name="customer_name"
-                      value={form.customer_name}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-sm"
-                      disabled
-                      placeholder="Auto-filled"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Wallet Balance</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-600 font-bold">₹</span>
-                      <input
-                        type="text"
-                        name="wallet"
-                        value={form.wallet}
-                        className="w-full pl-7 pr-3 py-2 rounded-lg border border-slate-200 bg-indigo-50 text-indigo-700 font-semibold text-sm"
-                        disabled
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Date <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="date"
-                        name="date"
-                        value={form.date}
-                        onChange={handleChange}
-                        max={today}
-                        ref={dateRef}
-                        onKeyDown={(e) => e.key === 'Enter' && amountRef.current?.focus()}
-                        className="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transaction Details */}
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <FaMoneyBillWave className="text-indigo-600" />
-                  <h3 className="text-base font-semibold text-slate-700">Transaction Details</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Amount (₹) <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                      <input
-                        type="number"
-                        name="amount"
-                        value={form.amount}
-                        onChange={handleChange}
-                        ref={amountRef}
-                        required
-                        onKeyDown={(e) => e.key === 'Enter' && modeRef.current?.focus()}
-                        className="w-full pl-7 pr-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Transaction Mode <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="credit_debit_mode"
-                      value={form.credit_debit_mode}
-                      onChange={handleChange}
-                      ref={modeRef}
-                      onKeyDown={(e) => e.key === 'Enter' && noteRef.current?.focus()}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
-                    >
-                      <option value="">Select Transaction Type</option>
-                      <option value="received">💰 Received (Credit)</option>
-                      <option value="given">💸 Given (Debit)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">Note (Optional)</label>
-                    <input
-                      type="text"
-                      name="note"
-                      value={form.note}
-                      onChange={handleChange}
-                      ref={noteRef}
-                      onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit(e)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all text-sm"
-                      placeholder="Add a note..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-2 rounded-lg font-bold text-base shadow-md hover:shadow-lg transition-all duration-150"
-              >
-                Submit Cash Entry
-              </button>
-            </form>
+         
 
             {/* Table Section */}
             <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">

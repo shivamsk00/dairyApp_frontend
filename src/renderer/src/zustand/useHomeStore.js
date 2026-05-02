@@ -197,6 +197,17 @@ const useHomeStore = create((set) => ({
       )
     }
   },
+  fetchCmSubsidyCustomerReport: async (params) => {
+    try {
+      const res = await api.get('cm-subsidy-customer-report', { params })
+      return res.data
+    } catch (error) {
+      console.error('Error fetching Cm subsidy customer report:', error)
+      return (
+        error.response?.data || { status_code: 500, message: 'Failed to fetch Cm subsidy customer report' }
+      )
+    }
+  },
 
   // ================MILK COLLECTION API =======================
   fetchCustomerDetailsByAccount: async (account_number) => {

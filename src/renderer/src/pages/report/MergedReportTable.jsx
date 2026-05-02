@@ -55,27 +55,27 @@ const MergedTableExact = ({ summaryData }) => {
   let milkEntryCount = 0
 
   return (
-    <div className="p-4 mt-10 overflow-x-auto">
+    <div className=" mt-2 overflow-x-auto">
      
 
       <div className="relative border rounded overflow-hidden max-h-[70vh]">
         <div className="overflow-auto max-h-[calc(70vh-7rem)]">
-          <table className="min-w-full border border-white text-sm">
+          <table className="min-w-full border border-white ">
             <thead className="sticky top-0 z-10 bg-gray-800 text-white">
               <tr className="text-center">
-                <th className="border px-2 py-1 w-10">Sr.</th>
-                <th className="border px-2 py-1 w-24">Date</th>
-                <th className="border px-2 py-1 w-20">Shift</th>
-                <th className="border px-2 py-1 w-16">Qty (L)</th>
-                <th className="border px-2 py-1 w-16">Fat</th>
-                <th className="border px-2 py-1 w-16">SNF</th>
-                <th className="border px-2 py-1 w-20">Rate</th>
-                <th className="border px-2 py-1 w-20">Amount</th>
-                <th className="border px-2 py-1 w-40">Product + Qty</th>
-                <th className="border px-2 py-1 w-24">Product Amount</th>
-                <th className="border px-2 py-1 w-20">Credit</th>
-                <th className="border px-2 py-1 w-20">Debit</th>
-                <th className="border px-2 py-1 w-32">Message</th>
+                <th className="border  text-[12px]  w-10">Sr.</th>
+                <th className="border  text-[12px]  w-24">Date</th>
+                <th className="border  text-[12px]  w-20">Shift</th>
+                <th className="border  text-[12px]  w-16">Qty (L)</th>
+                <th className="border  text-[12px]  w-16">Fat</th>
+                <th className="border  text-[12px]  w-16">SNF</th>
+                <th className="border  text-[12px]  w-20">Rate</th>
+                <th className="border  text-[12px]  w-20">Amount</th>
+                <th className="border  text-[12px]  w-40">Product + Qty</th>
+                <th className="border  text-[12px]  w-24">Product Amount</th>
+                <th className="border  text-[12px]  w-20">Credit</th>
+                <th className="border  text-[12px]  w-20">Debit</th>
+                <th className="border  text-[12px]  w-32">Message</th>
               </tr>
             </thead>
             <tbody>
@@ -111,49 +111,49 @@ const MergedTableExact = ({ summaryData }) => {
                           isPayment ? 'bg-green-50' : 'bg-white'
                       }`}
                   >
-                    <td className="border px-2 py-1 text-black w-10 font-medium">{idx + 1}</td>
-                    <td className="border px-2 py-1 text-black w-24 font-medium">{formatDate(entry.date)}</td>
-                    <td className="border px-2 py-1 text-black w-20">
+                    <td className="border px-2 py-1 text-black w-10 text-[12px] font-medium">{idx + 1}</td>
+                    <td className="border px-2 py-1 text-black w-24 text-[12px] font-medium">{formatDate(entry.date)}</td>
+                    <td className="border px-2 py-1 text-black w-20 text-[12px]">
                       {isMilk ? (
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${entry.shift === 'morning' ? 'bg-yellow-200 text-yellow-800' : 'bg-blue-200 text-blue-800'
+                        <span className={`px-2 py-1 rounded text-[12px] font-medium ${entry.shift === 'morning' ? 'bg-yellow-200 text-yellow-800' : 'bg-blue-200 text-blue-800'
                           }`}>
                           {entry.shift}
                         </span>
                       ) : ''}
                     </td>
-                    <td className="border px-2 py-1 text-blue-600 w-16 font-semibold">
+                    <td className="border px-2 py-1 text-blue-600 text-[12px] w-16 font-semibold">
                       {isMilk ? parseFloat(entry.quantity).toFixed(2) : ''}
                     </td>
-                    <td className="border px-2 py-1 text-yellow-600 w-16 font-semibold">
+                    <td className="border px-2 py-1 text-yellow-600 w-16 text-[12px] font-semibold">
                       {isMilk ? `${parseFloat(entry.fat).toFixed(1)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-purple-600 w-16 font-semibold">
+                    <td className="border px-2 py-1 text-purple-600 w-16 text-[12px] font-semibold">
                       {isMilk ? `${parseFloat(entry.snf).toFixed(1)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-gray-700 w-20">
+                    <td className="border px-2 py-1 text-gray-700 text-[12px] w-20">
                       {isMilk ? `₹${parseFloat(entry.base_rate).toFixed(2)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-green-600 w-20 font-semibold">
+                    <td className="border px-2 py-1 text-green-600 w-20 text-[12px] font-semibold">
                       {isMilk ? `₹${parseFloat(entry.total_amount).toFixed(2)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-black w-40">
+                    <td className="border px-2 py-1 text-black w-40 text-[12px]">
                       {isProduct ? (
-                        <div className="text-xs">
+                        <div className="text-[12px]">
                           <div className="font-medium">{entry.product?.name || 'N/A'}</div>
                           <div className="text-gray-600">Qty: {entry.qty}</div>
                         </div>
                       ) : ''}
                     </td>
-                    <td className="border px-2 py-1 text-orange-600 w-24 font-semibold">
+                    <td className="border px-2 py-1 text-orange-600 w-24 text-[12px] font-semibold">
                       {isProduct ? `₹${parseFloat(entry.total).toFixed(2)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-green-600 w-20 font-semibold">
+                    <td className="border px-2 py-1 text-green-600 w-20 text-[12px] font-semibold">
                       {isPayment && entry.credit_debit_mode === 'received' ? `₹${parseFloat(entry.amount).toFixed(2)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-red-600 w-20 font-semibold">
+                    <td className="border px-2 py-1 text-red-600 w-20 text-[12px] font-semibold">
                       {isPayment && entry.credit_debit_mode === 'given' ? `₹${parseFloat(entry.amount).toFixed(2)}` : ''}
                     </td>
-                    <td className="border px-2 py-1 text-gray-700 w-32 text-xs">
+                    <td className="border px-2 py-1 text-gray-700 w-32 text-[12px]">
                       {isPayment ? entry.note : ''}
                     </td>
                   </tr>
@@ -163,54 +163,54 @@ const MergedTableExact = ({ summaryData }) => {
 
             {/* Enhanced Footer with Fat and SNF Averages */}
             <tfoot className="sticky bottom-0 bg-gray-800 text-white">
-              <tr className="font-semibold text-xs">
+              <tr className="font-semibold text-[12px]">
                 {/* Sr. No Column */}
                 <td className="border px-2 py-2 w-10 text-center">
-                  <div className="text-xs text-gray-300">#</div>
+                  <div className="text-[12px] text-gray-300">#</div>
                 </td>
 
                 {/* Date Column */}
                 <td className="border px-2 py-2 w-24 text-center">
-                  <div className="text-xs text-gray-300">Date</div>
+                  <div className="text-[12px] text-gray-300">Date</div>
                 </td>
 
                 {/* Shift Column - Total Milk Quantity */}
                 <td className="border px-2 py-2 w-20 text-center">
                   <div>
-                    <div className="text-blue-300 text-xs">Total Milk</div>
-                    <div className="font-bold">{totalMilkQty.toFixed(2)} L</div>
+                    <div className="text-blue-300 text-[12px]">Total Milk</div>
+                    <div className="font-bold text-[12px]">{totalMilkQty.toFixed(2)} L</div>
                   </div>
                 </td>
 
                 {/* Qty Column - Total Milk Amount */}
                 <td className="border px-2 py-2 w-16 text-center">
                   <div>
-                    <div className="text-green-300 text-xs">Amount</div>
-                    <div className="font-bold">₹{totalMilkAmount.toFixed(2)}</div>
+                    <div className="text-green-300 text-[12px]">Amount</div>
+                    <div className="font-bold text-[12px]">₹{totalMilkAmount.toFixed(2)}</div>
                   </div>
                 </td>
 
                 {/* Fat Column */}
                 <td className="border px-2 py-2 w-16 text-center">
                   <div>
-                    <div className="text-yellow-300 text-xs">Avg Fat</div>
-                    <div className="font-bold">{milkEntryCount > 0 ? (totalFat / milkEntryCount).toFixed(1) : '0.0'}</div>
+                    <div className="text-yellow-300 text-[12px]">Avg Fat</div>
+                    <div className="font-bold text-[12px]">{milkEntryCount > 0 ? (totalFat / milkEntryCount).toFixed(1) : '0.0'}</div>
                   </div>
                 </td>
 
                 {/* SNF Column */}
                 <td className="border px-2 py-2 w-16 text-center">
                   <div>
-                    <div className="text-purple-300 text-xs">Avg SNF</div>
-                    <div className="font-bold">{milkEntryCount > 0 ? (totalSNF / milkEntryCount).toFixed(1) : '0.0'}</div>
+                    <div className="text-purple-300 text-[12px]">Avg SNF</div>
+                    <div className="font-bold text-[12px]">{milkEntryCount > 0 ? (totalSNF / milkEntryCount).toFixed(1) : '0.0'}</div>
                   </div>
                 </td>
 
                 {/* Rate Column */}
                 <td className="border px-2 py-2 w-20 text-center">
                   <div>
-                    <div className="text-gray-300 text-xs">Avg Rate</div>
-                    <div className="font-bold">
+                    <div className="text-gray-300 text-[12px]">Avg Rate</div>
+                    <div className="font-bold text-[12px]">
                       ₹{milkEntryCount > 0 ? (totalMilkAmount / totalMilkQty).toFixed(2) : '0.00'}
                     </div>
                   </div>
@@ -219,47 +219,47 @@ const MergedTableExact = ({ summaryData }) => {
                 {/* Amount Column - Collections */}
                 <td className="border px-2 py-2 w-20 text-center">
                   <div>
-                    <div className="text-indigo-300 text-xs">Collections</div>
-                    <div className="font-bold">{milkEntryCount}</div>
+                    <div className="text-indigo-300 text-[12px]">Collections</div>
+                    <div className="font-bold text-[12px]">{milkEntryCount}</div>
                   </div>
                 </td>
 
                 {/* Product Column */}
                 <td className="border px-2 py-2 w-40 text-center">
                   <div>
-                    <div className="text-orange-300 text-xs">Products</div>
-                    <div className="font-bold">₹{totalProductAmount.toFixed(2)}</div>
+                    <div className="text-orange-300 text-[12px]">Products</div>
+                    <div className="font-bold text-[12px]">₹{totalProductAmount.toFixed(2)}</div>
                   </div>
                 </td>
 
                 {/* Product Amount Column */}
                 <td className="border px-2 py-2 w-24 text-center">
                   <div>
-                    <div className="text-orange-300 text-xs">Items</div>
-                    <div className="font-bold">{totalProductQty}</div>
+                    <div className="text-orange-300 text-[12px]">Items</div>
+                    <div className="font-bold text-[12px]">{totalProductQty}</div>
                   </div>
                 </td>
 
                 {/* Credit Column */}
                 <td className="border px-2 py-2 w-20 text-center">
                   <div>
-                    <div className="text-green-300 text-xs">Received</div>
-                    <div className="font-bold">₹{totalDebit.toFixed(2)}</div>
+                    <div className="text-green-300 text-[12px]">Received</div>
+                    <div className="font-bold text-[12px]">₹{totalDebit.toFixed(2)}</div>
                   </div>
                 </td>
 
                 {/* Debit Column */}
                 <td className="border px-2 py-2 w-20 text-center">
                   <div>
-                    <div className="text-red-300 text-xs">Given</div>
-                    <div className="font-bold">₹{totalCredit.toFixed(2)}</div>
+                    <div className="text-red-300 text-[12px]">Given</div>
+                    <div className="font-bold text-[12px]">₹{totalCredit.toFixed(2)}</div>
                   </div>
                 </td>
 
                 {/* Message Column - Net Balance */}
                 <td className="border px-2 py-2 w-32 text-center">
                   <div>
-                    <div className="text-indigo-300 text-xs">Total Amount</div>
+                    <div className="text-indigo-300 text-[12px]">Total Amount</div>
                     {/* <div className="font-bold">
                      
                       ₹{parseFloat(summaryData.net_milk_balance || 0).toFixed(2)}

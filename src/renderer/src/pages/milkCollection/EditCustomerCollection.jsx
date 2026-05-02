@@ -4,7 +4,7 @@ import CustomToast from '../../helper/costomeToast';
 import { IoMdClose } from 'react-icons/io';
 import DateFormate from '../../helper/DateFormate';
 
-const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
+const EditCustomerCollectionModal = ({ isOpen, onClose, productData, onUpdate }) => {
   const {
     fetchCustomerDetailsByAccount,
     fetchCategory,
@@ -36,7 +36,7 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
         customer_account_number: productData.customer_account_number || '',
         name: productData.customer?.name || '',
         careof: productData.customer?.careof || '',
-        date: DateFormate(productData.date) || today,
+        date: productData.date || today,
         category_id: productData.category_id || '',
         product_id: productData.product_id || '',
         product_price: productData.product_price || '',
@@ -103,6 +103,13 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
         }
       }
 
+      // Handle price change
+      if (name === 'product_price') {
+        const price = parseFloat(value) || 0;
+        const qty = parseFloat(updated.qty || 0);
+        updated.total = (price * qty).toFixed(2);
+      }
+
       // Handle quantity change
       if (name === 'qty') {
         const qty = parseFloat(value) || 0;
@@ -162,7 +169,7 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
         customer_account_number: form.customer_account_number,
         name: form.name,
         careof: form.careof,
-        date: DateFormate(form.date),
+        date: form.date,
         category_id: form.category_id,
         product_id: form.product_id,
         product_price: form.product_price,
@@ -176,6 +183,7 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
       const res = await updateProductSale(productData.id, customerCollectionData);
       if (res.status_code === 200) {
         CustomToast.success(res.message);
+        if (onUpdate) await onUpdate();
         onClose();
       } else {
         CustomToast.error(res.message);
@@ -213,7 +221,7 @@ const EditCustomerCollectionModal = ({ isOpen, onClose, productData }) => {
               type: 'select',
               options: allProducts.map((prod) => ({ value: prod.id, label: prod.name })),
             },
-            { label: 'Price', name: 'product_price', type: 'number', readOnly: true },
+            { label: 'Price', name: 'product_price', type: 'number', readOnly: false },
             { label: 'Quantity', name: 'qty', type: 'number', readOnly: false },
             { label: 'Total Price', name: 'total', type: 'number', readOnly: true },
             {

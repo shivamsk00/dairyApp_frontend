@@ -251,7 +251,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className={`max-w-8xl mx-auto space-y-6 transition-all duration-500 ${appUpdateMessage ? 'pt-24' : 'pt-4'}`}>
+      <div className={`max-w-8xl mx-auto space-y-6 transition-all duration-500 ${appUpdateMessage ? 'pt-20' : 'pt-4'}`}>
         {/* Top KPI Cards - Using API Data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <KpiCard
@@ -283,7 +283,7 @@ const Dashboard = () => {
         </div>
 
         {/* Shift-wise Collection Summary */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-400">
           <h2 className="text-lg font-semibold text-gray-800">Last 7 Days - Shift-wise Collection</h2>
           <p className="text-sm text-gray-500 mb-6">Morning vs Evening milk collection breakdown</p>
 
@@ -342,7 +342,7 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Area: Performance & Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 border border-gray-400 rounded-lg">
           <div className="lg:col-span-2 space-y-6">
             {/* Weekly Performance Chart */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -489,11 +489,11 @@ const Dashboard = () => {
 
 // Reusable Components
 const KpiCard = ({ title, value, subtitle, icon, color }) => (
-  <div className={`${color} p-5 rounded-lg text-white shadow-lg`}>
+  <div className={`${color} p-2  text-white shadow-lg`}>
     <div className="flex justify-between items-start">
       <div>
         <p className="text-sm font-medium opacity-90">{title}</p>
-        <p className="text-3xl font-bold">{value}</p>
+        <p className="text-xl font-bold">{value}</p>
         {subtitle && <p className="text-xs opacity-80">{subtitle}</p>}
       </div>
       <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">

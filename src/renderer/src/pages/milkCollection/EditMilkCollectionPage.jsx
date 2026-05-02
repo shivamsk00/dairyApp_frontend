@@ -184,6 +184,8 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
     const fat = form.fat?.toString().trim();
     const clr = form.clr?.toString().trim();
     const snfRaw = form.snf?.toString().trim();
+    
+    // ✅ Keep user input clean, but send '.0' to API for integer values (e.g., 8 -> 8.0)
     const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
 
     // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
@@ -224,9 +226,6 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
             setForm(prev => ({
               ...prev,
-              fat: res.fat || "",
-              clr: res.clr || "",
-              snf: res.snf || "",
               base_rate: res.rate || '',
               rate: res.rate || '', // Update displayed rate as well
             }));

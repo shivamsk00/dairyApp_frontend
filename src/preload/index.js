@@ -62,6 +62,7 @@ const api = {
   openChildWindow: () => ipcRenderer.send('open-child-window'),
   openSecondWindow: () => ipcRenderer.send('open-second-window'),
   openCusomerWindow: () => ipcRenderer.send('open-cutomer-win'),
+  openCashEntryWindow: () => ipcRenderer.send('open-cash-entry-window'),
   printSlip: (data) => ipcRenderer.send('print-slip', data),
   logoutCloseAll: () => ipcRenderer.send('logout_close_all'),
 
@@ -108,11 +109,16 @@ const api = {
     ipcRenderer.removeAllListeners('customer-win-close')
     ipcRenderer.on('customer-win-close', callback)
   },
+  onCashEntryWindowClosed: (callback) => {
+    ipcRenderer.removeAllListeners('cash-entry-window-closed')
+    ipcRenderer.on('cash-entry-window-closed', callback)
+  },
 
   // 🧼 Cleanup function for window events
   removeWindowListeners: () => {
     ipcRenderer.removeAllListeners('second-window-closed')
     ipcRenderer.removeAllListeners('customer-win-close')
+    ipcRenderer.removeAllListeners('cash-entry-window-closed')
   },
 
   // 🧩 Utility - Generic invoke and on methods [web:124][web:125]
@@ -138,7 +144,8 @@ const api = {
       'update-message',
       'update-progress',
       'second-window-closed',
-      'customer-win-close'
+      'customer-win-close',
+      'cash-entry-window-closed'
     ]
     
     if (allowedOnChannels.includes(channel)) {
