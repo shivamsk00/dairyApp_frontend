@@ -323,7 +323,7 @@ const MilkCorrectionPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
+        <div className=" bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
             <div className="max-full mx-auto space-y-6">
                 {/* Header */}
                 <div className="bg-white shadow-lg border border-gray-200 p-4">
