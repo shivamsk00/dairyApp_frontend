@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../zustand/useAuthStore';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { Eye, EyeOff } from 'lucide-react';
 import CustomToast from '../../helper/costomeToast';
 import loginImg from "../../assets/login_img.png"
 
@@ -100,7 +100,7 @@ const Login = () => {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/3 transform -translate-y-1/2 cursor-pointer text-gray-500"
                         >
-                            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </span>
                         {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
                         {/* <div className="text-right mt-1">

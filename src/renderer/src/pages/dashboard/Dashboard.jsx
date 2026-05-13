@@ -1,15 +1,15 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { toast } from 'react-toastify';
-import { FaUsers, FaBoxOpen, FaMoneyBillWave, FaChartLine, FaSun, FaMoon, FaPlus, FaUserPlus, FaFileInvoice, FaBook, FaRegCreditCard, FaShoppingCart, FaFileExport, FaUser, FaDownload } from 'react-icons/fa';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Users, Package, Banknote, LineChart, Sun, Moon, Plus, UserPlus, Receipt, Book, CreditCard, ShoppingCart, FileOutput, User, Download } from 'lucide-react';
+// import { Line } from 'react-chartjs-2';
+// import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import useHomeStore from '../../zustand/useHomeStore';
 import { Link } from 'react-router-dom';
 
 // Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
-
+// ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+const DashboardChart = lazy(() => import('./DashboardChart'));
 const Dashboard = () => {
   const getDashboardData = useHomeStore((state) => state.fetchDashboardData);
   const [dashboardData, setDashboardData] = useState(null);
@@ -209,7 +209,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-4">
                 <div className={`p-2 rounded-lg backdrop-blur-sm ${appUpdateMessage === 'No update available.' ? 'bg-white/10' : 'bg-white/20 animate-pulse'
                   }`}>
-                  <FaChartLine className="text-xl text-white" />
+                  <LineChart className="text-xl text-white" />
                 </div>
                 <div>
                   <p className="font-bold text-xs tracking-wide uppercase opacity-80">Software Update</p>
@@ -257,27 +257,27 @@ const Dashboard = () => {
           <KpiCard
             title="Total Customers"
             value={summary.customers}
-            icon={<FaUsers className="text-white" />}
+            icon={<Users className="text-white" />}
             color="bg-blue-500"
           />
           <KpiCard
             title="Today's Collection"
             value={`${totalCollection.toFixed(2)} L`}
             subtitle="morning + evening"
-            icon={<FaBoxOpen className="text-white" />}
+            icon={<Package className="text-white" />}
             color="bg-green-500"
           />
           <KpiCard
             title="Current Inventory"
             value={`${summary.inventory.toFixed(2)}`}
-            icon={<FaMoneyBillWave className="text-white" />}
+            icon={<Banknote className="text-white" />}
             color="bg-yellow-500"
           />
           <KpiCard
             title="Last 7 Days"
             value={`${last7DaysTotal.toFixed(2)} L`}
             subtitle="total collection"
-            icon={<FaChartLine className="text-white" />}
+            icon={<LineChart className="text-white" />}
             color="bg-teal-500"
           />
         </div>
@@ -292,7 +292,7 @@ const Dashboard = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <FaSun className="text-yellow-500" />
+                  <Sun className="text-yellow-500" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-700">Morning Shift</p>
@@ -313,7 +313,7 @@ const Dashboard = () => {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FaMoon className="text-blue-500" />
+                  <Moon className="text-blue-500" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-700">Evening Shift</p>
@@ -349,7 +349,13 @@ const Dashboard = () => {
               <h2 className="text-lg font-semibold text-gray-800">Last 7 Days Collection Trend</h2>
               <p className="text-sm text-gray-500 mb-4">Morning vs Evening shift comparison</p>
               <div style={{ height: '300px' }}>
-                <Line data={weeklyPerformanceData} options={chartOptions} />
+                {/* <Line data={weeklyPerformanceData} options={chartOptions} /> */}
+                <Suspense fallback={<div>Loading Chart...</div>}>
+                  <DashboardChart
+                    data={weeklyPerformanceData}
+                    options={chartOptions}
+                  />
+                </Suspense>
               </div>
             </div>
 
@@ -358,12 +364,12 @@ const Dashboard = () => {
               <ProductCard
                 title="Total Customers"
                 value={summary.customers}
-                icon={<FaUsers />}
+                icon={<Users />}
               />
               <ProductCard
                 title="Today's Inventory"
                 value={`${summary.inventory.toFixed(2)} L`}
-                icon={<FaBoxOpen />}
+                icon={<Package />}
               />
             </div>
           </div>
@@ -375,19 +381,19 @@ const Dashboard = () => {
             <div className="space-y-3">
 
               <Link to="/customer">
-                <QuickActionButton text="All Customer" icon={<FaUsers />} />
+                <QuickActionButton text="All Customer" icon={<Users />} />
               </Link>
               <Link to="/AddProductPage">
-                <QuickActionButton text="Add Product" icon={<FaBoxOpen />} />
+                <QuickActionButton text="Add Product" icon={<Package />} />
               </Link>
               <Link to="/milkCorrection">
-                <QuickActionButton text="All Milk Correction" icon={<FaFileInvoice />} />
+                <QuickActionButton text="All Milk Correction" icon={<Receipt />} />
               </Link>
               <Link to="/reports">
-                <QuickActionButton text="View Reports" icon={<FaBook />} />
+                <QuickActionButton text="View Reports" icon={<Book />} />
               </Link>
               <Link to="/cashentry">
-                <QuickActionButton text="Cash Entries" icon={<FaRegCreditCard />} />
+                <QuickActionButton text="Cash Entries" icon={<CreditCard />} />
               </Link>
             </div>
           </div>
@@ -461,7 +467,7 @@ const Dashboard = () => {
               <option>This Month</option>
             </select>
             <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors">
-              <FaFileExport />
+              <FileOutput />
               <span>Export Report</span>
             </button>
           </div>
@@ -479,7 +485,7 @@ const Dashboard = () => {
         title="Check for software updates"
       >
         <div className="bg-blue-500 p-1.5 rounded-full group-hover:rotate-180 transition-transform duration-500">
-          <FaDownload className="text-xs" />
+          <Download className="text-xs" />
         </div>
         <span className="text-xs font-bold tracking-wider uppercase">Check Update</span>
       </div>

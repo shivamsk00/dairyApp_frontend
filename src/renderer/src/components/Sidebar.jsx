@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import useToggleStore from '../zustand/useToggleStore';
-import { MdOutlineDashboard, MdMenu, MdClose } from 'react-icons/md';
-import { FaChartBar, FaDatabase, FaFileAlt, FaRupeeSign, FaUser, FaChevronDown, FaUsers, FaCalculator, FaBox } from 'react-icons/fa';
-import { GiCash, GiHeavyCollar } from 'react-icons/gi';
-import { FaArrowTrendUp, FaGear, FaListCheck, FaMoneyBillTrendUp } from 'react-icons/fa6';
+import { 
+  LayoutDashboard, 
+  Menu, 
+  X, 
+  BarChart3, 
+  Database, 
+  FileText, 
+  IndianRupee, 
+  User, 
+  ChevronDown, 
+  Users, 
+  Calculator, 
+  Package, 
+  Banknote, 
+  ShoppingBag, 
+  TrendingUp, 
+  Settings, 
+  ClipboardCheck, 
+  Receipt,
+  Milk,
+  FileEdit
+} from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import dairyLogo from "../assets/dairyLogo.png";
-import { TbReceiptRupee } from 'react-icons/tb';
-import { LuMilk } from 'react-icons/lu';
-import { MdEditNote } from 'react-icons/md';
 
 const Sidebar = () => {
   const [isSecondWindowOpen, setIsSecondWindowOpen] = useState(false);
@@ -96,10 +111,10 @@ const Sidebar = () => {
 
   // Combined menu items with special items included
   const menuItems = [
-    { path: '/', icon: <MdOutlineDashboard size={20} />, label: 'Dashboard', type: 'link' },
+    { path: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard', type: 'link' },
     { 
       id: 'milk-center',
-      icon: <LuMilk size={18} />, 
+      icon: <Milk size={18} />, 
       label: 'Milk Center', 
       type: 'dropdown',
       subItems: [
@@ -113,7 +128,7 @@ const Sidebar = () => {
     },
     { 
       id: 'all-correction',
-      icon: <MdEditNote size={20} />, 
+      icon: <FileEdit size={20} />, 
       label: 'All Correction', 
       type: 'dropdown',
       subItems: [
@@ -124,7 +139,7 @@ const Sidebar = () => {
     },
     { 
       id: 'accounts',
-      icon: <FaCalculator size={16} />, 
+      icon: <Calculator size={16} />, 
       label: 'Accounts', 
       type: 'dropdown',
       subItems: [
@@ -134,7 +149,7 @@ const Sidebar = () => {
     },
     { 
       id: 'customers',
-      icon: <FaUsers size={18} />, 
+      icon: <Users size={18} />, 
       label: 'Customers', 
       type: 'dropdown',
       subItems: [
@@ -144,7 +159,7 @@ const Sidebar = () => {
     },
     { 
       id: 'products',
-      icon: <FaBox size={16} />, 
+      icon: <Package size={16} />, 
       label: 'Products', 
       type: 'dropdown',
       subItems: [
@@ -154,15 +169,15 @@ const Sidebar = () => {
     },
     // { 
     //   id: 'customer-collection',
-    //   icon: <GiHeavyCollar size={14} />, 
+    //   icon: <ShoppingBag size={14} />, 
     //   label: 'Products Sold', 
     //   type: 'button',
     //   onClick: handleProductsSoldClick,
     //   isDisabled: isCustomerCollectionOpen,
     //   isActive: activeItem === 'customer-collection'
     // },
-    { path: '/reports', icon: <FaFileAlt size={14} />, label: 'Reports', type: 'link' },
-    { path: '/settings', icon: <FaGear size={14} />, label: 'Settings', type: 'link' },
+    { path: '/reports', icon: <FileText size={14} />, label: 'Reports', type: 'link' },
+    { path: '/settings', icon: <Settings size={14} />, label: 'Settings', type: 'link' },
   ];
 
   return (
@@ -173,7 +188,7 @@ const Sidebar = () => {
         className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 text-white rounded-lg shadow-lg"
         aria-label="Toggle menu"
       >
-        {isMobileMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Backdrop for mobile */}
@@ -214,7 +229,7 @@ const Sidebar = () => {
               className="hidden lg:block p-2 hover:bg-white/10 rounded-lg transition-colors"
               aria-label="Toggle sidebar"
             >
-              <MdMenu size={20} />
+              <Menu size={20} />
             </button>
           </div>
         </div>
@@ -272,7 +287,7 @@ const Sidebar = () => {
                         )}
                       </div>
                       {!isCollapsed && (
-                        <FaChevronDown 
+                        <ChevronDown 
                           className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
                           size={12} 
                         />
