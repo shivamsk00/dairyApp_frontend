@@ -681,19 +681,6 @@ const DairyMilkCollectionPage = () => {
                         {/* Customer Details */}
                         <div className="grid grid-cols-6 gap-2">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    disabled
-                                    ref={nameRef}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
-                                    placeholder="Auto-filled"
-                                />
-                            </div>
-                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Account No *</label>
                                 <input
                                     type="text"
@@ -705,22 +692,6 @@ const DairyMilkCollectionPage = () => {
                                     placeholder="Account No"
                                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                                     required
-                                />
-                            </div>
-
-
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Care of</label>
-                                <input
-                                    type="text"
-                                    name="careof"
-                                    value={form.careof}
-                                    onChange={handleChange}
-                                    disabled
-                                    ref={careOfRef}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
-                                    placeholder="Auto-filled"
                                 />
                             </div>
 
@@ -742,22 +713,6 @@ const DairyMilkCollectionPage = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
-                                <input
-                                    type="text"
-                                    name="mobile"
-                                    value={form.mobile}
-                                    onChange={handleChange}
-                                    disabled
-                                    ref={mobileRef}
-                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
-                                    placeholder="Auto-filled"
-                                />
-                            </div>
-
-
-
-                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">FAT (%) *</label>
                                 <input
                                     type="number"
@@ -771,8 +726,7 @@ const DairyMilkCollectionPage = () => {
                                     required
                                 />
                             </div>
-
-                            <div>
+                              <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">CLR</label>
                                 <input
                                     type="number"
@@ -799,8 +753,7 @@ const DairyMilkCollectionPage = () => {
                                     placeholder="SNF %"
                                 />
                             </div>
-
-                            <div>
+                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Base Rate (₹/Ltr)</label>
                                 <input
                                     type="number"
@@ -812,6 +765,60 @@ const DairyMilkCollectionPage = () => {
                                     placeholder="Auto-calculated"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={nameRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+                            
+
+
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Care of</label>
+                                <input
+                                    type="text"
+                                    name="careof"
+                                    value={form.careof}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={careOfRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+
+                            
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                                <input
+                                    type="text"
+                                    name="mobile"
+                                    value={form.mobile}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={mobileRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+
+
+
+                            
+
+                          
+
+                           
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Other Price (₹)</label>

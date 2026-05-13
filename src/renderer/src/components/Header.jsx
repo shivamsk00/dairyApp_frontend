@@ -3,6 +3,7 @@ import useAuthStore from '../zustand/useAuthStore';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { MdEmail } from 'react-icons/md';
+import { clearAllCustomersFromDB } from '../helper/db';
 
 const Header = () => {
     const [isToggleMenu, setIsToggleMenu] = useState(false);
@@ -13,6 +14,9 @@ const Header = () => {
     const nav = useNavigate();
 
     const handleLogout = async () => {
+        // Clear IndexedDB data first to ensure security and fresh state for next user
+        await clearAllCustomersFromDB();
+        
         const res = await logout();
         if (res.status_code == 200) {
             toast(res.message, {
@@ -28,6 +32,7 @@ const Header = () => {
             window.api.logoutCloseAll();
         }
     };
+
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -78,7 +83,8 @@ const Header = () => {
                         </button>
 
                         <button
-                            onClick={() => {
+                            onClick={async () => {
+                                await clearAllCustomersFromDB();
                                 localStorage.clear();
                                 toast.success('Cleared previous data', {
                                     position: 'top-right',
