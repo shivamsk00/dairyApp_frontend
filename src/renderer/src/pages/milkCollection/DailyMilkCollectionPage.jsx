@@ -120,7 +120,7 @@ const DairyMilkCollectionPage = () => {
             // 1. Try Local DB
             let localData = await getCustomerFromDB(accountNo);
             console.log("local data fetch from index db==>", localData)
-            
+
             if (localData) {
                 setForm((prev) => ({
                     ...prev,
@@ -140,7 +140,7 @@ const DairyMilkCollectionPage = () => {
             if (!hasCustomers) {
                 console.log("⚠️ DB is empty, fetching all customers from API...");
                 const res = await getAllCustomer('');
-                
+
                 if (res && (res.data || res)) {
                     let customerData = res.data || res;
                     if (!Array.isArray(customerData)) {
@@ -152,7 +152,7 @@ const DairyMilkCollectionPage = () => {
                     if (Array.isArray(customerData) && customerData.length > 0) {
                         console.log(`✅ Fetched ${customerData.length} customers from API, saving to DB...`);
                         await saveCustomersToDB(customerData);
-                        
+
                         // Try DB lookup again
                         localData = await getCustomerFromDB(accountNo);
                         if (localData) {
@@ -429,14 +429,14 @@ const DairyMilkCollectionPage = () => {
             try {
                 // Check if DB already has customers
                 const hasCustomers = await hasCustomersInDB();
-                
+
                 if (hasCustomers) {
                     console.log("✅ DB already has customers, skipping API fetch");
                     return;
                 }
 
                 console.log("📥 DB is empty, fetching from API...");
-                
+
                 const res = await getAllCustomer('');
                 console.log("📥 getAllCustomer API response:", res);
                 console.log("Response keys:", Object.keys(res || {}));
@@ -448,7 +448,7 @@ const DairyMilkCollectionPage = () => {
 
                 // Check if response is wrapped in a data property or is the array directly
                 let customerData = res.data || res;
-                
+
                 // If customerData is still not an array, try other possible keys
                 if (!Array.isArray(customerData)) {
                     console.log("⚠️ Response data is not an array, checking other properties...");
@@ -463,14 +463,14 @@ const DairyMilkCollectionPage = () => {
                 }
 
                 console.log(`📊 Received ${customerData.length} customers from API`);
-                
+
                 if (customerData.length > 0) {
                     console.log("📋 First customer from API:", JSON.stringify(customerData[0], null, 2));
                 }
 
                 // Save to IndexedDB
                 await saveCustomersToDB(customerData);
-                
+
                 // Verify save
                 const savedCustomers = await getAllCustomersFromDB();
                 console.log(`✅ Verified: ${savedCustomers.length} customers saved to DB`);
@@ -479,7 +479,7 @@ const DairyMilkCollectionPage = () => {
                 console.error("❌ Failed to sync customers:", err);
             }
         };
-        
+
         syncCustomers();
     }, [])
 
