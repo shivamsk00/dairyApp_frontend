@@ -614,10 +614,10 @@ const DairyMilkCollectionPage = () => {
     }
 
     return (
-        <div className="w-full  bg-white flex flex-col ">
+        <div className="w-full  bg-white flex flex-col h-screen">
             <CommonHeader heading={"Daily Milk Collection"} />
 
-            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            <div className="flex flex-col lg:flex-row  overflow-hidden">
                 {/* === Left: Form Section === */}
                 <div className="w-full lg:w-[70%] xl:w-[70%] h-fit bg-gradient-to-br from-blue-200 to-indigo-100 border-r border-gray-200 flex flex-col overflow-hidden">
                     <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-3 flex-1 overflow-y-auto scrollable-table hide-scrollbar">
@@ -954,7 +954,7 @@ const DairyMilkCollectionPage = () => {
                 </div>
             </div>
             {/* Table */}
-            <div className="flex flex-col flex-1 relative overflow-hidden">
+            <div className="flex flex-col flex-1 relative overflow-hidden  mt-1">
                 {/* Fixed Header */}
                 <div className="bg-black border-b w-full min-w-[1000px] sticky top-0 z-10">
                     <table className="w-full text-xl table-fixed">
