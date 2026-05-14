@@ -1,37 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import useHomeStore from '../../../zustand/useHomeStore'; // Adjust path as needed
 
 const PieChart = () => {
-  const [chartData] = useState({
-    series: [44, 33, 23], // Example values
-    options: {
-      chart: {
-        type: 'pie',
-      },
-      labels: ['Cow Milk', 'Buffalo Milk', 'Other'],
-      responsive: [{
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 300
-          },
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }],
-      title: {
-        text: 'Milk Type Distribution',
-        align: 'center'
+  const fetchDashboardData = useHomeStore(state => state.fetchDashboardData);
+  const [series, setSeries] = useState([]);
+  const [labels, setLabels] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const chartOptions = {
+    chart: {
+      type: 'pie',
+    },
+    labels: labels,
+    responsive: [{
+      breakpoint: 480,
+      options: {
+        chart: { width: 300 },
+        legend: { position: 'bottom' }
       }
+    }],
+    title: {
+      text: 'Milk Type Distribution',
+      align: 'center'
     }
-  });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchDashboardData();
+        const milkData = res?.data?.milk_type_distribution || [];
+
+        const pieLabels = milkData.map(item =>
+          item.type.charAt(0).toUpperCase() + item.type.slice(1) + ' Milk'
+        );
+        const pieSeries = milkData.map(item => item.percentage);
+
+        setLabels(pieLabels);
+        setSeries(pieSeries);
+      } catch (err) {
+        console.error('Error loading milk type distribution:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <p>Loading chart...</p>;
 
   return (
-    <div id="pie-chart">
+    <div id="pie-chart" className='bg-white p-4 rounded-lg shadow-lg flex-1'>
       <ReactApexChart
-        options={chartData.options}
-        series={chartData.series}
+        options={{ ...chartOptions, labels }}
+        series={series}
         type="pie"
         height={350}
         width={600}

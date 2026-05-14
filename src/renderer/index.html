@@ -1,22 +1,42 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>सरस डेयरी</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <!-- <meta
+
+<head>
+  <meta charset="UTF-8" />
+  <title>सरस डेयरी</title>
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <!-- <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     /> -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'self' https://dairy.islamicloves.com; script-src 'self'; style-src 'self' 'unsafe-inline';"
-    />
-  </head>
 
-  <body>
-    <div id="root"></div>
+  <!-- OLD META -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://dairy.productionhouse.store; script-src 'self';  style-src 'self' 'unsafe-inline';" />  -->
 
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+  <!-- NEW META TAGE -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+             connect-src 'self' https://dairy.productionhouse.store; 
+             script-src 'self';  
+             style-src 'self' 'unsafe-inline'; 
+             img-src 'self' data: https:;" />
+
+
+
+  <!-- <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; connect-src 'self' https://test.productionhouse.store; script-src 'self'; style-src 'self' 'unsafe-inline';" /> -->
+
+  <link rel="stylesheet" href="./src/assets/base.css">
+</head>
+<div id="preloader" class="bg-slate-500">
+
+  <div class="preloader">
+  </div>
+
+</div>
+<div id="root"></div>
+
+<script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
