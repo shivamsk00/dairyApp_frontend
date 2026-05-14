@@ -121,7 +121,6 @@ const BulkHisaabComponent = () => {
                 }))
             }
 
-            console.log('Submitting all data via single API:', payload)
 
             // ✅ Call only this ONE API function
             const res = await bulkRecordPayment(payload)
@@ -129,9 +128,7 @@ const BulkHisaabComponent = () => {
             if (res.status_code === 201 || res.status_code === 200) {
                 CustomToast.success(`✓ Success! ${res.payments_created || validPayments.length} customers processed`)
 
-                if (res.data?.wallet_updates) {
-                    console.log('Wallet Updates:', res.data.wallet_updates)
-                }
+
 
                 // Reset all form data
                 setPayments([])

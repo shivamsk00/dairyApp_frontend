@@ -35,7 +35,7 @@ const HeadDairyList = () => {
             const res = await getAllHeadDairyMaster();
             if (res.status_code == 200) {
                 setRowData(res.data);
-                console.log("all Head Dairy Data fetch", res)
+            
             }
 
             else {

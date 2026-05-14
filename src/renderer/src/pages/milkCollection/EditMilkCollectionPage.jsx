@@ -94,12 +94,9 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
 
   // FETCH ALL CUSTOMER
   const fetchCustomerDetailByAccountNumber = async (accountNo) => {
-    // console.log('Fetching customer details for:', accountNo);
     try {
       const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
-      console.log('Customer response:', res);
       if (res.status_code == 200) {
-        // CustomToast.success(res.message)
         setIscustomer(false)
         setForm((prev) => ({
           ...prev,

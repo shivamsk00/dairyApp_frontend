@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import api from './axiosConfig'
 
 // Safe JSON parse function
-const useHomeStore = create((set) => ({
+const useHomeStore = create((set, get) => ({
   loading: false,
   error: null,
 
@@ -18,11 +18,9 @@ const useHomeStore = create((set) => ({
   },
   // Snf Chart Api
   snfChartDataFetch: async (snfData) => {
-    console.log('SNF DATA IN FRONT SNF TABLE====>', snfData)
     try {
       const token = localStorage.getItem('token')
       const res = await api.post('/snf-chart/save', { data: snfData })
-      console.log('response save snf data return', res)
       return res.data
     } catch (error) {
       console.log('ERROR IN SNF CHART DATA', error)
@@ -32,7 +30,7 @@ const useHomeStore = create((set) => ({
   rateChartDataFetch: async (rateData) => {
     try {
       const res = await api.post('/milk-rates-submit', rateData)
-      console.log('response save rate data', res)
+     
 
       // Return saved data so component can update its state
       return res.data.data // returning saved data array
@@ -92,9 +90,9 @@ const useHomeStore = create((set) => ({
     }
   },
   // fetchCategory
-  fetchCategory: async () => {
+  fetchCategory: async (page = 1) => {
     try {
-      const res = await api.get('/all-product-category')
+      const res = await api.get(`/all-product-category?page=${page}`)
       return res.data
     } catch (error) {
       console.log('Error product category add:', error)
@@ -113,11 +111,8 @@ const useHomeStore = create((set) => ({
   },
   // updateCategoryStatus
   updateCategory: async (categroy_id, categoryData) => {
-    console.log('categroy_id', categroy_id)
-    console.log('categoryData', categoryData)
     try {
       const res = await api.post(`/update-product-category/${categroy_id}`, categoryData)
-      console.log('response in update cate', res)
       return res.data
     } catch (error) {
       console.log('Error product category update:', error)
@@ -132,6 +127,40 @@ const useHomeStore = create((set) => ({
     } catch (error) {
       console.log('Error product category add:', error)
       return null
+    }
+  },
+  // fetchAllCategories for dropdowns
+  fetchAllCategories: async () => {
+    try {
+      let allData = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      while (currentPage <= totalPages) {
+        const response = await api.get(`/all-product-category?page=${currentPage}`);
+        const resBody = response.data;
+
+        if (resBody && resBody.status_code == 200) {
+          // The structure is { status_code: 200, data: { data: [...], last_page: X } }
+          const paginationData = resBody.data;
+          const items = paginationData?.data || [];
+          
+          allData = [...allData, ...items];
+          totalPages = paginationData?.last_page || 1;
+          currentPage++;
+          
+          // Safety break
+          if (currentPage > 500) break;
+        } else {
+          console.error("Failed to fetch page", currentPage, resBody);
+          break;
+        }
+      }
+
+      return { status_code: 200, data: { data: allData } };
+    } catch (error) {
+      console.error('Error fetching all categories:', error);
+      return { status_code: 500, message: 'Failed to fetch all categories' };
     }
   },
 
@@ -238,7 +267,6 @@ const useHomeStore = create((set) => ({
   },
 
   submitMilkCollection: async (milkCollectionData) => {
-    console.log('milkCollectionData', milkCollectionData)
     try {
       const res = await api.post('/milk-collection-submit', milkCollectionData)
       return res.data
@@ -363,8 +391,7 @@ const useHomeStore = create((set) => ({
   allProductGet: async (page) => {
     try {
       // set({loading:true})
-      // const res = await api.get(`/all-product?page=${page}`)
-      const res = await api.get(`/all-product`)
+      const res = await api.get(`/all-product?page=${page}`)
       // set({loading:false})
       return res.data
     } catch (error) {
@@ -441,6 +468,40 @@ const useHomeStore = create((set) => ({
       return error.response.data
     }
   },
+  // fetchAllProducts for dropdowns
+  fetchAllProducts: async () => {
+    try {
+      let allData = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      while (currentPage <= totalPages) {
+        const response = await api.get(`/all-product?page=${currentPage}`);
+        const resBody = response.data;
+
+        if (resBody && resBody.status_code == 200) {
+          // The structure is { status_code: 200, data: { data: [...], last_page: X } }
+          const paginationData = resBody.data;
+          const items = paginationData?.data || [];
+          
+          allData = [...allData, ...items];
+          totalPages = paginationData?.last_page || 1;
+          currentPage++;
+          
+          // Safety break
+          if (currentPage > 500) break;
+        } else {
+          console.error("Failed to fetch page", currentPage, resBody);
+          break;
+        }
+      }
+
+      return { status_code: 200, data: { data: allData } };
+    } catch (error) {
+      console.error('Error fetching all products:', error);
+      return { status_code: 500, message: 'Failed to fetch all products' };
+    }
+  },
 
   // ========================== STOCK API =============================== //
 
@@ -456,11 +517,10 @@ const useHomeStore = create((set) => ({
     }
   },
 
-  // get all Product stock api
-  getAllProductStock: async () => {
+  getAllProductStock: async (page = 1) => {
     try {
       // set({loading:true})
-      const res = await api.get(`/all-product-stock`)
+      const res = await api.get(`/all-product-stock?page=${page}`)
       // set({loading:false})
       return res.data
     } catch (error) {
@@ -502,23 +562,13 @@ const useHomeStore = create((set) => ({
     }
   },
 
-  // <======================= PRODUCT SALE SUBMIT API =======================>
-  // productSaleSubmit: async (productSaleData) => {
-  //   try {
-  //     const res = await api.post('/product-sale-submit', productSaleData)
-  //     return res.data
-  //   } catch (error) {
-  //     console.log('ERROR IN SUBMIT PRODUCT SALE SUBMIT API', error)
-  //   }
-  // },
+
 
   productSaleSubmit: async (productSaleData) => {
     try {
-        console.log('🌐 API URL:', api.defaults.baseURL + '/product-sale-submit');
-        console.log('📦 Sending:', productSaleData);
-        
+    
         const res = await api.post('/product-sale-submit', productSaleData);
-        console.log('✅ Success:', res.data);
+       
         return res.data;
     } catch (error) {
         console.error('❌ API Error:', {

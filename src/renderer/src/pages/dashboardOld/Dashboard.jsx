@@ -54,7 +54,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const res = await fetchDashboardData();
-        console.log("response", res)
+        
         const data = res?.data || {};
 
         const purchased = Number(data.total_milk?.total_milk_purchased) || 0;
@@ -102,7 +102,7 @@ const Dashboard = () => {
 
   // Update message handler with proper state management [web:152]
   const handleUpdateMessage = useCallback((msg) => {
-    console.log('Update message received:', msg);
+   
     setMessage(msg);
     
     if (msg) {
@@ -147,7 +147,7 @@ const Dashboard = () => {
 
   // Progress handler [web:152]
   const handleUpdateProgress = useCallback((percent) => {
-    console.log('Update progress:', percent);
+  
     setProgress(percent);
     
     if (percent === 100) {
@@ -170,7 +170,7 @@ const Dashboard = () => {
 
     // Cleanup function to prevent memory leaks [web:152][web:154]
     return () => {
-      console.log('Cleaning up update listeners');
+      
       if (window.api?.removeUpdateListeners) {
         window.api.removeUpdateListeners();
       }
@@ -187,7 +187,7 @@ const Dashboard = () => {
     setIsDownloading(true);
     try {
       const result = await window.api.upadateStartDownload();
-      console.log('Update download started:', result);
+      
       
       if (result?.success === false) {
         setIsDownloading(false);
@@ -209,7 +209,7 @@ const Dashboard = () => {
     setIsCheckingUpdate(true);
     try {
       const result = await window.api.checkForUpdate();
-      console.log('Update check result:', result);
+      
       
       if (result?.success === false) {
         setIsCheckingUpdate(false);

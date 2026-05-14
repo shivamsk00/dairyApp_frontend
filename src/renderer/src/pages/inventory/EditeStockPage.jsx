@@ -9,7 +9,7 @@ const EditeStockPage = () => {
   const { state } = useLocation();
   const { stockId } = state;
 
-  const allProductGet = useHomeStore(state => state.allProductGet);
+  const fetchAllProducts = useHomeStore(state => state.fetchAllProducts);
   const getEditProductStockData = useHomeStore(state => state.getEditProductStockData);
   const updateProductStock = useHomeStore(state => state.updateProductStock); // ✅ Correct function name
 
@@ -34,12 +34,12 @@ const EditeStockPage = () => {
   const fetchProductEditData = async () => {
     try {
       const res = await getEditProductStockData(stockId);
-      console.log("Fetched stock data:", res);
+      
       if (res.status_code ==
         200 && res.data.length > 0) {
         const stock = res.data[0];
 
-        console.log("this is stock", stock.product_id)
+      
         setFormData({
           product_id: stock.product_id || '',
           stock_type: stock.stock_type || '',
@@ -59,7 +59,7 @@ const EditeStockPage = () => {
 
   const getAllProducts = async () => {
     try {
-      const res = await allProductGet();
+      const res = await fetchAllProducts();
       if (res.status_code == 200) {
         setProductData(res.data.data);
 

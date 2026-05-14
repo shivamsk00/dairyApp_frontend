@@ -39,7 +39,7 @@ const InventoryPage = () => {
                 onChange={() => remberSelectedTable(type)}
                 className="peer hidden"
               />
-              <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-blue-100">
+              <span className="capitalize px-4 py-1 rounded-full border border-gray-400 text-gray-700 cursor-pointer transition-all duration-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
                 {type}
               </span>
             </label>

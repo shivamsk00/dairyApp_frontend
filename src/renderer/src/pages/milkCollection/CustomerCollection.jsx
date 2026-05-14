@@ -378,13 +378,10 @@ const CustomerCollection = () => {
             }))
         };
 
-        console.log('📤 Submitting Data:', customerCollectionData);
 
         try {
             const res = await productSaleSubmit(customerCollectionData);
-            console.log('✅ Response:', res);
 
-            // ✅ Fixed: Check if response exists first
             if (res && res.status_code === 200) {
                 CustomToast.success(res.message);
 

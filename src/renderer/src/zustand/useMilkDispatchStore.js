@@ -5,7 +5,6 @@ import api from './axiosConfig'
 // Head Dairy Milk dispatch api for submit data
 const useDailyMilkDispatchStore = create((set) => ({
   submitMilkDispatch: async (milkDispatchData) => {
-    console.log("milkDispatchData", milkDispatchData)
     try {
       const res = await api.post('/milk-dispatch-submit', milkDispatchData)
       return res.data

@@ -49,7 +49,7 @@ const MilkDispatchPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await getAllHeadDairyMaster();
-      console.log('Dairy Id', res);
+    
       setHeadDairies(res.data);
 
     };
@@ -119,7 +119,7 @@ const MilkDispatchPage = () => {
   const fetchRateAndUpdate = async (index, fat, clr, snf, updatedDetails, qty) => {
     try {
       const result = await getMilkRate(fat, clr, snf);
-      console.log("Fetched rate:", result);
+   
 
       const updatedMilk = { ...updatedDetails[index] };
 
@@ -253,7 +253,7 @@ const MilkDispatchPage = () => {
       }
     } catch (error) {
       CustomToast.error(res.message)
-      console.log("ERROR IN DELETE FUN IN Head Dairy LIST", error);
+  
     } finally {
       setIsConfirmOpen(false); ``
       setHeadDairyToDelete(null);

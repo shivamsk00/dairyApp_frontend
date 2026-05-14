@@ -13,7 +13,7 @@ const EditCustomerPage = () => {
     const loading = useHomeStore(state => state.loading);
 
     const customer = location.state;
-    console.log('Customer data:', customer);
+   
 
     const [customerData, setCustomerData] = useState({
         customer_type: '',
@@ -88,7 +88,7 @@ const EditCustomerPage = () => {
 
 
     const handleSubmit = async (e) => {
-        console.log("customerData", customerData)
+      
         e.preventDefault();
         // return
         try {

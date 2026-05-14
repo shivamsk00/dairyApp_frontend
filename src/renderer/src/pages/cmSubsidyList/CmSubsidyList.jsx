@@ -72,7 +72,7 @@ const CmSubsidyList = () => {
       const response = await getAllCustomer('')
 
       if (response && response.status_code === "200") {
-        console.log('API Response:', response)
+        
 
         // Filter customers who have subsidy_code (not null, not empty, not "N/A")
         const subsidyCustomers = response.data.filter(customer =>
@@ -89,8 +89,6 @@ const CmSubsidyList = () => {
           return codeA - codeB;
         });
 
-        console.log('Subsidy Customers Found:', subsidyCustomers.length)
-        console.log('Filtered Customers:', subsidyCustomers)
 
         setCustomers(subsidyCustomers)
         setFilteredCustomers(subsidyCustomers)

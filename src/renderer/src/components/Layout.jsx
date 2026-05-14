@@ -37,7 +37,7 @@ const Layout = () => {
           <div className="  max-w-full">
             {/* Content Container with Modern Design */}
             <div className="min-h-full">
-              <div className="bg-white/80 backdrop-blur-sm  overflow-hidden transition-all duration-300 hover:shadow-2xl">
+              <div className="bg-white/80 backdrop-blur-sm overflow-hidden transition-all duration-300">
                 <div className="p-1 sm:p-2 lg:p-2">
                   <Outlet />
                 </div>
