@@ -22,7 +22,7 @@ const Dashboard = () => {
     try {
       if (!isSilent) setLoading(true);
       const res = await getDashboardData();
-      console.log('dashboard data', res);
+  
       if (res.status_code === 200) {
         setDashboardData(res.data);
       } else {

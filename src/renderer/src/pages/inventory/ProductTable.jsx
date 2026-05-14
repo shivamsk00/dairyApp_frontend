@@ -26,7 +26,7 @@ const ProductTable = () => {
   const productAllDataFetch = async (page = 1) => {
     try {
       const res = await allProductGet(page);
-      console.log("fetch all product ", res)
+     
       if (res.status_code == 200) {
         setProducts(res.data.data)
         setCurrentPage(res.data.current_page);
@@ -64,7 +64,7 @@ const ProductTable = () => {
   const handleToggleStatus = async () => {
     try {
       const res = await updateProductStatus(selectedProduct.id);
-      console.log("status update", res)
+     
       if (res.status_code == 200) {
         toast(res.message, {
           position: "top-right",
@@ -134,9 +134,6 @@ const ProductTable = () => {
   // CATEGORY UPDATE
   const handleEdit = async () => {
 
-    console.log("productEdit", productEdit)
-
-    console.log("selectedProduct", selectedProduct)
     try {
       const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
       // console.log("edit category ", res)
@@ -203,7 +200,7 @@ const ProductTable = () => {
       pages.push(
         <button
           key={1}
-          className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white'}`}
           onClick={() => productAllDataFetch(1)}
         >
           1
@@ -220,7 +217,7 @@ const ProductTable = () => {
       pages.push(
         <button
           key={i}
-          className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white'}`}
           onClick={() => productAllDataFetch(i)}
         >
           {i}
@@ -237,7 +234,7 @@ const ProductTable = () => {
       pages.push(
         <button
           key={totalPages}
-          className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+          className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white'}`}
           onClick={() => productAllDataFetch(totalPages)}
         >
           {totalPages}
@@ -249,7 +246,7 @@ const ProductTable = () => {
       <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
         {/* Previous Button */}
         <button
-          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 disabled:opacity-50"
           onClick={() => productAllDataFetch(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -260,7 +257,7 @@ const ProductTable = () => {
 
         {/* Next Button */}
         <button
-          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
+          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 disabled:opacity-50"
           onClick={() => productAllDataFetch(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -373,11 +370,11 @@ const ProductTable = () => {
                   ['Category Name', selectedProduct.category?.name],
                   ['Price', `₹${selectedProduct.price}`],
                   ['Unit', selectedProduct.unit],
-                  ['Stocks', selectedProduct.stocks.length],
+                  ['Stocks', selectedProduct?.stocks?.length || 0],
                   ['Status', selectedProduct.status == 1 ? <span className='text-green-700 font-bold'>Active</span> : <span className='text-red-700 font-bold'>Inactive</span>],
                   ['Created At', new Date(selectedProduct.created_at).toLocaleString()],
                 ].map(([label, value]) => (
-                  <tr key={label} className="border-b hover:bg-gray-50">
+                  <tr key={label} className="border-b">
                     <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
                     <td className="px-4 py-2">{value}</td>
                   </tr>
@@ -389,7 +386,7 @@ const ProductTable = () => {
             <div className="mt-6 text-right">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                className="bg-gray-700 text-white px-5 py-2 rounded"
               >
                 Close
               </button>

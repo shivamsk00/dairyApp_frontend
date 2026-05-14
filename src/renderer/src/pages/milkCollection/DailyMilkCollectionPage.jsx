@@ -119,7 +119,7 @@ const DairyMilkCollectionPage = () => {
         try {
             // 1. Try Local DB
             let localData = await getCustomerFromDB(accountNo);
-            console.log("local data fetch from index db==>", localData)
+
 
             if (localData) {
                 setForm((prev) => ({
@@ -138,7 +138,7 @@ const DairyMilkCollectionPage = () => {
             // 2. DB returned null - check if DB is empty
             const hasCustomers = await hasCustomersInDB();
             if (!hasCustomers) {
-                console.log("⚠️ DB is empty, fetching all customers from API...");
+                
                 const res = await getAllCustomer('');
 
                 if (res && (res.data || res)) {
@@ -150,7 +150,7 @@ const DairyMilkCollectionPage = () => {
                     }
 
                     if (Array.isArray(customerData) && customerData.length > 0) {
-                        console.log(`✅ Fetched ${customerData.length} customers from API, saving to DB...`);
+                     
                         await saveCustomersToDB(customerData);
 
                         // Try DB lookup again
@@ -173,9 +173,9 @@ const DairyMilkCollectionPage = () => {
             }
 
             // 3. Fallback to direct API lookup
-            console.log("⚠️ Customer not in DB, using direct API lookup...");
+            
             const res = await fetchCustomerDetailsByAccount(accountNo);
-            console.log('Customer response:', res);
+          
             if (res.status_code == 200) {
                 CustomToast.success(res.message)
                 setForm((prev) => ({
@@ -299,10 +299,10 @@ const DairyMilkCollectionPage = () => {
         };
 
         setCustomerWallet(null)
-        console.log("Submitting milk collection", submitData)
+       
         try {
             const res = await submitMilkCollection(submitData);
-            console.log("submitted milk collection response", res)
+            
             if (res.status_code == 200) {
                 if (toggle) {
                     handlePrint(submitData)
@@ -324,7 +324,7 @@ const DairyMilkCollectionPage = () => {
     const fetchMilkCollectionDetails = async (page = 1) => {
         try {
             const res = await getMilkCollectionRecord(page);
-            console.log("milk collection data fetch success====>");
+           
             if (res.status_code == 200) {
                 setCollections(res.morning);
                 setMorningCollection(res.morning);
@@ -435,11 +435,10 @@ const DairyMilkCollectionPage = () => {
                     return;
                 }
 
-                console.log("📥 DB is empty, fetching from API...");
+              
 
                 const res = await getAllCustomer('');
-                console.log("📥 getAllCustomer API response:", res);
-                console.log("Response keys:", Object.keys(res || {}));
+                
 
                 if (!res) {
                     console.error("❌ No response from API");
@@ -462,7 +461,6 @@ const DairyMilkCollectionPage = () => {
                     return;
                 }
 
-                console.log(`📊 Received ${customerData.length} customers from API`);
 
                 if (customerData.length > 0) {
                     console.log("📋 First customer from API:", JSON.stringify(customerData[0], null, 2));

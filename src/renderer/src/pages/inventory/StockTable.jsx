@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import CustomToast from '../../helper/costomeToast';
 import { FaEye, FaPen } from 'react-icons/fa';
 import { FaTrashCan } from 'react-icons/fa6';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
 
 const StockTable = () => {
      const nav = useNavigate()
@@ -18,15 +19,19 @@ const StockTable = () => {
      const [productEdit, setProductEdit] = useState(null)
      const [isModalOpen, setIsModalOpen] = useState(false);
      const [StockData, setStockData] = useState([]);
+     const [currentPage, setCurrentPage] = useState(1);
+     const [totalPages, setTotalPages] = useState(1);
+     const [maxPageButtons, setMaxPageButtons] = useState(5);
 
 
-     const productStockAllDataFetch = async () => {
+     const productStockAllDataFetch = async (page = 1) => {
           try {
-               const res = await getAllProductStock();
+               const res = await getAllProductStock(page);
                if (res.status_code == 200) {
 
-                    console.log("fetch all product stock====>", res.data.data)
                     setStockData(res.data.data)
+                    setCurrentPage(res.data.current_page);
+                    setTotalPages(res.data.last_page);
                }
 
 
@@ -46,7 +51,7 @@ const StockTable = () => {
 
 
      const openModal = (type, product) => {
-          console.log("product", product)
+        
           setSelectedProduct(product);
           setModalType(type);
           setProductEdit(product.name)
@@ -63,7 +68,7 @@ const StockTable = () => {
      const handleToggleStatus = async () => {
           try {
                const res = await updateProductStatus(selectedProduct.id);
-               console.log("status update", res)
+             
                if (res.status_code == 200) {
                     toast(res.message, {
                          position: "top-right",
@@ -132,10 +137,6 @@ const StockTable = () => {
 
      // CATEGORY UPDATE
      const handleEdit = async () => {
-
-          console.log("productEdit", productEdit)
-
-          console.log("selectedProduct", selectedProduct)
           try {
                const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
                // console.log("edit category ", res)
@@ -189,6 +190,84 @@ const StockTable = () => {
           }
      };
 
+     const renderPageButtons = () => {
+          const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
+          const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
+
+          const pages = [];
+
+          // Always show first page
+          if (groupStart > 1) {
+               pages.push(
+                    <button
+                         key={1}
+                         className={`px-3 py-1 border rounded text-sm ${currentPage === 1 ? 'bg-blue-500 text-white' : 'bg-white'}`}
+                         onClick={() => productStockAllDataFetch(1)}
+                    >
+                         1
+                    </button>
+               );
+
+               if (groupStart > 2) {
+                    pages.push(<span key="start-ellipsis" className="px-2 text-gray-500">...</span>);
+               }
+          }
+
+          // Middle buttons
+          for (let i = groupStart; i <= groupEnd; i++) {
+               pages.push(
+                    <button
+                         key={i}
+                         className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white'}`}
+                         onClick={() => productStockAllDataFetch(i)}
+                    >
+                         {i}
+                    </button>
+               );
+          }
+
+          // Always show last page
+          if (groupEnd < totalPages) {
+               if (groupEnd < totalPages - 1) {
+                    pages.push(<span key="end-ellipsis" className="px-2 text-gray-500">...</span>);
+               }
+
+               pages.push(
+                    <button
+                         key={totalPages}
+                         className={`px-3 py-1 border rounded text-sm ${currentPage === totalPages ? 'bg-blue-500 text-white' : 'bg-white'}`}
+                         onClick={() => productStockAllDataFetch(totalPages)}
+                    >
+                         {totalPages}
+                    </button>
+               );
+          }
+
+          return (
+               <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
+                    {/* Previous Button */}
+                    <button
+                         className="px-3 py-1 border rounded text-sm text-white bg-gray-500 disabled:opacity-50"
+                         onClick={() => productStockAllDataFetch(currentPage - 1)}
+                         disabled={currentPage === 1}
+                    >
+                         <MdArrowBackIos size={18} />
+                    </button>
+
+                    {pages}
+
+                    {/* Next Button */}
+                    <button
+                         className="px-3 py-1 border rounded text-sm text-white bg-gray-500 disabled:opacity-50"
+                         onClick={() => productStockAllDataFetch(currentPage + 1)}
+                         disabled={currentPage === totalPages}
+                    >
+                         <MdArrowForwardIos size={18} />
+                    </button>
+               </div>
+          );
+     };
+
 
 
      return (
@@ -198,7 +277,7 @@ const StockTable = () => {
 
                {/* === Bottom Table === */}
                <div className="mt-8 w-full">
-                    <h3 className="text-xl font-semibold mb-4">Product Data</h3>
+                    <h3 className="text-xl font-semibold mb-4">Stock Data</h3>
                     <div className="overflow-x-auto">
                          <table className="min-w-full border border-gray-300 text-sm">
                               <thead className="bg-gray-100">
@@ -260,6 +339,8 @@ const StockTable = () => {
                                    )}
                               </tbody>
                          </table>
+                         {/* Pagination Controls */}
+                         {renderPageButtons()}
                     </div>
                </div>
 
@@ -284,7 +365,7 @@ const StockTable = () => {
                               <table className="w-full text-sm text-left border border-gray-200">
                                    <tbody>
                                         {[
-                                             ['Product Name', selectedProduct.product.name],
+                                             ['Product Name', selectedProduct?.product?.name || 'Product Removed'],
                                              ['Quantity', selectedProduct.quantity],
                                              ['Stock Type', `${selectedProduct.stock_type}`],
                                              // ['Unit', selectedProduct.unit],
@@ -292,7 +373,7 @@ const StockTable = () => {
                                              ['Status', selectedProduct.status == 1 ? <span className='text-green-700 font-bold'>Active</span> : <span className='text-red-700 font-bold'>Inactive</span>],
                                              ['Created At', new Date(selectedProduct.created_at).toLocaleString()],
                                         ].map(([label, value]) => (
-                                             <tr key={label} className="border-b hover:bg-gray-50">
+                                             <tr key={label} className="border-b">
                                                   <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
                                                   <td className="px-4 py-2">{value}</td>
                                              </tr>
@@ -304,7 +385,7 @@ const StockTable = () => {
                               <div className="mt-6 text-right">
                                    <button
                                         onClick={() => setIsModalOpen(false)}
-                                        className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                                        className="bg-gray-700 text-white px-5 py-2 rounded"
                                    >
                                         Close
                                    </button>
@@ -358,7 +439,7 @@ const StockTable = () => {
                                         </h2>
                                         <p className="mb-6">
                                              Are you sure you want to delete{' '}
-                                             <strong>{selectedProduct.product.name}</strong>?
+                                             <strong>{selectedProduct?.product?.name || 'Product Removed'}</strong>?
                                         </p>
                                         <div className="flex justify-end gap-2">
                                              <button

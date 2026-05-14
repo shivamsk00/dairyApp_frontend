@@ -5,7 +5,7 @@ import CommonBackButton from '../../components/CommonBackButton';
 import { goBack } from '../../helper/navigation';
 
 const AddProductPage = () => {
-    const fetchCategory = useHomeStore(state => state.fetchCategory);
+    const fetchAllCategories = useHomeStore(state => state.fetchAllCategories);
     const addProduct = useHomeStore(state => state.addProduct);
     const [categories, setCategories] = useState([]);
 
@@ -26,10 +26,10 @@ const AddProductPage = () => {
 
     const getAllCategory = async () => {
         try {
-            const res = await fetchCategory();
+            const res = await fetchAllCategories();
             if (res.status_code == 200) {
-                setCategories(res.data.data); // Assuming array in res.data.data
-                console.log("Fetched categories", res.data.data);
+                setCategories(res.data.data); 
+                
             } else {
                 CustomToast.error(res.message);
             }

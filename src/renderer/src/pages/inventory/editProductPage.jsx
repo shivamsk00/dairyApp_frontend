@@ -9,7 +9,7 @@ const EditProductPage = () => {
   const { state } = useLocation();
   const { productId } = state;
 
-  const fetchCategory = useHomeStore(state => state.fetchCategory);
+  const fetchAllCategories = useHomeStore(state => state.fetchAllCategories);
   const editProductDetailsFetch = useHomeStore(state => state.editProductDetailsFetch);
   const updateProduct = useHomeStore(state => state.updateProduct);
 
@@ -45,7 +45,7 @@ const EditProductPage = () => {
 
   const getAllCategory = async () => {
     try {
-      const res = await fetchCategory();
+      const res = await fetchAllCategories();
       if (res.status_code == 200) {
         setCategories(res.data.data);
       } else {

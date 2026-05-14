@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
 
         try {
             const res = await sendOtpForgotPassword({ email });
-            console.log("response forgot pass", res)
+        
             if (res.status_code == 200) {
                 // await axios.post('/forgot-password', { email });
                 toast.success(res.message);

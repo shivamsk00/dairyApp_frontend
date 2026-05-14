@@ -34,7 +34,7 @@ const CategoriesPage = () => {
     const handleToggleStatus = async () => {
         try {
             const res = await updateCategoryStatus(selectedCategory.id);
-            console.log("status update", res)
+          
             if (res.status_code == 200) {
                 toast(res.message, {
                     position: "top-right",
@@ -103,11 +103,9 @@ const CategoriesPage = () => {
     // CATEGORY UPDATE
     const handleEdit = async () => {
 
-        console.log("categoryEdit", categoryEdit)
-        console.log("selectedCategory", selectedCategory)
+
         try {
             const res = await updateCategory(selectedCategory.id, { name: categoryEdit });
-            // console.log("edit category ", res)
             if (res.status_code == 200) {
                 toast(res.message, {
                     position: "top-right",
@@ -161,7 +159,7 @@ const CategoriesPage = () => {
     const fetchCategoryData = async () => {
         try {
             const res = await fetchCategory();
-            console.log("response print fetch category data", res)
+           
             setCategories(res.data.data)
 
 

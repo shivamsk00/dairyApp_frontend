@@ -32,7 +32,6 @@ const AddHeadDairy = () => {
 
         try {
             const res = await addHeadDairy(form);
-            console.log("API Response:", res);
 
             if (res.status_code == 200) {
                 setShowSuccessModal(true);

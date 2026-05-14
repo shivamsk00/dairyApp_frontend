@@ -8,7 +8,7 @@ import CommonBackButton from '../../components/CommonBackButton';
 import { goBack } from '../../helper/navigation';
 
 const AddStockPage = () => {
-    const allProductGet = useHomeStore(state => state.allProductGet);
+    const fetchAllProducts = useHomeStore(state => state.fetchAllProducts);
     const addProductStock = useHomeStore(state => state.addProductStock);
     const [categories, setCategories] = useState([]);
 
@@ -28,12 +28,16 @@ const AddStockPage = () => {
 
     const getAllProductData = async () => {
         try {
-            const res = await allProductGet();
-            if (res.status_code == 200) {
-                setCategories(res.data.data); // Assuming array in res.data.data
-                console.log("Fetched All product get ", res.data.data);
+            const res = await fetchAllProducts();
+            if (res && res.status_code == 200) {
+                const fetchedItems = res.data?.data || [];
+                setCategories(fetchedItems); 
+          
+                if (fetchedItems.length === 0) {
+                    console.warn("No products found in the response.");
+                }
             } else {
-                CustomToast.error(res.message);
+                CustomToast.error(res?.message || "Failed to fetch products");
             }
         } catch (error) {
             console.log("ERROR IN FETCH CATEGORY IN ADD PRODUCT PAGE", error);

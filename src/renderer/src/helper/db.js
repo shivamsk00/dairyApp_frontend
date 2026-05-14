@@ -48,7 +48,6 @@ export const openDB = () => {
             const objectStore = db.createObjectStore(CUSTOMER_STORE, { keyPath: 'dbKey', autoIncrement: true });
             objectStore.createIndex('account_no', 'account_no', { unique: false });
             
-            console.log("IndexedDB standardized successfully");
         };
     });
 };
@@ -140,7 +139,7 @@ export const hasCustomersInDB = async () => {
 
             request.onsuccess = (event) => {
                 const count = event.target.result;
-                console.log(`📊 DB has ${count} customers`);
+               
                 resolve(count > 0);
             };
 
@@ -158,7 +157,7 @@ export const hasCustomersInDB = async () => {
 // Debug function to see all customers in DB
 export const getAllCustomersFromDB = async () => {
     try {
-        console.log("🔵 getAllCustomersFromDB: Fetching all customers...");
+       
         
         const db = await openDB();
         const transaction = db.transaction([CUSTOMER_STORE], 'readonly');
@@ -169,13 +168,12 @@ export const getAllCustomersFromDB = async () => {
 
             request.onsuccess = (event) => {
                 const customers = event.target.result;
-                console.log(`📊 Total customers in DB: ${customers.length}`);
+              
                 
                 if (customers.length > 0) {
-                    console.log("📋 First customer:", JSON.stringify(customers[0], null, 2));
-                    console.log("📋 Account numbers in DB:", customers.map(c => c.customer_account_number || c.account_no || 'N/A'));
+                   
                 } else {
-                    console.log("⚠️ Database is empty!");
+                   
                 }
                 
                 resolve(customers);
@@ -195,7 +193,7 @@ export const getAllCustomersFromDB = async () => {
 // Clear all data from DB
 export const clearAllCustomersFromDB = async () => {
     try {
-        console.log("🔵 clearAllCustomersFromDB: Clearing database...");
+       
         
         const db = await openDB();
         const transaction = db.transaction([CUSTOMER_STORE], 'readwrite');
@@ -204,12 +202,12 @@ export const clearAllCustomersFromDB = async () => {
 
         return new Promise((resolve, reject) => {
             request.onsuccess = () => {
-                console.log("✅ Database cleared successfully");
+               
                 resolve();
             };
 
             request.onerror = (e) => {
-                console.error("❌ Error clearing database:", e.target.error);
+               
                 reject(e.target.error);
             };
         });

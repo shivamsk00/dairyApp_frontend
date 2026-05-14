@@ -22,7 +22,7 @@ const useAuthStore = create((set) => ({
     try {
       const loginData = { email, password }
       const res = await api.post('/login-admin', loginData)
-      console.log('Login response', res)
+     
 
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.admin))
@@ -39,7 +39,7 @@ const useAuthStore = create((set) => ({
     set({ loading: true, error: null })
     try {
       const res = await api.post('/create-admin', adminData)
-      console.log('admin created', res)
+      
 
       set({ user: res.data.admin, token: res.data.token, loading: false })
       return res.data
@@ -53,7 +53,7 @@ const useAuthStore = create((set) => ({
     set({ loading: true, error: null })
     try {
       const res = await api.post('/verify-otp', verifyData)
-      console.log('admin created', res)
+      
       set({ loading: false })
       localStorage.setItem('rememberEmail',"")
       return res.data
@@ -65,11 +65,9 @@ const useAuthStore = create((set) => ({
     }
   },
   sendOtpForgotPassword: async (email) => {
-    console.log('email in send otp forgot pass ', email)
     set({ loading: true, error: null })
     try {
       const res = await api.post('/send-otp-forget-password', email)
-      console.log('admin send otp for forgot password', res)
       set({ loading: false, error: null })
       return res.data
     } catch (error) {
@@ -84,7 +82,6 @@ const useAuthStore = create((set) => ({
     set({ loading: true, error: null })
     try {
       const res = await api.post('/forget-password', newPasswordData)
-      console.log('admin forgot pasword', res)
       set({ loading: false })
       return res.data
     } catch (error) {

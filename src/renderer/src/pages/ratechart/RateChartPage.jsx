@@ -85,8 +85,6 @@ const RateChartPage = () => {
   const handleImport = (event) => {
     const file = event.target.files[0];
     
-    console.log("🔍 Import Debug - File selected:", file);
-    
     if (!file) {
       CustomToast.error("No file selected.");
       return;
@@ -115,18 +113,17 @@ const RateChartPage = () => {
     };
 
     reader.onload = (e) => {
-      console.log("✅ FileReader onload triggered");
+     
       
       try {
         const data = new Uint8Array(e.target.result);
-        console.log("🔍 Data length:", data.length);
         
         if (data.length === 0) {
           throw new Error("File is empty or corrupted");
         }
 
         const workbook = XLSX.read(data, { type: 'array' });
-        console.log("🔍 Workbook sheets:", workbook.SheetNames);
+      
         
         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
           throw new Error("No sheets found in the Excel file");
@@ -141,8 +138,6 @@ const RateChartPage = () => {
           defval: ''
         });
 
-        console.log("🔍 Excel Data Preview:", jsonData.slice(0, 3));
-        console.log("🔍 Total Excel rows:", jsonData.length);
 
         if (jsonData.length < 2) {
           throw new Error("Excel file needs at least header row and one data row");
@@ -150,12 +145,11 @@ const RateChartPage = () => {
 
         // Get headers - Excel structure: [empty/label, 8, 8.1, 8.2, ...]
         const headers = jsonData[0];
-        console.log("🔍 Raw Headers:", headers);
+       
         
         // Skip first column and get all SNF headers
         const snfHeaders = headers.slice(1).filter(h => h !== null && h !== undefined && h !== '');
-        console.log("🔍 Found SNF Headers:", snfHeaders);
-        console.log("🔍 SNF Headers types:", snfHeaders.map(h => `${h} (${typeof h})`));
+        
 
         if (snfHeaders.length === 0) {
           throw new Error("No SNF headers found in first row");
@@ -176,13 +170,13 @@ const RateChartPage = () => {
             // Round to 1 decimal place to handle precision issues
             const roundedValue = parseFloat(numericValue.toFixed(1));
             headerMap.set(roundedValue, index + 1); // +1 because we skip first column
-            console.log(`🔍 Mapped header "${header}" -> ${roundedValue} at column ${index + 1}`);
+            
           } else {
             console.warn(`🔍 Skipping invalid header: "${header}"`);
           }
         });
 
-        console.log("🔍 Header Mapping:", Array.from(headerMap.entries()));
+ 
 
         if (headerMap.size === 0) {
           throw new Error(`No valid numeric headers found. Headers were: ${snfHeaders.join(', ')}`);
@@ -190,13 +184,11 @@ const RateChartPage = () => {
 
         // Check how many of our expected SNF values match
         const matchedSnfValues = SNF_VALUES.filter(snf => headerMap.has(snf));
-        console.log("🔍 Matched SNF values from our range:", matchedSnfValues);
+        
         
         if (matchedSnfValues.length === 0) {
           // No exact matches, let's see what we can use
           const availableHeaders = Array.from(headerMap.keys()).sort((a, b) => a - b);
-          console.log("🔍 Available headers in Excel:", availableHeaders);
-          console.log("🔍 Expected SNF range:", `${SNF_VALUES[0]} to ${SNF_VALUES[SNF_VALUES.length - 1]}`);
           
           CustomToast.error(`Excel headers (${availableHeaders.join(', ')}) don't match expected SNF range (${SNF_VALUES[0]} to ${SNF_VALUES[SNF_VALUES.length - 1]}). Please check your Excel file headers.`);
           return;
@@ -204,14 +196,13 @@ const RateChartPage = () => {
 
         // Process data rows
         const dataRows = jsonData.slice(1);
-        console.log("🔍 Processing", dataRows.length, "data rows");
+      
 
         // Filter out empty rows
         const validDataRows = dataRows.filter(row => 
           row && row.length > 0 && row.some(cell => cell !== null && cell !== undefined && cell !== '')
         );
 
-        console.log("🔍 Valid data rows:", validDataRows.length);
         if (validDataRows.length > 0) {
           console.log("🔍 Sample data rows:", validDataRows.slice(0, 3));
         }
@@ -247,7 +238,7 @@ const RateChartPage = () => {
                   const numValue = safeToNumber(cellValue);
                   if (numValue !== null) {
                     rate = cellValue.toString();
-                    console.log(`🔍 Set rate for FAT ${fat}, SNF ${snf}: "${rate}"`);
+                    
                   }
                 }
               }
@@ -272,13 +263,6 @@ const RateChartPage = () => {
           });
         });
 
-        console.log("🔍 Import Summary:");
-        console.log("- Available headers in Excel:", snfHeaders.length);
-        console.log("- Matched headers with our range:", matchedSnfValues.length);  
-        console.log("- Valid data rows:", validDataRows.length);
-        console.log("- Total possible cells:", totalPossibleCells);
-        console.log("- Imported cells:", importedCells);
-        console.log("- Import success rate:", totalPossibleCells > 0 ? `${((importedCells/totalPossibleCells)*100).toFixed(1)}%` : '0%');
 
         if (importedCells === 0) {
           const availableHeaders = Array.from(headerMap.keys()).sort((a, b) => a - b);

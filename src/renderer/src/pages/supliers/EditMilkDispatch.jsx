@@ -4,7 +4,6 @@ import CustomToast from '../../helper/costomeToast';
 import useDailyMilkDispatchStore from '../../zustand/useMilkDispatchStore';
 
 const EditMilkDispatchModal = ({ isOpen, onClose, milkDispatchData }) => {
-    console.log("milkDispatch data", milkDispatchData)
     const updateMilkDispatch = useDailyMilkDispatchStore(state => state.updateMilkDispatch)
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState({

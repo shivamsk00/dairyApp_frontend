@@ -50,7 +50,6 @@ const CashEntryPage = () => {
     try {
       setLoading(true)
       const res = await allCashEntries()
-      console.log('All entries', res.data)
       if (res.status_code == 200) {
         setAllEntries(res.data)
       } else {

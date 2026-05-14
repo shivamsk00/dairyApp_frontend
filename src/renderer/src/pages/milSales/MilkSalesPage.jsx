@@ -137,7 +137,6 @@ const MilkSalesPage = () => {
     // console.log("final daily milk data submit===>", dailyMilkSaleData)
     try {
       const res = await dailyMilkSaleSubmit(dailyMilkSaleData);
-      console.log("submited data", res)
       if (res.status_code == 200) {
         CustomToast.success(res.message)
         CustomToast.success(res.response)
@@ -170,7 +169,7 @@ const MilkSalesPage = () => {
   const fetchDailyMilkSaleData = async (page = 1) => {
     try {
       const res = await getDailyMilkSaleData(page)
-      console.log("fetch all milk daily collection sale data====>", res)
+    
       if (res) {
 
         setDailyMilkCollectionData(res.data)
