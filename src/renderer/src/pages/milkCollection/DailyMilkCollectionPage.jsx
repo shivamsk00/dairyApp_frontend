@@ -1,169 +1,1052 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import useHomeStore from '../../zustand/useHomeStore';
+import { toast } from 'react-toastify';
+import { FaEye, FaPen } from 'react-icons/fa';
+import { FaTrashCan } from 'react-icons/fa6';
+import CustomToast from '../../helper/costomeToast';
+import { IoMdCloseCircle } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
+import EditCustomerModal from '../customer/EditCustomerPage';
+import EditMilkCollectionModal from './EditMilkCollectionPage';
+import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
+import CommonHeader from '../../components/CommonHeader';
+import ToggleButton from '../../components/ToggleButton';
+import { BsFillPrinterFill } from 'react-icons/bs';
+import '../../assets/scrollbar.css'
+import MilkCollectionTable from './MilkCollectionTable';
+import { saveCustomersToDB, getCustomerFromDB, getAllCustomersFromDB, clearAllCustomersFromDB, hasCustomersInDB } from '../../helper/db';
 
-const DailyMilkCollectionPage = () => {
+const DairyMilkCollectionPage = () => {
+    console.log("MilkCollectionPage Rendered");
+    const nav = useNavigate()
+    const today = new Date().toISOString().split('T')[0];
+
+    const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
+
+    const getAllCustomer = useHomeStore(state => state.getAllCustomer);
+    const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
+    const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
+    const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
+    const getMilkRate = useHomeStore(state => state.getMilkRate);
+
+    // State variables
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [deleteId, setDeleteId] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [selectedDate, setSelectedDate] = useState('');
     const [milkType, setMilkType] = useState('cow');
+    const [shiftValue, setShiftValue] = useState('morning');
+    const [isShift, setIsShift] = useState('morning');
+    const [isEditeModal, setIsEditeModal] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isFetchingRate, setIsFetchingRate] = useState(false);
+    const [isFetchingCustomer, setIsFetchingCustomer] = useState(false);
+    const [collections, setCollections] = useState([]);
+    const [toggle, setToggle] = useState(true)
+    const [milkCollectiionAvergeData, setMilkCollectionAvergeData] = useState({
+        avg_base_rate: '',
+        avg_fat: 0,
+        avg_snf: 0,
+        milk_total: 0,
+        other_price_total: 0,
+        total_amount: 0,
+        morning_avg_base_rate: '',
+        morning_avg_fat: 0,
+        morning_avg_snf: 0,
+        morning_total_amount: 0,
+        morning_total_milk: 0,
+        evening_avg_base_rate: '',
+        evening_avg_fat: 0,
+        evening_avg_snf: 0,
+        evening_total_amount: 0,
+        evening_total_milk: 0
+    });
+
+    const [dayTotal, setDayTotal] = useState({
+        morning_total_amount: 0,
+        morning_total_milk: 0,
+        evening_total_amount: 0,
+        evening_total_milk: 0,
+        total_amount: 0,
+        milk_total: 0,
+    })
+    const [morningCollection, setMorningCollection] = useState([]);
+    const [eveningCollection, setEveningCollection] = useState([]);
+    const [customerWallet, setCustomerWallet] = useState(null)
+
+    function checkTimeOfDay() {
+        const now = new Date();
+        const hour = now.getHours();
+
+        if (hour < 12) {
+            setShiftValue("morning")
+            setIsShift("morning")
+        } else {
+            setShiftValue("evening")
+            setIsShift("evening")
+        }
+    }
+
     const [form, setForm] = useState({
+        customer_account_number: '',
+        name: '',
+        careof: '',
+        mobile: '',
         quantity: '',
         clr: '',
         fat: '',
         snf: '',
-        baseRate: '',
-        otherPrice: '',
-        accountNo: '',
-        name: '',
-        spouse: '',
-        mobile: '',
+        base_rate: '',
+        other_price: '0',
+        rate: '',
+        total_amount: '',
+        milk_type: "",
+        shift: "",
+        date: today,
+        print: false,
     });
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+    const lastFetchedAccRef = useRef(null);
+    const lastRateParamsRef = useRef({ fat: '', clr: '', snf: '' });
+
+    // FETCH PER CUSTOMER
+    const fetchCustomerDetailByAccountNumber = async (accountNo) => {
+        if (!accountNo || isFetchingCustomer) return;
+
+        // Skip if this account was just fetched and name is already set
+        if (lastFetchedAccRef.current === accountNo && form.name) return;
+
+        setIsFetchingCustomer(true);
+        try {
+            // 1. Try Local DB
+            let localData = await getCustomerFromDB(accountNo);
+
+
+            if (localData) {
+                setForm((prev) => ({
+                    ...prev,
+                    name: localData.name || '',
+                    careof: localData.careof || '',
+                    mobile: localData.mobile || '',
+                }));
+                setCustomerWallet(localData.wallet);
+                CustomToast.success("Customer Found")
+                lastFetchedAccRef.current = accountNo;
+                setIsFetchingCustomer(false);
+                return;
+            }
+
+            // 2. DB returned null - check if DB is empty
+            const hasCustomers = await hasCustomersInDB();
+            if (!hasCustomers) {
+
+                const res = await getAllCustomer('');
+
+                if (res && (res.data || res)) {
+                    let customerData = res.data || res;
+                    if (!Array.isArray(customerData)) {
+                        if (res.customers) customerData = res.customers;
+                        else if (res.result) customerData = res.result;
+                        else if (typeof res === 'object') customerData = Object.values(res).find(v => Array.isArray(v));
+                    }
+
+                    if (Array.isArray(customerData) && customerData.length > 0) {
+
+                        await saveCustomersToDB(customerData);
+
+                        // Try DB lookup again
+                        localData = await getCustomerFromDB(accountNo);
+                        if (localData) {
+                            setForm((prev) => ({
+                                ...prev,
+                                name: localData.name || '',
+                                careof: localData.careof || '',
+                                mobile: localData.mobile || '',
+                            }));
+                            setCustomerWallet(localData.wallet);
+                            CustomToast.success("Customer Found (from refreshed DB)")
+                            lastFetchedAccRef.current = accountNo;
+                            setIsFetchingCustomer(false);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // 3. Fallback to direct API lookup
+
+            const res = await fetchCustomerDetailsByAccount(accountNo);
+
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                setForm((prev) => ({
+                    ...prev,
+                    name: res.data.name || '',
+                    careof: res.data.careof || '',
+                    mobile: res.data.mobile || '',
+                }));
+                setCustomerWallet(res.data.wallet)
+                lastFetchedAccRef.current = accountNo;
+            } else {
+                CustomToast.error(res.message)
+                setForm((prev) => ({
+                    ...prev,
+                    name: '',
+                    careof: '',
+                    mobile: '',
+                }));
+                lastFetchedAccRef.current = null;
+            }
+        } catch (error) {
+            console.error('Error fetching customer details:', error);
+            setForm((prev) => ({
+                ...prev,
+                name: '',
+                careof: '',
+                mobile: '',
+            }));
+            lastFetchedAccRef.current = null;
+        } finally {
+            setIsFetchingCustomer(false);
+        }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Milk Collection:', { milkType, ...form });
+    // Helper for calculations
+    const calculateTotals = (data) => {
+        const b = parseFloat(data.base_rate) || 0;
+        const o = parseFloat(data.other_price) || 0;
+        const q = parseFloat(data.quantity) || 0;
+        const rate = q * b;
+        const total_amount = rate + o;
+        return {
+            rate: rate.toFixed(2),
+            total_amount: total_amount.toFixed(2),
+        };
     };
+
+    // Auto-calculate rate and total amount
+    useEffect(() => {
+        const totals = calculateTotals(form);
+        if (totals.rate !== form.rate || totals.total_amount !== form.total_amount) {
+            setForm((prev) => ({
+                ...prev,
+                ...totals
+            }));
+        }
+    }, [form.base_rate, form.other_price, form.quantity]);
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        // Only clear name when account number changes - NOT other fields
+        if (name === 'customer_account_number') {
+            setForm(prev => ({
+                ...prev,
+                [name]: value,
+                name: ''  // Only clear name field
+            }));
+            return;
+        }
+
+        setForm(prev => {
+            let updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
+
+            if (name === "clr") {
+                updated.snf = "";
+            } else if (name === "snf") {
+                updated.clr = "";
+            }
+
+            return updated;
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (isSubmitting) return;
+        if (isFetchingRate) {
+            CustomToast.warn("Fetching rate, please wait...");
+            return;
+        }
+
+        // Final check for empty or invalid data
+        if (!form.customer_account_number || !form.name) {
+            CustomToast.error("Please enter a valid account number");
+            accRef.current?.focus();
+            return;
+        }
+
+        if (!form.quantity || parseFloat(form.quantity) <= 0) {
+            CustomToast.error("Please enter quantity");
+            qtyRef.current?.focus();
+            return;
+        }
+
+        if (!form.total_amount || parseFloat(form.total_amount) <= 0) {
+            CustomToast.error("Total amount must be greater than 0");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Safety recalculation to ensure data integrity even if user entered values very fast
+        const totals = calculateTotals(form);
+        const submitData = {
+            ...form,
+            ...totals,
+            shift: shiftValue,
+            milk_type: milkType
+        };
+
+        setCustomerWallet(null)
+
+        try {
+            const res = await submitMilkCollection(submitData);
+
+            if (res.status_code == 200) {
+                if (toggle) {
+                    handlePrint(submitData)
+                }
+
+                CustomToast.success(res.message)
+                resetForm();
+                fetchMilkCollectionDetails()
+            } else {
+                CustomToast.error(res.message || res.errors)
+            }
+        } catch (error) {
+            CustomToast.error(error.message || "Something went wrong")
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const fetchMilkCollectionDetails = async (page = 1) => {
+        try {
+            const res = await getMilkCollectionRecord(page);
+
+            if (res.status_code == 200) {
+                setCollections(res.morning);
+                setMorningCollection(res.morning);
+                setEveningCollection(res.evening);
+                setMilkCollectionAvergeData({
+                    avg_base_rate: res.avg_base_rate || '',
+                    avg_fat: res.avg_fat || '',
+                    avg_snf: res.avg_snf || '',
+                    milk_total: res.milk_total || '',
+                    other_price_total: res.other_price_total || '',
+                    total_amount: res.total_amount || '',
+
+                    morning_avg_base_rate: res.morning_avg_base_rate || '',
+                    morning_avg_fat: res.morning_avg_fat || '',
+                    morning_avg_snf: res.morning_avg_snf || '',
+                    morning_total_amount: res.morning_total_amount || '',
+                    morning_total_milk: res.morning_total_milk || '',
+
+                    evening_avg_base_rate: res.evening_avg_base_rate || '',
+                    evening_avg_fat: res.evening_avg_fat || '',
+                    evening_avg_snf: res.evening_avg_snf || '',
+                    evening_total_amount: res.evening_total_amount || '',
+                    evening_total_milk: res.evening_total_milk || ''
+                });
+
+                setDayTotal({
+                    morning_total_amount: res.morning_total_amount || 0,
+                    morning_total_milk: res.morning_total_milk || 0,
+                    evening_total_amount: res.evening_total_amount || 0,
+                    evening_total_milk: res.evening_total_milk || 0,
+                    total_amount: res.total_amount || 0,
+                    milk_total: res.milk_total || 0,
+                })
+            } else {
+                CustomToast.error(res.message);
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMilkCollectionDetails()
+    }, [isEditeModal])
+
+    const handleRemove = async (id) => {
+        try {
+            const res = await deleteMilkCollection(id);
+            if (res.status_code == 200) {
+                CustomToast.success(res.message)
+                fetchMilkCollectionDetails()
+            } else {
+                CustomToast.success(res.message)
+            }
+        } catch (error) {
+
+        }
+    };
+
+    // PRINT HANDLER
+    const handlePrint = useCallback((data) => {
+        // Validate Data
+        if (!data.customer_account_number || !data.quantity || !data.total_amount || parseFloat(data.total_amount) <= 0) {
+            // Use CustomToast or alert
+            console.warn("Print blocks: Missing or invalid data", data);
+            return;
+        }
+
+        const shift = data.shift === 'morning' ? 'M' : 'E';
+        const now = new Date();
+        const localTime = now.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        const slipData = {
+            account_no: data.customer_account_number,
+            customer: data.name,
+            date: data.date,
+            time: `${localTime}(${shift})`,
+            qty: `${data.quantity} / Ltr`,
+            fat: data.fat,
+            snf: data.snf,
+            rate: `${data.base_rate} / Ltr`,
+            total: data.total_amount
+        };
+
+        if (window.api && window.api.printSlip) {
+            window.api.printSlip(slipData);
+        } else {
+            console.error("Print API not available");
+        }
+    }, []);
+
+    useEffect(() => {
+        checkTimeOfDay();
+
+        // Sync Customers for Offline/Fast Access
+        const syncCustomers = async () => {
+            console.log("🔵 syncCustomers: Starting customer sync...");
+            try {
+                // Check if DB already has customers
+                const hasCustomers = await hasCustomersInDB();
+
+                if (hasCustomers) {
+                    console.log("✅ DB already has customers, skipping API fetch");
+                    return;
+                }
+
+
+
+                const res = await getAllCustomer('');
+
+
+                if (!res) {
+                    console.error("❌ No response from API");
+                    return;
+                }
+
+                // Check if response is wrapped in a data property or is the array directly
+                let customerData = res.data || res;
+
+                // If customerData is still not an array, try other possible keys
+                if (!Array.isArray(customerData)) {
+                    console.log("⚠️ Response data is not an array, checking other properties...");
+                    if (res.customers) customerData = res.customers;
+                    else if (res.result) customerData = res.result;
+                    else if (typeof res === 'object') customerData = Object.values(res).find(v => Array.isArray(v));
+                }
+
+                if (!Array.isArray(customerData)) {
+                    console.error("❌ Could not find customer array in response:", res);
+                    return;
+                }
+
+
+                if (customerData.length > 0) {
+                    console.log("📋 First customer from API:", JSON.stringify(customerData[0], null, 2));
+                }
+
+                // Save to IndexedDB
+                await saveCustomersToDB(customerData);
+
+                // Verify save
+                const savedCustomers = await getAllCustomersFromDB();
+                console.log(`✅ Verified: ${savedCustomers.length} customers saved to DB`);
+
+            } catch (err) {
+                console.error("❌ Failed to sync customers:", err);
+            }
+        };
+
+        syncCustomers();
+    }, [])
+
+    // INPUT REFS
+    const accRef = useRef(null);
+    const qtyRef = useRef(null);
+    const nameRef = useRef(null);
+    const fatRef = useRef(null);
+    const mobileRef = useRef(null);
+    const clrRef = useRef(null);
+    const careOfRef = useRef(null);
+    const snfRef = useRef(null);
+    const otherRateRef = useRef(null);
+    const submitRef = useRef(null);
+
+    // Enhanced keyboard navigation with auto-fetch
+    const handleAccountKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const accNo = form.customer_account_number.trim();
+            if (accNo) {
+                await fetchCustomerDetailByAccountNumber(accNo);
+                qtyRef.current?.focus();
+            } else {
+                setForm((prev) => ({ ...prev, name: '', careof: '', mobile: '' }));
+            }
+        }
+    };
+
+    const handleQuantityKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const accNo = form.customer_account_number.trim();
+            if (accNo && !form.name) {
+                await fetchCustomerDetailByAccountNumber(accNo);
+            }
+            fatRef.current?.focus();
+        }
+    };
+
+    const handleQuantityFocus = async () => {
+        const accNo = form.customer_account_number.trim();
+        if (accNo && !form.name) {
+            await fetchCustomerDetailByAccountNumber(accNo);
+        }
+    };
+
+    const handleFatKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const accNo = form.customer_account_number.trim();
+            if (accNo && !form.name) {
+                await fetchCustomerDetailByAccountNumber(accNo);
+            }
+            snfRef.current?.focus();
+        }
+    };
+
+    const handleSnfKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (isFetchingRate) return;
+
+            const fat = form.fat?.trim();
+            const clr = form.clr?.trim();
+            const snfRaw = form.snf?.trim();
+
+            if (!(fat && (clr || snfRaw))) return;
+
+            // Prevent redundant rate calculations if parameters haven't changed
+            if (
+                lastRateParamsRef.current.fat === fat &&
+                lastRateParamsRef.current.clr === clr &&
+                lastRateParamsRef.current.snf === snfRaw &&
+                form.base_rate // only skip if we already have a rate
+            ) {
+                otherRateRef.current?.focus();
+                return;
+            }
+
+            const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+
+            setIsFetchingRate(true);
+            try {
+                const res = await getMilkRate(fat, clr, snfForApi);
+                if (res) {
+                    lastRateParamsRef.current = { fat, clr, snf: snfRaw };
+                    setForm((prev) => {
+                        const updated = {
+                            ...prev,
+                            fat: res.fat || prev.fat,
+                            clr: res.clr || prev.clr,
+                            snf: res.snf || prev.snf,
+                            base_rate: res.rate || '',
+                        };
+                        const totals = calculateTotals(updated);
+                        return { ...updated, ...totals };
+                    });
+                    res.rate
+                        ? CustomToast.success("Rate Found", "top-center")
+                        : CustomToast.warn("RATE not found", "top-center");
+                }
+            } catch (err) {
+                console.error("Rate error", err);
+                CustomToast.error("Error fetching rate");
+            } finally {
+                setIsFetchingRate(false);
+            }
+            otherRateRef.current?.focus();
+        }
+    };
+
+    // RESET FORM HANDLER
+    const resetForm = () => {
+        setForm({
+            customer_account_number: '',
+            name: '',
+            careof: '',
+            mobile: '',
+            quantity: '',
+            clr: '',
+            fat: '',
+            snf: '',
+            base_rate: '',
+            other_price: '0',
+            rate: '',
+            total_amount: '',
+            milk_type: '',
+            date: today,
+        })
+        setTimeout(() => accRef.current?.focus(), 200);
+    }
 
     return (
-        <div className="w-full p-4">
-            <h2 className="text-2xl font-bold mb-4">Daily Milk Collection</h2>
+        <div className="w-full  bg-white flex flex-col h-screen">
+            <CommonHeader heading={"Daily Milk Collection"} />
 
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md space-y-6">
-                {/* Milk Type Selection */}
-                <div className="flex gap-6 items-center">
-                    <label className="font-semibold">Milk Type:</label>
-                    {['cow', 'buffalo', 'other'].map(type => (
-                        <label key={type} className="flex items-center gap-1 capitalize">
-                            <input
-                                type="radio"
-                                name="milkType"
-                                value={type}
-                                checked={milkType === type}
-                                onChange={() => setMilkType(type)}
+            <div className="flex flex-col lg:flex-row  overflow-hidden">
+                {/* === Left: Form Section === */}
+                <div className="w-full lg:w-[70%] xl:w-[70%] h-fit bg-gradient-to-br from-blue-200 to-indigo-100 border-r border-gray-200 flex flex-col overflow-hidden">
+                    <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-3 flex-1 overflow-y-auto scrollable-table hide-scrollbar">
+                        {/* Milk Type & Shift */}
+                        <div className="flex gap-4 ">
+                            {/* Milk Type */}
+                            <div className="w-1/3 ">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Milk Type:</label>
+                                <div className="flex gap-1">
+                                    {['cow', 'buffalo', 'other'].map((type) => (
+                                        <label key={type} className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="milkType"
+                                                value={type}
+                                                checked={milkType === type}
+                                                onChange={() => setMilkType(type)}
+                                                className="mr-1"
+                                            />
+                                            <span className="capitalize text-sm">{type}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Shift */}
+                            <div className="w-1/3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Shift:</label>
+                                <div className="flex gap-4">
+                                    {['morning', 'evening'].map((shift) => (
+                                        <label key={shift} className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="shift"
+                                                value={shift}
+                                                checked={shiftValue === shift}
+                                                onChange={() => {
+                                                    setShiftValue(shift);
+                                                    setIsShift(shift);
+                                                }}
+                                                className="mr-1"
+                                            />
+                                            <span className="capitalize text-sm">{shift}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Date */}
+                            <div className="w-1/3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date:</label>
+                                <input
+                                    type="date"
+                                    value={form.date}
+                                    name="date"
+                                    onChange={handleChange}
+                                    max={today}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                            </div>
+
+                        </div>
+
+
+                        {/* Customer Details */}
+                        <div className="grid grid-cols-6 gap-2">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Account No *</label>
+                                <input
+                                    type="text"
+                                    name="customer_account_number"
+                                    value={form.customer_account_number}
+                                    onChange={handleChange}
+                                    ref={accRef}
+                                    onKeyDown={handleAccountKeyDown}
+                                    placeholder="Account No"
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    required
+                                />
+                            </div>
+
+                            {/* Quantity - NOT DISABLED, with fetch on focus */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Quantity (Ltr) *</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    value={form.quantity}
+                                    onChange={handleChange}
+                                    ref={qtyRef}
+                                    onKeyDown={handleQuantityKeyDown}
+                                    onFocus={handleQuantityFocus}  // Fetch on focus
+                                    placeholder="Quantity"
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">FAT (%) *</label>
+                                <input
+                                    type="number"
+                                    name="fat"
+                                    value={form.fat}
+                                    onChange={handleChange}
+                                    ref={fatRef}
+                                    onKeyDown={handleFatKeyDown}
+                                    placeholder="FAT %"
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">CLR</label>
+                                <input
+                                    type="number"
+                                    name="clr"
+                                    placeholder="CLR"
+                                    value={form.clr}
+                                    onChange={handleChange}
+                                    ref={clrRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">SNF (%) *</label>
+                                <input
+                                    type="text"
+                                    value={form.snf}
+                                    required
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    name="snf"
+                                    onChange={handleChange}
+                                    ref={snfRef}
+                                    onKeyDown={handleSnfKeyDown}
+                                    placeholder="SNF %"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Base Rate (₹/Ltr)</label>
+                                <input
+                                    type="number"
+                                    name="base_rate"
+                                    value={form.base_rate}
+                                    onChange={handleChange}
+                                    readOnly
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-calculated"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={form.name}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={nameRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+
+
+
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Care of</label>
+                                <input
+                                    type="text"
+                                    name="careof"
+                                    value={form.careof}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={careOfRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+
+
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                                <input
+                                    type="text"
+                                    name="mobile"
+                                    value={form.mobile}
+                                    onChange={handleChange}
+                                    disabled
+                                    ref={mobileRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-filled"
+                                />
+                            </div>
+
+
+
+
+
+
+
+
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Other Price (₹)</label>
+                                <input
+                                    type="number"
+                                    name="other_price"
+                                    value={form.other_price}
+                                    onChange={handleChange}
+                                    ref={otherRateRef}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Rate (Auto)</label>
+                                <input
+                                    type="number"
+                                    name="rate"
+                                    value={form.rate}
+                                    readOnly
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-gray-100 text-gray-600 text-sm"
+                                    placeholder="Auto-calculated"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                                <input
+                                    type="number"
+                                    name="total_amount"
+                                    value={form.total_amount}
+                                    readOnly
+                                    className="w-full px-2 py-1 border border-gray-300 rounded bg-green-100 text-green-800 text-sm font-semibold"
+                                    placeholder="Auto-calculated"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Submit Section */}
+                        <div className="flex items-center justify-between pt-4">
+                            <ToggleButton
+                                label="Auto Print"
+                                enabled={toggle}
+                                onToggle={(val) => setToggle(val)}
                             />
-                            {type}
-                        </label>
-                    ))}
+
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded"
+                                >
+                                    Reset
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    ref={submitRef}
+                                    disabled={isSubmitting || isFetchingRate}
+                                    className={`px-4 py-2 text-white text-sm rounded ${isSubmitting || isFetchingRate ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'}`}
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Customer Wallet Display */}
+                        {customerWallet !== null && (
+                            <div className="bg-blue-50 border border-blue-200 p-3 rounded">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-blue-800">Wallet Balance:</span>
+                                    <span className="text-lg font-bold text-blue-600">₹{customerWallet}</span>
+                                </div>
+                            </div>
+                        )}
+                    </form>
                 </div>
 
-                {/* Input Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium">Quantity (Ltr)</label>
-                        <input
-                            type="number"
-                            name="quantity"
-                            value={form.quantity}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
+                {/* === Right: Day Total */}
+                <div className="w-full lg:w-[30%] xl:w-[30%] h-fit lg:flex-1 flex flex-row overflow-hidden">
+                    {/* Day Total Card */}
+                    <div className="bg-white w-[100%] border-b border-gray-300 p-2 sm:p-2 flex-shrink-0">
+                        <h2 className="text-sm font-semibold text-gray-800 mb-1">Daily Summary</h2>
+                        <div className="grid w-[100%] grid-cols-3 gap-1 sm:gap-2 text-sm">
+                            {/* Morning */}
+                            <div className="bg-blue-500 p-2 rounded border border-orange-200">
+                                <h3 className="font-semibold text-white mb-2">Morning</h3>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-white">
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.morning_total_milk.toFixed(2)} L</span>
+                                    </div>
+                                    <div className="flex justify-between text-white">
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.morning_total_amount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Evening */}
+                            <div className="bg-orange-500 p-3 rounded border border-purple-200">
+                                <h3 className="font-semibold text-white mb-2">Evening</h3>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-white">
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.evening_total_milk.toFixed(2)} L</span>
+                                    </div>
+                                    <div className="flex justify-between text-white">
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.evening_total_amount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Total */}
+                            <div className="bg-green-500 p-3 rounded border border-green-200">
+                                <h3 className="font-semibold text-white mb-2">Total</h3>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-white">
+                                        <span className='text-xs'>Milk:</span>
+                                        <span className="font-semibold text-xs">{dayTotal?.milk_total.toFixed(2)} L</span>
+                                    </div>
+                                    <div className="flex justify-between text-white">
+                                        {/* <span className='text-xs'>Amount:</span> */}
+                                        <span className="font-bold text-xs">₹{dayTotal?.total_amount.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium">CLR</label>
-                        <input
-                            type="number"
-                            name="clr"
-                            value={form.clr}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">FAT (%)</label>
-                        <input
-                            type="number"
-                            name="fat"
-                            value={form.fat}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">SNF (%)</label>
-                        <input
-                            type="number"
-                            name="snf"
-                            value={form.snf}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Base Rate (₹/Ltr)</label>
-                        <input
-                            type="number"
-                            name="baseRate"
-                            value={form.baseRate}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Other Price (₹/Ltr)</label>
-                        <input
-                            type="number"
-                            name="otherPrice"
-                            value={form.otherPrice}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
+
+
+                </div>
+            </div>
+            <MilkCollectionTable
+                morningCollection={morningCollection}
+                eveningCollection={eveningCollection}
+                isShift={isShift}
+                handlePrint={handlePrint}
+                setSelectedCustomer={setSelectedCustomer}
+                setIsModalOpen={setIsModalOpen}
+                setIsEditeModal={setIsEditeModal}
+                setDeleteId={setDeleteId}
+                setShowConfirmModal={setShowConfirmModal}
+            />
+
+            {isModalOpen && selectedCustomer && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh] m-auto">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">
+                            Milk Collection Details
+                        </h2>
+
+                        <table className="w-full text-sm text-left border border-gray-200">
+                            <tbody>
+                                {[
+                                    ['Name', selectedCustomer.name],
+                                    ['Mobile', selectedCustomer.mobile],
+                                    ['careof', selectedCustomer.careof],
+                                    ['Account Number', selectedCustomer.customer_account_number],
+                                    ['Milk Type', selectedCustomer.milk_type],
+                                    ['Quantity (Ltr)', selectedCustomer.quantity],
+                                    ['FAT (%)', selectedCustomer.fat],
+                                    ['SNF (%)', selectedCustomer.snf],
+                                    ['CLR', selectedCustomer.clr],
+                                    ['Base Rate (₹)', selectedCustomer.base_rate],
+                                    ['Other Price (₹)', selectedCustomer.other_price],
+                                    ['Total amount (₹)', (parseFloat(selectedCustomer.quantity) * (parseFloat(selectedCustomer.base_rate) + parseFloat(selectedCustomer.other_price))).toFixed(2)],
+                                    ['Created At', new Date(selectedCustomer.created_at).toLocaleString()],
+                                ].map(([label, value], index) => (
+                                    <tr key={label} className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-gray-200'} hover:bg-gray-100`}>
+                                        <td className="font-medium text-gray-700 px-4 py-2 w-1/3">{label}</td>
+                                        <td className="px-4 py-2">{value}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <div className="mt-6 text-right">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
+            )}
 
-                {/* Side Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium">Account No</label>
-                        <input
-                            type="text"
-                            name="accountNo"
-                            value={form.accountNo}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Name</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={form.name}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Spouse</label>
-                        <input
-                            type="text"
-                            name="spouse"
-                            value={form.spouse}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Mobile</label>
-                        <input
-                            type="text"
-                            name="mobile"
-                            value={form.mobile}
-                            onChange={handleChange}
-                            className="mt-1 w-full border rounded px-3 py-2"
-                        />
+            {showConfirmModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-sm mx-auto">
+                        <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+                        <p className="text-sm text-gray-700 mb-6">Are you sure you want to delete this item?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirmModal(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleRemove(deleteId);
+                                    setShowConfirmModal(false);
+                                    setDeleteId(null);
+                                }}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
+            )}
 
-                {/* Submit Button */}
-                <button
-                    type="submit"
-                    className="w-full text-white py-2 rounded"
-                >
-                    Submit Collection
-                </button>
-            </form>
+            <EditMilkCollectionModal
+                isOpen={isEditeModal}
+                onClose={() => setIsEditeModal(false)}
+                milkData={selectedCustomer}
+                onUpdate={fetchMilkCollectionDetails}
+            />
         </div>
     );
 };
 
-export default DailyMilkCollectionPage;
+export default DairyMilkCollectionPage;
