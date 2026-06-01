@@ -16,7 +16,7 @@ const Header = () => {
     const handleLogout = async () => {
         // Clear IndexedDB data first to ensure security and fresh state for next user
         await clearAllCustomersFromDB();
-        
+
         const res = await logout();
         if (res.status_code == 200) {
             toast(res.message, {
@@ -60,7 +60,7 @@ const Header = () => {
                     {/* Hide email on small screens */}
                     <h2 className="hidden sm:flex items-center gap-1 text-sm font-medium text-white">
                         <MdEmail className="text-blue-400" size={20} />
-                        {user.email}
+                        {user.email && user.email.toUpperCase()}
                     </h2>
 
                     {/* Profile Icon */}
