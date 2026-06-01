@@ -22,17 +22,27 @@ const useAuthStore = create((set) => ({
     try {
       const loginData = { email, password }
       const res = await api.post('/login-admin', loginData)
-     
 
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.admin))
+      const token = res?.data?.token
+      const admin = res?.data?.admin
 
-      set({ user: res.data.admin, token: res.data.token, loading: false })
+      if (!token || !admin) {
+        set({ error: 'Login failed: invalid server response', loading: false })
+        return null
+      }
+
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(admin))
+
+      set({ user: admin, token, loading: false })
       return res.data
     } catch (err) {
-      set({ error: 'Invalid credentials', loading: false })
+      // When CSP blocks the request, err.response can be undefined.
+      const message = err?.response?.data?.message || err?.message || 'Invalid credentials'
+      const data = err?.response?.data
 
-      return err.response.data
+      set({ error: message, loading: false })
+      return data || { message }
     }
   },
   register_sendOtp: async (adminData) => {

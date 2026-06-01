@@ -80,7 +80,7 @@ const Sidebar = () => {
   }, [location.pathname]);
 
   const linkClasses = ({ isActive }) =>
-    `group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 font-medium text-[12px] 
+    `group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 font-medium text-[15px] 
      ${isActive 
        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105' 
        : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
@@ -267,7 +267,7 @@ const Sidebar = () => {
                       onClick={() => toggleDropdown(item.id)}
                       className={`
                         w-full group flex items-center justify-between px-4 py-3 mx-2 rounded-xl 
-                        transition-all duration-300 font-medium text-[12px]
+                        transition-all duration-300 font-medium text-[15px]
                         ${isOpen 
                           ? 'bg-slate-700/50 text-white shadow-lg' 
                           : 'text-gray-300 hover:bg-slate-700/50 hover:text-white hover:scale-102'
@@ -355,7 +355,7 @@ const Sidebar = () => {
                     disabled={item.isDisabled}
                     className={`
                       w-full group flex items-center gap-3 px-4 py-3 mx-2 rounded-xl 
-                      transition-all duration-300 font-medium text-[12px]
+                      transition-all duration-300 font-medium text-[15px]
                       ${item.isDisabled
                         ? 'bg-slate-700/50 text-gray-400 cursor-not-allowed opacity-50'
                         : item.isActive
