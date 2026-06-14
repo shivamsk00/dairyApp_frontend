@@ -53,6 +53,9 @@ const CmSubsidyList = () => {
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [reportData, setReportData] = useState([])
+  const [originalReportData, setOriginalReportData] = useState([])
+  const [summaryData, setSummaryData] = useState(null)
+  const [originalSummaryData, setOriginalSummaryData] = useState(null)
   const [showDateFilter, setShowDateFilter] = useState(false)
   const [subsidyAmount, setSubsidyAmount] = useState('') // NEW: Added subsidy amount state
 
@@ -137,6 +140,9 @@ const CmSubsidyList = () => {
 
       if (response && response.status_code === 200) {
         setReportData(response.data);
+        setOriginalReportData(response.data);
+        setSummaryData(response.summary || null);
+        setOriginalSummaryData(response.summary || null);
         toast.success("Report data loaded successfully");
       } else {
         toast.error(response?.message || "Failed to fetch report");
@@ -159,6 +165,9 @@ const CmSubsidyList = () => {
       end_date: today,
     });
     setReportData([]);
+    setOriginalReportData([]);
+    setSummaryData(null);
+    setOriginalSummaryData(null);
     setSubsidyAmount(''); // NEW: Reset subsidy amount
     // Reset customers to original data without report info
     setFilteredCustomers(customers.map(customer => ({
@@ -189,6 +198,48 @@ const CmSubsidyList = () => {
     setFilteredCustomers(filtered)
   }
 
+  // Recalculate fat and snf based on target averages and original data
+  const recalculateReportData = (targetAvgFat, targetAvgSnf) => {
+    const origAvgFat = parseFloat(originalSummaryData?.avg_fat) || 0;
+    const origAvgSnf = parseFloat(originalSummaryData?.avg_snf) || 0;
+
+    const deltaFat = (parseFloat(targetAvgFat) || 0) - origAvgFat;
+    const deltaSnf = (parseFloat(targetAvgSnf) || 0) - origAvgSnf;
+
+    const updated = originalReportData.map(item => {
+      const origFat = parseFloat(item.fat) || 0;
+      const origSnf = parseFloat(item.snf) || 0;
+      return {
+        ...item,
+        fat: Math.max(0, origFat + deltaFat).toFixed(2),
+        snf: Math.max(0, origSnf + deltaSnf).toFixed(2)
+      };
+    });
+    setReportData(updated);
+  };
+
+  const handleAvgFatChange = (newAvgFatVal) => {
+    setSummaryData(prev => {
+      const updatedSummary = { ...prev, avg_fat: newAvgVal => newAvgFatVal };
+      // Also update the individual rows
+      recalculateReportData(newAvgFatVal, prev?.avg_snf || 0);
+      return {
+        ...prev,
+        avg_fat: newAvgFatVal
+      };
+    });
+  };
+
+  const handleAvgSnfChange = (newAvgSnfVal) => {
+    setSummaryData(prev => {
+      recalculateReportData(prev?.avg_fat || 0, newAvgSnfVal);
+      return {
+        ...prev,
+        avg_snf: newAvgSnfVal
+      };
+    });
+  };
+
   // NEW: Handle Excel Export
   const handleExportExcel = () => {
     if (reportData.length === 0) {
@@ -196,16 +247,22 @@ const CmSubsidyList = () => {
       return;
     }
 
-    const dataToExport = reportData.map((item) => ({
-      'Document Date': item.document_date,
-      'Shift': item.shift === 'morning' ? 'M' : 'E',
-      'Farmer code': item.farmer_code,
-      'UOM': item.uom,
-      'Milk Type': item.milk_type === 'cow' ? 'C' : 'B',
-      'Milk Qty': item.milk_qty,
-      'Fat %': item.fat,
-      'SNF %': item.snf
-    }));
+    const dataToExport = reportData.map((item) => {
+      const customer = customers.find(c => String(c.account_number) === String(item.farmer_code));
+      const uploaderCode = customer ? customer.subsidy_code : (item.uploader_code || '');
+
+      return {
+        'Document Date': item.document_date,
+        'Shift': item.shift === 'morning' ? 'M' : 'E',
+        'Uploader code': uploaderCode,
+        'Farmer code': item.farmer_code,
+        'UOM': item.uom,
+        'Milk Type': item.milk_type === 'cow' ? 'C' : 'B',
+        'Milk Qty': item.milk_qty,
+        'Fat %': item.fat,
+        'SNF %': item.snf
+      };
+    });
 
     // Calculate totals for the footer row
     if (reportData.length > 0) {
@@ -218,12 +275,13 @@ const CmSubsidyList = () => {
       dataToExport.push({
         'Document Date': 'GRAND TOTAL',
         'Shift': '',
+        'Uploader code': '',
         'Farmer code': '',
         'UOM': '',
         'Milk Type': '',
-        'Milk Qty': Number(totalMilkQty.toFixed(2)),
-        'Fat %': '',
-        'SNF %': ''
+        'Milk Qty': summaryData && summaryData.total_qty !== undefined ? summaryData.total_qty : Number(totalMilkQty.toFixed(2)),
+        'Fat %': summaryData && summaryData.avg_fat !== undefined ? summaryData.avg_fat : '',
+        'SNF %': summaryData && summaryData.avg_snf !== undefined ? summaryData.avg_snf : ''
       });
     }
 
@@ -408,35 +466,11 @@ const CmSubsidyList = () => {
                 </div>
               </div>
 
-              {/* Summary Cards */}
-              {/* {reportData.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-3">
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Total Records</div>
-                    <div className="text-xl font-bold text-blue-600">{reportData.length} Entries</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <div className="text-sm text-gray-600">Total Milk Qty</div>
-                    <div className="text-xl font-bold text-green-600">{reportData.reduce((acc, item) => acc + (parseFloat(item.milk_qty) || 0), 0).toFixed(2)} {reportData[0]?.uom || 'KG'}</div>
-                  </div>
-                </div>
-              )} */}
+            
             </div>
           )}
 
-          {/* Search bar */}
-          {/* <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search by name, account number, mobile, email, subsidy code..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-50"
-              />
-            </div>
-          </div> */}
+         
         </div>
       </div>
 
@@ -467,6 +501,7 @@ const CmSubsidyList = () => {
                       <>
                         <th className="text-center p-2 text-[10px] font-semibold ">Document Date</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Shift</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Uploader Code</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Farmer Code</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">UOM</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Milk Type</th>
@@ -517,6 +552,11 @@ const CmSubsidyList = () => {
                         <td className="p-2 text-[10px] text-center capitalize">{item.shift === 'morning' ? 'M' : 'E'}</td>
                         <td className="p-2 text-[10px] text-center">
                           <span className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-mono text-blue-800 border border-blue-200">
+                            {customers.find(c => String(c.account_number) === String(item.farmer_code))?.subsidy_code || item.uploader_code || ''}
+                          </span>
+                        </td>
+                        <td className="p-2 text-[10px] text-center">
+                          <span className="px-3 py-1 bg-gray-50 rounded-lg text-[10px] font-mono text-gray-800 border border-gray-200">
                             {item.farmer_code}
                           </span>
                         </td>
@@ -533,10 +573,38 @@ const CmSubsidyList = () => {
             </div>
 
             {reportData.length > 0 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="text-sm text-gray-600 text-center font-medium">
-                  Showing {reportData.length} records from {dateForm.start_date} to {dateForm.end_date}
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="text-sm text-gray-600 font-medium">
+                  Showing {reportData.length} records from {formatInputDate(dateForm.start_date)} to {formatInputDate(dateForm.end_date)}
                 </div>
+                {summaryData && (
+                  <div className="flex flex-wrap items-center gap-6">
+                    <div className="text-sm text-gray-700">
+                      <span className="font-bold text-gray-900">Total Qty:</span>{' '}
+                      <span className="text-green-600 font-bold">{summaryData.total_qty} {reportData[0]?.uom || 'LTR'}</span>
+                    </div>
+                    <div className="text-sm text-gray-700 flex items-center gap-1.5">
+                      <span className="font-bold text-gray-900">Avg Fat:</span>{' '}
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={summaryData.avg_fat || ''}
+                        onChange={(e) => handleAvgFatChange(e.target.value)}
+                        className="w-16 border border-gray-300 rounded px-1.5 py-0.5 text-center font-bold text-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      />
+                    </div>
+                    <div className="text-sm text-gray-700 flex items-center gap-1.5">
+                      <span className="font-bold text-gray-900">Avg SNF:</span>{' '}
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={summaryData.avg_snf || ''}
+                        onChange={(e) => handleAvgSnfChange(e.target.value)}
+                        className="w-16 border border-gray-300 rounded px-1.5 py-0.5 text-center font-bold text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-500 bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
