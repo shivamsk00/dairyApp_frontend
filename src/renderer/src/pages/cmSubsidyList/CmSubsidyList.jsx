@@ -253,7 +253,7 @@ const CmSubsidyList = () => {
 
       return {
         'Document Date': item.document_date,
-        'Shift': item.shift === 'morning' ? 'M' : 'E',
+        'Shift': item.shift === 'Morning' ? 'M' : 'E',
         'Uploader code': uploaderCode,
         'Farmer code': item.farmer_code,
         'UOM': item.uom,
@@ -549,7 +549,7 @@ const CmSubsidyList = () => {
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="p-2 text-[10px] text-center font-medium">{index + 1}</td>
                         <td className="p-2 text-[10px] text-center">{item.document_date}</td>
-                        <td className="p-2 text-[10px] text-center capitalize">{item.shift === 'morning' ? 'M' : 'E'}</td>
+                        <td className="p-2 text-[10px] text-center capitalize">{item.shift === 'Morning' ? 'M' : 'E'}</td>
                         <td className="p-2 text-[10px] text-center">
                           <span className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-mono text-blue-800 border border-blue-200">
                             {customers.find(c => String(c.account_number) === String(item.farmer_code))?.subsidy_code || item.uploader_code || ''}
