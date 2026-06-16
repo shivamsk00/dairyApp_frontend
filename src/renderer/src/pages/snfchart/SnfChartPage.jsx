@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Chart from './Chart';
+import useHomeStore from '../../zustand/useHomeStore';
+import CustomToast from '../../helper/costomeToast';
 
 const SnfChartPage = () => {
      const [formValues, setFormValues] = useState({
@@ -9,6 +11,8 @@ const SnfChartPage = () => {
      });
 
      const [saveTrigger, setSaveTrigger] = useState(0);
+     const snfFormulaDataFetch = useHomeStore(state => state.snfFormulaDataFetch);
+     const getSnfFormulaData = useHomeStore(state => state.getSnfFormulaData);
 
      const handleChange = (e) => {
           const { name, value } = e.target;
@@ -18,10 +22,28 @@ const SnfChartPage = () => {
           });
      };
 
-     const handleSave = (e) => {
+     const handleSave = async (e) => {
           e.preventDefault();
-          setSaveTrigger(prev => prev + 1); // trigger Chart to recalculate
-          alert(`Saved!\nA: ${formValues.A}, B: ${formValues.B}, C: ${formValues.C}`);
+
+          const formulaData = [
+               { A: parseFloat(formValues.A) },
+               { B: parseFloat(formValues.B) },
+               { C: parseFloat(formValues.C) },
+          ];
+
+          try {
+               const res = await snfFormulaDataFetch(formulaData);
+               console.log("response update snf chart", res.data);
+               if (res.status_code == 200) {
+                    CustomToast.success(res.message);
+               } else {
+                    CustomToast.error(res.message);
+               }
+
+               setSaveTrigger(prev => prev + 1);
+          } catch (error) {
+               CustomToast.error(error);
+          }
      };
 
      const handleReset = () => {
@@ -32,64 +54,95 @@ const SnfChartPage = () => {
           });
      };
 
-     return (
-          <>
-               <section>
-                    <div style={{ display: 'flex', alignItems: 'center', height: 'auto' }}>
-                         <form onSubmit={handleSave} style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '10px', width: '300px', backgroundColor: '#f9f9f9' }}>
-                              <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>SNF Formula</h2>
-                              <p style={{ textAlign: 'center' }}>(CLR / A) + (B * FAT) + C</p>
+     useEffect(() => {
+          const fetchFormula = async () => {
+               const data = await getSnfFormulaData();
+               if (data) {
+                    setFormValues({
+                         A: data.A,
+                         B: data.B,
+                         C: data.C,
+                    });
+               }
+          };
 
-                              <label>
-                                   A:
+          fetchFormula();
+     }, []);
+
+     return (
+          <section className="h-screen bg-gradient-to-br from-slate-800 to-gray-900  text-white p-6 overflow-auto">
+             
+                    <div className="flex justify-center items-center mb-10 border border-dashed border-gray-600 rounded-lg p-4">
+                         <form
+                              onSubmit={handleSave}
+                              className="w-full max-w-lg bg-gray-800 border border-gray-700 rounded-2xl shadow-lg p-8"
+                         >
+                              <h2 className="text-2xl font-bold text-center mb-4 text-teal-400">SNF Formula Settings</h2>
+                              <p className="text-center text-sm mb-8 text-gray-300">(CLR / A) + (B × FAT) + C</p>
+
+                              {/* Field A */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for A:</label>
                                    <input
                                         type="number"
                                         name="A"
                                         value={formValues.A}
                                         onChange={handleChange}
                                         step="any"
-                                        style={{ width: '100%', padding: '8px', marginBottom: '10px', border: '1px solid #777', borderRadius: '3px' }}
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                                    />
-                              </label>
+                              </div>
 
-                              <label>
-                                   B:
+                              {/* Field B */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for B:</label>
                                    <input
                                         type="number"
                                         name="B"
                                         value={formValues.B}
                                         onChange={handleChange}
                                         step="any"
-                                        style={{ width: '100%', padding: '8px', marginBottom: '10px', border: '1px solid #777', borderRadius: '3px' }}
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                                    />
-                              </label>
+                              </div>
 
-                              <label>
-                                   C:
+                              {/* Field C */}
+                              <div className="mb-6">
+                                   <label className="block text-sm mb-2 text-gray-200">Value for C:</label>
                                    <input
                                         type="number"
                                         name="C"
                                         value={formValues.C}
                                         onChange={handleChange}
                                         step="any"
-                                        style={{ width: '100%', padding: '8px', marginBottom: '20px', border: '1px solid #777', borderRadius: '3px' }}
+                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                                    />
-                              </label>
+                              </div>
 
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                   <button type="submit" style={{ padding: '8px 16px', backgroundColor: '#4CAF50', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                              <div className="flex justify-between items-center mt-6">
+                                   <button
+                                        type="submit"
+                                        className="w-full mr-2 bg-teal-600 hover:bg-teal-700 transition text-white font-semibold py-2 rounded-lg"
+                                   >
                                         Save
                                    </button>
-                                   <button type="button" onClick={handleReset} style={{ padding: '8px 16px', backgroundColor: '#f44336', color: '#fff', border: 'none', borderRadius: '5px' }}>
+                                   <button
+                                        type="button"
+                                        onClick={handleReset}
+                                        className="w-full ml-2 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 rounded-lg"
+                                   >
                                         Reset
                                    </button>
                               </div>
                          </form>
                     </div>
-               </section>
 
-               <Chart formValues={formValues} trigger={saveTrigger} />
-          </>
+                    {/* Chart Section */}
+                    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-md">
+                         <Chart formValues={formValues} trigger={saveTrigger} />
+                    </div>
+               
+          </section>
      );
 };
 
