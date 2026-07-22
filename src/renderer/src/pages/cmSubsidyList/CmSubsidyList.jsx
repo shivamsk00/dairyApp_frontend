@@ -252,6 +252,8 @@ const CmSubsidyList = () => {
       const uploaderCode = customer ? customer.subsidy_code : (item.uploader_code || '');
 
       return {
+        'Customer Name': item.customer_name || '-',
+        'Bank Account': item.bank_account || '-',
         'Document Date': item.document_date,
         'Shift': item.shift === 'Morning' ? 'M' : 'E',
         'Uploader code': uploaderCode,
@@ -273,6 +275,8 @@ const CmSubsidyList = () => {
 
       // Add Total Row
       dataToExport.push({
+        'Customer Name': '',
+        'Bank Account': '',
         'Document Date': 'GRAND TOTAL',
         'Shift': '',
         'Uploader code': '',
@@ -499,6 +503,8 @@ const CmSubsidyList = () => {
                     <th className="text-center p-2 text-[10px] font-semibold w-16">Sr.</th>
                     {reportData.length > 0 ? (
                       <>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Customer Name</th>
+                        <th className="text-center p-2 text-[10px] font-semibold ">Bank Account</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Document Date</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Shift</th>
                         <th className="text-center p-2 text-[10px] font-semibold ">Uploader Code</th>
@@ -548,6 +554,8 @@ const CmSubsidyList = () => {
                     reportData.map((item, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="p-2 text-[10px] text-center font-medium">{index + 1}</td>
+                        <td className="p-2 text-[10px] text-center text-gray-900 font-semibold">{item.customer_name || '-'}</td>
+                        <td className="p-2 text-[10px] text-center font-mono text-gray-700">{item.bank_account || '-'}</td>
                         <td className="p-2 text-[10px] text-center">{item.document_date}</td>
                         <td className="p-2 text-[10px] text-center capitalize">{item.shift === 'Morning' ? 'M' : 'E'}</td>
                         <td className="p-2 text-[10px] text-center">

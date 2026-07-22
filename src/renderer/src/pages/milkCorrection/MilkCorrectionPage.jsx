@@ -129,7 +129,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.customer_account_number,
             sortable: true,
             cell: row => (
-                <div className="font-medium text-gray-900 text-[10px]">
+                <div className="font-medium text-gray-900 text-[13px]">
                     {row.customer_account_number}
                 </div>
             )
@@ -139,7 +139,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.date,
             sortable: true,
             cell: row => (
-                <div className="text-sm text-gray-600 text-[10px]">
+                <div className="text-sm text-gray-600 text-[13px]">
                     {new Date(row.date).toLocaleDateString('en-IN')}
                 </div>
             )
@@ -149,7 +149,7 @@ const MilkCorrectionPage = () => {
             selector: row => row.milk_type,
             sortable: true,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${row.milk_type === 'cow'
+                <span className={`px-2 py-1 rounded-full text-[13px] font-medium ${row.milk_type === 'cow'
                     ? 'bg-green-100 text-green-800'
                     : 'bg-yellow-100 text-yellow-800'
                     }`}>
@@ -161,7 +161,7 @@ const MilkCorrectionPage = () => {
             name: 'Shift',
             selector: row => row.shift,
             cell: row => (
-                <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${row.shift === 'morning'
+                <span className={`px-2 py-1 rounded-full text-[13px] font-medium ${row.shift === 'morning'
                     ? 'bg-orange-100 text-orange-800'
                     : 'bg-purple-100 text-purple-800'
                     }`}>
@@ -173,7 +173,7 @@ const MilkCorrectionPage = () => {
             name: 'Qty (L)',
             selector: row => row.quantity,
             cell: row => (
-                <div className="font-medium text-blue-600 text-[10px]">
+                <div className="font-medium text-blue-600 text-[13px]">
                     {row.quantity}
                 </div>
             )
@@ -182,7 +182,7 @@ const MilkCorrectionPage = () => {
             name: 'FAT',
             selector: row => row.fat,
             cell: row => (
-                <div className="text-[10px] font-medium">
+                <div className="text-[13px] font-medium">
                     {row.fat}
                 </div>
             )
@@ -191,7 +191,7 @@ const MilkCorrectionPage = () => {
             name: 'SNF',
             selector: row => row.snf,
             cell: row => (
-                <div className="text-[10px] font-medium">
+                <div className="text-[13px] font-medium">
                     {row.snf}
                 </div>
             )
@@ -200,7 +200,7 @@ const MilkCorrectionPage = () => {
             name: 'Rate',
             selector: row => row.base_rate,
             cell: row => (
-                <div className="font-medium text-green-600 text-[10px]">
+                <div className="font-medium text-green-600 text-[13px]">
                     ₹{row.base_rate}
                 </div>
             )
@@ -209,7 +209,7 @@ const MilkCorrectionPage = () => {
         //     name: 'Other Rate',
         //     selector: row => row.other_price,
         //     cell: row => (
-        //         <div className="font-medium text-green-600 text-[10px]">
+        //         <div className="font-medium text-green-600 text-[13px]">
         //             ₹{row.other_price}
         //         </div>
         //     ),
@@ -220,7 +220,7 @@ const MilkCorrectionPage = () => {
             name: 'Amount',
             selector: row => row.total_amount,
             cell: row => (
-                <div className="font-semibold text-green-700 text-[10px]">
+                <div className="font-semibold text-green-700 text-[13px]">
                     ₹{row.total_amount}
                 </div>
             )

@@ -172,7 +172,7 @@ const CashCorrection = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-800">Cash Entry Correction</h2>
-                  <p className="text-[10px] text-slate-600">Total: {filteredEntries.length} entries</p>
+                  <p className="text-[13px] text-slate-600">Total: {filteredEntries.length} entries</p>
                 </div>
               </div>
               <button
@@ -229,7 +229,7 @@ const CashCorrection = () => {
                 <thead className="bg-gradient-to-r from-slate-100 to-slate-200 sticky top-0 z-10">
                   <tr>
                     {['#', 'Account', 'Customer', 'Date', 'Amount', 'Type', 'Note', 'Actions'].map((header) => (
-                      <th key={header} className="px-3 py-2 text-left text-[10px] font-bold text-slate-700 uppercase">
+                      <th key={header} className="px-3 py-2 text-left text-[13px] font-bold text-slate-700 uppercase">
                         {header}
                       </th>
                     ))}
@@ -239,7 +239,7 @@ const CashCorrection = () => {
                   {filteredEntries.length > 0 ? (
                     filteredEntries.map((entry, index) => (
                       <tr key={entry.id} className="hover:bg-indigo-50 transition-colors">
-                        <td className="px-3 py-2 text-[10px] font-semibold text-slate-600">{index + 1}</td>
+                        <td className="px-3 py-2 text-[13px] font-semibold text-slate-600">{index + 1}</td>
                         {editingRowId === entry.id ? (
                           <>
                             <td className="px-3 py-2">
@@ -248,17 +248,17 @@ const CashCorrection = () => {
                                 name="customer_account_number"
                                 value={editFormData.customer_account_number}
                                 onChange={handleEditFormChange}
-                                className="w-full px-2 py-1 text-[10px] rounded border border-indigo-300 outline-none"
+                                className="w-full px-2 py-1 text-[13px] rounded border border-indigo-300 outline-none"
                               />
                             </td>
-                            <td className="px-3 py-2 text-[10px]">{entry.customer?.name || '-'}</td>
+                            <td className="px-3 py-2 text-[13px]">{entry.customer?.name || '-'}</td>
                             <td className="px-3 py-2">
                               <input
                                 type="date"
                                 name="date"
                                 value={editFormData.date}
                                 onChange={handleEditFormChange}
-                                className="w-full px-2 py-1 text-[10px] rounded border border-indigo-300 outline-none"
+                                className="w-full px-2 py-1 text-[13px] rounded border border-indigo-300 outline-none"
                               />
                             </td>
                             <td className="px-3 py-2">
@@ -267,7 +267,7 @@ const CashCorrection = () => {
                                 name="amount"
                                 value={editFormData.amount}
                                 onChange={handleEditFormChange}
-                                className="w-full px-2 py-1 text-[10px] rounded border border-indigo-300 outline-none"
+                                className="w-full px-2 py-1 text-[13px] rounded border border-indigo-300 outline-none"
                               />
                             </td>
                             <td className="px-3 py-2">
@@ -275,7 +275,7 @@ const CashCorrection = () => {
                                 name="credit_debit_mode"
                                 value={editFormData.credit_debit_mode}
                                 onChange={handleEditFormChange}
-                                className="w-full px-2 py-1 text-[10px] rounded border border-indigo-300 outline-none"
+                                className="w-full px-2 py-1 text-[13px] rounded border border-indigo-300 outline-none"
                               >
                                 <option value="received">Received</option>
                                 <option value="given">Given</option>
@@ -287,7 +287,7 @@ const CashCorrection = () => {
                                 name="note"
                                 value={editFormData.note}
                                 onChange={handleEditFormChange}
-                                className="w-full px-2 py-1 text-[10px] rounded border border-indigo-300 outline-none"
+                                className="w-full px-2 py-1 text-[13px] rounded border border-indigo-300 outline-none"
                               />
                             </td>
                             <td className="px-3 py-2">
@@ -299,16 +299,16 @@ const CashCorrection = () => {
                           </>
                         ) : (
                           <>
-                            <td className="px-3 py-2 text-[10px] font-bold text-indigo-600">{entry.customer_account_number}</td>
-                            <td className="px-3 py-2 text-[10px] font-semibold text-slate-700">{entry.customer?.name || '-'}</td>
-                            <td className="px-3 py-2 text-[10px] text-slate-600">{entry.date}</td>
-                            <td className="px-3 py-2 text-[10px] font-bold text-slate-800">₹{entry.amount}</td>
+                            <td className="px-3 py-2 text-[13px] font-bold text-indigo-600">{entry.customer_account_number}</td>
+                            <td className="px-3 py-2 text-[13px] font-semibold text-slate-700">{entry.customer?.name || '-'}</td>
+                            <td className="px-3 py-2 text-[13px] text-slate-600">{entry.date}</td>
+                            <td className="px-3 py-2 text-[13px] font-bold text-slate-800">₹{entry.amount}</td>
                             <td className="px-3 py-2">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${entry.credit_debit_mode === 'received' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[13px] font-bold ${entry.credit_debit_mode === 'received' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                 {entry.credit_debit_mode === 'received' ? 'Received' : 'Given'}
                               </span>
                             </td>
-                            <td className="px-3 py-2 text-[10px] text-slate-500 max-w-xs truncate">{entry.note || '-'}</td>
+                            <td className="px-3 py-2 text-[13px] text-slate-500 max-w-xs truncate">{entry.note || '-'}</td>
                             <td className="px-3 py-2">
                               <div className="flex gap-2">
                                 <button onClick={() => handleEditClick(entry)} className="p-2 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-all"><FaPen size={10}/></button>

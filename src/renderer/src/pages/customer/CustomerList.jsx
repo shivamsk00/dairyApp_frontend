@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './customer.css'
+import Modal from 'react-modal'
 import { FaDotCircle, FaEye, FaPen, FaTrashAlt, FaSave, FaTimes, FaEdit, FaBuilding, FaPlus, FaSearch, FaFilter, FaTicketAlt } from 'react-icons/fa'
 import { User, Phone, MapPin, Building2, CreditCard, Mail, UserCheck, Briefcase, MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useHomeStore from '../../zustand/useHomeStore'
 import { IoMdCloseCircle } from 'react-icons/io'
 import CustomToast from '../../helper/costomeToast'
+
+Modal.setAppElement('#root')
 
 const CustomerList = () => {
   const nav = useNavigate()
@@ -55,6 +58,35 @@ const CustomerList = () => {
     status: '1'
   })
   const [isSaving, setIsSaving] = useState(false)
+
+  // Edit Modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editModalCustomerId, setEditModalCustomerId] = useState(null)
+  const [editModalLoading, setEditModalLoading] = useState(false)
+  const [editModalSaving, setEditModalSaving] = useState(false)
+  const [editModalData, setEditModalData] = useState({
+    account_number: '',
+    customer_type: '',
+    name: '',
+    careof: '',
+    mobile: '',
+    email: '',
+    address: '',
+    city: '',
+    state: '',
+    wallet: '',
+    pincode: '',
+    bank_account: '',
+    ifsc_code: '',
+    subsidy_code: '',
+    contact_person: '',
+    designation: '',
+    total_cows: '',
+    total_buffalos: '',
+    total_animals: '',
+    farmer_code: '',
+    status: '1'
+  })
 
   // Data fetching functions (keeping your original logic)
   const fetchAllCustomerData = async () => {
@@ -186,6 +218,92 @@ const CustomerList = () => {
       ...prev,
       [field]: value
     }))
+  }
+
+  // Edit Modal handlers
+  const handleCardEditClick = async (customer) => {
+    setIsEditModalOpen(true)
+    setEditModalLoading(true)
+    setEditModalCustomerId(customer.id)
+    try {
+      const res = await editCustomerValueGet({ customer_id: customer.id })
+      if (res.status_code === 200) {
+        const d = res.data
+        setEditModalData({
+          account_number: d.account_number || '',
+          customer_type: d.customer_type || '',
+          name: d.name || '',
+          careof: d.careof || '',
+          mobile: d.mobile || '',
+          email: d.email || '',
+          address: d.address || '',
+          city: d.city || '',
+          state: d.state || '',
+          wallet: d.wallet || '',
+          pincode: d.pincode || '',
+          bank_account: d.bank_account || '',
+          ifsc_code: d.ifsc_code || '',
+          subsidy_code: d.subsidy_code || '',
+          contact_person: d.contact_person || '',
+          designation: d.designation || '',
+          total_cows: d.total_cows || '',
+          total_buffalos: d.total_buffalos || '',
+          total_animals: d.total_animals || '',
+          farmer_code: d.farmer_code || '',
+          status: d.status || '1'
+        })
+      } else {
+        CustomToast.error(res.message || 'Failed to fetch customer details')
+        setIsEditModalOpen(false)
+      }
+    } catch (error) {
+      console.error('Edit modal fetch error:', error)
+      CustomToast.error('Failed to load customer data')
+      setIsEditModalOpen(false)
+    } finally {
+      setEditModalLoading(false)
+    }
+  }
+
+  const handleEditModalChange = (field, value) => {
+    setEditModalData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleEditModalSave = async () => {
+    setEditModalSaving(true)
+    try {
+      const res = await updateCustomer(editModalCustomerId, editModalData)
+      if (res.status_code === 200) {
+        CustomToast.success('Customer updated successfully!')
+        setIsEditModalOpen(false)
+        setEditModalCustomerId(null)
+        setEditModalData({
+          account_number: '', customer_type: '', name: '', careof: '', mobile: '', email: '',
+          address: '', city: '', state: '', wallet: '', pincode: '', bank_account: '', ifsc_code: '',
+          subsidy_code: '', contact_person: '', designation: '', total_cows: '',
+          total_buffalos: '', total_animals: '', farmer_code: '', status: '1'
+        })
+        fetchAllCustomerData()
+      } else {
+        CustomToast.error(res.message || 'Failed to update customer')
+      }
+    } catch (error) {
+      console.error('Edit modal save error:', error)
+      CustomToast.error('Failed to update customer')
+    } finally {
+      setEditModalSaving(false)
+    }
+  }
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false)
+    setEditModalCustomerId(null)
+    setEditModalData({
+      account_number: '', customer_type: '', name: '', careof: '', mobile: '', email: '',
+      address: '', city: '', state: '', wallet: '', pincode: '', bank_account: '', ifsc_code: '',
+      subsidy_code: '', contact_person: '', designation: '', total_cows: '',
+      total_buffalos: '', total_animals: '', farmer_code: '', status: '1'
+    })
   }
 
   const confirmDeleteCustomer = async () => {
@@ -370,9 +488,9 @@ const CustomerList = () => {
                 {/* Table Header - Sticky */}
                 <thead className="bg-black text-white sticky top-0 z-10">
                   <tr>
-                    <th className="text-left p-2 text-[9px] border-b font-semibold  w-16">Sr.</th>
+                    <th className="text-left p-2 text-[12px] border-b font-semibold  w-16">Sr.</th>
                     <th
-                      className="text-left p-2 text-[9px] border-b font-semibold cursor-pointer hover:bg-gray-100 min-w-[120px]"
+                      className="text-left p-2 text-[12px] border-b font-semibold cursor-pointer hover:bg-gray-100 min-w-[120px]"
                       onClick={() => handleSort('account_number')}
                     >
                       <div className="flex items-center gap-2">
@@ -385,7 +503,7 @@ const CustomerList = () => {
                       </div>
                     </th>
                     <th
-                      className="text-left p-2 text-[9px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[180px]"
+                      className="text-left p-2 text-[12px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[180px]"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-2">
@@ -398,7 +516,7 @@ const CustomerList = () => {
                       </div>
                     </th>
                     <th
-                      className="text-left p-2 text-[9px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[130px]"
+                      className="text-left p-2 text-[12px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[130px]"
                       onClick={() => handleSort('subsidy_code')}
                     >
                       <div className="flex items-center gap-2">
@@ -410,11 +528,11 @@ const CustomerList = () => {
                         )}
                       </div>
                     </th>
-                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[120px]">Mobile</th>
-                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[160px]">Email</th>
-                    {/* <th className="text-left p-2 text-[9px] border-b font-semibold text-gray-700 min-w-[180px]">Address</th> */}
-                    <th className="text-left p-2 text-[9px] border-b font-semibold min-w-[100px]">Wallet</th>
-                    <th className="text-center p-2 text-[9px] border-b font-semibold w-32 sticky right-0 ">Actions</th>
+                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[120px]">Mobile</th>
+                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[160px]">Email</th>
+                    {/* <th className="text-left p-2 text-[12px] border-b font-semibold text-gray-700 min-w-[180px]">Address</th> */}
+                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[100px]">Wallet</th>
+                    <th className="text-center p-2 text-[12px] border-b font-semibold w-32 sticky right-0 ">Actions</th>
                   </tr>
                 </thead>
 
@@ -427,12 +545,12 @@ const CustomerList = () => {
                         }`}
                     >
                       {/* Serial Number */}
-                      <td className="p-2 text-[9px] text-gray-600 font-medium">
+                      <td className="p-2 text-[12px] text-gray-600 font-medium">
                         {startIndex + index + 1}
                       </td>
 
                       {/* Account Number */}
-                      <td className="p-2 text-[9px]">
+                      <td className="p-2 text-[12px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
@@ -448,7 +566,7 @@ const CustomerList = () => {
                       </td>
 
                       {/* Customer Name */}
-                      <td className="p-2 text-[9px]">
+                      <td className="p-2 text-[12px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
@@ -463,9 +581,9 @@ const CustomerList = () => {
                               <User className="w-3 h-3 text-orange-600" />
                             </div> */}
                             <div>
-                              <div className="text-[9px] text-gray-900">{row.name}</div>
+                              <div className="text-[12px] text-gray-900">{row.name}</div>
                               {row.careof && (
-                                <div className="text-[8px] text-gray-500">c/o {row.careof}</div>
+                                <div className="text-[11px] text-gray-500">c/o {row.careof}</div>
                               )}
                             </div>
                           </div>
@@ -473,19 +591,19 @@ const CustomerList = () => {
                       </td>
 
                       {/* CM Subsidy Code */}
-                      <td className="p-2 text-[9px]">
+                      <td className="p-2 text-[12px]">
                         {editingRowId === row.id ? (
                           <input
                             type="text"
                             value={editFormData.subsidy_code}
                             onChange={(e) => handleInputChange('subsidy_code', e.target.value)}
-                            className="w-full px-3 text-[9px] py-1 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 text-[12px] py-1 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             placeholder="Subsidy Code"
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
                             <FaTicketAlt className="w-3 h-3 text-gray-500" />
-                            <span className="font-mono text-[9px]">
+                            <span className="font-mono text-[12px]">
                               {row.subsidy_code || <span className="text-gray-400 italic">N/A</span>}
                             </span>
                           </div>
@@ -493,7 +611,7 @@ const CustomerList = () => {
                       </td>
 
                       {/* Mobile */}
-                      <td className="p-2 text-[9px]">
+                      <td className="p-2 text-[12px]">
                         {editingRowId === row.id ? (
                           <input
                             type="tel"
@@ -505,8 +623,8 @@ const CustomerList = () => {
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
-                            <Phone className="w-3 h-3 text-[9px] text-gray-500" />
-                            <a href={`tel:${row.mobile}`} className="hover:text-blue-600 transition-colors text-[9px]">
+                            <Phone className="w-3 h-3 text-[12px] text-gray-500" />
+                            <a href={`tel:${row.mobile}`} className="hover:text-blue-600 transition-colors text-[12px]">
                               {row.mobile}
                             </a>
                           </div>
@@ -525,9 +643,9 @@ const CustomerList = () => {
                           />
                         ) : (
                           <div className="flex items-center gap-2 text-gray-700">
-                            <Mail className="w-3 h-3 text-[9px] text-gray-500" />
+                            <Mail className="w-3 h-3 text-[12px] text-gray-500" />
                             {row.email ? (
-                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-[9px] truncate max-w-[140px]">
+                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-[12px] truncate max-w-[140px]">
                                 {row.email}
                               </a>
                             ) : (
@@ -566,13 +684,13 @@ const CustomerList = () => {
                             type="number"
                             value={editFormData.wallet}
                             onChange={(e) => handleInputChange('wallet', e.target.value)}
-                            className="w-full px-3 py-1 text-[9px] border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-1 text-[12px] border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Wallet Amount"
                             min="0"
                             step="0.01"
                           />
                         ) : (
-                          <div className="text-green-600 font-bold text-[9px]">
+                          <div className="text-green-600 font-bold text-[12px]">
                             ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', {
                               minimumFractionDigits: 2
                             })}
@@ -822,13 +940,13 @@ const CustomerList = () => {
                   <FaEye className="w-3 h-3" />
                   View
                 </button>
-                {/* <button
+                <button
                   className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                  onClick={() => handleEditClick(customer)}
+                  onClick={() => handleCardEditClick(customer)}
                 >
                   <FaEdit className="w-3 h-3" />
                   Edit
-                </button> */}
+                </button>
               </div>
             </div>
           ))}
@@ -1046,6 +1164,130 @@ const CustomerList = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Customer Modal (react-modal) */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={handleEditModalClose}
+        className="edit-modal-content"
+        overlayClassName="edit-modal-overlay"
+        shouldCloseOnOverlayClick={!editModalSaving}
+        shouldCloseOnEsc={!editModalSaving}
+      >
+        <div className="edit-modal-header">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <FaEdit className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-white">
+              <h2 className="text-lg font-bold">Edit Customer</h2>
+              <p className="text-orange-100 text-xs">
+                {editModalData.name && editModalData.account_number
+                  ? `${editModalData.name} — A/c: ${editModalData.account_number}`
+                  : 'Loading customer data...'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleEditModalClose}
+            disabled={editModalSaving}
+            className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white hover:bg-opacity-20 disabled:opacity-50"
+          >
+            <IoMdCloseCircle size={24} />
+          </button>
+        </div>
+
+        <div className="edit-modal-body">
+          {editModalLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+              <span className="ml-3 text-gray-600 text-sm">Loading customer data...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { label: 'Account Number', name: 'account_number', disabled: true },
+                { label: 'Customer Type', name: 'customer_type', isSelect: true },
+                { label: 'Name', name: 'name' },
+                { label: 'Care Of', name: 'careof' },
+                { label: 'Mobile', name: 'mobile', type: 'number' },
+                { label: 'Email', name: 'email', type: 'email' },
+                { label: 'Address', name: 'address' },
+                { label: 'City', name: 'city' },
+                { label: 'State', name: 'state' },
+                { label: 'Pincode', name: 'pincode', type: 'number' },
+                { label: 'Wallet', name: 'wallet', type: 'number' },
+                { label: 'Contact Person', name: 'contact_person' },
+                { label: 'Designation', name: 'designation' },
+                { label: 'Bank Account', name: 'bank_account', type: 'number' },
+                { label: 'IFSC Code', name: 'ifsc_code' },
+                { label: 'Subsidy Code', name: 'subsidy_code' },
+                { label: 'Farmer Code', name: 'farmer_code' },
+                { label: 'Total Cows', name: 'total_cows', type: 'number' },
+                { label: 'Total Buffalos', name: 'total_buffalos', type: 'number' },
+                { label: 'Total Animals', name: 'total_animals', type: 'number' }
+              ].map(({ label, name, type, isSelect, disabled }) => (
+                <div key={name}>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
+                    {label}
+                  </label>
+                  {isSelect ? (
+                    <select
+                      name={name}
+                      value={editModalData[name] || ''}
+                      onChange={(e) => handleEditModalChange(name, e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="Buyer">Buyer</option>
+                      <option value="Seller">Seller</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={type || 'text'}
+                      name={name}
+                      value={editModalData[name] || ''}
+                      onChange={(e) => handleEditModalChange(name, e.target.value)}
+                      disabled={disabled}
+                      className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+                        disabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                      }`}
+                      placeholder={`Enter ${label.toLowerCase()}`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="edit-modal-footer">
+          <button
+            onClick={handleEditModalClose}
+            disabled={editModalSaving}
+            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleEditModalSave}
+            disabled={editModalLoading || editModalSaving}
+            className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {editModalSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Saving...
+              </>
+            ) : (
+              <>
+                <FaSave className="w-3 h-3" />
+                Save Changes
+              </>
+            )}
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

@@ -15,6 +15,7 @@ import { BsFillPrinterFill } from 'react-icons/bs';
 import '../../assets/scrollbar.css'
 import MilkCollectionTable from './MilkCollectionTable';
 import { saveCustomersToDB, getCustomerFromDB, getAllCustomersFromDB, clearAllCustomersFromDB, hasCustomersInDB } from '../../helper/db';
+import DateFormate from '../../helper/DateFormate';
 
 const DairyMilkCollectionPage = () => {
     console.log("MilkCollectionPage Rendered");
@@ -25,7 +26,7 @@ const DairyMilkCollectionPage = () => {
 
     const getAllCustomer = useHomeStore(state => state.getAllCustomer);
     const submitMilkCollection = useHomeStore(state => state.submitMilkCollection);
-    const getMilkCollectionRecord = useHomeStore(state => state.getMilkCollectionRecord);
+    const getMilkCorrectionData = useHomeStore(state => state.getMilkCorrectionData);
     const deleteMilkCollection = useHomeStore(state => state.deleteMilkCollection);
     const getMilkRate = useHomeStore(state => state.getMilkRate);
 
@@ -312,7 +313,7 @@ const DairyMilkCollectionPage = () => {
 
                 CustomToast.success(res.message)
                 resetForm();
-                fetchMilkCollectionDetails()
+                fetchDateFilteredData()
             } else {
                 CustomToast.error(res.message || res.errors)
             }
@@ -323,61 +324,83 @@ const DairyMilkCollectionPage = () => {
         }
     };
 
-    const fetchMilkCollectionDetails = async (page = 1) => {
+    const fetchDateFilteredData = async () => {
         try {
-            const res = await getMilkCollectionRecord(page);
+            const payload = {
+                start_date: DateFormate(form.date),
+                end_date: DateFormate(form.date),
+                data_type: 'all',
+                customer_account_number: ''
+            };
 
-            if (res.status_code == 200) {
-                setCollections(res.morning);
-                setMorningCollection(res.morning);
-                setEveningCollection(res.evening);
-                setMilkCollectionAvergeData({
-                    avg_base_rate: res.avg_base_rate || '',
-                    avg_fat: res.avg_fat || '',
-                    avg_snf: res.avg_snf || '',
-                    milk_total: res.milk_total || '',
-                    other_price_total: res.other_price_total || '',
-                    total_amount: res.total_amount || '',
+            const res = await getMilkCorrectionData(payload);
 
-                    morning_avg_base_rate: res.morning_avg_base_rate || '',
-                    morning_avg_fat: res.morning_avg_fat || '',
-                    morning_avg_snf: res.morning_avg_snf || '',
-                    morning_total_amount: res.morning_total_amount || '',
-                    morning_total_milk: res.morning_total_milk || '',
+            if (res?.status_code == 200) {
+                const collections = res.data?.milk_collections || [];
 
-                    evening_avg_base_rate: res.evening_avg_base_rate || '',
-                    evening_avg_fat: res.evening_avg_fat || '',
-                    evening_avg_snf: res.evening_avg_snf || '',
-                    evening_total_amount: res.evening_total_amount || '',
-                    evening_total_milk: res.evening_total_milk || ''
-                });
+                const morningData = collections.filter(item => item.shift === 'morning');
+                const eveningData = collections.filter(item => item.shift === 'evening');
+
+                setMorningCollection(morningData);
+                setEveningCollection(eveningData);
+                setCollections(isShift === 'morning' ? morningData : eveningData);
+
+                const calculateSummary = (data) => {
+                    const totalMilk = data.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0), 0);
+                    const totalAmount = data.reduce((sum, item) => sum + (parseFloat(item.total_amount) || 0), 0);
+                    const avgFat = data.length > 0 ? data.reduce((sum, item) => sum + (parseFloat(item.fat) || 0), 0) / data.length : 0;
+                    const avgSnf = data.length > 0 ? data.reduce((sum, item) => sum + (parseFloat(item.snf) || 0), 0) / data.length : 0;
+                    const avgBaseRate = data.length > 0 ? data.reduce((sum, item) => sum + (parseFloat(item.base_rate) || 0), 0) / data.length : 0;
+                    const otherPriceTotal = data.reduce((sum, item) => sum + (parseFloat(item.other_price) || 0), 0);
+                    return { totalMilk, totalAmount, avgFat, avgSnf, avgBaseRate, otherPriceTotal };
+                };
+
+                const morningSummary = calculateSummary(morningData);
+                const eveningSummary = calculateSummary(eveningData);
+                const overallSummary = calculateSummary(collections);
 
                 setDayTotal({
-                    morning_total_amount: res.morning_total_amount || 0,
-                    morning_total_milk: res.morning_total_milk || 0,
-                    evening_total_amount: res.evening_total_amount || 0,
-                    evening_total_milk: res.evening_total_milk || 0,
-                    total_amount: res.total_amount || 0,
-                    milk_total: res.milk_total || 0,
-                })
+                    morning_total_amount: morningSummary.totalAmount,
+                    morning_total_milk: morningSummary.totalMilk,
+                    evening_total_amount: eveningSummary.totalAmount,
+                    evening_total_milk: eveningSummary.totalMilk,
+                    total_amount: overallSummary.totalAmount,
+                    milk_total: overallSummary.totalMilk,
+                });
+
+                setMilkCollectionAvergeData({
+                    avg_base_rate: overallSummary.avgBaseRate.toFixed(2),
+                    avg_fat: overallSummary.avgFat.toFixed(2),
+                    avg_snf: overallSummary.avgSnf.toFixed(2),
+                    milk_total: overallSummary.totalMilk.toFixed(2),
+                    other_price_total: overallSummary.otherPriceTotal.toFixed(2),
+                    total_amount: overallSummary.totalAmount.toFixed(2),
+                    morning_avg_base_rate: morningSummary.avgBaseRate.toFixed(2),
+                    morning_avg_fat: morningSummary.avgFat.toFixed(2),
+                    morning_avg_snf: morningSummary.avgSnf.toFixed(2),
+                    morning_total_amount: morningSummary.totalAmount.toFixed(2),
+                    morning_total_milk: morningSummary.totalMilk.toFixed(2),
+                    evening_avg_base_rate: eveningSummary.avgBaseRate.toFixed(2),
+                    evening_avg_fat: eveningSummary.avgFat.toFixed(2),
+                    evening_avg_snf: eveningSummary.avgSnf.toFixed(2),
+                    evening_total_amount: eveningSummary.totalAmount.toFixed(2),
+                    evening_total_milk: eveningSummary.totalMilk.toFixed(2)
+                });
             } else {
-                CustomToast.error(res.message);
+                CustomToast.error(res?.message || "Failed to fetch data");
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching date filtered data:", error);
+            CustomToast.error("Error fetching data");
         }
     };
-
-    useEffect(() => {
-        fetchMilkCollectionDetails()
-    }, [isEditeModal])
 
     const handleRemove = async (id) => {
         try {
             const res = await deleteMilkCollection(id);
             if (res.status_code == 200) {
                 CustomToast.success(res.message)
-                fetchMilkCollectionDetails()
+                fetchDateFilteredData()
             } else {
                 CustomToast.success(res.message)
             }
@@ -482,6 +505,10 @@ const DairyMilkCollectionPage = () => {
 
         syncCustomers();
     }, [])
+
+    useEffect(() => {
+        fetchDateFilteredData()
+    }, [form.date])
 
     // INPUT REFS
     const accRef = useRef(null);
@@ -680,7 +707,6 @@ const DairyMilkCollectionPage = () => {
 
                         </div>
 
-
                         {/* Customer Details */}
                         <div className="grid grid-cols-6 gap-2">
                             <div>
@@ -782,9 +808,6 @@ const DairyMilkCollectionPage = () => {
                                 />
                             </div>
 
-
-
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Care of</label>
                                 <input
@@ -799,8 +822,6 @@ const DairyMilkCollectionPage = () => {
                                 />
                             </div>
 
-
-
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
                                 <input
@@ -814,14 +835,6 @@ const DairyMilkCollectionPage = () => {
                                     placeholder="Auto-filled"
                                 />
                             </div>
-
-
-
-
-
-
-
-
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Other Price (₹)</label>
@@ -966,6 +979,8 @@ const DairyMilkCollectionPage = () => {
                 setIsEditeModal={setIsEditeModal}
                 setDeleteId={setDeleteId}
                 setShowConfirmModal={setShowConfirmModal}
+                avgFat={milkCollectiionAvergeData.avg_fat}
+                avgSnf={milkCollectiionAvergeData.avg_snf}
             />
 
             {isModalOpen && selectedCustomer && (
@@ -1043,7 +1058,7 @@ const DairyMilkCollectionPage = () => {
                 isOpen={isEditeModal}
                 onClose={() => setIsEditeModal(false)}
                 milkData={selectedCustomer}
-                onUpdate={fetchMilkCollectionDetails}
+                onUpdate={fetchDateFilteredData}
             />
         </div>
     );

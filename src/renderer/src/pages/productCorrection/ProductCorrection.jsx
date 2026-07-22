@@ -137,7 +137,7 @@ const ProductCorrection = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-800">Product Sales Correction</h2>
-                                    <p className="text-[10px] text-slate-600">Total: {filteredProducts.length} entries</p>
+                                    <p className="text-[13px] text-slate-600">Total: {filteredProducts.length} entries</p>
                                 </div>
                             </div>
                             <button
@@ -183,7 +183,7 @@ const ProductCorrection = () => {
                                 <thead className="bg-gradient-to-r from-slate-100 to-slate-200 sticky top-0 z-10">
                                     <tr>
                                         {['Sr', 'Account', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date', 'Type', 'Actions'].map((header) => (
-                                            <th key={header} className="px-3 py-2 text-left text-[10px] font-bold text-slate-700 uppercase">
+                                            <th key={header} className="px-3 py-2 text-left text-[13px] font-bold text-slate-700 uppercase">
                                                 {header}
                                             </th>
                                         ))}
@@ -193,17 +193,17 @@ const ProductCorrection = () => {
                                     {filteredProducts.length > 0 ? (
                                         filteredProducts.map((item, i) => (
                                             <tr key={item.id} className="hover:bg-indigo-50 transition-colors">
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-600">{i + 1}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-600">{item.customer_account_number}</td>
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-700">{item.customer?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-700">{item.product?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-600">{item.category?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-green-600">₹{item.product_price}</td>
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-700">{item.qty}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-blue-600">₹{item.total}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-600">{item.date}</td>
+                                                <td className="px-3 py-2 text-[13px] font-semibold text-slate-600">{i + 1}</td>
+                                                <td className="px-3 py-2 text-[13px] font-bold text-indigo-600">{item.customer_account_number}</td>
+                                                <td className="px-3 py-2 text-[13px] font-semibold text-slate-700">{item.customer?.name || '-'}</td>
+                                                <td className="px-3 py-2 text-[13px] text-slate-700">{item.product?.name || '-'}</td>
+                                                <td className="px-3 py-2 text-[13px] text-slate-600">{item.category?.name || '-'}</td>
+                                                <td className="px-3 py-2 text-[13px] font-bold text-green-600">₹{item.product_price}</td>
+                                                <td className="px-3 py-2 text-[13px] font-semibold text-slate-700">{item.qty}</td>
+                                                <td className="px-3 py-2 text-[13px] font-bold text-blue-600">₹{item.total}</td>
+                                                <td className="px-3 py-2 text-[13px] text-slate-600">{item.date}</td>
                                                 <td className="px-3 py-2">
-                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${item.transaction_type === 'cash' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                    <span className={`px-2 py-1 rounded-full text-[13px] font-bold ${item.transaction_type === 'cash' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                                                         {item.transaction_type === 'cash' ? '💵 Cash' : '📋 Borrow'}
                                                     </span>
                                                 </td>

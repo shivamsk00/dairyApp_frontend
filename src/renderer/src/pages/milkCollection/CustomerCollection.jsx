@@ -3,14 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import useHomeStore from '../../zustand/useHomeStore';
 import CustomToast from '../../helper/costomeToast';
-import DateFormate from '../../helper/DateFormate';
 import { TfiExport } from 'react-icons/tfi';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
-import { FaShoppingCart, FaUser, FaCalendarAlt, FaBoxOpen, FaSearch, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaBoxOpen, FaSearch, FaPlus, FaTrash } from 'react-icons/fa';
 import { FaPen, FaTrashCan } from 'react-icons/fa6';
 import { HiDocumentText } from 'react-icons/hi2';
-import EditCustomerCollectionModal from './EditCustomerCollection';
 
 const CustomerCollection = () => {
     const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
@@ -21,6 +19,7 @@ const CustomerCollection = () => {
     const getDeleteProducts = useHomeStore(state => state.getDeleteProducts);
     const allProductGet = useHomeStore(state => state.allProductGet);
     const addProductStock = useHomeStore(state => state.addProductStock);
+    const updateProductSale = useHomeStore(state => state.updateProductSale);
 
     const [allProductCategory, setAllProductCategory] = useState([]);
     const [allProductList, setAllProductList] = useState([]);
@@ -31,8 +30,6 @@ const CustomerCollection = () => {
 
     const [deleteId, setDeleteId] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [isEditeModal, setIsEditeModal] = useState(false);
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     // Stock Update States
     const [showStockModal, setShowStockModal] = useState(false);
@@ -41,6 +38,10 @@ const CustomerCollection = () => {
     // Search/Filter States
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('all');
+
+    // Inline Edit States
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({});
 
     const [form, setForm] = useState({
         account_number: '',
@@ -94,7 +95,7 @@ const CustomerCollection = () => {
 
     useEffect(() => {
         soldproductAllDataFetch();
-    }, [isEditeModal]);
+    }, []);
 
     // Search/Filter Logic
     useEffect(() => {
@@ -347,6 +348,73 @@ const CustomerCollection = () => {
 
 
     //////////////    Submit Function  ///////////////
+
+    // Inline Edit Handlers
+    const handleInlineEdit = (item) => {
+        const qty = parseFloat(item.qty) || 0;
+        const price = parseFloat(item.product_price) || 0;
+        setEditingId(item.id);
+        setEditForm({
+            qty: item.qty,
+            product_price: item.product_price,
+            total: (qty * price).toFixed(2),
+            transaction_type: item.transaction_type,
+            date: item.date,
+        });
+    };
+
+    const handleInlineEditChange = (field, value) => {
+        setEditForm(prev => {
+            const updated = { ...prev, [field]: value };
+            if (field === 'qty' || field === 'product_price') {
+                const qty = parseFloat(updated.qty) || 0;
+                const price = parseFloat(updated.product_price) || 0;
+                updated.total = (qty * price).toFixed(2);
+            }
+            return updated;
+        });
+    };
+
+    const handleInlineSave = async (item) => {
+        if (!editForm.qty || parseFloat(editForm.qty) <= 0) {
+            CustomToast.error("Quantity must be greater than 0");
+            return;
+        }
+
+        try {
+            const payload = {
+                customer_account_number: item.customer_account_number,
+                name: item.customer?.name || '',
+                careof: item.customer?.careof || '',
+                date: editForm.date,
+                category_id: item.category_id,
+                product_id: item.product_id,
+                product_price: parseFloat(editForm.product_price),
+                qty: parseFloat(editForm.qty),
+                total: parseFloat(editForm.total),
+                transaction_type: editForm.transaction_type,
+            };
+
+            const res = await updateProductSale(item.id, payload);
+            if (res.status_code == 200) {
+                CustomToast.success(res.message);
+                setEditingId(null);
+                setEditForm({});
+                await soldproductAllDataFetch();
+                await fetchAllProducts();
+            } else {
+                CustomToast.error(res.message);
+            }
+        } catch (error) {
+            console.error("Inline edit error:", error);
+            CustomToast.error("Failed to update");
+        }
+    };
+
+    const handleInlineCancel = () => {
+        setEditingId(null);
+        setEditForm({});
+    };
     const handleSubmitProduct = async (e) => {
         e.preventDefault();
 
@@ -616,7 +684,7 @@ const CustomerCollection = () => {
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-700 mb-1">Price</label>
                                             <div className="relative">
-                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[10px]">₹</span>
+                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[13px]">₹</span>
                                                 <input
                                                     type="number"
                                                     step="any"
@@ -705,14 +773,14 @@ const CustomerCollection = () => {
                                 products.map((p, idx) => p.selectedProduct && (
                                     <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in slide-in-from-right-2 duration-300">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase">Item {idx + 1}</span>
+                                            <span className="text-[13px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase">Item {idx + 1}</span>
                                             
                                         </div>
                                         <h4 className="font-bold text-slate-800 text-sm mb-2">{p.selectedProduct.name}</h4>
                                         
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="bg-white p-2 rounded-lg border border-slate-100 shadow-sm min-h-[50px] flex flex-col justify-center relative group">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Available Stock</p>
+                                                <p className="text-[13px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Available Stock</p>
                                                 <div className="flex items-center justify-between">
                                                     <p className={`text-base font-black ${Number(p.selectedProduct.available_stock || 0) <= 5 ? 'text-red-600' : 'text-emerald-600'} !text-opacity-100`}>
                                                         {p.selectedProduct.available_stock ?? '0'}
@@ -730,7 +798,7 @@ const CustomerCollection = () => {
                                                 </div>
                                             </div>
                                             <div className="bg-white p-2 rounded-lg border border-slate-100 shadow-sm">
-                                                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Price</p>
+                                                <p className="text-[13px] text-slate-500 uppercase tracking-wider font-semibold">Price</p>
                                                 <p className="text-sm font-black text-indigo-600">₹{p.selectedProduct.price}</p>
                                             </div>
                                         </div>
@@ -761,7 +829,7 @@ const CustomerCollection = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-800">Sales History</h2>
-                                    <p className="text-[10px] text-slate-600">Total: {filteredProducts.length} entries</p>
+                                    <p className="text-[13px] text-slate-600">Total: {filteredProducts.length} entries</p>
                                 </div>
                             </div>
                             <button
@@ -807,7 +875,7 @@ const CustomerCollection = () => {
                                 <thead className="bg-gradient-to-r from-slate-100 to-slate-200 sticky top-0 z-10">
                                     <tr>
                                         {['Sr', 'Account', 'Customer', 'Product', 'Category', 'Price', 'Qty', 'Total', 'Date', 'Type', 'Actions'].map((header) => (
-                                            <th key={header} className="px-3 py-2 text-left text-[10px] font-bold text-slate-700 uppercase">
+                                            <th key={header} className="px-3 py-2 text-left text-[13px] font-bold text-slate-700 uppercase">
                                                 {header}
                                             </th>
                                         ))}
@@ -815,47 +883,110 @@ const CustomerCollection = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {filteredProducts.length > 0 ? (
-                                        filteredProducts.map((item, i) => (
-                                            <tr key={item.id} className="hover:bg-indigo-50 transition-colors">
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-600">{i + 1}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-indigo-600">{item.customer_account_number}</td>
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-700">{item.customer?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-700">{item.product?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-600">{item.category?.name || '-'}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-green-600">₹{item.product_price}</td>
-                                                <td className="px-3 py-2 text-[10px] font-semibold text-slate-700">{item.qty}</td>
-                                                <td className="px-3 py-2 text-[10px] font-bold text-blue-600">₹{item.total}</td>
-                                                <td className="px-3 py-2 text-[10px] text-slate-600">{item.date}</td>
-                                                <td className="px-3 py-2">
-                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${item.transaction_type === 'cash' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-                                                        }`}>
-                                                        {item.transaction_type === 'cash' ? '💵 Cash' : '📋 Borrow'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-3 py-2">
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedCustomer(item);
-                                                                setIsEditeModal(true);
-                                                            }}
-                                                            className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-700  transition-all"
-                                                        >
-                                                            <FaPen size={10} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => {
-                                                                setDeleteId(item.id);
-                                                                setShowConfirmModal(true);
-                                                            }}
-                                                            className="p-2 bg-red-100 hover:bg-red-200 text-red-700  transition-all"
-                                                        >
-                                                            <FaTrashCan size={10} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
+                                        filteredProducts.map((item, i) => {
+                                            const isEditing = editingId === item.id;
+                                            return (
+                                                <tr key={item.id} className={`${isEditing ? 'bg-yellow-50' : 'hover:bg-indigo-50'} transition-colors`}>
+                                                    <td className="px-3 py-2 text-[13px] font-semibold text-slate-600">{i + 1}</td>
+                                                    <td className="px-3 py-2 text-[13px] font-bold text-indigo-600">{item.customer_account_number}</td>
+                                                    <td className="px-3 py-2 text-[13px] font-semibold text-slate-700">{item.customer?.name || '-'}</td>
+                                                    <td className="px-3 py-2 text-[13px] text-slate-700">{item.product?.name || '-'}</td>
+                                                    <td className="px-3 py-2 text-[13px] text-slate-600">{item.category?.name || '-'}</td>
+
+                                                    {isEditing ? (
+                                                        <>
+                                                            <td className="px-1 py-1">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editForm.product_price}
+                                                                    onChange={(e) => handleInlineEditChange('product_price', e.target.value)}
+                                                                    className="w-full px-1 py-1 text-[13px] border border-indigo-300 rounded focus:border-indigo-500 outline-none"
+                                                                />
+                                                            </td>
+                                                            <td className="px-1 py-1">
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={editForm.qty}
+                                                                    onChange={(e) => handleInlineEditChange('qty', e.target.value)}
+                                                                    className="w-full px-1 py-1 text-[13px] border border-indigo-300 rounded focus:border-indigo-500 outline-none"
+                                                                />
+                                                            </td>
+                                                            <td className="px-3 py-2 text-[13px] font-bold text-blue-600">₹{editForm.total || '0.00'}</td>
+                                                            <td className="px-1 py-1">
+                                                                <input
+                                                                    type="date"
+                                                                    value={editForm.date}
+                                                                    onChange={(e) => handleInlineEditChange('date', e.target.value)}
+                                                                    className="w-full px-1 py-1 text-[13px] border border-indigo-300 rounded focus:border-indigo-500 outline-none"
+                                                                />
+                                                            </td>
+                                                            <td className="px-1 py-1">
+                                                                <select
+                                                                    value={editForm.transaction_type}
+                                                                    onChange={(e) => handleInlineEditChange('transaction_type', e.target.value)}
+                                                                    className="w-full px-1 py-1 text-[13px] border border-indigo-300 rounded focus:border-indigo-500 outline-none"
+                                                                >
+                                                                    <option value="cash">Cash</option>
+                                                                    <option value="borrow">Borrow</option>
+                                                                </select>
+                                                            </td>
+                                                            <td className="px-2 py-1">
+                                                                <div className="flex gap-1">
+                                                                    <button
+                                                                        onClick={() => handleInlineSave(item)}
+                                                                        className="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-[13px] font-bold rounded transition-colors"
+                                                                        title="Save"
+                                                                    >
+                                                                        Save
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={handleInlineCancel}
+                                                                        className="px-2 py-1 bg-gray-400 hover:bg-gray-500 text-white text-[13px] font-bold rounded transition-colors"
+                                                                        title="Cancel"
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <td className="px-3 py-2 text-[13px] font-bold text-green-600">₹{item.product_price}</td>
+                                                            <td className="px-3 py-2 text-[13px] font-semibold text-slate-700">{item.qty}</td>
+                                                            <td className="px-3 py-2 text-[13px] font-bold text-blue-600">₹{item.total}</td>
+                                                            <td className="px-3 py-2 text-[13px] text-slate-600">{item.date}</td>
+                                                            <td className="px-3 py-2">
+                                                                <span className={`px-2 py-1 rounded-full text-[13px] font-bold ${item.transaction_type === 'cash' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                    {item.transaction_type === 'cash' ? 'Cash' : 'Borrow'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-3 py-2">
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => handleInlineEdit(item)}
+                                                                        className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-700 transition-all"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <FaPen size={13} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setDeleteId(item.id);
+                                                                            setShowConfirmModal(true);
+                                                                        }}
+                                                                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 transition-all"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <FaTrashCan size={13} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </>
+                                                    )}
+                                                </tr>
+                                            );
+                                        })
                                     ) : (
                                         <tr>
                                             <td colSpan="11" className="px-6 py-24 text-center">
@@ -877,15 +1008,6 @@ const CustomerCollection = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Edit Modal */}
-            {isEditeModal && (
-                <EditCustomerCollectionModal
-                    isOpen={isEditeModal}
-                    onClose={() => setIsEditeModal(false)}
-                    productData={selectedCustomer}
-                />
-            )}
 
             {/* Delete Confirmation Modal */}
             {showConfirmModal && (
@@ -941,7 +1063,7 @@ const CustomerCollection = () => {
                         <h3 className="font-bold flex items-center gap-2">
                             <FaBoxOpen /> Quick Stock Update
                         </h3>
-                        <p className="text-indigo-100 text-[10px] mt-1">{stockToUpdate.name}</p>
+                        <p className="text-indigo-100 text-[13px] mt-1">{stockToUpdate.name}</p>
                     </div>
                     <div className="p-6">
                         <label className="block text-xs font-semibold text-slate-700 mb-2">Quantity to Add (IN)</label>
@@ -971,13 +1093,6 @@ const CustomerCollection = () => {
                 </div>
             </div>
         )}
-
-        <EditCustomerCollectionModal
-            isOpen={isEditeModal}
-            onClose={() => setIsEditeModal(false)}
-            customerData={selectedCustomer}
-            onUpdate={soldproductAllDataFetch}
-        />
         </div>
     );
 };

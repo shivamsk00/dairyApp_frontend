@@ -34,7 +34,8 @@ const EditCustomerPage = () => {
         subsidy_code: '',
         total_cows: "",
         total_buffalos: "",
-        total_animals: ""
+        total_animals: "",
+        farmer_code: ""
 
     });
 
@@ -66,7 +67,8 @@ const EditCustomerPage = () => {
                     subsidy_code: customerData.subsidy_code,
                     total_cows: customerData.total_cows || "",
                     total_buffalos: customerData.total_buffalos || "",
-                    total_animals: customerData.total_animals || ""
+                    total_animals: customerData.total_animals || "",
+                    farmer_code: customerData.farmer_code || ""
                 });
             } else {
                 toast.error(res.message);
@@ -130,6 +132,7 @@ const EditCustomerPage = () => {
                         { label: 'Wallet', name: 'wallet', type: 'number' },
                         { label: 'Care of', name: 'careof' },
                         { label: 'Pincode', name: 'pincode', type: 'number' },
+                        { label: 'Farmer Code', name: 'farmer_code', type: 'string' },
                         { label: 'Designation', name: 'designation' },
                         { label: 'Total Cows', name: 'total_cows', type: 'number' },
                         { label: 'Total Buffalos', name: 'total_buffalos', type: 'number' },
