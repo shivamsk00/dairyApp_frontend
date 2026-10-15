@@ -1,0 +1,84 @@
+/* Scrollbar css */
+/* Modern browsers (Firefox, Chrome 121+, Edge 121+) */
+.scrollable-table {
+    scrollbar-color: #4f46e5 #1f2937;
+    /* thumb color, track color */
+    scrollbar-width: 30px;
+    /* or 'auto' for default width */
+    /* scrollbar-gutter: stable; */
+    overflow-y: scroll;
+    
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) - for better customization */
+.scrollable-table::-webkit-scrollbar {
+    width: 20px;
+    /* vertical scrollbar width */
+    height: 5px;
+    /* horizontal scrollbar height */
+}
+
+.scrollable-table::-webkit-scrollbar-track {
+    background: #1f2937;
+    /* track color */
+    border-radius: 4px;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb {
+    background: #4f46e5;
+    /* thumb color */
+    border-radius: 4px;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+    /* hover color */
+}
+
+/* Utility to hide scrollbars but keep scrolling functional */
+.hide-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* For other browsers fallback */
+    -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Thicker, prettier scrollbar for tables */
+.table-scrollbar {
+    /* thumb color, track color for modern browsers */
+    scrollbar-color: #7c3aed #f1f5f9;
+    /* make it larger on browsers that support it */
+    scrollbar-width: 14px;
+}
+
+.table-scrollbar::-webkit-scrollbar {
+    width: 14px;
+    height: 8px;
+}
+
+.table-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9; /* light track */
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,0.02);
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7c3aed, #5b21b6);
+    border-radius: 8px;
+    border: 3px solid #f1f5f9; /* gives a nice gap between thumb and track */
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #6d28d9, #4c1d95);
+}
+
+/* Subtle background for the scroll container to make scrollbar stand out */
+.table-scroll-bg {
+    background: linear-gradient(180deg, rgba(99,102,241,0.03), rgba(15,23,42,0.01));
+}
