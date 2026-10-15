@@ -70,6 +70,8 @@ const api = {
   checkForUpdate: () => ipcRenderer.invoke('check-for-update'),
   upadateStartDownload: () => ipcRenderer.invoke('start-update-download'),
   restartAndInstall: () => ipcRenderer.invoke('restart-and-install'),
+  getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
+  dismissUpdateStatus: () => ipcRenderer.invoke('dismiss-update-status'),
 
   // 📦 App Info
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
@@ -93,10 +95,17 @@ const api = {
     })
   },
 
+  // Structured update status: { state, currentVersion, version, percent, transferred, total, ... }
+  onUpdateStatus: (callback) => {
+    ipcRenderer.removeAllListeners('update-status')
+    ipcRenderer.on('update-status', (event, status) => callback(status))
+  },
+
   // 🧼 Cleanup function for update listeners [web:122]
   removeUpdateListeners: () => {
     ipcRenderer.removeAllListeners('update-message')
     ipcRenderer.removeAllListeners('update-progress')
+    ipcRenderer.removeAllListeners('update-status')
   },
 
   // 🧼 Window closed events
@@ -128,7 +137,9 @@ const api = {
       'get-app-version',
       'check-for-update',
       'start-update-download',
-      'restart-and-install'
+      'restart-and-install',
+      'get-update-status',
+      'dismiss-update-status'
     ]
     
     if (allowedInvokeChannels.includes(channel)) {
@@ -143,6 +154,7 @@ const api = {
     const allowedOnChannels = [
       'update-message',
       'update-progress',
+      'update-status',
       'second-window-closed',
       'customer-win-close',
       'cash-entry-window-closed'

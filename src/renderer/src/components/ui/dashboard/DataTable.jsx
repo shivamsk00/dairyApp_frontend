@@ -13,11 +13,19 @@ import '../ui.css'
  * @param {(row, index: number) => string | number} [rowKey] Defaults to row.id, then the index.
  * @param {React.ReactNode} [emptyMessage='No records']
  * @param {string} [minWidth] e.g. '760px' to scroll horizontally on narrow screens.
+ * @param {(row) => string | undefined} [rowClassName] Extra classes per row (e.g. highlight one being edited).
+ * @param {(row) => void} [onRowClick] Makes rows clickable (and keyboard-focusable: Enter/Space). Clicks on
+ *   links, buttons and form controls inside a row are ignored, so cell actions keep working.
  */
+// Clicks that belong to something inside the row (a link, button or field) are not row clicks.
+const INTERACTIVE = 'a, button, input, select, textarea, label, [role="combobox"]'
+
 const DataTable = ({
   columns,
   rows = [],
   rowKey,
+  rowClassName,
+  onRowClick,
   emptyMessage = 'No records',
   minWidth,
   className
@@ -42,7 +50,32 @@ const DataTable = ({
           </tr>
         ) : (
           rows.map((row, index) => (
-            <tr key={rowKey ? rowKey(row, index) : (row.id ?? index)}>
+            <tr
+              key={rowKey ? rowKey(row, index) : (row.id ?? index)}
+              className={cx(
+                onRowClick && 'cursor-pointer hover:bg-[color:var(--ui-surface-sunken)]',
+                rowClassName?.(row)
+              )}
+              tabIndex={onRowClick ? 0 : undefined}
+              onClick={
+                onRowClick
+                  ? (event) => {
+                      if (!event.target.closest(INTERACTIVE)) onRowClick(row)
+                    }
+                  : undefined
+              }
+              onKeyDown={
+                onRowClick
+                  ? (event) => {
+                      if (event.target !== event.currentTarget) return
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        onRowClick(row)
+                      }
+                    }
+                  : undefined
+              }
+            >
               {columns.map((column) => (
                 <td key={column.key} className={column.className}>
                   {column.render ? column.render(row) : row[column.key]}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
+import UpdateNotifier from './UpdateNotifier';
 import { Outlet } from 'react-router-dom';
 
 const Layout = () => {
@@ -25,10 +26,10 @@ const Layout = () => {
 
       {/* Main Content Container */}
       <div className="flex flex-col flex-1 min-w-0 h-full">
-        {/* Header - Fixed */}
-        <header className="flex-shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200/60 shadow-sm z-10">
+        {/* Header */}
+        <div className="flex-shrink-0">
           <Header />
-        </header>
+        </div>
 
         {/* Main Content - Scrollable Only */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -47,13 +48,12 @@ const Layout = () => {
           <ScrollToTopButton />
         </main>
 
-        {/* Footer - Fixed */}
-        <footer className="flex-shrink-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-700/30 shadow-inner">
-          <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <Footer />
-          </div>
-        </footer>
+        {/* Footer */}
+        <Footer />
       </div>
+
+      {/* App update status (any page) */}
+      <UpdateNotifier />
     </div>
   );
 };

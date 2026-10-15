@@ -1,23 +1,58 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './customer.css'
-import Modal from 'react-modal'
-import { FaDotCircle, FaEye, FaPen, FaTrashAlt, FaSave, FaTimes, FaEdit, FaBuilding, FaPlus, FaSearch, FaFilter, FaTicketAlt } from 'react-icons/fa'
-import { User, Phone, MapPin, Building2, CreditCard, Mail, UserCheck, Briefcase, MoreHorizontal } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  Building2,
+  ChevronsUpDown,
+  CreditCard,
+  Eye,
+  IndianRupee,
+  Loader2,
+  Mail,
+  MapPin,
+  Milk,
+  Pencil,
+  Phone,
+  Save,
+  Search,
+  ShoppingBag,
+  Ticket,
+  User,
+  UserCheck,
+  UserPlus,
+  Users,
+  X
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useHomeStore from '../../zustand/useHomeStore'
-import { IoMdCloseCircle } from 'react-icons/io'
 import CustomToast from '../../helper/costomeToast'
-
-Modal.setAppElement('#root')
+import {
+  Avatar,
+  Badge,
+  Breadcrumb,
+  Button,
+  DataTable,
+  DeleteConfirmModal,
+  IconBadge,
+  IconButton,
+  Input,
+  KpiCard,
+  Modal,
+  Pagination,
+  SelectDropdown,
+  SurfaceCard,
+  useDocumentTitle
+} from '../../components/ui'
 
 const CustomerList = () => {
+  useDocumentTitle('Customers')
   const nav = useNavigate()
   const getAllCustomer = useHomeStore((state) => state.getAllCustomer)
   const deleteCustomer = useHomeStore((state) => state.deleteCustomer)
   const editCustomerValueGet = useHomeStore((state) => state.editCustomerValueGet)
   const updateCustomer = useHomeStore((state) => state.updateCustomer)
 
-  const scrollRef = useRef(null)
   const [rowData, setRowData] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState(null)
@@ -29,7 +64,6 @@ const CustomerList = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-  const [viewMode, setViewMode] = useState('table') // 'table' or 'card'
 
   // Updated inline editing states
   const [editingRowId, setEditingRowId] = useState(null)
@@ -214,14 +248,14 @@ const CustomerList = () => {
   }
 
   const handleInputChange = (field, value) => {
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
       [field]: value
     }))
   }
 
   // Edit Modal handlers
-  const handleCardEditClick = async (customer) => {
+  const handleEditModalOpen = async (customer) => {
     setIsEditModalOpen(true)
     setEditModalLoading(true)
     setEditModalCustomerId(customer.id)
@@ -266,7 +300,7 @@ const CustomerList = () => {
   }
 
   const handleEditModalChange = (field, value) => {
-    setEditModalData(prev => ({ ...prev, [field]: value }))
+    setEditModalData((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleEditModalSave = async () => {
@@ -278,10 +312,27 @@ const CustomerList = () => {
         setIsEditModalOpen(false)
         setEditModalCustomerId(null)
         setEditModalData({
-          account_number: '', customer_type: '', name: '', careof: '', mobile: '', email: '',
-          address: '', city: '', state: '', wallet: '', pincode: '', bank_account: '', ifsc_code: '',
-          subsidy_code: '', contact_person: '', designation: '', total_cows: '',
-          total_buffalos: '', total_animals: '', farmer_code: '', status: '1'
+          account_number: '',
+          customer_type: '',
+          name: '',
+          careof: '',
+          mobile: '',
+          email: '',
+          address: '',
+          city: '',
+          state: '',
+          wallet: '',
+          pincode: '',
+          bank_account: '',
+          ifsc_code: '',
+          subsidy_code: '',
+          contact_person: '',
+          designation: '',
+          total_cows: '',
+          total_buffalos: '',
+          total_animals: '',
+          farmer_code: '',
+          status: '1'
         })
         fetchAllCustomerData()
       } else {
@@ -299,10 +350,27 @@ const CustomerList = () => {
     setIsEditModalOpen(false)
     setEditModalCustomerId(null)
     setEditModalData({
-      account_number: '', customer_type: '', name: '', careof: '', mobile: '', email: '',
-      address: '', city: '', state: '', wallet: '', pincode: '', bank_account: '', ifsc_code: '',
-      subsidy_code: '', contact_person: '', designation: '', total_cows: '',
-      total_buffalos: '', total_animals: '', farmer_code: '', status: '1'
+      account_number: '',
+      customer_type: '',
+      name: '',
+      careof: '',
+      mobile: '',
+      email: '',
+      address: '',
+      city: '',
+      state: '',
+      wallet: '',
+      pincode: '',
+      bank_account: '',
+      ifsc_code: '',
+      subsidy_code: '',
+      contact_person: '',
+      designation: '',
+      total_cows: '',
+      total_buffalos: '',
+      total_animals: '',
+      farmer_code: '',
+      status: '1'
     })
   }
 
@@ -361,7 +429,6 @@ const CustomerList = () => {
   }
 
   // Pagination
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentData = filteredData.slice(startIndex, endIndex)
@@ -374,918 +441,614 @@ const CustomerList = () => {
     setFilteredData(rowData)
   }, [rowData])
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 lg:p-6">
-      {/* Header Section */}
-      <div className="bg-white  shadow-sm border border-gray-200 mb-6">
-        <div className="p-3">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            {/* Title and Info */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 ">
-                <User className="w-4 h-4 text-orange-600" />
-              </div>
-              <div>
-                <h1 className="text-xl lg:text-xl font-bold text-gray-900">Customer Management</h1>
-                <p className="text-gray-600 mt-1 text-xs">Manage and view customer information with advanced features</p>
-                <div className="flex items-center gap-4 mt-2 text-gray-500">
-                  <span className='text-[12px] font-bold'>Total: {filteredData.length} customers</span>
-                  {editingRowId && (
-                    <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full animate-pulse">
-                      Editing Mode Active
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+  const openDetails = (id) => {
+    // Clear the previous customer first so the dialog never flashes someone else's details.
+    setSelectedCustomer(null)
+    setIsModalOpen(true)
+    fetchCustomerDetail(id)
+  }
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => nav('/addCustomer')}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-2 py-2 text-[12px] shadow-md transition-all duration-200 flex items-center gap-2 font-medium"
-              >
-                <FaPlus className="w-2 h-2" />
-                Add Customer
-              </button>
+  const money = (value) =>
+    `₹${parseFloat(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  // Headline numbers use the full list, not the current search.
+  const sellers = rowData.filter((c) => c.customer_type === 'Seller').length
+  const buyers = rowData.filter((c) => c.customer_type === 'Buyer').length
+  const walletTotal = rowData.reduce((sum, c) => sum + parseFloat(c.wallet || 0), 0)
+
+  const sortHeader = (label, field) => {
+    const active = sortConfig.key === field
+    const Icon = !active ? ChevronsUpDown : sortConfig.direction === 'asc' ? ArrowUp : ArrowDown
+    return (
+      <button
+        type="button"
+        onClick={() => handleSort(field)}
+        className="inline-flex items-center gap-1 uppercase"
+        aria-label={`Sort by ${label}`}
+      >
+        {label}
+        <Icon size={12} className={active ? 'ui-text-brand' : 'opacity-50'} aria-hidden="true" />
+      </button>
+    )
+  }
+
+  const editing = (row) => editingRowId === row.id
+  // Compact inputs for editing inside a table row.
+  const cell = 'w-full !min-h-8 !px-2 !py-1 !text-[12px]'
+
+  const columns = [
+    {
+      key: 'sr',
+      header: 'Sr.',
+      render: (row) => <span className="ui-text-tertiary">{filteredData.indexOf(row) + 1}</span>
+    },
+    {
+      key: 'account_number',
+      header: sortHeader('Acc. No.', 'account_number'),
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="text"
+            disabled
+            value={editFormData.account_number}
+            readOnly
+          />
+        ) : (
+          <span className="ui-text-brand font-semibold">{row.account_number}</span>
+        )
+    },
+    {
+      key: 'name',
+      header: sortHeader('Customer', 'name'),
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="text"
+            placeholder="Customer Name"
+            value={editFormData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+          />
+        ) : (
+          <div className="flex items-center gap-2.5">
+            <Avatar name={row.name || 'C'} className="size-8 text-[11px]" />
+            <div className="min-w-0">
+              <div className="font-semibold">{row.name}</div>
+              {row.careof && <div className="ui-text-tertiary text-[11px]">c/o {row.careof}</div>}
             </div>
           </div>
+        )
+    },
+    {
+      key: 'subsidy_code',
+      header: sortHeader('Subsidy Code', 'subsidy_code'),
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="text"
+            placeholder="Subsidy Code"
+            value={editFormData.subsidy_code}
+            onChange={(e) => handleInputChange('subsidy_code', e.target.value)}
+          />
+        ) : row.subsidy_code ? (
+          <span className="font-mono text-[12px]">{row.subsidy_code}</span>
+        ) : (
+          <span className="ui-text-tertiary italic">N/A</span>
+        )
+    },
+    {
+      key: 'mobile',
+      header: 'Mobile',
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="tel"
+            maxLength="10"
+            placeholder="Mobile Number"
+            value={editFormData.mobile}
+            onChange={(e) => handleInputChange('mobile', e.target.value)}
+          />
+        ) : (
+          <a
+            href={`tel:${row.mobile}`}
+            className="inline-flex items-center gap-1.5 hover:text-[color:var(--ui-primary-600)]"
+          >
+            <Phone size={12} className="ui-text-tertiary" aria-hidden="true" />
+            {row.mobile}
+          </a>
+        )
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="email"
+            placeholder="Email Address"
+            value={editFormData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+          />
+        ) : row.email ? (
+          <a
+            href={`mailto:${row.email}`}
+            className="inline-flex max-w-[190px] items-center gap-1.5 hover:text-[color:var(--ui-primary-600)]"
+          >
+            <Mail size={12} className="ui-text-tertiary shrink-0" aria-hidden="true" />
+            <span className="truncate">{row.email}</span>
+          </a>
+        ) : (
+          <span className="ui-text-tertiary italic">N/A</span>
+        )
+    },
+    {
+      key: 'wallet',
+      header: 'Wallet',
+      className: 'text-right',
+      render: (row) =>
+        editing(row) ? (
+          <Input
+            className={cell}
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Wallet Amount"
+            value={editFormData.wallet}
+            onChange={(e) => handleInputChange('wallet', e.target.value)}
+          />
+        ) : (
+          <span className="font-bold text-[color:var(--ui-success-600)]">{money(row.wallet)}</span>
+        )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (row) =>
+        editing(row) ? (
+          <div className="flex justify-end gap-1.5">
+            <Button
+              size="sm"
+              variant="success"
+              icon={Save}
+              loading={isSaving}
+              onClick={handleEditSave}
+            >
+              {isSaving ? 'Saving…' : 'Save'}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={X}
+              disabled={isSaving}
+              onClick={handleEditCancel}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-end gap-0.5">
+            <IconButton
+              icon={Eye}
+              label="View details"
+              iconSize={15}
+              className="!size-8"
+              onClick={() => openDetails(row.id)}
+            />
+            <IconButton
+              icon={Pencil}
+              label="Edit inline"
+              iconSize={15}
+              className="!size-8"
+              onClick={() => handleEditClick(row)}
+            />
+          </div>
+        )
+    }
+  ]
 
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col lg:flex-row gap-4 mt-3 pt-3 ">
-            {/* Search */}
+  const typeTone = (type) => (type === 'Seller' ? 'success' : type === 'Buyer' ? 'info' : 'neutral')
+
+  const editFields = [
+    { label: 'Account Number', name: 'account_number', disabled: true },
+    { label: 'Customer Type', name: 'customer_type', isSelect: true },
+    { label: 'Name', name: 'name' },
+    { label: 'Care Of', name: 'careof' },
+    { label: 'Mobile', name: 'mobile', type: 'number' },
+    { label: 'Email', name: 'email', type: 'email' },
+    { label: 'Address', name: 'address' },
+    { label: 'City', name: 'city' },
+    { label: 'State', name: 'state' },
+    { label: 'Pincode', name: 'pincode', type: 'number' },
+    { label: 'Wallet', name: 'wallet', type: 'number' },
+    { label: 'Contact Person', name: 'contact_person' },
+    { label: 'Designation', name: 'designation' },
+    { label: 'Bank Account', name: 'bank_account', type: 'number' },
+    { label: 'IFSC Code', name: 'ifsc_code' },
+    { label: 'Subsidy Code', name: 'subsidy_code' },
+    { label: 'Farmer Code', name: 'farmer_code' },
+    { label: 'Total Cows', name: 'total_cows', type: 'number' },
+    { label: 'Total Buffalos', name: 'total_buffalos', type: 'number' },
+    { label: 'Total Animals', name: 'total_animals', type: 'number' }
+  ]
+
+  return (
+    <div className="w-full ui-text-primary">
+      <Breadcrumb
+        title="Customers"
+        items={[{ label: 'Home', to: '/' }, { label: 'Customers' }]}
+        actions={
+          <Button size="sm" icon={UserPlus} onClick={() => nav('/addCustomer')}>
+            Add Customer
+          </Button>
+        }
+      />
+
+      <div className="space-y-5 p-3 sm:p-4 lg:p-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <KpiCard
+            className="col-span-2 lg:col-span-1"
+            label="Total Customers"
+            value={rowData.length}
+            icon={Users}
+            tone="info"
+          />
+          <KpiCard
+            label="Sellers"
+            value={sellers}
+            icon={Milk}
+            tone="primary"
+            details={[
+              {
+                label: 'Supply milk',
+                value: `${rowData.length ? Math.round((sellers / rowData.length) * 100) : 0}%`
+              }
+            ]}
+          />
+          <KpiCard
+            label="Buyers"
+            value={buyers}
+            icon={ShoppingBag}
+            tone="accent"
+            details={[
+              {
+                label: 'Buy from dairy',
+                value: `${rowData.length ? Math.round((buyers / rowData.length) * 100) : 0}%`
+              }
+            ]}
+          />
+          <KpiCard
+            className="col-span-2 lg:col-span-1"
+            label="Total Wallet Balance"
+            value={money(walletTotal)}
+            icon={IndianRupee}
+            tone="success"
+          />
+        </div>
+
+        <SurfaceCard className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
-              <input
-                type="text"
-                placeholder="Search by name, account number, mobile, email, subsidy code..."
+              <Search
+                size={15}
+                className="ui-text-tertiary pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+              />
+              <Input
+                type="search"
+                aria-label="Search customers"
+                placeholder="Search by name, account number, mobile, email, subsidy code…"
                 value={searchCustomer}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-1 border border-gray-300  focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                className="!pl-9"
               />
             </div>
-
-            {/* Items per page */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">Show:</label>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value))
-                  setCurrentPage(1)
-                }}
-                className="border border-gray-300  px-3 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 p-1">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`px-4 py-1  text-sm font-medium transition-colors ${viewMode === 'table'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                  }`}
-              >
-                Table
-              </button>
-              <button
-                onClick={() => setViewMode('card')}
-                className={`px-4 py-1  text-sm font-medium transition-colors ${viewMode === 'card'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                  }`}
-              >
-                Cards
-              </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="ui-text-tertiary text-[12px] font-medium">Show</span>
+                <SelectDropdown
+                  aria-label="Rows per page"
+                  fieldClassName="w-24"
+                  options={[10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }))}
+                  value={itemsPerPage}
+                  onChange={(value) => {
+                    setItemsPerPage(Number(value))
+                    setCurrentPage(1)
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
+            <span className="ui-text-tertiary">
+              <strong className="ui-text-secondary">{filteredData.length}</strong> customers
+              {searchCustomer && ' match your search'}
+            </span>
+            {editingRowId && <Badge tone="warning">Editing mode active</Badge>}
+          </div>
+        </SurfaceCard>
+
+        {loading && (
+          <SurfaceCard className="flex items-center justify-center gap-3 p-12">
+            <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
+            <span className="ui-text-secondary text-[13px]">Loading customers…</span>
+          </SurfaceCard>
+        )}
+
+        {!loading && currentData.length === 0 && (
+          <SurfaceCard className="px-6 py-14 text-center">
+            <IconBadge
+              icon={Users}
+              tone="neutral"
+              variant="tint"
+              size="xl"
+              shape="circle"
+              className="mx-auto mb-3"
+            />
+            <p className="ui-font-display text-[15px] font-bold">No customers found</p>
+            <p className="ui-text-tertiary mt-1 text-[12.5px]">
+              Try adjusting your search or add a new customer.
+            </p>
+          </SurfaceCard>
+        )}
+
+        {!loading && currentData.length > 0 && (
+          <SurfaceCard className="overflow-hidden">
+            <DataTable
+              className="max-h-[62vh] overflow-y-auto px-2"
+              minWidth="980px"
+              columns={columns}
+              rows={currentData}
+              onRowClick={(row) => {
+                if (!editing(row)) openDetails(row.id)
+              }}
+              rowClassName={(row) => (editing(row) ? 'bg-[color:var(--ui-primary-50)]' : undefined)}
+            />
+            <Pagination
+              page={currentPage}
+              pageSize={itemsPerPage}
+              total={filteredData.length}
+              onPageChange={setCurrentPage}
+              itemLabel="customers"
+            />
+          </SurfaceCard>
+        )}
       </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-white shadow-sm border border-gray-200 p-12">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <span className="ml-3 text-gray-600">Loading customers...</span>
-          </div>
-        </div>
-      )}
-
-      {/* Responsive Table View */}
-      {!loading && viewMode === 'table' && (
-        <div className="bg-white  shadow-sm border border-gray-200">
-          {/* Desktop Table */}
-          <div className="hidden lg:block">
-            <div className="overflow-x-auto overflow-y-auto h-[65vh] table-scrollbar table-scroll-bg">
-              <table className="w-full">
-                {/* Table Header - Sticky */}
-                <thead className="bg-black text-white sticky top-0 z-10">
-                  <tr>
-                    <th className="text-left p-2 text-[12px] border-b font-semibold  w-16">Sr.</th>
-                    <th
-                      className="text-left p-2 text-[12px] border-b font-semibold cursor-pointer hover:bg-gray-100 min-w-[120px]"
-                      onClick={() => handleSort('account_number')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Acc. No.
-                        {sortConfig.key === 'account_number' && (
-                          <span className="text-orange-500">
-                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-2 text-[12px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[180px]"
-                      onClick={() => handleSort('name')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Customer Name
-                        {sortConfig.key === 'name' && (
-                          <span className="text-orange-500">
-                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left p-2 text-[12px] border-b font-semibold  cursor-pointer hover:bg-gray-100 min-w-[130px]"
-                      onClick={() => handleSort('subsidy_code')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Subsidy Code
-                        {sortConfig.key === 'subsidy_code' && (
-                          <span className="text-orange-500">
-                            {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[120px]">Mobile</th>
-                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[160px]">Email</th>
-                    {/* <th className="text-left p-2 text-[12px] border-b font-semibold text-gray-700 min-w-[180px]">Address</th> */}
-                    <th className="text-left p-2 text-[12px] border-b font-semibold min-w-[100px]">Wallet</th>
-                    <th className="text-center p-2 text-[12px] border-b font-semibold w-32 sticky right-0 ">Actions</th>
-                  </tr>
-                </thead>
-
-                {/* Table Body */}
-                <tbody>
-                  {currentData.map((row, index) => (
-                    <tr
-                      key={row.id}
-                      className={`hover:bg-gray-50 border-b transition-colors ${editingRowId === row.id ? 'bg-blue-50 border-blue-200' : ''
-                        }`}
-                    >
-                      {/* Serial Number */}
-                      <td className="p-2 text-[12px] text-gray-600 font-medium">
-                        {startIndex + index + 1}
-                      </td>
-
-                      {/* Account Number */}
-                      <td className="p-2 text-[12px]">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="text"
-                            disabled={true}
-                            value={editFormData.account_number}
-                            onChange={(e) => handleInputChange('account_number', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-gray-100 cursor-not-allowed"
-                            placeholder="Account No."
-                          />
-                        ) : (
-                          <div className="font-medium text-blue-600">{row.account_number}</div>
-                        )}
-                      </td>
-
-                      {/* Customer Name */}
-                      <td className="p-2 text-[12px]">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="text"
-                            value={editFormData.name}
-                            onChange={(e) => handleInputChange('name', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            placeholder="Customer Name"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center gap-3">
-                            {/* <div className="w-4 h-4 bg-orange-100 rounded-full flex items-center justify-center">
-                              <User className="w-3 h-3 text-orange-600" />
-                            </div> */}
-                            <div>
-                              <div className="text-[12px] text-gray-900">{row.name}</div>
-                              {row.careof && (
-                                <div className="text-[11px] text-gray-500">c/o {row.careof}</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* CM Subsidy Code */}
-                      <td className="p-2 text-[12px]">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="text"
-                            value={editFormData.subsidy_code}
-                            onChange={(e) => handleInputChange('subsidy_code', e.target.value)}
-                            className="w-full px-3 text-[12px] py-1 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            placeholder="Subsidy Code"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2 text-gray-700">
-                            <FaTicketAlt className="w-3 h-3 text-gray-500" />
-                            <span className="font-mono text-[12px]">
-                              {row.subsidy_code || <span className="text-gray-400 italic">N/A</span>}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Mobile */}
-                      <td className="p-2 text-[12px]">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="tel"
-                            value={editFormData.mobile}
-                            onChange={(e) => handleInputChange('mobile', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            placeholder="Mobile Number"
-                            maxLength="10"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2 text-gray-700">
-                            <Phone className="w-3 h-3 text-[12px] text-gray-500" />
-                            <a href={`tel:${row.mobile}`} className="hover:text-blue-600 transition-colors text-[12px]">
-                              {row.mobile}
-                            </a>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Email */}
-                      <td className="p-4">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="email"
-                            value={editFormData.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            placeholder="Email Address"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2 text-gray-700">
-                            <Mail className="w-3 h-3 text-[12px] text-gray-500" />
-                            {row.email ? (
-                              <a href={`mailto:${row.email}`} className="hover:text-blue-600 transition-colors text-[12px] truncate max-w-[140px]">
-                                {row.email}
-                              </a>
-                            ) : (
-                              <span className="text-gray-400 italic text-sm">N/A</span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Address */}
-                      {/* <td className="p-4">
-                        {editingRowId === row.id ? (
-                          <textarea
-                            value={editFormData.address}
-                            onChange={(e) => handleInputChange('address', e.target.value)}
-                            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
-                            placeholder="Address"
-                            rows="2"
-                          />
-                        ) : (
-                          <div className="flex items-start gap-2 text-gray-700">
-                            <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                            <div className="text-sm">
-                              <div className="line-clamp-2 max-w-[160px]" title={row.address}>
-                                {row.address || 'N/A'}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </td> */}
-
-                      {/* Wallet */}
-                      <td className="p-4">
-                        {editingRowId === row.id ? (
-                          <input
-                            type="number"
-                            value={editFormData.wallet}
-                            onChange={(e) => handleInputChange('wallet', e.target.value)}
-                            className="w-full px-3 py-1 text-[12px] border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Wallet Amount"
-                            min="0"
-                            step="0.01"
-                          />
-                        ) : (
-                          <div className="text-green-600 font-bold text-[12px]">
-                            ₹{parseFloat(row.wallet || 0).toLocaleString('en-IN', {
-                              minimumFractionDigits: 2
-                            })}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Actions - Sticky */}
-                      <td className="p-4 sticky right-0 bg-white border-l border-gray-200">
-                        <div className="flex items-center justify-center gap-1">
-                          {editingRowId === row.id ? (
-                            <div className="flex gap-1">
-                              <button
-                                onClick={handleEditSave}
-                                disabled={isSaving}
-                                className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Save Changes"
-                              >
-                                <FaSave className="w-3 h-3" />
-                                {isSaving ? 'Saving...' : 'Save'}
-                              </button>
-                              <button
-                                onClick={handleEditCancel}
-                                disabled={isSaving}
-                                className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-xs font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50"
-                                title="Cancel Edit"
-                              >
-                                <FaTimes className="w-3 h-3" />
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-1">
-                              <button
-                                className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
-                                onClick={() => {
-                                  fetchCustomerDetail(row.id)
-                                  setIsModalOpen(true)
-                                }}
-                                title="View Details"
-                              >
-                                <FaEye className="w-3 h-3" />
-                              </button>
-                              <button
-                                className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
-                                onClick={() => handleEditClick(row)}
-                                title="Edit Inline"
-                              >
-                                <FaEdit className="w-3 h-3" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Mobile Responsive Cards (lg:hidden) */}
-          <div className="lg:hidden">
-            <div className="space-y-4 p-4">
-              {currentData.map((customer, index) => (
-                <div key={customer.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xs font-bold">
-                        {startIndex + index + 1}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm">{customer.name}</h3>
-                        <p className="text-xs text-blue-600">A/c: {customer.account_number}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
-                        onClick={() => {
-                          fetchCustomerDetail(customer.id)
-                          setIsModalOpen(true)
-                        }}
-                        title="View Details"
-                      >
-                        <FaEye className="w-3 h-3" />
-                      </button>
-                      <button
-                        className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
-                        onClick={() => handleEditClick(customer)}
-                        title="Edit"
-                      >
-                        <FaEdit className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Phone className="w-3 h-3" />
-                      <a href={`tel:${customer.mobile}`} className="hover:text-blue-600">
-                        {customer.mobile}
-                      </a>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <FaTicketAlt className="w-3 h-3" />
-                      <span className="truncate">{customer.subsidy_code || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Mail className="w-3 h-3" />
-                      <span className="truncate">{customer.email || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-green-600 font-bold">
-                      <span>₹</span>
-                      <span>{parseFloat(customer.wallet || 0).toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  {customer.address && (
-                    <div className="mt-2 flex items-start gap-2 text-xs text-gray-600">
-                      <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span className="line-clamp-2">{customer.address}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* No Data State */}
-          {currentData.length === 0 && !loading && (
-            <div className="text-center py-12">
-              <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg font-medium">No customers found</p>
-              <p className="text-gray-400 text-sm mt-2">Try adjusting your search criteria or add a new customer</p>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {filteredData.length > itemsPerPage && (
-            <div className="bg-gray-50 px-4 lg:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-sm text-gray-700 text-center sm:text-left">
-                Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} customers
+      {/* Customer details */}
+      <Modal
+        isOpen={isModalOpen && !!selectedCustomer}
+        onClose={() => setIsModalOpen(false)}
+        ariaLabel="Customer details"
+        maxWidth="64rem"
+        className="flex max-h-[90vh] flex-col overflow-hidden"
+      >
+        {selectedCustomer && (
+          <>
+            <div className="ui-border-subtle flex items-center gap-4 border-b px-6 py-5">
+              <Avatar name={selectedCustomer.name || 'C'} className="size-12" />
+              <div className="min-w-0 flex-1">
+                <h2 className="ui-font-display truncate text-[18px] font-extrabold">
+                  {selectedCustomer.name}
+                </h2>
+                <p className="ui-text-tertiary text-[12.5px]">
+                  Account No: {selectedCustomer.account_number}
+                </p>
               </div>
-              <div className="flex items-center gap-2 flex-wrap justify-center">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-
-                <div className="hidden sm:flex items-center gap-1">
-                  {[...Array(totalPages)].map((_, i) => {
-                    const page = i + 1
-                    if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === page
-                              ? 'text-orange-600 bg-orange-100'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                            }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return <span key={page} className="px-2 text-gray-400">...</span>
-                    }
-                    return null
-                  })}
-                </div>
-
-                {/* Mobile page indicator */}
-                <div className="sm:hidden text-sm text-gray-600 px-3 py-2">
-                  Page {currentPage} of {totalPages}
-                </div>
-
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
+              <Badge tone={selectedCustomer.status === '1' ? 'success' : 'danger'}>
+                {selectedCustomer.status === '1' ? 'Active customer' : 'Inactive customer'}
+              </Badge>
+              <IconButton icon={X} label="Close" onClick={() => setIsModalOpen(false)} />
             </div>
-          )}
-        </div>
-      )}
 
-      {/* Enhanced Card View */}
-      {!loading && viewMode === 'card' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {currentData.map((customer) => (
-            <div key={customer.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{customer.name}</h3>
-                    <p className="text-sm text-blue-600">{customer.account_number}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FaTicketAlt className="w-4 h-4" />
-                  <span className="font-mono">{customer.subsidy_code || 'No subsidy code'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span>{customer.mobile}</span>
-                </div>
-                {customer.email && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Mail className="w-4 h-4" />
-                    <span className="truncate">{customer.email}</span>
-                  </div>
-                )}
-                <div className="flex items-start gap-2 text-sm text-gray-600">
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span className="line-clamp-2">{customer.address || 'N/A'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Wallet Balance:</span>
-                  <span className="text-green-600 font-bold">
-                    ₹{parseFloat(customer.wallet || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-4 border-t border-gray-200">
-                <button
-                  className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                  onClick={() => {
-                    fetchCustomerDetail(customer.id)
-                    setIsModalOpen(true)
-                  }}
-                >
-                  <FaEye className="w-3 h-3" />
-                  View
-                </button>
-                <button
-                  className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                  onClick={() => handleCardEditClick(customer)}
-                >
-                  <FaEdit className="w-3 h-3" />
-                  Edit
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Customer Detail Modal (keeping your original modal code but updated) */}
-      {isModalOpen && selectedCustomer && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-white">
-                    <h2 className="text-2xl font-bold">{selectedCustomer.name}</h2>
-                    <p className="text-orange-100 text-sm">Account No: {selectedCustomer.account_number}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${selectedCustomer.status === '1'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                    }`}>
-                    <FaDotCircle className="w-3 h-3" />
-                    {selectedCustomer.status === '1' ? 'Active Customer' : 'Inactive Customer'}
-                  </span>
-
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-white hover:text-red-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20"
-                    title="Close"
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="ui-bg-sunken grid grid-cols-2 gap-4 px-6 py-4 lg:grid-cols-4">
+                <div>
+                  <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                    Customer type
+                  </p>
+                  <Badge
+                    tone={typeTone(selectedCustomer.customer_type)}
+                    icon={Building2}
+                    className="mt-1.5"
                   >
-                    <IoMdCloseCircle size={28} />
-                  </button>
+                    {selectedCustomer.customer_type || 'Regular'}
+                  </Badge>
                 </div>
-              </div>
-            </div>
-
-            {/* Modal Content */}
-            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-semibold">Customer Type</p>
-                      <span className={`inline-block mt-1 px-4 py-2 rounded-lg font-medium ${selectedCustomer.customer_type === 'Seller' ? 'bg-green-100 text-green-700' :
-                          selectedCustomer.customer_type === 'Buyer' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-700'
-                        }`}>
-                        <FaBuilding className="inline w-4 h-4 mr-2" />
-                        {selectedCustomer.customer_type || 'Regular'}
-                      </span>
-                    </div>
-
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-semibold">CM Subsidy Code</p>
-                      <div className="mt-1 text-sm font-bold text-purple-600 font-mono">
-                        {selectedCustomer.subsidy_code || 'N/A'}
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-semibold">Wallet Balance</p>
-                      <div className="mt-1 text-2xl font-bold text-green-600 flex items-center gap-1">
-                        <span>₹</span>
-                        <span>{parseFloat(selectedCustomer.wallet || 0).toLocaleString('en-IN', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}</span>
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 uppercase font-semibold">Member Since</p>
-                      <div className="mt-1 text-sm font-medium text-gray-700">
-                        {new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', {
+                <div>
+                  <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                    CM subsidy code
+                  </p>
+                  <p className="mt-1.5 font-mono text-[13px] font-bold">
+                    {selectedCustomer.subsidy_code || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                    Wallet balance
+                  </p>
+                  <p className="ui-font-display mt-1 text-[20px] font-extrabold text-[color:var(--ui-success-600)]">
+                    {money(selectedCustomer.wallet)}
+                  </p>
+                </div>
+                <div>
+                  <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                    Member since
+                  </p>
+                  <p className="mt-1.5 text-[13px] font-medium">
+                    {selectedCustomer.created_at && !isNaN(new Date(selectedCustomer.created_at))
+                      ? new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric'
-                        })}
-                      </div>
-                    </div>
-                  </div>
+                        })
+                      : '—'}
+                  </p>
                 </div>
               </div>
 
-              {/* Customer Details Grid */}
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <InfoCard
-                    label="Full Name"
-                    value={selectedCustomer.name}
-                    icon={<User className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="Care Of"
-                    value={selectedCustomer.careof}
-                    icon={<UserCheck className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="Mobile Number"
-                    value={selectedCustomer.mobile}
-                    icon={<Phone className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="Email Address"
-                    value={selectedCustomer.email}
-                    icon={<Mail className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="Address"
-                    value={selectedCustomer.address}
-                    icon={<MapPin className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="City"
-                    value={selectedCustomer.city}
-                  />
-                  <InfoCard
-                    label="State"
-                    value={selectedCustomer.state}
-                  />
-                  <InfoCard
-                    label="Pincode"
-                    value={selectedCustomer.pincode}
-                  />
-                  <InfoCard
-                    label="Bank Account"
-                    value={selectedCustomer.bank_account}
-                    icon={<CreditCard className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="IFSC Code"
-                    value={selectedCustomer.ifsc_code}
-                    icon={<Building2 className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="CM Subsidy Code"
-                    value={selectedCustomer.subsidy_code}
-                    icon={<FaTicketAlt className="w-4 h-4" />}
-                  />
-                  <InfoCard
-                    label="Aadhar Number"
-                    value={selectedCustomer.aadhar_number}
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-3 p-6 md:grid-cols-2 lg:grid-cols-3">
+                <InfoItem label="Full Name" value={selectedCustomer.name} icon={User} />
+                <InfoItem label="Care Of" value={selectedCustomer.careof} icon={UserCheck} />
+                <InfoItem
+                  label="Mobile Number"
+                  value={selectedCustomer.mobile}
+                  icon={Phone}
+                  href={`tel:${selectedCustomer.mobile}`}
+                />
+                <InfoItem
+                  label="Email Address"
+                  value={selectedCustomer.email}
+                  icon={Mail}
+                  href={`mailto:${selectedCustomer.email}`}
+                />
+                <InfoItem label="Address" value={selectedCustomer.address} icon={MapPin} />
+                <InfoItem label="City" value={selectedCustomer.city} />
+                <InfoItem label="State" value={selectedCustomer.state} />
+                <InfoItem label="Pincode" value={selectedCustomer.pincode} />
+                <InfoItem
+                  label="Bank Account"
+                  value={selectedCustomer.bank_account}
+                  icon={CreditCard}
+                  mono
+                />
+                <InfoItem
+                  label="IFSC Code"
+                  value={selectedCustomer.ifsc_code}
+                  icon={Building2}
+                  mono
+                />
+                <InfoItem
+                  label="CM Subsidy Code"
+                  value={selectedCustomer.subsidy_code}
+                  icon={Ticket}
+                  mono
+                />
+                <InfoItem label="Aadhar Number" value={selectedCustomer.aadhar_number} />
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Building2 className="w-4 h-4" />
-                <span>Customer Profile - Complete Information</span>
-              </div>
-              <div className="flex gap-3">
-                <button
+            <div className="ui-border-subtle flex items-center justify-between gap-3 border-t px-6 py-4">
+              <span className="ui-text-tertiary hidden items-center gap-2 text-[12px] sm:flex">
+                <Building2 size={14} aria-hidden="true" /> Customer profile — complete information
+              </span>
+              <div className="ml-auto flex gap-2">
+                <Button
+                  icon={Pencil}
                   onClick={() => {
                     setIsModalOpen(false)
-                    nav('/editCustomer', { state: selectedCustomer })
+                    handleEditModalOpen(selectedCustomer)
                   }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 font-medium"
                 >
-                  <FaPen className="w-4 h-4" />
                   Edit Customer
-                </button>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 font-medium"
-                >
+                </Button>
+                <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
                   Close
-                </button>
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
-      {/* Confirmation Modal for Delete */}
-      {isConfirmOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaTrashAlt className="w-6 h-6 text-red-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete Customer</h3>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to delete <strong>{customerToDelete?.name}</strong>?
-                This action cannot be undone.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => {
-                    setIsConfirmOpen(false)
-                    setCustomerToDelete(null)
-                  }}
-                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteCustomer}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Customer Modal (react-modal) */}
+      {/* Delete confirmation */}
+      <DeleteConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => {
+          setIsConfirmOpen(false)
+          setCustomerToDelete(null)
+        }}
+        onConfirm={confirmDeleteCustomer}
+        title="Delete Customer"
+        message={
+          <>
+            Are you sure you want to delete <strong>{customerToDelete?.name}</strong>? This action
+            cannot be undone.
+          </>
+        }
+      />
+      {/* Edit customer */}
       <Modal
         isOpen={isEditModalOpen}
-        onRequestClose={handleEditModalClose}
-        className="edit-modal-content"
-        overlayClassName="edit-modal-overlay"
-        shouldCloseOnOverlayClick={!editModalSaving}
-        shouldCloseOnEsc={!editModalSaving}
+        onClose={handleEditModalClose}
+        ariaLabel="Edit customer"
+        maxWidth="56rem"
+        dismissible={!editModalSaving}
+        className="flex max-h-[90vh] flex-col overflow-hidden"
       >
-        <div className="edit-modal-header">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <FaEdit className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-white">
-              <h2 className="text-lg font-bold">Edit Customer</h2>
-              <p className="text-orange-100 text-xs">
-                {editModalData.name && editModalData.account_number
-                  ? `${editModalData.name} — A/c: ${editModalData.account_number}`
-                  : 'Loading customer data...'}
-              </p>
-            </div>
+        <div className="ui-border-subtle flex items-center gap-3 border-b px-6 py-4">
+          <IconBadge icon={Pencil} tone="primary" />
+          <div className="min-w-0 flex-1">
+            <h2 className="ui-font-display text-[16px] font-bold">Edit Customer</h2>
+            <p className="ui-text-tertiary truncate text-[12px]">
+              {editModalData.name && editModalData.account_number
+                ? `${editModalData.name} — A/c: ${editModalData.account_number}`
+                : 'Loading customer data…'}
+            </p>
           </div>
-          <button
-            onClick={handleEditModalClose}
+          <IconButton
+            icon={X}
+            label="Close"
             disabled={editModalSaving}
-            className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white hover:bg-opacity-20 disabled:opacity-50"
-          >
-            <IoMdCloseCircle size={24} />
-          </button>
+            onClick={handleEditModalClose}
+          />
         </div>
 
-        <div className="edit-modal-body">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           {editModalLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-              <span className="ml-3 text-gray-600 text-sm">Loading customer data...</span>
+            <div className="flex items-center justify-center gap-3 py-16">
+              <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
+              <span className="ui-text-secondary text-[13px]">Loading customer data…</span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { label: 'Account Number', name: 'account_number', disabled: true },
-                { label: 'Customer Type', name: 'customer_type', isSelect: true },
-                { label: 'Name', name: 'name' },
-                { label: 'Care Of', name: 'careof' },
-                { label: 'Mobile', name: 'mobile', type: 'number' },
-                { label: 'Email', name: 'email', type: 'email' },
-                { label: 'Address', name: 'address' },
-                { label: 'City', name: 'city' },
-                { label: 'State', name: 'state' },
-                { label: 'Pincode', name: 'pincode', type: 'number' },
-                { label: 'Wallet', name: 'wallet', type: 'number' },
-                { label: 'Contact Person', name: 'contact_person' },
-                { label: 'Designation', name: 'designation' },
-                { label: 'Bank Account', name: 'bank_account', type: 'number' },
-                { label: 'IFSC Code', name: 'ifsc_code' },
-                { label: 'Subsidy Code', name: 'subsidy_code' },
-                { label: 'Farmer Code', name: 'farmer_code' },
-                { label: 'Total Cows', name: 'total_cows', type: 'number' },
-                { label: 'Total Buffalos', name: 'total_buffalos', type: 'number' },
-                { label: 'Total Animals', name: 'total_animals', type: 'number' }
-              ].map(({ label, name, type, isSelect, disabled }) => (
-                <div key={name}>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">
-                    {label}
-                  </label>
-                  {isSelect ? (
-                    <select
-                      name={name}
-                      value={editModalData[name] || ''}
-                      onChange={(e) => handleEditModalChange(name, e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    >
-                      <option value="">Select</option>
-                      <option value="Buyer">Buyer</option>
-                      <option value="Seller">Seller</option>
-                    </select>
-                  ) : (
-                    <input
-                      type={type || 'text'}
-                      name={name}
-                      value={editModalData[name] || ''}
-                      onChange={(e) => handleEditModalChange(name, e.target.value)}
-                      disabled={disabled}
-                      className={`w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
-                        disabled ? 'bg-gray-100 cursor-not-allowed' : ''
-                      }`}
-                      placeholder={`Enter ${label.toLowerCase()}`}
-                    />
-                  )}
-                </div>
-              ))}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {editFields.map(({ label, name, type, isSelect, disabled }) =>
+                isSelect ? (
+                  <SelectDropdown
+                    key={name}
+                    label={label}
+                    name={name}
+                    options={[
+                      { value: 'Buyer', label: 'Buyer' },
+                      { value: 'Seller', label: 'Seller' }
+                    ]}
+                    value={editModalData[name] || ''}
+                    placeholder="Select"
+                    onChange={(value) => handleEditModalChange(name, value)}
+                  />
+                ) : (
+                  <Input
+                    key={name}
+                    label={label}
+                    type={type || 'text'}
+                    name={name}
+                    value={editModalData[name] || ''}
+                    onChange={(e) => handleEditModalChange(name, e.target.value)}
+                    disabled={disabled}
+                    placeholder={`Enter ${label.toLowerCase()}`}
+                  />
+                )
+              )}
             </div>
           )}
         </div>
 
-        <div className="edit-modal-footer">
-          <button
-            onClick={handleEditModalClose}
-            disabled={editModalSaving}
-            className="px-5 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 disabled:opacity-50"
-          >
+        <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
+          <Button variant="secondary" disabled={editModalSaving} onClick={handleEditModalClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            icon={Save}
+            loading={editModalSaving}
+            disabled={editModalLoading}
             onClick={handleEditModalSave}
-            disabled={editModalLoading || editModalSaving}
-            className="px-5 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {editModalSaving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <FaSave className="w-3 h-3" />
-                Save Changes
-              </>
-            )}
-          </button>
+            {editModalSaving ? 'Saving…' : 'Save Changes'}
+          </Button>
         </div>
       </Modal>
     </div>
@@ -1294,57 +1057,38 @@ const CustomerList = () => {
 
 export default CustomerList
 
-// InfoCard component for modal
-const InfoCard = ({ label, value, icon }) => {
-  const isImage = typeof value === 'string' && (
-    value.endsWith('.jpg') || value.endsWith('.jpeg') ||
-    value.endsWith('.png') || value.endsWith('.webp') ||
-    value.endsWith('.gif')
-  )
-
+// One labelled value in the details dialog.
+// eslint-disable-next-line react/prop-types
+const InfoItem = ({ label, value, icon: Icon, href, mono }) => {
+  const isImage = typeof value === 'string' && /\.(jpe?g|png|webp|gif)$/i.test(value)
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
-      <div className="flex items-center gap-2 mb-2">
-        {icon && <div className="text-gray-500">{icon}</div>}
-        <p className="text-xs uppercase font-semibold text-gray-500 tracking-wide">{label}</p>
+    <div className="ui-bg-raised ui-border-subtle rounded-lg border p-4">
+      <div className="mb-1.5 flex items-center gap-2">
+        {Icon && <Icon size={14} className="ui-text-tertiary" aria-hidden="true" />}
+        <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+          {label}
+        </p>
       </div>
-
       {isImage ? (
         <img
           src={value}
           alt={label}
-          className="rounded-lg border border-gray-200 shadow-sm max-h-32 w-full object-cover"
+          className="ui-border-subtle max-h-32 w-full rounded-lg border object-cover"
         />
-      ) : (
-        <div className="break-words">
-          {value ? (
-            <p className="font-medium text-gray-800 leading-relaxed">
-              {label.includes('Mobile') || label.includes('Phone') ? (
-                <a href={`tel:${value}`} className="text-blue-600 hover:underline">
-                  {value}
-                </a>
-              ) : label.includes('Email') ? (
-                <a href={`mailto:${value}`} className="text-blue-600 hover:underline">
-                  {value}
-                </a>
-              ) : label.includes('Wallet') || label.includes('Balance') ? (
-                <span className="text-green-600 font-bold">
-                  ₹{parseFloat(value || 0).toLocaleString('en-IN', {
-                    minimumFractionDigits: 2
-                  })}
-                </span>
-              ) : label.includes('Subsidy Code') ? (
-                <span className="font-mono text-sm text-purple-600">{value}</span>
-              ) : label.includes('Account') && value.length > 10 ? (
-                <span className="font-mono text-sm">{value}</span>
-              ) : (
-                value
-              )}
-            </p>
+      ) : value ? (
+        <p
+          className={`break-words text-[13px] font-medium leading-relaxed ${mono ? 'font-mono' : ''}`}
+        >
+          {href ? (
+            <a href={href} className="ui-text-brand hover:underline">
+              {value}
+            </a>
           ) : (
-            <p className="text-gray-400 italic">Not provided</p>
+            value
           )}
-        </div>
+        </p>
+      ) : (
+        <p className="ui-text-tertiary text-[13px] italic">Not provided</p>
       )}
     </div>
   )
