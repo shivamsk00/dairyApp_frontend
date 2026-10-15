@@ -3,7 +3,7 @@ import './assets/main.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastHost } from './components/ui';
 
 // Electron webFrame के लिए check करें कि environment Electron है या नहीं
 if (typeof window !== 'undefined' && window.electronAPI) {
@@ -41,6 +41,6 @@ document.head.appendChild(style);
 createRoot(document.getElementById('root')).render(
   <>
     <App />
-    <ToastContainer />
+    <ToastHost />
   </>
 )
