@@ -22,6 +22,9 @@ export { default as ChatDrawer } from './layout/ChatDrawer'
 export { default as CommandPalette } from './layout/CommandPalette'
 export { default as ScrollToTopButton } from './layout/ScrollToTopButton'
 
+// Feedback
+export { default as ToastHost } from './feedback/ToastHost'
+
 // Modals
 export { default as ConfirmActionModal } from './modals/ConfirmActionModal'
 export { default as DeleteConfirmModal } from './modals/DeleteConfirmModal'

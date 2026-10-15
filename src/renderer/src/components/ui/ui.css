@@ -731,3 +731,84 @@ select.ui-input {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
 }
+
+/* ---------- Toasts (react-toastify, mounted through <ToastHost />) ---------- */
+/* !important is needed: react-toastify's own `colored` / `dark` themes also set these properties,
+   and existing call sites choose those themes. */
+
+.Toastify__toast-container {
+  --toastify-toast-width: 22rem;
+  font-family: inherit;
+}
+.Toastify__toast.ui-toast {
+  position: relative;
+  min-height: 0;
+  margin-bottom: 0.6rem;
+  padding: 0.7rem 0.6rem 0.7rem 1rem;
+  align-items: center;
+  gap: 0.7rem;
+  overflow: hidden;
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: 5px;
+  background: var(--ui-surface-raised) !important;
+  color: var(--ui-text-primary) !important;
+  box-shadow: var(--ui-shadow-xl);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.ui-toast::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--ui-toast-tone);
+}
+.ui-toast-success {
+  --ui-toast-tone: var(--ui-success-500);
+}
+.ui-toast-error {
+  --ui-toast-tone: var(--ui-danger-500);
+}
+.ui-toast-warning {
+  --ui-toast-tone: var(--ui-warning-500);
+}
+.ui-toast-info {
+  --ui-toast-tone: var(--ui-info-500);
+}
+.ui-toast-default {
+  --ui-toast-tone: var(--ui-primary-500);
+}
+.ui-toast-icon {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 6px;
+  box-shadow: none !important;
+}
+.ui-toast-close {
+  display: inline-grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--ui-text-tertiary) !important;
+  opacity: 1 !important;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.ui-toast-close:hover {
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-primary) !important;
+}
+.Toastify__progress-bar.ui-toast-progress {
+  height: 2px;
+  background: var(--ui-toast-tone) !important;
+  opacity: 0.7;
+}
