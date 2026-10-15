@@ -22,6 +22,7 @@ Icons are passed as components: `icon={Milk}` (from `lucide-react`), not `<Milk 
 | `layout/`     | `AppSidebar`, `AppHeader`, `Breadcrumb`, `AppFooter`, `CommandPalette`, `ChatDrawer`, `ScrollToTopButton`     |
 | `modals/`     | `ImportModal`, `ExportModal`, `ExportStatusModal`, `DeleteConfirmModal`, `ConfirmActionModal`, `SuccessModal` |
 | `dashboard/`  | `PageHero`, `KpiCard`, `SectionCard`, `InsightCard`, `BentoGrid`, `DataTable`                                 |
+| `form/`       | `Field`, `Input`, `Select`, `SelectDropdown`, `Textarea`, `FileInput`, `FormSection`, `FormActions`           |
 | `hooks/`      | `useDocumentTitle`                                                                                            |
 
 Each file's JSDoc lists its props. Quick examples:

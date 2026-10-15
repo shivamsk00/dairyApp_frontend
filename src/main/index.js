@@ -277,6 +277,7 @@ import icon from '../../resources/icon.png?asset'
 import { format } from 'url'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
+import { createUpdateManager } from './updater'
 
 // Configure logging for debugging
 log.transports.file.level = 'info'
@@ -459,50 +460,15 @@ function createChildWindow() {
   }
 }
 
-// Helper function to send update messages
-function sendUpdateMessage(message) {
-  if (mainWindow && mainWindow.webContents && !mainWindow.isDestroyed()) {
-    log.info('Sending update message:', message)
-    mainWindow.webContents.send('update-message', message)
+// Auto-update: one structured status object is pushed to the renderer ('update-status').
+const updater = createUpdateManager({
+  autoUpdater,
+  currentVersion: () => app.getVersion(),
+  log,
+  send: (status) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-status', status)
   }
-}
-
-function sendUpdateProgress(progress) {
-  if (mainWindow && mainWindow.webContents && !mainWindow.isDestroyed()) {
-    log.info('Sending update progress:', progress)
-    mainWindow.webContents.send('update-progress', progress)
-  }
-}
-
-// Show update dialog
-function showUpdateDialog(info) {
-  if (!mainWindow || mainWindow.isDestroyed()) return
-  
-  const dialogOptions = {
-    type: 'info',
-    title: 'Update Ready',
-    message: `Update Downloaded Successfully!`,
-    detail: `Version ${info.version} has been downloaded. The app will restart to apply the update.`,
-    buttons: ['Restart Now', 'Later'],
-    defaultId: 0,
-    cancelId: 1,
-    icon: icon
-  }
-  
-  dialog.showMessageBox(mainWindow, dialogOptions).then((result) => {
-    if (result.response === 0) {
-      // User chose to restart now
-      log.info('User chose to restart and install update')
-      autoUpdater.quitAndInstall(false, true)
-    } else {
-      // User chose later
-      log.info('User chose to install update later')
-      sendUpdateMessage(null) // Hide the banner
-    }
-  }).catch((error) => {
-    log.error('Dialog error:', error)
-  })
-}
+})
 
 // App Ready
 app.whenReady().then(() => {
@@ -513,22 +479,12 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // Check for updates on startup (after 5 seconds)
-  setTimeout(() => {
-    log.info('Checking for updates on startup...')
-    autoUpdater.checkForUpdatesAndNotify().catch((error) => {
-      log.error('Startup update check failed:', error)
-    })
-  }, 5000)
+  updater.registerEvents()
 
-  // Set up periodic update checks (every 30 minutes in production)
+  // Quiet background checks: they only surface something when an update is actually found.
+  setTimeout(() => updater.check(), 5000)
   if (!is.dev) {
-    updateCheckInterval = setInterval(() => {
-      log.info('Periodic update check...')
-      autoUpdater.checkForUpdates().catch((error) => {
-        log.error('Periodic update check failed:', error)
-      })
-    }, 30 * 60 * 1000) // 30 minutes
+    updateCheckInterval = setInterval(() => updater.check(), 30 * 60 * 1000) // every 30 minutes
   }
 
   // IPC Events
@@ -540,32 +496,16 @@ app.whenReady().then(() => {
 
   // Update related IPC handlers
   ipcMain.handle('check-for-update', async () => {
-    try {
-      log.info('Manual update check requested')
-      const result = await autoUpdater.checkForUpdates()
-      return { success: true, updateInfo: result }
-    } catch (error) {
-      log.error('Manual update check failed:', error)
-      sendUpdateMessage(`Update check failed: ${error.message}`)
-      return { success: false, error: error.message }
-    }
+    const status = await updater.check({ manual: true })
+    return { success: status.state !== 'error', status }
   })
-
-  ipcMain.handle('start-update-download', async () => {
-    try {
-      log.info('Manual download requested')
-      await autoUpdater.downloadUpdate()
-      return { success: true }
-    } catch (error) {
-      log.error('Manual download failed:', error)
-      return { success: false, error: error.message }
-    }
+  ipcMain.handle('start-update-download', () => {
+    updater.download()
+    return { success: true }
   })
-
-  ipcMain.handle('restart-and-install', () => {
-    log.info('Restart and install requested')
-    autoUpdater.quitAndInstall(false, true)
-  })
+  ipcMain.handle('restart-and-install', () => updater.install())
+  ipcMain.handle('get-update-status', () => updater.getStatus())
+  ipcMain.handle('dismiss-update-status', () => updater.dismiss())
 
   ////////////////////////////////// CLOSE ALL WINDOW AFTER LOGOUT /////////////////////////////////////////////////////
   ipcMain.on('logout_close_all', () => {
@@ -643,73 +583,6 @@ app.whenReady().then(() => {
     })
   })
 
-  // Auto Updater Events
-  autoUpdater.on('checking-for-update', () => {
-    log.info('Checking for update...')
-    sendUpdateMessage('Checking for updates...')
-  })
-
-  autoUpdater.on('update-available', (info) => {
-    log.info('Update available:', info.version)
-    sendUpdateMessage(`Update available! Version ${info.version}`)
-    
-    // Auto download the update
-    log.info('Starting update download...')
-    autoUpdater.downloadUpdate()
-  })
-
-  autoUpdater.on('update-not-available', (info) => {
-    log.info('Update not available. Current version:', app.getVersion())
-    sendUpdateMessage('No update available.')
-    
-    // Hide message after 5 seconds
-    setTimeout(() => {
-      sendUpdateMessage(null)
-    }, 5000)
-  })
-
-  autoUpdater.on('download-progress', (progressObj) => {
-    const percent = Math.round(progressObj.percent)
-    log.info(`Download progress: ${percent}% - ${progressObj.transferred}/${progressObj.total} bytes`)
-    sendUpdateProgress(percent)
-    
-    if (percent === 0) {
-      sendUpdateMessage('Starting download...')
-    } else {
-      sendUpdateMessage('Downloading update...')
-    }
-  })
-
-  autoUpdater.on('update-downloaded', (info) => {
-    log.info('Update downloaded successfully:', info.version)
-    sendUpdateMessage('Update downloaded successfully!')
-    sendUpdateProgress(100)
-    
-    // Show dialog for restart
-    setTimeout(() => {
-      showUpdateDialog(info)
-    }, 2000)
-  })
-
-  autoUpdater.on('error', (error) => {
-    log.error('Auto updater error:', error)
-    console.log('Error details:', JSON.stringify(error, null, 2))
-    sendUpdateMessage(`Update error: ${error.message}`)
-    
-    // Clear error message after 8 seconds
-    setTimeout(() => {
-      sendUpdateMessage(null)
-    }, 8000)
-  })
-
-  // Legacy IPC handlers for backward compatibility
-  ipcMain.on('start-update-download', () => {
-    autoUpdater.downloadUpdate()
-  })
-
-  ipcMain.on('check-for-update', () => {
-    autoUpdater.checkForUpdates()
-  })
 })
 
 // App Quit

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import useAuthStore from '../../zustand/useAuthStore'
+import useUpdateStore from '../../zustand/useUpdateStore'
 import {
   ActionLink,
   Badge,
@@ -75,8 +76,8 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [appUpdateMessage, setAppUpdateMessage] = useState(null)
-  const [appUpdateProgress, setAppUpdateProgress] = useState(0)
+  const checkForUpdates = useUpdateStore((state) => state.checkNow)
+  const appVersion = useUpdateStore((state) => state.status.currentVersion)
   const [refreshing, setRefreshing] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -120,43 +121,8 @@ const Dashboard = () => {
     [getDashboardData]
   )
 
-  const handleCheckUpdate = async () => {
-    if (window.api && window.api.checkForUpdate) {
-      try {
-        setAppUpdateMessage('Checking for updates...')
-        await window.api.checkForUpdate()
-      } catch {
-        toast.error('Failed to check for updates')
-        setAppUpdateMessage(null)
-      }
-    }
-  }
-
   useEffect(() => {
     fetchDashboardData(false)
-
-    // Automatic update check on dashboard load
-    handleCheckUpdate()
-
-    // Listen for app updates
-    if (window.api) {
-      window.api.onUpdateMessage((message) => {
-        setAppUpdateMessage(message)
-        if (message === 'No update available.') {
-          toast.info('Your software is up to date.')
-        }
-      })
-
-      window.api.onUpdateProgress((percent) => {
-        setAppUpdateProgress(percent)
-      })
-    }
-
-    return () => {
-      if (window.api && window.api.removeUpdateListeners) {
-        window.api.removeUpdateListeners()
-      }
-    }
   }, [fetchDashboardData])
 
   const handleRefresh = async () => {
@@ -468,7 +434,7 @@ const Dashboard = () => {
           label: 'Check for updates',
           icon: Sparkles,
           tone: 'info',
-          onSelect: handleCheckUpdate
+          onSelect: checkForUpdates
         }
       ]
     }
@@ -476,87 +442,31 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen relative ui-text-primary">
-      {/* App Update Overlay/Banner */}
-      {appUpdateMessage && (
-        <div className="fixed top-0 left-0 w-full z-[100] animate-in slide-in-from-top duration-500 ease-out">
-          {/* Main Banner */}
-          <div
-            className={`text-white px-6 py-3 shadow-2xl backdrop-blur-md border-b border-white/10 transition-colors duration-500 ${
-              appUpdateMessage === 'No update available.'
-                ? 'bg-gray-800'
-                : 'bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700'
-            }`}
-          >
-            <div className="max-w-8xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`p-2 rounded-lg backdrop-blur-sm ${
-                    appUpdateMessage === 'No update available.'
-                      ? 'bg-white/10'
-                      : 'bg-white/20 animate-pulse'
-                  }`}
-                >
-                  <LineChart className="text-xl text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-xs tracking-wide uppercase opacity-80">
-                    Software Update
-                  </p>
-                  <p className="text-lg font-medium leading-tight">{appUpdateMessage}</p>
-                </div>
-              </div>
-
-              {appUpdateProgress > 0 && (
-                <div className="flex items-center gap-4 w-full sm:w-80">
-                  <div className="flex-1 relative h-3 bg-blue-900/40 rounded-full overflow-hidden border border-blue-400/20">
-                    <div
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-white transition-all duration-500 ease-out shadow-[0_0_15px_rgba(255,255,255,0.8)]"
-                      style={{ width: `${appUpdateProgress}%` }}
-                    />
-                  </div>
-                  <span className="text-lg font-bold font-mono min-w-[50px]">
-                    {appUpdateProgress}%
-                  </span>
-                </div>
-              )}
-
-              <button
-                onClick={() => setAppUpdateMessage(null)}
-                className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors focus:outline-none"
-                title="Dismiss"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          {/* High-Visibility Top Progress Strip */}
-          {appUpdateProgress > 0 && (
-            <div className="w-full h-1.5 bg-blue-900/20">
-              <div
-                className="h-full bg-white transition-all duration-500 shadow-[0_0_10px_#fff]"
-                style={{ width: `${appUpdateProgress}%` }}
-              />
-            </div>
-          )}
-        </div>
-      )}
-      <div
-        className={`max-w-8xl mx-auto transition-all duration-500 ${appUpdateMessage ? 'pt-20' : ''}`}
-      >
+      <div className="max-w-8xl mx-auto">
         <Breadcrumb
           title="Dashboard"
           items={[{ label: 'Home', to: '/' }, { label: 'Dashboard' }]}
           actions={
-            <button
-              type="button"
-              onClick={() => setPaletteOpen(true)}
-              className="ui-bg-raised ui-border-default hidden items-center gap-2 rounded-full border py-1 pl-2.5 pr-1.5 text-[11.5px] font-medium ui-text-tertiary sm:inline-flex"
-            >
-              <Search size={12} aria-hidden="true" />
-              Quick search
-              <kbd className="ui-kbd text-[10px]">Ctrl K</kbd>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                className="ui-bg-raised ui-border-default hidden items-center gap-2 rounded-full border py-1 pl-2.5 pr-1.5 text-[11.5px] font-medium ui-text-tertiary sm:inline-flex"
+              >
+                <Search size={12} aria-hidden="true" />
+                Quick search
+                <kbd className="ui-kbd text-[10px]">Ctrl K</kbd>
+              </button>
+              <button
+                type="button"
+                onClick={checkForUpdates}
+                title="Check for software updates"
+                className="ui-bg-raised ui-border-default ui-text-tertiary hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium hover:text-[color:var(--ui-primary-600)] sm:inline-flex"
+              >
+                <Download size={12} aria-hidden="true" />
+                {appVersion ? `v${appVersion} · ` : ''}Check for updates
+              </button>
+            </>
           }
         />
 
@@ -896,15 +806,6 @@ const Dashboard = () => {
           </BentoGrid>
         </div>
       </div>
-
-      <Button
-        icon={Download}
-        onClick={handleCheckUpdate}
-        title="Check for software updates"
-        className="fixed bottom-3 left-3 z-[90] !rounded-full uppercase tracking-wider"
-      >
-        Check Update
-      </Button>
 
       <CommandPalette isOpen={paletteOpen} onOpenChange={setPaletteOpen} groups={paletteGroups} />
 
