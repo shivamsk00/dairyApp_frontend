@@ -98,7 +98,7 @@ const CommandPalette = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-[#0a0c0b8c] px-4 pt-24 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-[hsl(214_32%_5%_/_0.55)] px-4 pt-24 backdrop-blur-[2px]"
       onMouseDown={(event) => event.target === event.currentTarget && onOpenChange(false)}
     >
       <div

@@ -20,10 +20,8 @@ const Layout = () => {
 
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Sidebar - Fixed */}
-      <aside className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white flex-shrink-0 shadow-2xl border-r border-slate-700/30 overflow-y-auto">
-        <Sidebar />
-      </aside>
+      {/* Sidebar */}
+      <Sidebar />
 
       {/* Main Content Container */}
       <div className="flex flex-col flex-1 min-w-0 h-full">

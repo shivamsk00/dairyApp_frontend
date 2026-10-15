@@ -222,8 +222,8 @@ const Dashboard = () => {
         {
           label: 'Morning Shift (L)',
           data: stats?.days.map((item) => item.morning_milk) || [],
-          borderColor: '#e8830f',
-          backgroundColor: 'rgba(232, 131, 15, 0.12)',
+          borderColor: 'hsl(38, 92%, 48%)',
+          backgroundColor: 'hsla(38, 92%, 48%, 0.14)',
           tension: 0.4,
           fill: true,
           pointRadius: 4,
@@ -233,8 +233,8 @@ const Dashboard = () => {
         {
           label: 'Evening Shift (L)',
           data: stats?.days.map((item) => item.evening_milk) || [],
-          borderColor: '#187f65',
-          backgroundColor: 'rgba(24, 127, 101, 0.12)',
+          borderColor: 'hsl(187, 85%, 38%)',
+          backgroundColor: 'hsla(187, 85%, 38%, 0.14)',
           tension: 0.4,
           fill: true,
           pointRadius: 4,

@@ -11,64 +11,64 @@
  */
 
 :root {
-  --ui-font-display: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --ui-font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   --ui-neutral-0: #fff;
-  --ui-neutral-50: #f7f8f7;
-  --ui-neutral-100: #eff1f0;
-  --ui-neutral-150: #e4e7e5;
-  --ui-neutral-200: #d8dcd9;
-  --ui-neutral-300: #c0c6c2;
-  --ui-neutral-400: #98a29b;
-  --ui-neutral-500: #757f79;
-  --ui-neutral-600: #5a625c;
-  --ui-neutral-700: #454b46;
-  --ui-neutral-800: #2e3230;
-  --ui-neutral-900: #1e211f;
+  --ui-neutral-50: hsl(210 30% 98%);
+  --ui-neutral-100: hsl(213 25% 95%);
+  --ui-neutral-150: hsl(213 20% 91%);
+  --ui-neutral-200: hsl(213 20% 88%);
+  --ui-neutral-300: hsl(213 16% 78%);
+  --ui-neutral-400: hsl(214 14% 60%);
+  --ui-neutral-500: hsl(214 14% 46%);
+  --ui-neutral-600: hsl(214 18% 36%);
+  --ui-neutral-700: hsl(214 22% 26%);
+  --ui-neutral-800: hsl(213 24% 17%);
+  --ui-neutral-900: hsl(213 22% 11%);
 
-  --ui-primary-50: #effaf6;
-  --ui-primary-100: #d7f2e7;
-  --ui-primary-200: #b0e4d0;
-  --ui-primary-300: #7ed0b4;
-  --ui-primary-400: #48b594;
-  --ui-primary-500: #24997c;
-  --ui-primary-600: #187f65;
-  --ui-primary-700: #146553;
-  --ui-primary-800: #135144;
-  --ui-primary-900: #114339;
-  --ui-primary-950: #082720;
+  --ui-primary-50: hsl(187 90% 96%);
+  --ui-primary-100: hsl(187 88% 90%);
+  --ui-primary-200: hsl(187 86% 80%);
+  --ui-primary-300: hsl(187 90% 69%);
+  --ui-primary-400: hsl(187 85% 53%);
+  --ui-primary-500: hsl(187 85% 45%);
+  --ui-primary-600: hsl(187 85% 38%);
+  --ui-primary-700: hsl(187 85% 31%);
+  --ui-primary-800: hsl(187 80% 25%);
+  --ui-primary-900: hsl(187 75% 20%);
+  --ui-primary-950: hsl(187 80% 12%);
 
-  --ui-accent-50: #fff8ec;
-  --ui-accent-100: #ffebc7;
-  --ui-accent-400: #f8a22c;
-  --ui-accent-500: #e8830f;
-  --ui-accent-600: #c8682a;
-  --ui-accent-700: #a15220;
+  --ui-accent-50: hsl(38 100% 95%);
+  --ui-accent-100: hsl(38 100% 88%);
+  --ui-accent-400: hsl(38 92% 56%);
+  --ui-accent-500: hsl(38 92% 43%);
+  --ui-accent-600: hsl(34 92% 36%);
+  --ui-accent-700: hsl(30 88% 29%);
 
-  --ui-success-50: #ecfaf3;
-  --ui-success-100: #d2f2e1;
-  --ui-success-400: #3eb981;
-  --ui-success-500: #1e9e6b;
-  --ui-success-600: #16814d;
-  --ui-success-700: #106a3f;
+  --ui-success-50: hsl(160 60% 96%);
+  --ui-success-100: hsl(160 55% 90%);
+  --ui-success-400: hsl(160 55% 52%);
+  --ui-success-500: hsl(160 60% 45%);
+  --ui-success-600: hsl(160 60% 35%);
+  --ui-success-700: hsl(160 65% 28%);
 
-  --ui-warning-50: #fdf6e9;
-  --ui-warning-100: #fbeac7;
-  --ui-warning-500: #dc9a2c;
-  --ui-warning-600: #b87c1c;
-  --ui-warning-700: #93630f;
+  --ui-warning-50: hsl(46 100% 95%);
+  --ui-warning-100: hsl(46 100% 88%);
+  --ui-warning-500: hsl(46 93% 47%);
+  --ui-warning-600: hsl(42 92% 38%);
+  --ui-warning-700: hsl(38 90% 30%);
 
-  --ui-danger-50: #fceeee;
-  --ui-danger-100: #f9d9d8;
-  --ui-danger-500: #d0504c;
-  --ui-danger-600: #b33d3a;
-  --ui-danger-700: #8f2e2c;
+  --ui-danger-50: hsl(0 86% 97%);
+  --ui-danger-100: hsl(0 90% 92%);
+  --ui-danger-500: hsl(0 84% 60%);
+  --ui-danger-600: hsl(0 84% 50%);
+  --ui-danger-700: hsl(0 74% 40%);
 
-  --ui-info-50: #eef4fa;
-  --ui-info-100: #d3e4f2;
-  --ui-info-500: #3e7ead;
-  --ui-info-600: #2e6690;
-  --ui-info-700: #235071;
+  --ui-info-50: hsl(220 90% 96%);
+  --ui-info-100: hsl(220 85% 90%);
+  --ui-info-500: hsl(220 80% 56%);
+  --ui-info-600: hsl(220 75% 46%);
+  --ui-info-700: hsl(220 70% 37%);
 
   --ui-surface-canvas: var(--ui-neutral-50);
   --ui-surface-base: var(--ui-neutral-0);
@@ -81,42 +81,42 @@
   --ui-text-secondary: var(--ui-neutral-600);
   --ui-text-tertiary: var(--ui-neutral-500);
 
-  --ui-sidebar-bg: #14201c;
-  --ui-sidebar-border: #ffffff0f;
+  --ui-sidebar-bg: hsl(214 32% 7%);
+  --ui-sidebar-border: #ffffff12;
   --ui-sidebar-text: #ffffff9e;
   --ui-sidebar-text-active: #fff;
 
-  --ui-shadow-sm: 0 1px 3px 0 #1e211f0f, 0 1px 2px -1px #1e211f0d;
-  --ui-shadow-md: 0 4px 10px -2px #1e211f12, 0 2px 6px -3px #1e211f0f;
-  --ui-shadow-lg: 0 12px 24px -6px #1e211f17, 0 4px 10px -4px #1e211f0f;
-  --ui-shadow-xl: 0 20px 40px -8px #1e211f1f, 0 8px 16px -6px #1e211f12;
-  --ui-glow-primary: 0 8px 24px -6px #187f6559;
-  --ui-glow-accent: 0 8px 24px -6px #e8830f4d;
-  --ui-glow-info: 0 8px 24px -6px #3e7ead59;
-  --ui-glow-success: 0 8px 24px -6px #1e9e6b59;
-  --ui-glow-warning: 0 8px 24px -6px #dc9a2c59;
-  --ui-glow-danger: 0 8px 24px -6px #d0504c59;
-  --ui-glow-neutral: 0 8px 24px -6px #757f794d;
+  --ui-shadow-sm: 0 1px 3px 0 hsl(214 32% 10% / 0.06), 0 1px 2px -1px hsl(214 32% 10% / 0.05);
+  --ui-shadow-md: 0 4px 10px -2px hsl(214 32% 10% / 0.07), 0 2px 6px -3px hsl(214 32% 10% / 0.06);
+  --ui-shadow-lg: 0 12px 24px -6px hsl(214 32% 10% / 0.09), 0 4px 10px -4px hsl(214 32% 10% / 0.06);
+  --ui-shadow-xl: 0 20px 40px -8px hsl(214 32% 10% / 0.12), 0 8px 16px -6px hsl(214 32% 10% / 0.07);
+  --ui-glow-primary: 0 8px 24px -6px hsl(187 85% 38% / 0.35);
+  --ui-glow-accent: 0 8px 24px -6px hsl(38 92% 43% / 0.3);
+  --ui-glow-info: 0 8px 24px -6px hsl(220 80% 56% / 0.35);
+  --ui-glow-success: 0 8px 24px -6px hsl(160 60% 45% / 0.35);
+  --ui-glow-warning: 0 8px 24px -6px hsl(46 93% 47% / 0.35);
+  --ui-glow-danger: 0 8px 24px -6px hsl(0 84% 60% / 0.35);
+  --ui-glow-neutral: 0 8px 24px -6px hsl(214 14% 46% / 0.3);
 }
 
 /* Dark palette — only applies if <html data-theme="dark"> is ever set (the app does not today). */
 [data-theme='dark'] {
-  --ui-surface-canvas: #0f1211;
-  --ui-surface-base: #171a18;
-  --ui-surface-raised: #1d211f;
-  --ui-surface-sunken: #131615;
-  --ui-border-subtle: #ffffff0f;
-  --ui-border-default: #ffffff1a;
-  --ui-border-strong: #ffffff29;
-  --ui-text-primary: var(--ui-neutral-50);
-  --ui-text-secondary: var(--ui-neutral-300);
-  --ui-text-tertiary: var(--ui-neutral-400);
-  --ui-sidebar-bg: #0c0f0d;
+  --ui-surface-canvas: hsl(214 32% 7%);
+  --ui-surface-base: hsl(213 24% 9%);
+  --ui-surface-raised: hsl(213 22% 11%);
+  --ui-surface-sunken: hsl(213 25% 8%);
+  --ui-border-subtle: hsl(213 18% 18%);
+  --ui-border-default: hsl(213 18% 22%);
+  --ui-border-strong: hsl(213 18% 30%);
+  --ui-text-primary: hsl(213 30% 93%);
+  --ui-text-secondary: hsl(213 15% 72%);
+  --ui-text-tertiary: hsl(213 12% 58%);
+  --ui-sidebar-bg: hsl(214 36% 5%);
   --ui-sidebar-text: #ffffff8f;
-  --ui-primary-50: #16231f;
-  --ui-primary-100: #1c2f29;
-  --ui-accent-50: #241a10;
-  --ui-accent-100: #2f2315;
+  --ui-primary-50: hsl(187 50% 12%);
+  --ui-primary-100: hsl(187 50% 16%);
+  --ui-accent-50: hsl(38 50% 12%);
+  --ui-accent-100: hsl(38 50% 16%);
 }
 
 .ui-font-display {
@@ -442,7 +442,7 @@
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: #0a0c0b99;
+  background: hsl(214 32% 5% / 0.6);
   backdrop-filter: blur(3px);
   opacity: 0;
   transition: opacity 0.2s;
@@ -463,7 +463,7 @@
   color: var(--ui-text-primary);
   box-shadow:
     var(--ui-shadow-xl),
-    0 0 0 1px #1e211f05;
+    0 0 0 1px hsl(214 32% 10% / 0.02);
   outline: none;
   transform: translateY(-12px) scale(0.98);
   transition:
@@ -527,6 +527,10 @@
     transparent
   );
   color: var(--ui-sidebar-text-active);
+}
+.ui-sidebar-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .ui-sidebar-link > svg {
   flex-shrink: 0;
