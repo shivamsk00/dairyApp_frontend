@@ -1,282 +1,281 @@
-import React, { useEffect, useState } from 'react';
-import { IoMdClose } from 'react-icons/io';
-import CustomToast from '../../helper/costomeToast';
-import useDailyMilkDispatchStore from '../../zustand/useMilkDispatchStore';
+/* eslint-disable react/prop-types -- props are documented by usage in MilkDispatchPage */
+import { useEffect, useState } from 'react'
+import { Pencil, Save, X } from 'lucide-react'
+import CustomToast from '../../helper/costomeToast'
+import useMilkDispatchStore from '../../zustand/useMilkDispatchStore'
+import useHomeStore from '../../zustand/useHomeStore'
+import {
+  Button,
+  IconBadge,
+  IconButton,
+  Input,
+  Modal,
+  SelectDropdown,
+  Textarea
+} from '../../components/ui'
+import { SHIFTS, money } from './dispatchOptions'
+
+// Server date -> YYYY-MM-DD for <input type="date">, without the UTC day shift.
+const formatDateForInput = (dateString) => {
+  if (!dateString) return ''
+  const match = String(dateString).match(/^(\d{4}-\d{2}-\d{2})/)
+  if (match) return match[1]
+  const d = new Date(dateString)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 const EditMilkDispatchModal = ({ isOpen, onClose, milkDispatchData }) => {
-    const updateMilkDispatch = useDailyMilkDispatchStore(state => state.updateMilkDispatch)
-    const [loading, setLoading] = useState(false)
-    const [form, setForm] = useState({
-        dispatch_date: '',
-        head_dairy_id: '',
-        shift: '',
-        vehicle_no: '',
-        total_qty: '',
-        total_amount: '',
-        notes: '',
-        milk_details: [],
-    });
+  const updateMilkDispatch = useMilkDispatchStore((state) => state.updateMilkDispatch)
+  const getAllHeadDairyMaster = useHomeStore((state) => state.getAllHeadDairyMaster)
+  const [loading, setLoading] = useState(false)
+  const [headDairies, setHeadDairies] = useState([])
+  const [errors, setErrors] = useState({})
+  const [form, setForm] = useState({
+    dispatch_date: '',
+    head_dairy_id: '',
+    shift: '',
+    vehicle_no: '',
+    notes: '',
+    milk_details: []
+  })
 
-    useEffect(() => {
-        if (milkDispatchData) {
-            setForm({
-                dispatch_date: formatDateForInput(milkDispatchData.dispatch_date),
-                head_dairy_id: milkDispatchData.head_dairy.id,
-                shift: milkDispatchData.shift,
-                vehicle_no: milkDispatchData.vehicle_no,
-                total_qty: milkDispatchData.total_qty,
-                total_amount: milkDispatchData.total_amount,
-                notes: milkDispatchData.notes || '',
-                milk_details: milkDispatchData.milk_details || [],
-            });
-        }
-    }, [milkDispatchData]);
+  useEffect(() => {
+    if (isOpen) {
+      getAllHeadDairyMaster().then((res) => setHeadDairies(res?.data || []))
+    }
+  }, [isOpen])
 
-    const formatDateForInput = (dateString) => {
-        const d = new Date(dateString);
-        return d.toISOString().split('T')[0];
-    };
+  useEffect(() => {
+    if (milkDispatchData) {
+      setErrors({})
+      setForm({
+        dispatch_date: formatDateForInput(milkDispatchData.dispatch_date),
+        head_dairy_id: milkDispatchData.head_dairy?.id ?? milkDispatchData.head_dairy_id ?? '',
+        shift: milkDispatchData.shift,
+        vehicle_no: milkDispatchData.vehicle_no ?? '',
+        notes: milkDispatchData.notes || '',
+        // copy rows so editing never mutates the list's data
+        milk_details: (milkDispatchData.milk_details || []).map((row) => ({ ...row }))
+      })
+    }
+  }, [milkDispatchData])
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm(prev => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
+  // Totals always follow the rows (the old dialog sent the stale totals from before the edit).
+  const totalQty = form.milk_details.reduce((sum, row) => sum + Number(row.qty || 0), 0)
+  const totalAmount = form.milk_details.reduce((sum, row) => sum + Number(row.amount || 0), 0)
 
-    const handleMilkDetailChange = (index, field, value) => {
-        const updatedDetails = [...form.milk_details];
-        updatedDetails[index][field] = value;
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: undefined }))
+  }
 
-        // Optionally recalculate amount
+  const handleMilkDetailChange = (index, field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      milk_details: prev.milk_details.map((row, i) => {
+        if (i !== index) return row
+        const updated = { ...row, [field]: value }
         if (['qty', 'rate'].includes(field)) {
-            const qty = parseFloat(updatedDetails[index].qty || 0);
-            const rate = parseFloat(updatedDetails[index].rate || 0);
-            updatedDetails[index].amount = (qty * rate).toFixed(2);
+          updated.amount = (parseFloat(updated.qty || 0) * parseFloat(updated.rate || 0)).toFixed(2)
         }
+        return updated
+      })
+    }))
+    setErrors((prev) => ({ ...prev, rows: undefined }))
+  }
 
-        setForm(prev => ({
-            ...prev,
-            milk_details: updatedDetails,
-        }));
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const found = {}
+    if (!form.dispatch_date) found.dispatch_date = 'Select the dispatch date'
+    if (!form.head_dairy_id) found.head_dairy_id = 'Choose a head dairy'
+    if (!form.shift) found.shift = 'Select a shift'
+    if (form.milk_details.some((row) => !(parseFloat(row.qty) > 0)))
+      found.rows = 'Every row needs a quantity greater than 0'
+    setErrors(found)
+    if (Object.keys(found).length) return
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            setLoading(true)
-            const res = await updateMilkDispatch(milkDispatchData?.id, form);
-            console.log("response ====>", res)
-            if (res.status_code == 200) {
-                CustomToast.success(res.message)
-                setLoading(false)
-                onClose()
-            } else {
-                CustomToast.error(res.message)
+    try {
+      setLoading(true)
+      const res = await updateMilkDispatch(milkDispatchData?.id, {
+        ...form,
+        total_qty: totalQty,
+        total_amount: totalAmount.toFixed(2)
+      })
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+        onClose()
+      } else {
+        CustomToast.error(res.message)
+      }
+    } catch (error) {
+      console.log('ERROR IN UPDATE EDITMILKDISPATCH', error)
+      CustomToast.error('Failed to update the dispatch')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-            }
-        } catch (error) {
-            console.log("ERROR IN UPDATE EDITMILKDISPATCH", error)
-            setLoading(false)
-        } finally {
-            setLoading(false)
-        }
-
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-5 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-lg w-1/2  p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Edit Milk Dispatch</h2>
-
-                    <button
-                        className=" top-2 p-2 rounded-md right-4 text-white text-xl"
-                        onClick={onClose}
-                    >
-                        <IoMdClose />
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block mb-1 font-medium">Dispatch Date</label>
-                        <input
-                            type="date"
-                            name="dispatch_date"
-                            value={form.dispatch_date}
-                            onChange={handleChange}
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-1 font-medium">Header Dairy</label>
-                        <input
-                            type="text"
-                            name="head_dairy_id"
-                            value={form.head_dairy_id}
-                            onChange={handleChange}
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 font-medium">Shift</label>
-                        <select
-                            name="shift"
-                            value={form.shift}
-                            onChange={handleChange}
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        >
-                            <option value="" disabled>Select shift</option>
-                            <option value="morning">Morning</option>
-                            <option value="evening">Evening</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <h3 className="text-lg font-semibold mb-2">Milk Details</h3>
-                        {form.milk_details.map((detail, index) => (
-                            <div key={index} className="mb-4 border p-3 rounded-md bg-gray-50">
-                                <div className="grid grid-cols-3 gap-2 mb-2">
-                                    <div>
-                                        <label className="block text-sm">Milk Type</label>
-                                        <input
-                                            type="text"
-                                            value={detail.milk_type}
-                                            readOnly
-                                            className="w-full border px-2 py-1 rounded bg-gray-200"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm">Qty (L)</label>
-                                        <input
-                                            type="number"
-                                            value={detail.qty}
-                                            onChange={e => handleMilkDetailChange(index, 'qty', e.target.value)}
-                                            className="w-full border px-2 py-1 rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm">Fat</label>
-                                        <input
-                                            type="number"
-                                            value={detail.fat}
-                                            onChange={e => handleMilkDetailChange(index, 'fat', e.target.value)}
-                                            className="w-full border px-2 py-1 rounded"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <label className="block text-sm">SNF</label>
-                                        <input
-                                            type="number"
-                                            value={detail.snf}
-                                            onChange={e => handleMilkDetailChange(index, 'snf', e.target.value)}
-                                            className="w-full border px-2 py-1 rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm">Rate</label>
-                                        <input
-                                            type="number"
-                                            value={detail.rate}
-                                            onChange={e => handleMilkDetailChange(index, 'rate', e.target.value)}
-                                            className="w-full border px-2 py-1 rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm">Amount (₹)</label>
-                                        <input
-                                            type="number"
-                                            value={detail.amount}
-                                            readOnly
-                                            className="w-full border px-2 py-1 rounded bg-gray-200"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 font-medium">Vehicle No</label>
-                        <input
-                            type="text"
-                            name="vehicle_no"
-                            value={form.vehicle_no}
-                            onChange={handleChange}
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        />
-                    </div>
-
-                    <div className="flex space-x-4">
-                        <div className="w-1/2">
-                            <label className="block mb-1 font-medium">Total Quantity (L)</label>
-                            <input
-                                type="number"
-                                name="total_qty"
-                                value={form.total_qty}
-                                onChange={handleChange}
-                                className="w-full border px-3 py-2 rounded"
-                                required
-                            />
-                        </div>
-
-                        <div className="w-1/2">
-                            <label className="block mb-1 font-medium">Total Amount (₹)</label>
-                            <input
-                                type="number"
-                                name="total_amount"
-                                value={form.total_amount}
-                                onChange={handleChange}
-                                className="w-full border px-3 py-2 rounded"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 font-medium">Notes</label>
-                        <textarea
-                            name="notes"
-                            value={form.notes}
-                            onChange={handleChange}
-                            rows="3"
-                            className="w-full border px-3 py-2 rounded"
-                            placeholder="Optional notes"
-                        ></textarea>
-                    </div>
-
-                    <div className="flex justify-end space-x-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            disabled={loading}
-                            type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                            {loading ? "Updating..." : "Upadate"}
-                        </button>
-                    </div>
-                </form>
-            </div>
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Edit milk dispatch"
+      maxWidth="52rem"
+      dismissible={!loading}
+      className="flex max-h-[90vh] flex-col overflow-hidden"
+    >
+      <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+        <div className="ui-border-subtle flex items-center gap-3 border-b px-6 py-4">
+          <IconBadge icon={Pencil} tone="primary" />
+          <div className="min-w-0 flex-1">
+            <h2 className="ui-font-display text-[16px] font-bold">Edit Milk Dispatch</h2>
+            <p className="ui-text-tertiary truncate text-[12px]">{milkDispatchData?.dairy_name}</p>
+          </div>
+          <IconButton icon={X} label="Close" disabled={loading} onClick={onClose} />
         </div>
-    );
-};
 
-export default EditMilkDispatchModal;
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              label="Dispatch Date"
+              required
+              type="date"
+              name="dispatch_date"
+              value={form.dispatch_date}
+              onChange={handleChange}
+              error={errors.dispatch_date}
+            />
+            <SelectDropdown
+              label="Head Dairy"
+              required
+              name="head_dairy_id"
+              searchable
+              options={headDairies.map((d) => ({ value: d.id, label: d.dairy_name }))}
+              value={form.head_dairy_id}
+              placeholder="Choose head dairy"
+              onChange={(value) => handleChange({ target: { name: 'head_dairy_id', value } })}
+              error={errors.head_dairy_id}
+            />
+            <SelectDropdown
+              label="Shift"
+              required
+              name="shift"
+              options={SHIFTS}
+              value={form.shift}
+              placeholder="Select shift"
+              onChange={(value) => handleChange({ target: { name: 'shift', value } })}
+              error={errors.shift}
+            />
+            <Input
+              label="Vehicle No"
+              type="text"
+              name="vehicle_no"
+              value={form.vehicle_no}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <p className="ui-text-tertiary mb-2 text-[11px] font-semibold uppercase tracking-wide">
+              Milk details
+            </p>
+            <div className="space-y-3">
+              {form.milk_details.map((detail, index) => (
+                <div
+                  key={index}
+                  className="ui-border-subtle grid grid-cols-2 gap-3 rounded-lg border p-3 md:grid-cols-6"
+                >
+                  <Input
+                    label="Milk Type"
+                    type="text"
+                    value={detail.milk_type ?? ''}
+                    readOnly
+                    disabled
+                  />
+                  <Input
+                    label="Qty (L)"
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={detail.qty ?? ''}
+                    onChange={(e) => handleMilkDetailChange(index, 'qty', e.target.value)}
+                  />
+                  <Input
+                    label="Fat"
+                    type="number"
+                    step="any"
+                    value={detail.fat ?? ''}
+                    onChange={(e) => handleMilkDetailChange(index, 'fat', e.target.value)}
+                  />
+                  <Input
+                    label="SNF"
+                    type="text"
+                    value={detail.snf ?? ''}
+                    onChange={(e) => handleMilkDetailChange(index, 'snf', e.target.value)}
+                  />
+                  <Input
+                    label="Rate"
+                    type="number"
+                    step="any"
+                    value={detail.rate ?? ''}
+                    onChange={(e) => handleMilkDetailChange(index, 'rate', e.target.value)}
+                  />
+                  <Input
+                    label="Amount (₹)"
+                    type="text"
+                    value={detail.amount ?? ''}
+                    readOnly
+                    disabled
+                  />
+                </div>
+              ))}
+            </div>
+            {errors.rows && (
+              <p role="alert" className="mt-2 text-[11.5px] text-[color:var(--ui-danger-600)]">
+                {errors.rows}
+              </p>
+            )}
+          </div>
+
+          <Textarea
+            label="Notes"
+            rows={2}
+            name="notes"
+            value={form.notes}
+            onChange={handleChange}
+          />
+
+          <div className="ui-bg-sunken flex flex-wrap gap-8 rounded-lg px-4 py-3">
+            <div>
+              <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                Total quantity
+              </p>
+              <p className="ui-font-display text-[18px] font-extrabold">{totalQty} L</p>
+            </div>
+            <div>
+              <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                Total amount
+              </p>
+              <p className="ui-font-display text-[18px] font-extrabold text-[color:var(--ui-success-600)]">
+                {money(totalAmount)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
+          <Button variant="secondary" disabled={loading} onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" icon={Save} loading={loading}>
+            Update
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+export default EditMilkDispatchModal

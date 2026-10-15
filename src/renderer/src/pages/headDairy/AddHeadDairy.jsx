@@ -1,162 +1,196 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import "./headDairy.css";
-import { FaArrowLeft } from 'react-icons/fa';
-import CommonBackButton from '../../components/CommonBackButton';
-import useHomeStore from '../../zustand/useHomeStore';
-import { toast } from 'react-toastify';
-import CustomToast from '../../helper/costomeToast';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, Building2, TriangleAlert, Plus } from 'lucide-react'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Breadcrumb,
+  Button,
+  FormActions,
+  FormSection,
+  Input,
+  SuccessModal,
+  useDocumentTitle
+} from '../../components/ui'
+
+const EMPTY = { dairy_name: '', contact_person: '', mobile: '', address: '' }
+
+const validateField = (name, value) => {
+  const text = String(value ?? '').trim()
+  if (name === 'dairy_name')
+    return !text
+      ? 'Enter the dairy name'
+      : text.length < 2
+        ? 'Name must be at least 2 characters'
+        : ''
+  if (name === 'mobile')
+    return !text
+      ? 'Enter a mobile number'
+      : /^\d{10}$/.test(text)
+        ? ''
+        : 'Enter a valid 10-digit mobile number'
+  return ''
+}
+const validateAll = (values) =>
+  Object.keys(EMPTY).reduce((found, name) => {
+    const message = validateField(name, values[name])
+    return message ? { ...found, [name]: message } : found
+  }, {})
 
 const AddHeadDairy = () => {
-    const [error, setError] = useState('');
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const navigate = useNavigate();
+  useDocumentTitle('Add Head Dairy Master')
+  const [error, setError] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+  const navigate = useNavigate()
 
-    const addHeadDairy = useHomeStore(state => state.addHeadDairy);
+  const addHeadDairy = useHomeStore((state) => state.addHeadDairy)
 
-    const [form, setForm] = useState({
-        dairy_name: '',
-        contact_person: '',
-        mobile: '',
-        address: '',
+  const [form, setForm] = useState(EMPTY)
 
-    });
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+    if (touched[name]) setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }))
+  }
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
+  const handleBlur = (e) => {
+    const { name, value } = e.target
+    setTouched((prev) => ({ ...prev, [name]: true }))
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }))
+  }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
 
-        try {
-            const res = await addHeadDairy(form);
+    const found = validateAll(form)
+    setErrors(found)
+    setTouched({ dairy_name: true, mobile: true, contact_person: true, address: true })
+    const invalid = Object.keys(found)
+    if (invalid.length) {
+      setError(
+        `Please fix the ${invalid.length} highlighted ${invalid.length === 1 ? 'field' : 'fields'} and try again.`
+      )
+      document.querySelector(`[name="${invalid[0]}"]`)?.focus()
+      return
+    }
 
-            if (res.status_code == 200) {
-                setShowSuccessModal(true);
+    setSubmitting(true)
+    try {
+      const res = await addHeadDairy(form)
 
-                // Optional: Clear the form
-                setForm({
-                    dairy_name: '',
-                    contact_person: '',
-                    mobile: '',
-                    address: '',
-                });
-                CustomToast.success(res.message)
-                // Navigate to /customer after 2 seconds
-                navigate('/alldairymaster');
-            } else {
-                CustomToast.error(res.message)
-            }
-        } catch (error) {
-            console.error('Error adding customer:', error);
-            setError('An unexpected error occurred.');
+      if (res.status_code == 200) {
+        setShowSuccessModal(true)
+        setForm(EMPTY)
+        CustomToast.success(res.message)
+        navigate('/alldairymaster')
+      } else {
+        CustomToast.error(res.message)
+      }
+    } catch (error) {
+      console.error('Error adding head dairy:', error)
+      setError('An unexpected error occurred.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="w-full ui-text-primary">
+      <Breadcrumb
+        title="Add Head Dairy Master"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Head Dairy Master', to: '/alldairymaster' },
+          { label: 'Add' }
+        ]}
+        actions={
+          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => navigate(-1)}>
+            Back
+          </Button>
         }
-    };
+      />
 
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="mx-auto max-w-4xl space-y-5 p-3 sm:p-4 lg:p-6"
+      >
+        {error && (
+          <div
+            role="alert"
+            className="ui-tint-danger flex items-center gap-2 rounded-lg px-4 py-3 text-[13px] font-medium"
+          >
+            <TriangleAlert size={16} aria-hidden="true" />
+            {error}
+          </div>
+        )}
 
+        <FormSection
+          title="Dairy Details"
+          subtitle="The dairy you dispatch milk to"
+          icon={Building2}
+          tone="info"
+          cols={2}
+        >
+          <Input
+            label="Dairy Name"
+            required
+            type="text"
+            name="dairy_name"
+            value={form.dairy_name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.dairy_name}
+          />
+          <Input
+            label="Mobile"
+            required
+            maxLength={10}
+            type="text"
+            name="mobile"
+            value={form.mobile}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errors.mobile}
+          />
+          <Input
+            label="Contact Person"
+            type="text"
+            name="contact_person"
+            value={form.contact_person}
+            onChange={handleChange}
+          />
+          <Input
+            label="Address"
+            type="text"
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+          />
+        </FormSection>
 
-    return (
-        <div className="w-full p-4 addCustomerContainer">
-            <CommonBackButton  heading={"Add Head Dairy Master"} />
-            {/* <button onClick={() => navigate('/alldairymaster')}>
-                    Add Head Dairy Master
-                </button> */}
-            {error && (
-                <div className="text-red-600 font-medium mb-4">{error}</div>
-            )}
+        <FormActions>
+          <Button variant="secondary" onClick={() => navigate(-1)}>
+            Cancel
+          </Button>
+          <Button type="submit" icon={Plus} loading={submitting}>
+            Add Head Dairy Master
+          </Button>
+        </FormActions>
+      </form>
 
-            {showSuccessModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 shadow-md text-center space-y-4">
-                        <h2 className="text-xl font-semibold text-green-600">Dairy Master Added Successfully</h2>
-                        <button
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                            onClick={() => navigate('/alldairymaster')}
-                        >
-                            Go to Dairy Master List
-                        </button>
-                    </div>
-                </div>
-            )}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => navigate('/alldairymaster')}
+        title="Dairy Master Added Successfully"
+        buttonLabel="Go to Dairy Master List"
+      />
+    </div>
+  )
+}
 
-
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 w-full space-y-4">
-                {/* Name and Phone */}
-                <div className="w-full flex flex-col md:flex-row gap-4">
-
-                    <div className="w-full">
-                        <label className="block text-sm font-medium text-gray-700">
-                            Dairy Name <span className='text-red-600 text-xl'>*</span>
-                        </label>
-                        <input
-                            type="text"
-                            name="dairy_name"
-                            value={form.dairy_name}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                    </div>
-                    <div className="w-full">
-                        <label className="block text-sm font-medium text-gray-700">
-                            Mobile <span className='text-red-600 text-xl'>*</span>
-                        </label>
-                        <input
-                            maxLength={10}
-                            type="text"
-                            name="mobile"
-                            value={form.mobile}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                    </div>
-                </div>
-
-                {/* Contact Person and Address */}
-                <div className="w-full flex flex-col md:flex-row gap-4">
-                    <div className="w-full">
-                        <label className="block text-sm font-medium text-gray-700">Contact Person</label>
-                        <input
-                            type="text"
-                            name="contact_person"
-                            value={form.contact_person}
-                            onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                    </div>
-                    {/* Address */}
-                    <div className="w-full">
-                        <label className="block text-sm font-medium text-gray-700">Address</label>
-                        <input
-                            type="text"
-                            name="address"
-                            value={form.address}
-                            onChange={handleChange}
-                            className="mt-1 w-full border border-gray-300 rounded-md px-3 py-2"
-                        />
-                    </div>
-                </div>
-
-
-
-
-
-
-                {/* Submit */}
-                <div className="w-full">
-                    <button
-                        type="submit"
-                        className="w-full addUserBtn text-white py-2 px-4 rounded"
-                    >
-                        Add Head Dairy Master
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
-};
-
-export default AddHeadDairy;
+export default AddHeadDairy

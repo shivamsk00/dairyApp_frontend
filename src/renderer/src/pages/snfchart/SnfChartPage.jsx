@@ -1,149 +1,193 @@
-import React, { useEffect, useState } from 'react';
-import Chart from './Chart';
-import useHomeStore from '../../zustand/useHomeStore';
-import CustomToast from '../../helper/costomeToast';
+import { useEffect, useState } from 'react'
+import { Calculator, RotateCcw, Save } from 'lucide-react'
+import Chart from './Chart'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Badge,
+  Breadcrumb,
+  Button,
+  Input,
+  SectionCard,
+  useDocumentTitle
+} from '../../components/ui'
+
+const DEFAULTS = { A: 4, B: 0.2, C: 0.66 }
+
+// One message per field, or '' when the value is fine.
+const validate = (values) => {
+  const errors = {}
+  for (const name of ['A', 'B', 'C']) {
+    const raw = values[name]
+    if (raw === '' || raw === null || raw === undefined) errors[name] = 'Enter a number'
+    else if (isNaN(Number(raw))) errors[name] = 'Enter a valid number'
+  }
+  // The formula divides CLR by A.
+  if (!errors.A && Number(values.A) === 0) errors.A = 'A cannot be 0 (the formula divides by A)'
+  return errors
+}
 
 const SnfChartPage = () => {
-     const [formValues, setFormValues] = useState({
-          A: 4,
-          B: 0.2,
-          C: 0.66,
-     });
+  useDocumentTitle('SNF Chart')
+  const [formValues, setFormValues] = useState(DEFAULTS)
+  const [touched, setTouched] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [saveTrigger, setSaveTrigger] = useState(0)
+  const snfFormulaDataFetch = useHomeStore((state) => state.snfFormulaDataFetch)
+  const getSnfFormulaData = useHomeStore((state) => state.getSnfFormulaData)
 
-     const [saveTrigger, setSaveTrigger] = useState(0);
-     const snfFormulaDataFetch = useHomeStore(state => state.snfFormulaDataFetch);
-     const getSnfFormulaData = useHomeStore(state => state.getSnfFormulaData);
+  const errors = validate(formValues)
+  const shown = (name) => (touched[name] ? errors[name] : undefined)
 
-     const handleChange = (e) => {
-          const { name, value } = e.target;
-          setFormValues({
-               ...formValues,
-               [name]: value,
-          });
-     };
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormValues({
+      ...formValues,
+      [name]: value
+    })
+    setTouched((prev) => ({ ...prev, [name]: true }))
+  }
 
-     const handleSave = async (e) => {
-          e.preventDefault();
+  const handleSave = async (e) => {
+    e.preventDefault()
+    setTouched({ A: true, B: true, C: true })
+    if (Object.keys(errors).length) return
 
-          const formulaData = [
-               { A: parseFloat(formValues.A) },
-               { B: parseFloat(formValues.B) },
-               { C: parseFloat(formValues.C) },
-          ];
+    const formulaData = [
+      { A: parseFloat(formValues.A) },
+      { B: parseFloat(formValues.B) },
+      { C: parseFloat(formValues.C) }
+    ]
 
-          try {
-               const res = await snfFormulaDataFetch(formulaData);
-               console.log("response update snf chart", res.data);
-               if (res.status_code == 200) {
-                    CustomToast.success(res.message);
-               } else {
-                    CustomToast.error(res.message);
-               }
+    setSaving(true)
+    try {
+      const res = await snfFormulaDataFetch(formulaData)
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+      } else {
+        CustomToast.error(res.message)
+      }
 
-               setSaveTrigger(prev => prev + 1);
-          } catch (error) {
-               CustomToast.error(error);
-          }
-     };
+      setSaveTrigger((prev) => prev + 1)
+    } catch (error) {
+      CustomToast.error(error?.message || 'Failed to save the formula')
+    } finally {
+      setSaving(false)
+    }
+  }
 
-     const handleReset = () => {
-          setFormValues({
-               A: 4,
-               B: 0.2,
-               C: 0.66,
-          });
-     };
+  const handleReset = () => {
+    setFormValues(DEFAULTS)
+    setTouched({})
+  }
 
-     useEffect(() => {
-          const fetchFormula = async () => {
-               const data = await getSnfFormulaData();
-               if (data) {
-                    setFormValues({
-                         A: data.A,
-                         B: data.B,
-                         C: data.C,
-                    });
-               }
-          };
+  useEffect(() => {
+    const fetchFormula = async () => {
+      const data = await getSnfFormulaData()
+      if (data) {
+        setFormValues({
+          A: data.A,
+          B: data.B,
+          C: data.C
+        })
+      }
+    }
 
-          fetchFormula();
-     }, []);
+    fetchFormula()
+  }, [])
 
-     return (
-          <section className="h-screen bg-gradient-to-br from-slate-800 to-gray-900  text-white p-6 overflow-auto">
-             
-                    <div className="flex justify-center items-center mb-10 border border-dashed border-gray-600 rounded-lg p-4">
-                         <form
-                              onSubmit={handleSave}
-                              className="w-full max-w-lg bg-gray-800 border border-gray-700 rounded-2xl shadow-lg p-8"
-                         >
-                              <h2 className="text-2xl font-bold text-center mb-4 text-teal-400">SNF Formula Settings</h2>
-                              <p className="text-center text-sm mb-8 text-gray-300">(CLR / A) + (B × FAT) + C</p>
+  // Worked example so the effect of A, B and C is visible while editing.
+  const exampleClr = 26
+  const exampleFat = 4
+  const example =
+    Object.keys(errors).length === 0
+      ? exampleClr / Number(formValues.A) + Number(formValues.B) * exampleFat + Number(formValues.C)
+      : null
 
-                              {/* Field A */}
-                              <div className="mb-6">
-                                   <label className="block text-sm mb-2 text-gray-200">Value for A:</label>
-                                   <input
-                                        type="number"
-                                        name="A"
-                                        value={formValues.A}
-                                        onChange={handleChange}
-                                        step="any"
-                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-                                   />
-                              </div>
+  return (
+    <div className="w-full ui-text-primary">
+      <Breadcrumb
+        title="SNF Chart"
+        items={[{ label: 'Home', to: '/' }, { label: 'Milk Center' }, { label: 'SNF Chart' }]}
+      />
 
-                              {/* Field B */}
-                              <div className="mb-6">
-                                   <label className="block text-sm mb-2 text-gray-200">Value for B:</label>
-                                   <input
-                                        type="number"
-                                        name="B"
-                                        value={formValues.B}
-                                        onChange={handleChange}
-                                        step="any"
-                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-                                   />
-                              </div>
+      <div className="grid grid-cols-1 gap-5 p-3 sm:p-4 lg:grid-cols-3 lg:p-6">
+        <form onSubmit={handleSave} noValidate className="lg:col-span-1">
+          <SectionCard
+            title="SNF Formula Settings"
+            subtitle="Used to build the chart on the right"
+            icon={Calculator}
+            tone="primary"
+          >
+            <div className="ui-bg-sunken mb-4 rounded-lg px-4 py-3 text-center">
+              <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                Formula
+              </p>
+              <p className="ui-font-display mt-1 text-[16px] font-bold">
+                (CLR / A) + (B × FAT) + C
+              </p>
+            </div>
 
-                              {/* Field C */}
-                              <div className="mb-6">
-                                   <label className="block text-sm mb-2 text-gray-200">Value for C:</label>
-                                   <input
-                                        type="number"
-                                        name="C"
-                                        value={formValues.C}
-                                        onChange={handleChange}
-                                        step="any"
-                                        className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
-                                   />
-                              </div>
+            <div className="space-y-4">
+              <Input
+                label="Value for A"
+                type="number"
+                name="A"
+                step="any"
+                value={formValues.A}
+                onChange={handleChange}
+                error={shown('A')}
+              />
+              <Input
+                label="Value for B"
+                type="number"
+                name="B"
+                step="any"
+                value={formValues.B}
+                onChange={handleChange}
+                error={shown('B')}
+              />
+              <Input
+                label="Value for C"
+                type="number"
+                name="C"
+                step="any"
+                value={formValues.C}
+                onChange={handleChange}
+                error={shown('C')}
+              />
+            </div>
 
-                              <div className="flex justify-between items-center mt-6">
-                                   <button
-                                        type="submit"
-                                        className="w-full mr-2 bg-teal-600 hover:bg-teal-700 transition text-white font-semibold py-2 rounded-lg"
-                                   >
-                                        Save
-                                   </button>
-                                   <button
-                                        type="button"
-                                        onClick={handleReset}
-                                        className="w-full ml-2 bg-rose-600 hover:bg-rose-700 transition text-white font-semibold py-2 rounded-lg"
-                                   >
-                                        Reset
-                                   </button>
-                              </div>
-                         </form>
-                    </div>
+            <div className="ui-border-subtle mt-4 flex items-center justify-between rounded-lg border px-4 py-3">
+              <span className="ui-text-tertiary text-[12px]">
+                Example: CLR {exampleClr}, FAT {exampleFat.toFixed(1)}
+              </span>
+              {example === null ? (
+                <span className="ui-text-tertiary text-[12px]">—</span>
+              ) : (
+                <Badge tone="primary" dot={false}>
+                  SNF {(Math.round(example * 10) / 10).toFixed(1)}
+                </Badge>
+              )}
+            </div>
 
-                    {/* Chart Section */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-md">
-                         <Chart formValues={formValues} trigger={saveTrigger} />
-                    </div>
-               
-          </section>
-     );
-};
+            <div className="mt-5 flex gap-2">
+              <Button type="submit" className="flex-1" icon={Save} loading={saving}>
+                Save
+              </Button>
+              <Button variant="secondary" className="flex-1" icon={RotateCcw} onClick={handleReset}>
+                Reset
+              </Button>
+            </div>
+          </SectionCard>
+        </form>
 
-export default SnfChartPage;
+        <div className="lg:col-span-2">
+          <Chart formValues={formValues} trigger={saveTrigger} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default SnfChartPage
