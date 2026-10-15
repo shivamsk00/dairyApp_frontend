@@ -49,54 +49,7 @@ const AddCustomerPage = () => {
         // setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setError('');
-
-    //     console.log("form data print ==>", form)
-
-    //     try {
-    //         const res = await addCustomer(form);
-    //         console.log("API Response:", res);
-
-    //         if (res.status_code == 200) {
-    //             setShowSuccessModal(true);
-
-    //             // Optional: Clear the form
-    //             setForm({
-    //                 customer_type: '',
-    //                 name: '',
-    //                 mobile: '',
-    //                 email: '',
-    //                 careof: '',
-    //                 address: '',
-    //                 city: '',
-    //                 pincode: '',
-    //                 contact_person: '',
-    //                 designation: '',
-    //                 // pan_number: '',
-    //                 state: '',
-    //                 bank_account: '',
-    //                 ifsc_code: '',
-    //                 subsidy_code: "",
-    //                 total_cows: "",
-    //                 total_buffalos: "",
-    //                 total_animals: "",
-    //                 aadhar_number:"",
-    //                 jan_aadhar_number:"",
-    //                 bank_image:""
-    //             });
-    //             CustomToast.success(res.message)
-    //             // Navigate to /customer after 2 seconds
-    //             navigate('/customer');
-    //         } else {
-    //             CustomToast.error(res.message)
-    //         }
-    //     } catch (error) {
-    //         console.error('Error adding customer:', error);
-    //         setError('An unexpected error occurred.');
-    //     }
-    // };
+   
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -277,7 +230,7 @@ const AddCustomerPage = () => {
                 {/* Email and Care of */}
                 <div className="w-full flex flex-col md:flex-row gap-4">
                     <div className="w-full">
-                        <label className="block text-sm font-medium text-white">Email</label>
+                        <label className="block text-sm font-medium text-white">Email <span className="text-red-600 text-xl">*</span></label>
                         <input
                             type="email"
                             name="email"
@@ -299,7 +252,7 @@ const AddCustomerPage = () => {
                     </div>
                     {/* contact person */}
                     <div className='w-full'>
-                        <label className="block text-sm font-medium text-white">Contact Person</label>
+                        <label className="block text-sm font-medium text-white">Contact Person <span className="text-red-600 text-xl">*</span></label>
                         <input
                             maxLength={10}
                             type="text"
@@ -326,7 +279,7 @@ const AddCustomerPage = () => {
                 {/* Extra Fields Row */}
                 <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-white">City</label>
+                        <label className="block text-sm font-medium text-white">City <span className="text-red-600 text-xl">*</span></label>
                         <input
                             type="text"
                             name="city"
@@ -336,7 +289,7 @@ const AddCustomerPage = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-white">Pincode</label>
+                        <label className="block text-sm font-medium text-white">Pincode <span className="text-red-600 text-xl">*</span></label>
                         <input
                             type="text"
                             name="pincode"
@@ -347,7 +300,7 @@ const AddCustomerPage = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-white">Designation</label>
+                        <label className="block text-sm font-medium text-white">Designation <span className="text-red-600 text-xl">*</span></label>
                         <input
                             type="text"
                             name="designation"
