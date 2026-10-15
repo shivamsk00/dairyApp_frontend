@@ -68,7 +68,7 @@ const ChatDrawer = ({
   return createPortal(
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] bg-[rgb(10_12_11_/_0.5)]" onClick={onClose} />
+        <div className="fixed inset-0 z-[60] bg-[hsl(214_32%_5%_/_0.5)]" onClick={onClose} />
       )}
       <aside
         aria-label={title}

@@ -26,6 +26,7 @@ const itemKey = (item) => item.id ?? item.to ?? item.label
 
 const containsActive = (item, pathname) =>
   (item.children ?? []).some((child) => isActivePath(child.to, pathname, child.end))
+// Note: `child.active` (window-opening items) only highlights the row; it doesn't auto-open the menu.
 
 const SidebarBadge = ({ badge }) =>
   badge ? (
@@ -47,7 +48,7 @@ const SidebarBadge = ({ badge }) =>
  * controlled by `mobileOpen` / `onMobileClose`.
  *
  * @param {Array<{title?: string, items: NavItem[]}>} sections
- *   NavItem: { id?, label, icon?: React.ComponentType, to?, end?, href?, onClick?,
+ *   NavItem: { id?, label, icon?: React.ComponentType, to?, end?, href?, onClick?, disabled?, active?,
  *   badge?: {label, tone?}, children?: NavItem[] }. Items with `children` render as a submenu that
  *   opens automatically when one of its routes is active.
  * @param {React.ReactNode} [logo] Shown when expanded.
@@ -62,6 +63,8 @@ const SidebarBadge = ({ badge }) =>
  * @param {{label: string, value: number, max: number, valueLabel?: string, actionLabel?: string,
  *   onAction?: () => void}} [usage] Meter card above the user row (e.g. storage, SMS credits).
  * @param {{name: string, role?: string, avatar?: string, badge?: string}} [user]
+ * @param {React.ReactNode} [footer] Shown at the bottom when expanded (e.g. version / copyright).
+ * @param {React.ReactNode} [footerCollapsed] Shown at the bottom when collapsed.
  * @param {() => void} [onUserClick]
  * @param {() => void} [onSignOut]
  */
@@ -76,6 +79,8 @@ const AppSidebar = ({
   favorites,
   usage,
   user,
+  footer,
+  footerCollapsed,
   onUserClick,
   onSignOut
 }) => {
@@ -231,7 +236,8 @@ const AppSidebar = ({
                               <li
                                 key={itemKey(child)}
                                 className={cx(
-                                  isActivePath(child.to, pathname, child.end) && 'is-active'
+                                  (child.active || isActivePath(child.to, pathname, child.end)) &&
+                                    'is-active'
                                 )}
                               >
                                 <ActionLink
@@ -239,9 +245,13 @@ const AppSidebar = ({
                                   end={child.end ?? child.to === '/'}
                                   href={child.href}
                                   onClick={child.onClick}
+                                  disabled={child.disabled}
                                   className="ui-sidebar-link"
                                 >
                                   <span className="truncate">{child.label}</span>
+                                  {child.disabled && (
+                                    <span className="ml-auto size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                  )}
                                   <SidebarBadge badge={child.badge} />
                                 </ActionLink>
                               </li>
@@ -357,6 +367,11 @@ const AppSidebar = ({
                   </button>
                 )}
               </div>
+            </div>
+          )}
+          {(expanded ? footer : footerCollapsed) && (
+            <div className="shrink-0 border-t border-[color:var(--ui-sidebar-border)] px-3 py-3 text-center">
+              {expanded ? footer : footerCollapsed}
             </div>
           )}
         </aside>
