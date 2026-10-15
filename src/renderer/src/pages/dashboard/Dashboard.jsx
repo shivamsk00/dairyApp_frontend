@@ -1,218 +1,507 @@
+import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from 'react'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import {
+  Users,
+  Milk,
+  Package,
+  Banknote,
+  IndianRupee,
+  CalendarDays,
+  LineChart,
+  Sun,
+  Moon,
+  Download,
+  RefreshCw,
+  MoreHorizontal,
+  FileSpreadsheet,
+  Search,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Receipt,
+  BookOpen,
+  CreditCard,
+  ChevronRight,
+  Loader2
+} from 'lucide-react'
+import useHomeStore from '../../zustand/useHomeStore'
+import useAuthStore from '../../zustand/useAuthStore'
+import {
+  ActionLink,
+  Badge,
+  BentoGrid,
+  Breadcrumb,
+  Button,
+  CommandPalette,
+  DataTable,
+  Dropdown,
+  ExportModal,
+  ExportStatusModal,
+  IconBadge,
+  IconButton,
+  InsightCard,
+  KpiCard,
+  PageHero,
+  SectionCard,
+  SurfaceCard,
+  useDocumentTitle
+} from '../../components/ui'
 
-import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
-import { toast } from 'react-toastify';
-import { Users, Package, Banknote, LineChart, Sun, Moon, Plus, UserPlus, Receipt, Book, CreditCard, ShoppingCart, FileOutput, User, Download } from 'lucide-react';
-// import { Line } from 'react-chartjs-2';
-// import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import useHomeStore from '../../zustand/useHomeStore';
-import { Link } from 'react-router-dom';
+const DashboardChart = lazy(() => import('./DashboardChart'))
 
-// Register Chart.js components
-// ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
-const DashboardChart = lazy(() => import('./DashboardChart'));
+const fmt = (value) => Number(value || 0).toFixed(2)
+const money = (value) =>
+  `₹${Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const percentChange = (current, previous) =>
+  previous > 0 ? ((current - previous) / previous) * 100 : null
+
+const MENU_ITEM =
+  'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] font-medium hover:bg-[color:var(--ui-surface-sunken)]'
+
+const QUICK_ACTIONS = [
+  { label: 'All Customers', to: '/customer', icon: Users, tone: 'info' },
+  { label: 'Add Product', to: '/AddProductPage', icon: Package, tone: 'accent' },
+  { label: 'Milk Correction', to: '/milkCorrection', icon: Receipt, tone: 'warning' },
+  { label: 'View Reports', to: '/reports', icon: BookOpen, tone: 'primary' },
+  { label: 'Cash Entries', to: '/cashentry', icon: CreditCard, tone: 'success' }
+]
+
 const Dashboard = () => {
-  const getDashboardData = useHomeStore((state) => state.fetchDashboardData);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [appUpdateMessage, setAppUpdateMessage] = useState(null);
-  const [appUpdateProgress, setAppUpdateProgress] = useState(0);
+  useDocumentTitle('Dashboard')
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const getDashboardData = useHomeStore((state) => state.fetchDashboardData)
+  const [dashboardData, setDashboardData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [appUpdateMessage, setAppUpdateMessage] = useState(null)
+  const [appUpdateProgress, setAppUpdateProgress] = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [quickExport, setQuickExport] = useState(null)
 
-  const fetchDashboardData = useCallback(async (isSilent = false) => {
-    try {
-      if (!isSilent) setLoading(true);
-      const res = await getDashboardData();
-  
-      if (res.status_code === 200) {
-        setDashboardData(res.data);
-      } else {
-        if (!isSilent) {
-          setError(res.message);
-          toast.error(res.message);
+  const fetchDashboardData = useCallback(
+    async (isSilent = false) => {
+      try {
+        if (!isSilent) setLoading(true)
+        const res = await getDashboardData()
+
+        if (res.status_code === 200) {
+          // Keep the per-shift "today" totals the API returns next to the main payload.
+          setDashboardData({
+            ...res.data,
+            today: {
+              morningMilk: res.morning_total_milk,
+              eveningMilk: res.evening_total_milk,
+              morningAmount: res.morning_total_amount,
+              eveningAmount: res.evening_total_amount,
+              totalAmount: res.total_amount,
+              morningCustomers: res.total_morning_customer,
+              eveningCustomers: res.total_evening_customer
+            }
+          })
+        } else {
+          if (!isSilent) {
+            setError(res.message)
+            toast.error(res.message)
+          }
         }
+      } catch (error) {
+        if (!isSilent) {
+          setError(error.message)
+          toast.error(error.message)
+        }
+      } finally {
+        if (!isSilent) setLoading(false)
       }
-    } catch (error) {
-      if (!isSilent) {
-        setError(error.message);
-        toast.error(error.message);
-      }
-    } finally {
-      if (!isSilent) setLoading(false);
-    }
-  }, [getDashboardData]);
+    },
+    [getDashboardData]
+  )
 
   const handleCheckUpdate = async () => {
     if (window.api && window.api.checkForUpdate) {
       try {
-        setAppUpdateMessage('Checking for updates...');
-        await window.api.checkForUpdate();
-      } catch (err) {
-        toast.error('Failed to check for updates');
-        setAppUpdateMessage(null);
+        setAppUpdateMessage('Checking for updates...')
+        await window.api.checkForUpdate()
+      } catch {
+        toast.error('Failed to check for updates')
+        setAppUpdateMessage(null)
       }
     }
-  };
+  }
 
   useEffect(() => {
-    fetchDashboardData(false);
+    fetchDashboardData(false)
 
     // Automatic update check on dashboard load
-    handleCheckUpdate();
+    handleCheckUpdate()
 
     // Listen for app updates
     if (window.api) {
       window.api.onUpdateMessage((message) => {
-        setAppUpdateMessage(message);
+        setAppUpdateMessage(message)
         if (message === 'No update available.') {
-          toast.info('Your software is up to date.');
+          toast.info('Your software is up to date.')
         }
-      });
+      })
 
       window.api.onUpdateProgress((percent) => {
-        setAppUpdateProgress(percent);
-      });
+        setAppUpdateProgress(percent)
+      })
     }
 
     return () => {
       if (window.api && window.api.removeUpdateListeners) {
-        window.api.removeUpdateListeners();
+        window.api.removeUpdateListeners()
       }
-    };
-  }, [fetchDashboardData]);
+    }
+  }, [fetchDashboardData])
 
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading dashboard data...</div>
-      </div>
-    );
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await fetchDashboardData(true)
+    setRefreshing(false)
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-red-600">Error: {error}</div>
-      </div>
-    );
-  }
+  // Everything below derives from the API response.
+  const stats = useMemo(() => {
+    if (!dashboardData) return null
+    const { summary, total_milk, last_7_days_shift_data: days = [], today = {} } = dashboardData
+    const last = days[days.length - 1]
+    const yesterday = days[days.length - 2]
 
-  // Wait for data to load
-  if (!dashboardData) {
-    return null;
-  }
+    const todayTotal = total_milk?.total_milk_collected || 0
+    const morningToday = today.morningMilk ?? last?.morning_milk ?? 0
+    const eveningToday = today.eveningMilk ?? last?.evening_milk ?? 0
+    const amountToday = today.totalAmount ?? last?.total_amount ?? 0
+    const morningAmount = today.morningAmount ?? last?.morning_amount ?? 0
+    const eveningAmount = today.eveningAmount ?? last?.evening_amount ?? 0
 
-  // Extract data from API response
-  const { summary, milk_type_distribution, total_milk, last_7_days_shift_data } = dashboardData;
+    const week = days.reduce(
+      (sum, day) => ({
+        total: sum.total + day.total_milk,
+        morning: sum.morning + day.morning_milk,
+        evening: sum.evening + day.evening_milk,
+        amount: sum.amount + day.total_amount
+      }),
+      { total: 0, morning: 0, evening: 0, amount: 0 }
+    )
+    const best = days.reduce(
+      (top, day) => (day.total_milk > (top?.total_milk ?? 0) ? day : top),
+      null
+    )
 
-  // Prepare line chart data from last_7_days_shift_data
-  const weeklyPerformanceData = {
-    labels: last_7_days_shift_data?.map(item => item.day) || [],
-    datasets: [
-      {
-        label: 'Morning Shift (L)',
-        data: last_7_days_shift_data?.map(item => item.morning_milk) || [],
-        borderColor: '#F59E0B',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2,
-      },
-      {
-        label: 'Evening Shift (L)',
-        data: last_7_days_shift_data?.map(item => item.evening_milk) || [],
-        borderColor: '#3B82F6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2,
-      },
-    ],
-  };
+    return {
+      customers: summary?.customers ?? 0,
+      todayTotal,
+      morningToday,
+      eveningToday,
+      amountToday,
+      morningAmount,
+      eveningAmount,
+      morningCustomers: today.morningCustomers,
+      eveningCustomers: today.eveningCustomers,
+      days,
+      week,
+      best,
+      vsYesterday: percentChange(todayTotal, yesterday?.total_milk),
+      amountVsYesterday: percentChange(amountToday, yesterday?.total_amount),
+      morningShare: week.total > 0 ? (week.morning / week.total) * 100 : 0,
+      eveningShare: week.total > 0 ? (week.evening / week.total) * 100 : 0,
+      avgPerDay: days.length ? week.total / days.length : 0,
+      avgRate: week.total > 0 ? week.amount / week.total : 0
+    }
+  }, [dashboardData])
 
-  // Chart options
+  const chartData = useMemo(
+    () => ({
+      labels: stats?.days.map((item) => item.day) || [],
+      datasets: [
+        {
+          label: 'Morning Shift (L)',
+          data: stats?.days.map((item) => item.morning_milk) || [],
+          borderColor: '#e8830f',
+          backgroundColor: 'rgba(232, 131, 15, 0.12)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2
+        },
+        {
+          label: 'Evening Shift (L)',
+          data: stats?.days.map((item) => item.evening_milk) || [],
+          borderColor: '#187f65',
+          backgroundColor: 'rgba(24, 127, 101, 0.12)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2
+        }
+      ]
+    }),
+    [stats]
+  )
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'bottom',
-      },
+      legend: { position: 'bottom' },
       tooltip: {
         callbacks: {
-          label: function (context) {
-            return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' L';
-          }
+          label: (context) => `${context.dataset.label}: ${context.parsed.y.toFixed(2)} L`
         }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        grid: {
-          display: true,
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-        ticks: {
-          callback: function (value) {
-            return value + ' L';
-          }
-        }
+        grid: { display: true, color: 'rgba(0, 0, 0, 0.05)' },
+        ticks: { callback: (value) => `${value} L` }
       },
-      x: {
-        grid: {
-          display: false,
-        }
-      }
+      x: { grid: { display: false } }
     }
-  };
+  }
 
-  // Calculate total collection
-  const totalCollection = total_milk?.total_milk_collected || 0;
-  const totalPurchased = total_milk?.total_milk_purchased || 0;
+  const exportRows = () =>
+    (stats?.days || []).map((item) => ({
+      Date: item.date,
+      Day: item.day,
+      'Morning (L)': Number(item.morning_milk.toFixed(2)),
+      'Evening (L)': Number(item.evening_milk.toFixed(2)),
+      'Total (L)': Number(item.total_milk.toFixed(2)),
+      'Amount (₹)': Number(item.total_amount.toFixed(2))
+    }))
 
-  // Calculate totals for last 7 days
-  const last7DaysTotal = last_7_days_shift_data?.reduce((sum, day) => sum + day.total_milk, 0) || 0;
-  const last7DaysMorningTotal = last_7_days_shift_data?.reduce((sum, day) => sum + day.morning_milk, 0) || 0;
-  const last7DaysEveningTotal = last_7_days_shift_data?.reduce((sum, day) => sum + day.evening_milk, 0) || 0;
+  const runExport = async (format) => {
+    const rows = exportRows()
+    const name = 'dairy_last_7_days'
+    if (format === 'JSON') {
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' })
+      )
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${name}.json`
+      link.click()
+      URL.revokeObjectURL(url)
+      return
+    }
+    const XLSX = await import('xlsx')
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Last 7 Days')
+    XLSX.writeFile(workbook, `${name}.${format === 'CSV' ? 'csv' : 'xlsx'}`)
+  }
 
-  // Calculate percentages for shift distribution
-  const morningPercentage = last7DaysTotal > 0 ? (last7DaysMorningTotal / last7DaysTotal * 100).toFixed(1) : 0;
-  const eveningPercentage = last7DaysTotal > 0 ? (last7DaysEveningTotal / last7DaysTotal * 100).toFixed(1) : 0;
+  const startQuickExport = async () => {
+    setQuickExport('loading')
+    try {
+      await runExport('Excel')
+      setQuickExport('done')
+    } catch {
+      setQuickExport(null)
+      toast.error('Export failed')
+    }
+  }
 
-  // Mock data for recent collections (you can replace with API data when available)
-  const recentCollectionsData = [
-    { customer: 'Ramesh Kumar', shift: 'Morning', time: '06:32 AM', amount: 12.6, fat: 4.7, snf: 8.9 },
-    { customer: 'Priya Sharma', shift: 'Morning', time: '07:15 AM', amount: 8.5, fat: 3.6, snf: 8.2 },
-    { customer: 'Suresh Ravi', shift: 'Evening', time: '06:01 PM', amount: 15.2, fat: 4.1, snf: 8.7 },
-    { customer: 'Lakshmi Reddy', shift: 'Evening', time: '07:00 PM', amount: 10.8, fat: 4, snf: 8.5 },
-    { customer: 'Vijay Singh', shift: 'Morning', time: '08:02 AM', amount: 14.6, fat: 4.1, snf: 8.8 },
-  ];
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center gap-3 ui-text-secondary">
+        <Loader2 size={22} className="animate-spin ui-text-brand" />
+        <span className="text-base font-medium">Loading dashboard data...</span>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <SurfaceCard className="max-w-md w-full p-6 text-center">
+          <p className="ui-font-display text-[15px] font-bold">Couldn&apos;t load the dashboard</p>
+          <p className="mt-1.5 text-[12.5px] text-[color:var(--ui-danger-600)]">{error}</p>
+          <Button
+            className="mt-5"
+            icon={RefreshCw}
+            onClick={() => {
+              setError(null)
+              fetchDashboardData(false)
+            }}
+          >
+            Try again
+          </Button>
+        </SurfaceCard>
+      </div>
+    )
+  }
+
+  // Wait for data to load
+  if (!stats) {
+    return null
+  }
+
+  const displayName = user?.name || user?.email?.split('@')[0] || 'there'
+  const todayLabel = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+
+  const insights = [
+    stats.todayTotal === 0
+      ? {
+          tag: 'Action Needed',
+          tone: 'warning',
+          icon: Milk,
+          text: <>No milk has been collected yet today.</>,
+          actionLabel: 'Open collection',
+          to: '/milkcollection'
+        }
+      : stats.vsYesterday !== null && {
+          tag: stats.vsYesterday >= 0 ? 'Positive Trend' : 'Heads Up',
+          tone: stats.vsYesterday >= 0 ? 'success' : 'warning',
+          icon: stats.vsYesterday >= 0 ? TrendingUp : TrendingDown,
+          text: (
+            <>
+              Today&apos;s collection is <strong>{Math.abs(stats.vsYesterday).toFixed(1)}%</strong>{' '}
+              {stats.vsYesterday >= 0 ? 'higher' : 'lower'} than yesterday.
+            </>
+          ),
+          actionLabel: 'Milk correction',
+          to: '/milkCorrection'
+        },
+    stats.best &&
+      stats.best.total_milk > 0 && {
+        tag: 'Best Day',
+        tone: 'primary',
+        icon: Sparkles,
+        text: (
+          <>
+            <strong>{fmt(stats.best.total_milk)} L</strong> collected on {stats.best.day},{' '}
+            {stats.best.date} — your highest this week.
+          </>
+        ),
+        actionLabel: 'View reports',
+        to: '/reports'
+      },
+    stats.week.total > 0 && {
+      tag: 'Shift Mix',
+      tone: 'info',
+      icon: stats.morningShare >= stats.eveningShare ? Sun : Moon,
+      text: (
+        <>
+          The <strong>{stats.morningShare >= stats.eveningShare ? 'morning' : 'evening'}</strong>{' '}
+          shift brings in{' '}
+          <strong>{Math.max(stats.morningShare, stats.eveningShare).toFixed(1)}%</strong> of this
+          week&apos;s milk.
+        </>
+      )
+    },
+    stats.week.total > 0 && {
+      tag: 'Average Rate',
+      tone: 'accent',
+      icon: IndianRupee,
+      text: (
+        <>
+          You paid an average of <strong>{money(stats.avgRate)}</strong> per litre over the last 7
+          days.
+        </>
+      ),
+      actionLabel: 'Rate chart',
+      to: '/ratechart'
+    }
+  ].filter(Boolean)
+
+  const rows = [
+    ...stats.days.map((item) => ({ ...item, id: item.date })),
+    {
+      id: 'total',
+      isTotal: true,
+      date: 'Total',
+      morning_milk: stats.week.morning,
+      evening_milk: stats.week.evening,
+      total_milk: stats.week.total,
+      total_amount: stats.week.amount
+    }
+  ]
+  const bold = (row, node) => (row.isTotal ? <strong>{node}</strong> : node)
+
+  const paletteGroups = [
+    {
+      title: 'Navigate',
+      items: [
+        { id: 'customers', label: 'Customers', icon: Users, to: '/customer', keywords: 'grahak' },
+        { id: 'collection', label: 'Milk Collection', icon: Milk, to: '/milkcollection' },
+        { id: 'dispatch', label: 'Milk Dispatch', icon: Package, to: '/milkDispatch' },
+        { id: 'payments', label: 'Payment Register', icon: IndianRupee, to: '/paymentregister' },
+        { id: 'cash', label: 'Cash Entry', icon: Banknote, to: '/cashentry' },
+        { id: 'reports', label: 'Reports', icon: BookOpen, to: '/reports' },
+        { id: 'ratechart', label: 'Rate Chart', icon: LineChart, to: '/ratechart' },
+        { id: 'inventory', label: 'Inventory', icon: Package, to: '/inventory' }
+      ]
+    },
+    {
+      title: 'Quick actions',
+      items: [
+        {
+          id: 'export',
+          label: 'Export last 7 days',
+          icon: Download,
+          tone: 'accent',
+          onSelect: () => setExportOpen(true)
+        },
+        {
+          id: 'refresh',
+          label: 'Refresh dashboard',
+          icon: RefreshCw,
+          tone: 'success',
+          onSelect: handleRefresh
+        },
+        {
+          id: 'update',
+          label: 'Check for updates',
+          icon: Sparkles,
+          tone: 'info',
+          onSelect: handleCheckUpdate
+        }
+      ]
+    }
+  ]
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative ui-text-primary">
       {/* App Update Overlay/Banner */}
       {appUpdateMessage && (
         <div className="fixed top-0 left-0 w-full z-[100] animate-in slide-in-from-top duration-500 ease-out">
           {/* Main Banner */}
-          <div className={`text-white px-6 py-3 shadow-2xl backdrop-blur-md border-b border-white/10 transition-colors duration-500 ${appUpdateMessage === 'No update available.'
-            ? 'bg-gray-800'
-            : 'bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700'
-            }`}>
+          <div
+            className={`text-white px-6 py-3 shadow-2xl backdrop-blur-md border-b border-white/10 transition-colors duration-500 ${
+              appUpdateMessage === 'No update available.'
+                ? 'bg-gray-800'
+                : 'bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700'
+            }`}
+          >
             <div className="max-w-8xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className={`p-2 rounded-lg backdrop-blur-sm ${appUpdateMessage === 'No update available.' ? 'bg-white/10' : 'bg-white/20 animate-pulse'
-                  }`}>
+                <div
+                  className={`p-2 rounded-lg backdrop-blur-sm ${
+                    appUpdateMessage === 'No update available.'
+                      ? 'bg-white/10'
+                      : 'bg-white/20 animate-pulse'
+                  }`}
+                >
                   <LineChart className="text-xl text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-xs tracking-wide uppercase opacity-80">Software Update</p>
+                  <p className="font-bold text-xs tracking-wide uppercase opacity-80">
+                    Software Update
+                  </p>
                   <p className="text-lg font-medium leading-tight">{appUpdateMessage}</p>
                 </div>
               </div>
@@ -225,7 +514,9 @@ const Dashboard = () => {
                       style={{ width: `${appUpdateProgress}%` }}
                     />
                   </div>
-                  <span className="text-lg font-bold font-mono min-w-[50px]">{appUpdateProgress}%</span>
+                  <span className="text-lg font-bold font-mono min-w-[50px]">
+                    {appUpdateProgress}%
+                  </span>
                 </div>
               )}
 
@@ -250,286 +541,389 @@ const Dashboard = () => {
           )}
         </div>
       )}
+      <div
+        className={`max-w-8xl mx-auto transition-all duration-500 ${appUpdateMessage ? 'pt-20' : ''}`}
+      >
+        <Breadcrumb
+          title="Dashboard"
+          items={[{ label: 'Home', to: '/' }, { label: 'Dashboard' }]}
+          actions={
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="ui-bg-raised ui-border-default hidden items-center gap-2 rounded-full border py-1 pl-2.5 pr-1.5 text-[11.5px] font-medium ui-text-tertiary sm:inline-flex"
+            >
+              <Search size={12} aria-hidden="true" />
+              Quick search
+              <kbd className="ui-kbd text-[10px]">Ctrl K</kbd>
+            </button>
+          }
+        />
 
-      <div className={`max-w-8xl mx-auto space-y-6 transition-all duration-500 ${appUpdateMessage ? 'pt-20' : 'pt-4'}`}>
-        {/* Top KPI Cards - Using API Data */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KpiCard
-            title="Total Customers"
-            value={summary.customers}
-            icon={<Users className="text-white" />}
-            color="bg-blue-500"
+        <div className="space-y-6 p-3 sm:p-4 lg:p-6">
+          <PageHero
+            title={`Welcome back, ${displayName}`}
+            description={
+              stats.todayTotal > 0
+                ? `${fmt(stats.todayTotal)} L collected today from ${stats.customers} registered customers.`
+                : `No collection recorded yet today. ${stats.customers} customers are registered.`
+            }
+            chips={[
+              { label: 'Live data', icon: Sparkles },
+              { label: `${stats.week.total.toFixed(0)} L this week`, icon: CalendarDays }
+            ]}
+            stats={[
+              { label: "Today's Collection", value: `${fmt(stats.todayTotal)} L` },
+              { label: "Today's Amount", value: money(stats.amountToday) },
+              { label: 'Customers', value: stats.customers }
+            ]}
+            actions={
+              <>
+                <Button
+                  icon={Download}
+                  className="!border-0 bg-white/[0.14] !text-white !shadow-none hover:bg-white/20"
+                  onClick={() => setExportOpen(true)}
+                >
+                  Export Report
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={RefreshCw}
+                  loading={refreshing}
+                  onClick={handleRefresh}
+                >
+                  Refresh Data
+                </Button>
+              </>
+            }
+            meta={todayLabel}
           />
-          <KpiCard
-            title="Today's Collection"
-            value={`${totalCollection.toFixed(2)} L`}
-            subtitle="morning + evening"
-            icon={<Package className="text-white" />}
-            color="bg-green-500"
-          />
-          <KpiCard
-            title="Current Inventory"
-            value={`${summary.inventory.toFixed(2)}`}
-            icon={<Banknote className="text-white" />}
-            color="bg-yellow-500"
-          />
-          <KpiCard
-            title="Last 7 Days"
-            value={`${last7DaysTotal.toFixed(2)} L`}
-            subtitle="total collection"
-            icon={<LineChart className="text-white" />}
-            color="bg-teal-500"
-          />
-        </div>
 
-        {/* Shift-wise Collection Summary */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-400">
-          <h2 className="text-lg font-semibold text-gray-800">Last 7 Days - Shift-wise Collection</h2>
-          <p className="text-sm text-gray-500 mb-6">Morning vs Evening milk collection breakdown</p>
+          <BentoGrid>
+            <KpiCard
+              className="col-span-12 sm:col-span-6 lg:col-span-3"
+              label="Total Customers"
+              value={stats.customers}
+              icon={Users}
+              tone="info"
+              details={[
+                { label: 'Morning shift', value: stats.morningCustomers ?? '—' },
+                { label: 'Evening shift', value: stats.eveningCustomers ?? '—' }
+              ]}
+            />
+            <KpiCard
+              className="col-span-12 sm:col-span-6 lg:col-span-3"
+              label="Today's Collection"
+              value={`${fmt(stats.todayTotal)} L`}
+              icon={Milk}
+              tone="primary"
+              change={
+                stats.vsYesterday !== null
+                  ? {
+                      value: `${Math.abs(stats.vsYesterday).toFixed(1)}%`,
+                      direction: stats.vsYesterday >= 0 ? 'up' : 'down'
+                    }
+                  : undefined
+              }
+              details={[
+                { label: 'Morning', value: `${fmt(stats.morningToday)} L` },
+                { label: 'Evening', value: `${fmt(stats.eveningToday)} L` }
+              ]}
+            />
+            <KpiCard
+              className="col-span-12 sm:col-span-6 lg:col-span-3"
+              label="Today's Amount"
+              value={money(stats.amountToday)}
+              icon={IndianRupee}
+              tone="accent"
+              change={
+                stats.amountVsYesterday !== null
+                  ? {
+                      value: `${Math.abs(stats.amountVsYesterday).toFixed(1)}%`,
+                      direction: stats.amountVsYesterday >= 0 ? 'up' : 'down'
+                    }
+                  : undefined
+              }
+              details={[
+                { label: 'Morning', value: money(stats.morningAmount) },
+                { label: 'Evening', value: money(stats.eveningAmount) }
+              ]}
+            />
+            <KpiCard
+              className="col-span-12 sm:col-span-6 lg:col-span-3"
+              label="Last 7 Days"
+              value={`${fmt(stats.week.total)} L`}
+              icon={LineChart}
+              tone="success"
+              details={[
+                { label: 'Daily average', value: `${fmt(stats.avgPerDay)} L` },
+                { label: 'Total paid', value: money(stats.week.amount) }
+              ]}
+            />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
-            {/* Morning Shift */}
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Sun className="text-yellow-500" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-700">Morning Shift</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {last7DaysMorningTotal.toFixed(2)} L
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 mb-3">
-                <p className="text-sm font-semibold">{morningPercentage}%</p>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="h-2 rounded-full bg-yellow-400" style={{ width: `${morningPercentage}%` }}></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Evening Shift */}
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Moon className="text-blue-500" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-700">Evening Shift</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {last7DaysEveningTotal.toFixed(2)} L
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 mb-3">
-                <p className="text-sm font-semibold">{eveningPercentage}%</p>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${eveningPercentage}%` }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center border-t pt-4">
-            <p className="text-gray-700 font-semibold">
-              Total Collection: <span className="text-xl text-black">{last7DaysTotal.toFixed(2)} Liters</span>
-            </p>
-            <p className="text-sm text-gray-500">
-              Customers: <span className="font-semibold text-gray-700">{summary.customers}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Main Content Area: Performance & Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 border border-gray-400 rounded-lg">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Weekly Performance Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-800">Last 7 Days Collection Trend</h2>
-              <p className="text-sm text-gray-500 mb-4">Morning vs Evening shift comparison</p>
+            <SectionCard
+              className="col-span-12 lg:col-span-8"
+              title="Collection Trend"
+              subtitle="Morning vs evening shift, last 7 days"
+              icon={LineChart}
+              tone="primary"
+              action={
+                <Dropdown
+                  panelClassName="w-56 p-1.5"
+                  trigger={({ toggle }) => (
+                    <IconButton icon={MoreHorizontal} label="More actions" onClick={toggle} />
+                  )}
+                >
+                  {(close) => (
+                    <>
+                      <button
+                        type="button"
+                        className={MENU_ITEM}
+                        onClick={() => {
+                          close()
+                          handleRefresh()
+                        }}
+                      >
+                        <RefreshCw size={15} aria-hidden="true" /> Refresh data
+                      </button>
+                      <button
+                        type="button"
+                        className={MENU_ITEM}
+                        onClick={() => {
+                          close()
+                          setExportOpen(true)
+                        }}
+                      >
+                        <Download size={15} aria-hidden="true" /> Export report…
+                      </button>
+                      <button
+                        type="button"
+                        className={MENU_ITEM}
+                        onClick={() => {
+                          close()
+                          startQuickExport()
+                        }}
+                      >
+                        <FileSpreadsheet size={15} aria-hidden="true" /> Quick export (Excel)
+                      </button>
+                    </>
+                  )}
+                </Dropdown>
+              }
+            >
               <div style={{ height: '300px' }}>
-                {/* <Line data={weeklyPerformanceData} options={chartOptions} /> */}
-                <Suspense fallback={<div>Loading Chart...</div>}>
-                  <DashboardChart
-                    data={weeklyPerformanceData}
-                    options={chartOptions}
-                  />
+                <Suspense
+                  fallback={<div className="ui-text-tertiary text-[13px]">Loading chart...</div>}
+                >
+                  <DashboardChart data={chartData} options={chartOptions} />
                 </Suspense>
               </div>
-            </div>
+            </SectionCard>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <ProductCard
-                title="Total Customers"
-                value={summary.customers}
-                icon={<Users />}
-              />
-              <ProductCard
-                title="Today's Inventory"
-                value={`${summary.inventory.toFixed(2)} L`}
-                icon={<Package />}
-              />
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-800">Quick Actions</h2>
-            <p className="text-sm text-gray-500 mb-6">Frequently used operations</p>
-            <div className="space-y-3">
-
-              <Link to="/customer">
-                <QuickActionButton text="All Customer" icon={<Users />} />
-              </Link>
-              <Link to="/AddProductPage">
-                <QuickActionButton text="Add Product" icon={<Package />} />
-              </Link>
-              <Link to="/milkCorrection">
-                <QuickActionButton text="All Milk Correction" icon={<Receipt />} />
-              </Link>
-              <Link to="/reports">
-                <QuickActionButton text="View Reports" icon={<Book />} />
-              </Link>
-              <Link to="/cashentry">
-                <QuickActionButton text="Cash Entries" icon={<CreditCard />} />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* 7 Days Detailed Table */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800">Last 7 Days Detailed Report</h2>
-          <p className="text-sm text-gray-500 mb-4">Day-wise collection breakdown</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-600">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3">Date</th>
-                  <th scope="col" className="px-6 py-3">Day</th>
-                  <th scope="col" className="px-6 py-3 text-right">Morning (L)</th>
-                  <th scope="col" className="px-6 py-3 text-right">Evening (L)</th>
-                  <th scope="col" className="px-6 py-3 text-right">Total (L)</th>
-                  <th scope="col" className="px-6 py-3 text-right">Amount (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {last_7_days_shift_data?.map((item, index) => (
-                  <tr key={index} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{item.date}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {item.day}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">{item.morning_milk.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-right">{item.evening_milk.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-right font-bold">{item.total_milk.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-right text-green-600 font-semibold">
-                      ₹{item.total_amount.toFixed(2)}
-                    </td>
-                  </tr>
+            <SectionCard
+              className="col-span-12 lg:col-span-4"
+              title="Shift Split"
+              subtitle="Share of the last 7 days"
+              icon={Sun}
+              tone="accent"
+            >
+              <div className="space-y-5">
+                {[
+                  {
+                    label: 'Morning Shift',
+                    icon: Sun,
+                    tone: 'warning',
+                    value: stats.week.morning,
+                    share: stats.morningShare,
+                    bar: 'var(--ui-accent-500)'
+                  },
+                  {
+                    label: 'Evening Shift',
+                    icon: Moon,
+                    tone: 'primary',
+                    value: stats.week.evening,
+                    share: stats.eveningShare,
+                    bar: 'var(--ui-primary-600)'
+                  }
+                ].map((shift) => (
+                  <div key={shift.label}>
+                    <div className="flex items-center gap-3">
+                      <IconBadge icon={shift.icon} tone={shift.tone} variant="tint" />
+                      <div className="min-w-0 flex-1">
+                        <p className="ui-text-tertiary text-[11.5px]">{shift.label}</p>
+                        <p className="ui-font-display text-[18px] font-extrabold leading-tight">
+                          {fmt(shift.value)} L
+                        </p>
+                      </div>
+                      <Badge tone={shift.tone === 'warning' ? 'accent' : 'primary'} dot={false}>
+                        {shift.share.toFixed(1)}%
+                      </Badge>
+                    </div>
+                    <div className="ui-bg-sunken mt-2.5 h-2 overflow-hidden rounded-full">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${shift.share}%`, background: shift.bar }}
+                      />
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot className="bg-gray-50">
-                <tr>
-                  <td colSpan="2" className="px-6 py-4 font-bold text-gray-900">Total</td>
-                  <td className="px-6 py-4 text-right font-bold text-gray-900">
-                    {last7DaysMorningTotal.toFixed(2)} L
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-gray-900">
-                    {last7DaysEveningTotal.toFixed(2)} L
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-gray-900">
-                    {last7DaysTotal.toFixed(2)} L
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-green-600">
-                    ₹{last_7_days_shift_data?.reduce((sum, day) => sum + day.total_amount, 0).toFixed(2)}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                <div className="ui-border-subtle flex items-center justify-between border-t pt-3 text-[12px]">
+                  <span className="ui-text-tertiary">Total collection</span>
+                  <span className="font-semibold">{fmt(stats.week.total)} L</span>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              className="col-span-12 lg:col-span-4"
+              title="Quick Actions"
+              subtitle="Frequently used operations"
+              icon={Sparkles}
+              tone="info"
+            >
+              <div className="-mx-1.5 space-y-1">
+                {QUICK_ACTIONS.map((action) => (
+                  <ActionLink
+                    key={action.to}
+                    to={action.to}
+                    activeClassName=""
+                    className="group flex items-center gap-3 rounded-lg px-1.5 py-2 text-[13px] font-medium hover:bg-[color:var(--ui-surface-sunken)]"
+                  >
+                    <IconBadge icon={action.icon} tone={action.tone} variant="tint" size="sm" />
+                    <span className="flex-1">{action.label}</span>
+                    <ChevronRight
+                      size={14}
+                      className="ui-text-tertiary transition-transform group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </ActionLink>
+                ))}
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              className="col-span-12 lg:col-span-8"
+              title="Insights"
+              subtitle="Generated from this week's collection data"
+              icon={Sparkles}
+              tone="accent"
+              action={<Badge tone="success">Live</Badge>}
+            >
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {insights.map((insight) => (
+                  <InsightCard
+                    key={insight.tag}
+                    tag={insight.tag}
+                    tone={insight.tone}
+                    icon={insight.icon}
+                    actionLabel={insight.actionLabel}
+                    onAction={insight.to ? () => navigate(insight.to) : undefined}
+                  >
+                    {insight.text}
+                  </InsightCard>
+                ))}
+                {insights.length === 0 && (
+                  <p className="ui-text-tertiary col-span-full py-4 text-center text-[13px]">
+                    Insights will appear once milk has been collected.
+                  </p>
+                )}
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              className="col-span-12"
+              title="Last 7 Days Detailed Report"
+              subtitle="Day-wise collection breakdown"
+              icon={CalendarDays}
+              tone="primary"
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={Download}
+                  onClick={() => setExportOpen(true)}
+                >
+                  Export
+                </Button>
+              }
+            >
+              <DataTable
+                minWidth="680px"
+                rows={rows}
+                columns={[
+                  {
+                    key: 'date',
+                    header: 'Date',
+                    render: (row) => <span className="font-medium">{bold(row, row.date)}</span>
+                  },
+                  {
+                    key: 'day',
+                    header: 'Day',
+                    render: (row) =>
+                      row.isTotal ? null : (
+                        <Badge tone="info" dot={false}>
+                          {row.day}
+                        </Badge>
+                      )
+                  },
+                  {
+                    key: 'morning',
+                    header: 'Morning (L)',
+                    className: 'text-right',
+                    render: (row) => bold(row, fmt(row.morning_milk))
+                  },
+                  {
+                    key: 'evening',
+                    header: 'Evening (L)',
+                    className: 'text-right',
+                    render: (row) => bold(row, fmt(row.evening_milk))
+                  },
+                  {
+                    key: 'total',
+                    header: 'Total (L)',
+                    className: 'text-right font-bold',
+                    render: (row) => fmt(row.total_milk)
+                  },
+                  {
+                    key: 'amount',
+                    header: 'Amount (₹)',
+                    className: 'text-right font-semibold text-[color:var(--ui-success-600)]',
+                    render: (row) => money(row.total_amount)
+                  }
+                ]}
+              />
+            </SectionCard>
+          </BentoGrid>
         </div>
-
-        {/* Export Reports */}
-        {/* <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-center">
-          <div>
-            <h3 className="text-md font-semibold text-gray-800">Export Reports</h3>
-            <p className="text-sm text-gray-500">Download daily, weekly, or monthly reports</p>
-          </div>
-          <div className="flex items-center gap-2 mt-3 sm:mt-0">
-            <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
-              <option>Today</option>
-              <option>This Week</option>
-              <option>This Month</option>
-            </select>
-            <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors">
-              <FileOutput />
-              <span>Export Report</span>
-            </button>
-          </div>
-        */}
-
-
       </div>
-      {/* Fixed Bottom Left Update Button */}
-      <div
+
+      <Button
+        icon={Download}
         onClick={handleCheckUpdate}
-        style={{
-          position: "fixed"
-        }}
-        className="fixed bottom-3 left-0 z-[90] flex items-center gap-2 bg-gray-900/80 hover:bg-gray-900 text-white px-4 py-2.5 rounded-full shadow-lg backdrop-blur-md cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 group border border-white/10"
         title="Check for software updates"
+        className="fixed bottom-3 left-3 z-[90] !rounded-full uppercase tracking-wider"
       >
-        <div className="bg-blue-500 p-1.5 rounded-full group-hover:rotate-180 transition-transform duration-500">
-          <Download className="text-xs" />
-        </div>
-        <span className="text-xs font-bold tracking-wider uppercase">Check Update</span>
-      </div>
+        Check Update
+      </Button>
+
+      <CommandPalette isOpen={paletteOpen} onOpenChange={setPaletteOpen} groups={paletteGroups} />
+
+      <ExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Export Last 7 Days"
+        formats={[{ value: 'CSV' }, { value: 'Excel', icon: FileSpreadsheet }, { value: 'JSON' }]}
+        scopes={[{ value: 'week', label: 'Last 7 days report' }]}
+        onExport={(format) => runExport(format)}
+      />
+      <ExportStatusModal
+        isOpen={quickExport !== null}
+        status={quickExport || 'loading'}
+        format="Excel"
+        onClose={() => setQuickExport(null)}
+      />
     </div>
-  );
-};
+  )
+}
 
-// Reusable Components
-const KpiCard = ({ title, value, subtitle, icon, color }) => (
-  <div className={`${color} p-2  text-white shadow-lg`}>
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="text-sm font-medium opacity-90">{title}</p>
-        <p className="text-xl font-bold">{value}</p>
-        {subtitle && <p className="text-xs opacity-80">{subtitle}</p>}
-      </div>
-      <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-        {icon}
-      </div>
-    </div>
-  </div>
-);
-
-const ProductCard = ({ title, value, change, icon }) => (
-  <div className="bg-white p-5 rounded-lg shadow-sm flex justify-between items-start">
-    <div>
-      <div className="flex items-center gap-2 text-gray-500 mb-2">
-        {icon}
-        <p className="text-sm font-medium">{title}</p>
-      </div>
-      <p className="text-3xl font-bold text-gray-800">{value}</p>
-    </div>
-    {change && <p className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">{change}</p>}
-  </div>
-);
-
-const QuickActionButton = ({ text, icon, primary = false }) => (
-  <button className={`w-full flex items-center gap-3 p-3 rounded-lg text-left text-sm font-medium transition-colors ${primary
-    ? 'bg-blue-600 text-white shadow hover:bg-blue-700'
-    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-    }`}>
-    {icon}
-    <span>{text}</span>
-  </button>
-);
-
-export default Dashboard;
+export default Dashboard
