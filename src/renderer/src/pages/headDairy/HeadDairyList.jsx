@@ -1,277 +1,326 @@
-import React, { useEffect, useState } from 'react';
-import "./headDairy.css"
+import { useEffect, useState } from 'react'
 import {
-    useReactTable,
-    getCoreRowModel,
-    flexRender,
-    createColumnHelper,
-} from '@tanstack/react-table';
-import { FaDotCircle, FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import useHomeStore from '../../zustand/useHomeStore';
-import { IoMdCloseCircle } from 'react-icons/io';
-import { toast } from 'react-toastify';
-import CustomToast from '../../helper/costomeToast';
-import Preloading from '../../components/Preloading';
+  Building2,
+  CircleCheck,
+  Eye,
+  IndianRupee,
+  Loader2,
+  Pencil,
+  Phone,
+  Plus,
+  Trash2,
+  Users
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Avatar,
+  Badge,
+  Breadcrumb,
+  Button,
+  DataTable,
+  DeleteConfirmModal,
+  DetailList,
+  IconBadge,
+  IconButton,
+  KpiCard,
+  Modal,
+  SurfaceCard,
+  useDocumentTitle
+} from '../../components/ui'
 
-const columnHelper = createColumnHelper();
+const money = (value) =>
+  `₹${parseFloat(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const isActive = (row) => row.status == 1
 
 const HeadDairyList = () => {
-    const nav = useNavigate();
-    const getAllHeadDairyMaster = useHomeStore(state => state.getAllHeadDairyMaster);
-    const deleteHeadDairyMaster = useHomeStore(state => state.deleteHeadDairyMaster);
-    const [rowData, setRowData] = useState([]);
-    const [loading, setLoading] = useState(false); // 👈 Add loading state
-    const [selectedHeadDairy, setSelectedHeadDairy] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [headDairyToDelete, setHeadDairyToDelete] = useState(null);
+  useDocumentTitle('Head Dairy Master')
+  const nav = useNavigate()
+  const getAllHeadDairyMaster = useHomeStore((state) => state.getAllHeadDairyMaster)
+  const deleteHeadDairyMaster = useHomeStore((state) => state.deleteHeadDairyMaster)
+  const [rowData, setRowData] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [selectedHeadDairy, setSelectedHeadDairy] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [headDairyToDelete, setHeadDairyToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
+  const fetchAllHeadDairyData = async () => {
+    try {
+      setLoading(true)
+      const res = await getAllHeadDairyMaster()
+      if (res.status_code == 200) {
+        setRowData(res.data)
+      } else {
+        CustomToast.error(res.message)
+      }
+    } catch (error) {
+      console.error('Failed to fetch Head Dairy Masters', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  useEffect(() => {
+    fetchAllHeadDairyData()
+  }, [])
 
-    const fetchAllHeadDairyData = async () => {
-        try {
-            setLoading(true); // 👈 Start loading
-            const res = await getAllHeadDairyMaster();
-            if (res.status_code == 200) {
-                setRowData(res.data);
-            
-            }
+  const confirmDeleteHeadDairyMaster = async () => {
+    setDeleting(true)
+    try {
+      const res = await deleteHeadDairyMaster(headDairyToDelete?.id)
+      if (res.status_code == 200) {
+        CustomToast.success(res.message)
+        fetchAllHeadDairyData()
+      } else {
+        CustomToast.error(res.message)
+      }
+    } catch (error) {
+      CustomToast.error('Failed to delete head dairy')
+      console.log('ERROR IN DELETE FUN IN Head Dairy LIST', error)
+    } finally {
+      setDeleting(false)
+      setIsConfirmOpen(false)
+      setHeadDairyToDelete(null)
+    }
+  }
 
-            else {
-                CustomToast.error(res.message);
-            }
+  const openDetails = (row) => {
+    setSelectedHeadDairy(row)
+    setIsModalOpen(true)
+  }
 
+  const activeCount = rowData.filter(isActive).length
+  const walletTotal = rowData.reduce((sum, row) => sum + parseFloat(row.wallet || 0), 0)
 
-
-        } catch (error) {
-            console.error("Failed to fetch Head Dairy Masters", error);
-        } finally {
-            setLoading(false); // 👈 End loading
-        }
-    };
-
-    useEffect(() => {
-        fetchAllHeadDairyData();
-    }, []);
-
-    const confirmDeleteHeadDairyMaster = async () => {
-        try {
-            const res = await deleteHeadDairyMaster(headDairyToDelete?.id);
-            if (res.status_code == 200) {
-                CustomToast.success(res.message)
-                fetchAllHeadDairyData();
-            } else {
-                CustomToast.error(res.message)
-
-            }
-        } catch (error) {
-            CustomToast.error(res.message)
-            console.log("ERROR IN DELETE FUN IN Head Dairy LIST", error);
-        } finally {
-            setIsConfirmOpen(false); ``
-            setHeadDairyToDelete(null);
-        }
-    };
-    const columns = [
-        columnHelper.accessor('id', {
-            header: 'ID',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('dairy_name', {
-            header: 'Head Dairy Name',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('mobile', {
-            header: 'Mobile',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('contact_person', {
-            header: 'Contact Person',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('address', {
-            header: 'Address',
-            cell: info => info.getValue(),
-        }),
-        columnHelper.accessor('wallet', {
-            header: 'Wallet',
-            cell: info => info.getValue(),
-        }),
-
-        columnHelper.display({
-            id: "status",
-            header: 'Status',
-            cell: ({ row }) => (
-                <div className="flex gap-3 text-center justify-start items-center">
-                    <FaDotCircle color={row.original.status == 1 ? 'green' : 'red'} />
-                    <h1>{row.original.status == 1 ? 'Active' : 'Inactive'}</h1>
-                </div>
-            ),
-        }),
-
-        columnHelper.display({
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
-                <div className="flex items-center justify-center text-center gap-2">
-                    <button
-                        className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition"
-                        onClick={() => {
-                            setSelectedHeadDairy(row.original);
-                            setIsModalOpen(true);
-                        }}
-                    >
-                        <FaEye />
-                    </button>
-                    <button
-                        className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-                        onClick={() => nav("/editHeadDairy", { state: row.original })}
-                    >
-                        <FaPen />
-                    </button>
-                    <button
-                        className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                        onClick={() => {
-                            setHeadDairyToDelete(row.original);
-                            setIsConfirmOpen(true);
-                        }}
-                    >
-                        <FaTrashAlt />
-                    </button>
-                </div>
-            )
-        }),
-    ];
-
-    const table = useReactTable({
-        data: rowData,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-
-
-
-    return (
-        <div className="overflow-x-auto p-4">
-            <div className="addUser_totalUser">
-                <div className="totalUserCount text-md mb-2 p-2 text-white">
-                    Total Head Dairy Master: {rowData.length}
-                </div>
-                <button onClick={() => nav("/headDairy")}>
-                    Add Head Dairy Master
-                </button>
-            </div>
-
-            {/* Loading State */}
-            {loading ? (
-                <div className="text-center py-10 text-lg font-semibold text-gray-600 h-full flex">
-                    <Preloading />
-                </div>
-
-            ) : (
-                <>
-                    <table className="min-w-full border text-sm">
-                        <thead className="bg-gray-100">
-                            {table.getHeaderGroups().map(headerGroup => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map(header => (
-                                        <th key={header.id} className="px-4 py-2 border">
-                                            {flexRender(header.column.columnDef.header, header.getContext())}
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                        </thead>
-                        <tbody>
-                            {table.getRowModel().rows.map(row => (
-                                <tr key={row.id} className="hover:bg-gray-50">
-                                    {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="px-4 py-2 border text-center">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-
-                    {/* Pagination Controls */}
-                    {/* {renderPageButtons()} */}
-                </>
-            )}
-
-
-            {/* THIS MODAL  */}
-            {isModalOpen && selectedHeadDairy && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">Head Dairy Details</h2>
-
-                        {/* <div
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute bg-white top-4 right-4 text-xxl cursor-pointer"
-                            title="Close"
-                        >
-                            <IoMdCloseCircle size={30} />
-                        </div> */}
-
-                        <table className="w-full text-sm text-left border border-gray-200">
-                            <tbody>
-                                {[
-                                    ['Name', selectedHeadDairy.dairy_name],
-                                    ['Mobile', selectedHeadDairy.mobile],
-                                    ['Contact Person', selectedHeadDairy.contact_person],
-                                    ['Address', selectedHeadDairy.address],
-                                    ['Wallet', selectedHeadDairy.wallet],
-                                    ['Status', selectedHeadDairy.status === "1" ? 'Active' : 'Inactive'],
-                                ].map(([label, value]) => (
-                                    <tr key={label} className="border-b hover:bg-gray-50">
-                                        <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
-                                        <td className="px-4 py-2">{value}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-
-                        <div className="mt-6 text-right">
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {isConfirmOpen && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-sm mx-4 p-6 text-center relative">
-                        <h2 className="text-lg font-semibold mb-4">Are you sure you want to delete?</h2>
-                        <p className="text-gray-700 mb-6">This action cannot be undone.</p>
-
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={() => setIsConfirmOpen(false)}
-                                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmDeleteHeadDairyMaster}
-                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
+  const columns = [
+    {
+      key: 'id',
+      header: 'ID',
+      render: (row) => <span className="ui-text-tertiary">{row.id}</span>
+    },
+    {
+      key: 'dairy_name',
+      header: 'Head Dairy Name',
+      render: (row) => (
+        <div className="flex items-center gap-2.5">
+          <Avatar name={row.dairy_name || 'D'} className="size-8 text-[11px]" />
+          <span className="font-semibold">{row.dairy_name}</span>
         </div>
-    );
-};
+      )
+    },
+    {
+      key: 'mobile',
+      header: 'Mobile',
+      render: (row) => (
+        <span className="inline-flex items-center gap-1.5">
+          <Phone size={12} className="ui-text-tertiary" aria-hidden="true" />
+          {row.mobile}
+        </span>
+      )
+    },
+    { key: 'contact_person', header: 'Contact Person' },
+    {
+      key: 'address',
+      header: 'Address',
+      render: (row) => <span className="block max-w-[220px] truncate">{row.address}</span>
+    },
+    {
+      key: 'wallet',
+      header: 'Wallet',
+      className: 'text-right',
+      render: (row) => (
+        <span className="font-bold text-[color:var(--ui-success-600)]">{money(row.wallet)}</span>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (row) => (
+        <Badge tone={isActive(row) ? 'success' : 'danger'}>
+          {isActive(row) ? 'Active' : 'Inactive'}
+        </Badge>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (row) => (
+        <div className="flex justify-end gap-0.5">
+          <IconButton
+            icon={Eye}
+            label="View details"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => openDetails(row)}
+          />
+          <IconButton
+            icon={Pencil}
+            label="Edit"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => nav('/editHeadDairy', { state: row })}
+          />
+          <IconButton
+            icon={Trash2}
+            label="Delete"
+            iconSize={15}
+            className="!size-8 hover:!text-[color:var(--ui-danger-600)]"
+            onClick={() => {
+              setHeadDairyToDelete(row)
+              setIsConfirmOpen(true)
+            }}
+          />
+        </div>
+      )
+    }
+  ]
 
-export default HeadDairyList;
+  return (
+    <div className="w-full ui-text-primary">
+      <Breadcrumb
+        title="Head Dairy Master"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Milk Center' },
+          { label: 'Head Dairy Master' }
+        ]}
+        actions={
+          <Button size="sm" icon={Plus} onClick={() => nav('/headDairy')}>
+            Add Head Dairy
+          </Button>
+        }
+      />
+
+      <div className="space-y-5 p-3 sm:p-4 lg:p-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <KpiCard label="Total Head Dairies" value={rowData.length} icon={Building2} tone="info" />
+          <KpiCard label="Active" value={activeCount} icon={CircleCheck} tone="success" />
+          <KpiCard
+            label="Inactive"
+            value={rowData.length - activeCount}
+            icon={Users}
+            tone="danger"
+          />
+          <KpiCard
+            label="Total Wallet"
+            value={money(walletTotal)}
+            icon={IndianRupee}
+            tone="accent"
+          />
+        </div>
+
+        {loading && (
+          <SurfaceCard className="flex items-center justify-center gap-3 p-12">
+            <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
+            <span className="ui-text-secondary text-[13px]">Loading head dairies…</span>
+          </SurfaceCard>
+        )}
+
+        {!loading && rowData.length === 0 && (
+          <SurfaceCard className="px-6 py-14 text-center">
+            <IconBadge
+              icon={Building2}
+              tone="neutral"
+              variant="tint"
+              size="xl"
+              shape="circle"
+              className="mx-auto mb-3"
+            />
+            <p className="ui-font-display text-[15px] font-bold">No head dairies yet</p>
+            <p className="ui-text-tertiary mt-1 text-[12.5px]">
+              Add the dairies you dispatch milk to.
+            </p>
+            <Button className="mt-4" icon={Plus} onClick={() => nav('/headDairy')}>
+              Add Head Dairy
+            </Button>
+          </SurfaceCard>
+        )}
+
+        {!loading && rowData.length > 0 && (
+          <SurfaceCard className="overflow-hidden">
+            <DataTable
+              className="px-2"
+              minWidth="900px"
+              columns={columns}
+              rows={rowData}
+              onRowClick={openDetails}
+            />
+          </SurfaceCard>
+        )}
+      </div>
+
+      <Modal
+        isOpen={isModalOpen && !!selectedHeadDairy}
+        onClose={() => setIsModalOpen(false)}
+        ariaLabel="Head dairy details"
+        maxWidth="40rem"
+        className="flex max-h-[90vh] flex-col overflow-hidden"
+      >
+        {selectedHeadDairy && (
+          <>
+            <div className="ui-border-subtle flex items-center gap-4 border-b px-6 py-5">
+              <Avatar name={selectedHeadDairy.dairy_name || 'D'} className="size-12" />
+              <div className="min-w-0 flex-1">
+                <h2 className="ui-font-display truncate text-[18px] font-extrabold">
+                  {selectedHeadDairy.dairy_name}
+                </h2>
+                <p className="ui-text-tertiary text-[12.5px]">Head Dairy Details</p>
+              </div>
+              <Badge tone={isActive(selectedHeadDairy) ? 'success' : 'danger'}>
+                {isActive(selectedHeadDairy) ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <DetailList
+                items={[
+                  ['Name', selectedHeadDairy.dairy_name],
+                  ['Mobile', selectedHeadDairy.mobile],
+                  ['Contact Person', selectedHeadDairy.contact_person],
+                  ['Wallet', money(selectedHeadDairy.wallet)],
+                  ['Address', selectedHeadDairy.address]
+                ]}
+              />
+            </div>
+            <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
+              <Button
+                icon={Pencil}
+                onClick={() => {
+                  setIsModalOpen(false)
+                  nav('/editHeadDairy', { state: selectedHeadDairy })
+                }}
+              >
+                Edit
+              </Button>
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      <DeleteConfirmModal
+        isOpen={isConfirmOpen}
+        loading={deleting}
+        onClose={() => {
+          setIsConfirmOpen(false)
+          setHeadDairyToDelete(null)
+        }}
+        onConfirm={confirmDeleteHeadDairyMaster}
+        title="Delete Head Dairy"
+        message={
+          <>
+            Are you sure you want to delete <strong>{headDairyToDelete?.dairy_name}</strong>? This
+            action cannot be undone.
+          </>
+        }
+      />
+    </div>
+  )
+}
+
+export default HeadDairyList

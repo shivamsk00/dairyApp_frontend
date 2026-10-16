@@ -423,6 +423,13 @@
   background: var(--ui-surface-sunken);
 }
 
+.ui-data-table-sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--ui-surface-raised);
+}
+
 .ui-kbd {
   border: 1px solid var(--ui-border-default);
   border-radius: 5px;

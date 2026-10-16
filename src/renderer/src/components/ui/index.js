@@ -11,6 +11,7 @@ export { default as IconBadge } from './primitives/IconBadge'
 export { default as IconButton } from './primitives/IconButton'
 export { default as Modal } from './primitives/Modal'
 export { default as SegmentedControl } from './primitives/SegmentedControl'
+export { default as Switch } from './primitives/Switch'
 export { default as SurfaceCard } from './primitives/SurfaceCard'
 
 // Layout
@@ -36,6 +37,7 @@ export { default as SuccessModal } from './modals/SuccessModal'
 // Dashboard
 export { default as BentoGrid } from './dashboard/BentoGrid'
 export { default as DataTable } from './dashboard/DataTable'
+export { default as DetailList } from './dashboard/DetailList'
 export { default as InsightCard } from './dashboard/InsightCard'
 export { default as Pagination } from './dashboard/Pagination'
 export { default as KpiCard } from './dashboard/KpiCard'
@@ -48,6 +50,9 @@ export { FileInput, Input, Select, Textarea } from './form/controls'
 export { default as FormActions } from './form/FormActions'
 export { default as FormSection } from './form/FormSection'
 export { default as SelectDropdown } from './form/SelectDropdown'
+
+// Utils
+export { todayISO, toLocalISO } from './utils/date'
 
 // Hooks
 export { default as useDocumentTitle } from './hooks/useDocumentTitle'

@@ -18,13 +18,22 @@ const pageItems = (page, pageCount) => {
  *
  * @param {number} page Current page, starting at 1.
  * @param {number} pageSize
- * @param {number} total Total number of items.
+ * @param {number} [total] Total number of items. Omit it for server-paged lists and pass `pageCount`.
+ * @param {number} [pageCount] Total pages, when the item total is unknown.
  * @param {(page: number) => void} onPageChange
  * @param {string} [itemLabel='items'] Plural noun for the summary.
  */
-const Pagination = ({ page, pageSize, total, onPageChange, itemLabel = 'items', className }) => {
-  const pageCount = Math.max(1, Math.ceil(total / pageSize))
-  if (total <= pageSize) return null
+const Pagination = ({
+  page,
+  pageSize,
+  total,
+  pageCount: knownPageCount,
+  onPageChange,
+  itemLabel = 'items',
+  className
+}) => {
+  const pageCount = knownPageCount ?? Math.max(1, Math.ceil(total / pageSize))
+  if (knownPageCount === undefined ? total <= pageSize : pageCount <= 1) return null
   const from = (page - 1) * pageSize + 1
   const to = Math.min(page * pageSize, total)
 
@@ -36,11 +45,18 @@ const Pagination = ({ page, pageSize, total, onPageChange, itemLabel = 'items', 
         className
       )}
     >
-      <p className="ui-text-tertiary text-[12px]">
-        Showing <strong className="ui-text-secondary">{from}</strong> to{' '}
-        <strong className="ui-text-secondary">{to}</strong> of{' '}
-        <strong className="ui-text-secondary">{total}</strong> {itemLabel}
-      </p>
+      {total !== undefined ? (
+        <p className="ui-text-tertiary text-[12px]">
+          Showing <strong className="ui-text-secondary">{from}</strong> to{' '}
+          <strong className="ui-text-secondary">{to}</strong> of{' '}
+          <strong className="ui-text-secondary">{total}</strong> {itemLabel}
+        </p>
+      ) : (
+        <p className="ui-text-tertiary text-[12px]">
+          Page <strong className="ui-text-secondary">{page}</strong> of{' '}
+          <strong className="ui-text-secondary">{pageCount}</strong>
+        </p>
+      )}
       <div className="flex flex-wrap items-center justify-center gap-1.5">
         <Button
           variant="secondary"

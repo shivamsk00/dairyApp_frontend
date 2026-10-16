@@ -1,229 +1,147 @@
+/* eslint-disable react/prop-types -- props are documented by usage in DailyMilkCollectionPage */
 import React from 'react'
-import { BsFillPrinterFill } from 'react-icons/bs';
-import { FaEye, FaPen } from 'react-icons/fa';
-import { FaTrashCan } from 'react-icons/fa6';
+import { Eye, Pencil, Printer, Trash2 } from 'lucide-react'
+import { Badge, DataTable, IconButton } from '../../components/ui'
 
-const MilkCollectionTable = (
+const MilkCollectionTable = ({
+  morningCollection,
+  eveningCollection,
+  isShift,
+  handlePrint,
+  setSelectedCustomer,
+  setIsModalOpen,
+  setIsEditeModal,
+  setDeleteId,
+  setShowConfirmModal,
+  avgFat,
+  avgSnf
+}) => {
+  const list = isShift === 'morning' ? morningCollection : eveningCollection
+  const tone = isShift === 'morning' ? 'accent' : 'primary'
+
+  const openView = (item) => {
+    setSelectedCustomer(item)
+    setIsModalOpen(true)
+  }
+
+  const columns = [
+    { key: 'sr', header: '#' },
     {
-        morningCollection,
-        eveningCollection,
-        isShift,
-        handlePrint,
-        setSelectedCustomer,
-        setIsModalOpen,
-        setIsEditeModal,
-        setDeleteId,
-        setShowConfirmModal,
-        avgFat,
-        avgSnf
+      key: 'customer_account_number',
+      header: 'AC No',
+      render: (item) => (
+        <span className="ui-text-brand font-bold">{item.customer_account_number}</span>
+      )
+    },
+    {
+      key: 'name',
+      header: 'Name',
+      render: (item) => (
+        <span className="font-semibold" title={item.name}>
+          {item.name}
+        </span>
+      )
+    },
+    { key: 'date', header: 'Date' },
+    {
+      key: 'shift',
+      header: 'Shift',
+      render: (item) => (
+        <Badge tone={tone} dot={false}>
+          {item.shift}
+        </Badge>
+      )
+    },
+    { key: 'quantity', header: 'Qty', className: 'text-right' },
+    { key: 'fat', header: 'FAT', className: 'text-right' },
+    { key: 'snf', header: 'SNF', className: 'text-right' },
+    {
+      key: 'base_rate',
+      header: 'Rate',
+      className: 'text-right',
+      render: (item) => `₹${item.base_rate}`
+    },
+    {
+      key: 'other_price',
+      header: 'Other',
+      className: 'text-right',
+      render: (item) => `₹${item.other_price}`
+    },
+    {
+      key: 'total_amount',
+      header: 'Total',
+      className: 'text-right',
+      render: (item) => (
+        <span className="font-bold text-[color:var(--ui-success-600)]">₹{item.total_amount}</span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (item) => (
+        <div className="flex justify-end gap-0.5">
+          <IconButton
+            icon={Printer}
+            label="Print"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => handlePrint(item)}
+          />
+          <IconButton
+            icon={Eye}
+            label="View"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => openView(item)}
+          />
+          <IconButton
+            icon={Pencil}
+            label="Edit"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => {
+              setSelectedCustomer(item)
+              setIsEditeModal(true)
+            }}
+          />
+          <IconButton
+            icon={Trash2}
+            label="Delete"
+            iconSize={15}
+            className="!size-8 hover:!text-[color:var(--ui-danger-600)]"
+            onClick={() => {
+              setDeleteId(item.id)
+              setShowConfirmModal(true)
+            }}
+          />
+        </div>
+      )
     }
-) => {
+  ]
 
-    console.log("TABLE RENDERED");
-    return (
-        <>
-            {/* Table */}
-            <div className="flex flex-col flex-1 relative overflow-hidden  mt-1">
-                {/* Fixed Header */}
-                <div className="bg-black border-b w-full min-w-[1000px] sticky top-0 z-10">
-                    <table className="w-full text-xl table-fixed">
-                        <colgroup>
-                            <col style={{ width: '40px' }} />     {/* SR */}
-                            <col style={{ width: '80px' }} />     {/* AC No */}
-                            <col style={{ width: '120px' }} />    {/* Name */}
-                            <col style={{ width: '80px' }} />     {/* Date */}
-                            <col style={{ width: '60px' }} />     {/* Shift */}
-                            <col style={{ width: '60px' }} />     {/* Qty */}
-                            <col style={{ width: '50px' }} />     {/* FAT */}
-                            <col style={{ width: '50px' }} />     {/* SNF */}
-                            <col style={{ width: '70px' }} />     {/* Rate */}
-                            <col style={{ width: '60px' }} />     {/* Other */}
-                            <col style={{ width: '70px' }} />     {/* Total */}
-                            <col style={{ width: '130px' }} />    {/* Actions */}
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                {['SR', 'AC No', 'Name', 'Date', 'Shift', 'Qty', 'FAT', 'SNF', 'Rate', 'Other', 'Total',  'Actions'].map(header => (
-                                    <th key={header} className="px-1 py-1 text-center text-[12px] font-bold text-white truncate">
-                                        {header}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-
-                {/* Scrollable Body with bottom padding for footer space */}
-                <div className="flex-1 overflow-auto scrollable-table pb-28">
-                    <div className="min-w-[1000px]">
-                        <table className="w-full text-xl table-fixed">
-                        <colgroup>
-                            <col style={{ width: '40px' }} />     {/* SR */}
-                            <col style={{ width: '80px' }} />     {/* AC No */}
-                            <col style={{ width: '120px' }} />    {/* Name */}
-                            <col style={{ width: '80px' }} />     {/* Date */}
-                            <col style={{ width: '60px' }} />     {/* Shift */}
-                            <col style={{ width: '60px' }} />     {/* Qty */}
-                            <col style={{ width: '50px' }} />     {/* FAT */}
-                            <col style={{ width: '50px' }} />     {/* SNF */}
-                            <col style={{ width: '70px' }} />     {/* Rate */}
-                            <col style={{ width: '60px' }} />     {/* Other */}
-                            <col style={{ width: '70px' }} />     {/* Total */}
-                            <col style={{ width: '130px' }} />    {/* Actions */}
-                        </colgroup>
-                            <tbody>
-                                {morningCollection.length === 0 && eveningCollection.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="12" className="text-center text-gray-500 text-[12px] py-8">
-                                            No data available
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    <>
-                                        {isShift === 'morning' && morningCollection.length > 0 && (
-                                            <>
-                                                <tr className="bg-orange-100">
-                                                    <td colSpan="12" className="px-2 py-2 text-center font-semibold text-blue-800 text-xs">
-                                                        Morning Collection ({morningCollection.length})
-                                                    </td>
-                                                </tr>
-                                                {morningCollection.map((item, i) => (
-                                                    <tr key={`morning-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center">{i + 1}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold text-center text-blue-600 truncate">{item.customer_account_number}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center" title={item.name}>{item.name}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center">{item.date}</td>
-                                                        <td className="px-2 py-1 truncate">
-                                                            <span className="px-1 py-0.5 text-[15px] font-bold bg-orange-100 text-orange-800 rounded block text-center">
-                                                                {item.shift === 'morning' ? 'Morning' : item.shift}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold text-center  truncate">{item.quantity}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center">{item.fat}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center">{item.snf}</td>
-                                                        <td className="px-2 py-1 text-[15px] text-center font-bold text-green-600 truncate">₹{item.base_rate}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center">₹{item.other_price}</td>
-                                                        <td className="px-2 py-1 text-[15px] text-center font-bold  text-green-700 truncate">₹{item.total_amount}</td>
-                                                        <td className="px-2 py-1">
-                                                            <div className="flex gap-0.5 justify-center">
-                                                                <button
-                                                                    className="p-1 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200 transition-colors"
-                                                                    onClick={() => handlePrint(item)}
-                                                                    title="Print"
-                                                                >
-                                                                    <BsFillPrinterFill size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-green-100 text-green-600 rounded text-xs hover:bg-green-200 transition-colors"
-                                                                    onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
-                                                                    title="View"
-                                                                >
-                                                                    <FaEye size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-yellow-100 text-yellow-600 rounded text-xs hover:bg-yellow-200 transition-colors"
-                                                                    onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
-                                                                    title="Edit"
-                                                                >
-                                                                    <FaPen size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-red-100 text-red-600 rounded text-xs hover:bg-red-200 transition-colors"
-                                                                    onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
-                                                                    title="Delete"
-                                                                >
-                                                                    <FaTrashCan size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </>
-                                        )}
-
-                                        {isShift === 'evening' && eveningCollection.length > 0 && (
-                                            <>
-                                                <tr className="bg-purple-100">
-                                                    <td colSpan="12" className="px-2 py-2 text-center font-semibold text-purple-800 text-xs">
-                                                        Evening Collection ({eveningCollection.length})
-                                                    </td>
-                                                </tr>
-                                                {eveningCollection.map((item, i) => (
-                                                    <tr key={`evening-${i}`} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  truncate">{i + 1}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold   text-blue-600 truncate">{item.customer_account_number}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold truncate text-center" title={item.name}>{item.name}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  truncate">{item.date}</td>
-                                                        <td className="px-2 py-1 truncate">
-                                                            <span className="px-1 py-0.5 text-[15px] font-bold  bg-purple-100 text-purple-800 rounded block text-center">
-                                                                {item.shift === 'evening' ? 'Evening' : item.shift}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold   truncate">{item.quantity}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  truncate">{item.fat}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  truncate">{item.snf}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  text-green-600 truncate">₹{item.base_rate}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold  truncate">₹{item.other_price}</td>
-                                                        <td className="px-2 py-1 text-[15px] font-bold   text-green-700 truncate">₹{item.total_amount}</td>
-                                                        <td className="px-2 py-1">
-                                                            <div className="flex gap-0.5 justify-center">
-                                                                <button
-                                                                    className="p-1 bg-blue-100 text-blue-600 rounded text-[15px] font-bold  hover:bg-blue-200 transition-colors"
-                                                                    onClick={() => handlePrint(item)}
-                                                                    title="Print"
-                                                                >
-                                                                    <BsFillPrinterFill size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-green-100 text-green-600 rounded text-[15px] font-bold  hover:bg-green-200 transition-colors"
-                                                                    onClick={() => { setSelectedCustomer(item); setIsModalOpen(true); }}
-                                                                    title="View"
-                                                                >
-                                                                    <FaEye size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-yellow-100 text-yellow-600 rounded text-[15px] font-bold  hover:bg-yellow-200 transition-colors"
-                                                                    onClick={() => { setSelectedCustomer(item); setIsEditeModal(true); }}
-                                                                    title="Edit"
-                                                                >
-                                                                    <FaPen size={16} />
-                                                                </button>
-                                                                <button
-                                                                    className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                                                                    onClick={() => { setDeleteId(item.id); setShowConfirmModal(true); }}
-                                                                    title="Delete"
-                                                                >
-                                                                    <FaTrashCan size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Fixed Footer - Average FAT & SNF */}
-                <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t z-10">
-                    <div className="flex items-center justify-center gap-8 py-2 px-4">
-                        <div className="flex items-center gap-2">
-                            <span className="text-white text-[15px] font-semibold">Average FAT:</span>
-                            <span className="text-yellow-300 text-[15px] font-bold">{avgFat ?? '-'}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-white text-[15px] font-semibold">Average SNF:</span>
-                            <span className="text-yellow-300 text-[15px] font-bold">{avgSnf ?? '-'}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Badge tone={tone} dot={false}>
+          {isShift === 'morning' ? 'Morning' : 'Evening'} collection · {list.length}
+        </Badge>
+        <span className="ui-text-tertiary text-[12.5px]">Average FAT</span>
+        <span className="text-[13px] font-bold">{avgFat ?? '-'}</span>
+        <span className="ui-text-tertiary ml-2 text-[12.5px]">Average SNF</span>
+        <span className="text-[13px] font-bold">{avgSnf ?? '-'}</span>
+      </div>
+      <DataTable
+        stickyHeader
+        className="max-h-[60vh] overflow-y-auto px-1"
+        minWidth="900px"
+        columns={columns}
+        rows={list.map((item, i) => ({ ...item, sr: i + 1 }))}
+        onRowClick={openView}
+        emptyMessage="No data available"
+      />
+    </div>
+  )
 }
 
 export default React.memo(MilkCollectionTable)

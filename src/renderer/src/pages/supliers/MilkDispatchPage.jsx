@@ -1,732 +1,762 @@
-import React, { useState, useEffect } from 'react';
-import { IoMdClose } from 'react-icons/io';
-import useDailyMilkDispatchStore from '../../zustand/useMilkDispatchStore';
-import useMilkDispatchStore from '../../zustand/useMilkDispatchStore';
-import CustomToast from '../../helper/costomeToast';
-import useHomeStore from '../../zustand/useHomeStore';
-import { FaDotCircle, FaEye, FaPen, FaTrashAlt } from 'react-icons/fa';
-import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
-import EditMilkDispatch from './EditMilkDispatch';
+/* eslint-disable react/prop-types -- SummaryRow is internal to this page */
+import { useState, useEffect, useRef } from 'react'
+import {
+  Eye,
+  Loader2,
+  Pencil,
+  Plus,
+  Receipt,
+  Send,
+  Trash2,
+  Truck,
+  TriangleAlert,
+  X
+} from 'lucide-react'
+import useMilkDispatchStore from '../../zustand/useMilkDispatchStore'
+import CustomToast from '../../helper/costomeToast'
+import useHomeStore from '../../zustand/useHomeStore'
+import EditMilkDispatch from './EditMilkDispatch'
+import { MILK_TYPES, SHIFTS, emptyMilkRow, money } from './dispatchOptions'
+import {
+  Badge,
+  Breadcrumb,
+  Button,
+  DataTable,
+  DeleteConfirmModal,
+  DetailList,
+  IconBadge,
+  IconButton,
+  Input,
+  Modal,
+  Pagination,
+  SectionCard,
+  SelectDropdown,
+  SurfaceCard,
+  Textarea,
+  todayISO,
+  useDocumentTitle
+} from '../../components/ui'
+
+const LOCAL_KEY = 'milkDispatchDraft'
+
+const emptyForm = () => ({
+  dispatch_date: todayISO(),
+  shift: '',
+  head_dairy_id: '',
+  vehicle_no: '',
+  total_qty: '',
+  total_amount: '',
+  notes: '',
+  milk_details: [emptyMilkRow()]
+})
+
+// Errors: { dispatch_date, head_dairy_id, shift, rows: [{ milk_type, qty }] }
+const validate = (form) => {
+  const errors = {}
+  if (!form.dispatch_date) errors.dispatch_date = 'Select the dispatch date'
+  if (!form.head_dairy_id) errors.head_dairy_id = 'Choose a head dairy'
+  if (!form.shift) errors.shift = 'Select a shift'
+  const rows = form.milk_details.map((row) => {
+    const rowErrors = {}
+    if (!row.milk_type) rowErrors.milk_type = 'Select type'
+    if (!(parseFloat(row.qty) > 0)) rowErrors.qty = 'Enter quantity'
+    return rowErrors
+  })
+  if (rows.some((r) => Object.keys(r).length)) errors.rows = rows
+  return errors
+}
+
+const SummaryRow = ({ label, children }) => (
+  <div className="ui-border-subtle flex items-center justify-between gap-3 border-b py-2.5 last:border-b-0">
+    <dt className="ui-text-tertiary text-[12px] font-semibold">{label}</dt>
+    <dd className="text-right text-[13px] font-medium capitalize">
+      {children || <span className="ui-text-tertiary">—</span>}
+    </dd>
+  </div>
+)
 
 const MilkDispatchPage = () => {
-  const submitMilkDispatch = useDailyMilkDispatchStore(state => state.submitMilkDispatch)
-  const getHeadDairyMilkData = useDailyMilkDispatchStore(state => state.getHeadDairyMilkData)
-  const getAllHeadDairyMaster = useHomeStore(state => state.getAllHeadDairyMaster);
-  const deleteHeadDairyMilkDispatch = useMilkDispatchStore(state => state.deleteHeadDairyMilkDispatch);
-  const getMilkRate = useHomeStore(state => state.getMilkRate);
-  const today = new Date().toISOString().split('T')[0];
-  const [headDairies, setHeadDairies] = useState([]);
-  const [isEditeModal, setIsEditeModal] = useState(false)
-  const [collections, setCollections] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [maxPageButtons, setMaxPageButtons] = useState(5);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedHeadDairy, setSelectedHeadDairy] = useState(null);
-  const [headDairyToDelete, setHeadDairyToDelete] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedDairy, setSelectedDairy] = useState(null);
+  useDocumentTitle('Milk Dispatch')
+  const submitMilkDispatch = useMilkDispatchStore((state) => state.submitMilkDispatch)
+  const getHeadDairyMilkData = useMilkDispatchStore((state) => state.getHeadDairyMilkData)
+  const getAllHeadDairyMaster = useHomeStore((state) => state.getAllHeadDairyMaster)
+  const deleteHeadDairyMilkDispatch = useMilkDispatchStore(
+    (state) => state.deleteHeadDairyMilkDispatch
+  )
+  const getMilkRate = useHomeStore((state) => state.getMilkRate)
+
+  const [headDairies, setHeadDairies] = useState([])
+  const [collections, setCollections] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedHeadDairy, setSelectedHeadDairy] = useState(null)
+  const [headDairyToDelete, setHeadDairyToDelete] = useState(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedDairy, setSelectedDairy] = useState(null)
   const [loading, setLoading] = useState(false)
-  const LOCAL_KEY = 'milkDispatchDraft';
-  // const [rowData, setRowData] = useState([]);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [form, setForm] = useState({
-    dispatch_date: today,
-    shift: '',
-    head_dairy_id: '',
-    vehicle_no: '',
-    total_qty: '',
-    total_amount: '',
-    notes: '',
-    milk_details: [
-      { milk_type: '', qty: '', fat: '', snf: '', rate: '', amount: '' },
-    ],
-  });
-
-
+  const [listLoading, setListLoading] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [showErrors, setShowErrors] = useState(false)
+  const [form, setForm] = useState(emptyForm)
+  // One pending rate lookup at a time (a plain variable in the component body is recreated every render,
+  // so the old debounce never actually cancelled anything).
+  const snfDebounceRef = useRef(null)
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await getAllHeadDairyMaster();
-    
-      setHeadDairies(res.data);
-
-    };
-    fetchData();
-  }, []);
-
+      const res = await getAllHeadDairyMaster()
+      setHeadDairies(res.data || [])
+    }
+    fetchData()
+  }, [])
 
   // Auto calculate total qty and amount
   useEffect(() => {
-    const totalQty = form.milk_details.reduce((sum, item) => sum + Number(item.qty || 0), 0);
-    const totalAmount = form.milk_details.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-    setForm(prev => ({
+    const totalQty = form.milk_details.reduce((sum, item) => sum + Number(item.qty || 0), 0)
+    const totalAmount = form.milk_details.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+    setForm((prev) => ({
       ...prev,
       total_qty: totalQty,
-      total_amount: totalAmount.toFixed(2),
-    }));
-  }, [form.milk_details]);
+      total_amount: totalAmount.toFixed(2)
+    }))
+  }, [form.milk_details])
 
+  // Re-check after each edit once the user has tried to submit.
+  useEffect(() => {
+    if (showErrors) setErrors(validate(form))
+  }, [form, showErrors])
 
+  const saveDraft = (next) => localStorage.setItem(LOCAL_KEY, JSON.stringify(next))
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    const updatedForm = { ...form, [name]: value };
-    setForm(updatedForm);
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(updatedForm));
-  };
+    const { name, value } = e.target
+    const updatedForm = { ...form, [name]: value }
+    setForm(updatedForm)
+    saveDraft(updatedForm)
+  }
 
-
-
-  let snfDebounceTimeout;
+  const setField = (name) => (value) => handleFormChange({ target: { name, value } })
 
   const handleMilkDetailChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedDetails = [...form.milk_details];
-    updatedDetails[index][name] = value;
+    const { name, value } = e.target
+    const updatedDetails = form.milk_details.map((row, i) =>
+      i === index ? { ...row, [name]: value } : row
+    )
+    const { qty, fat, clr } = updatedDetails[index]
 
-    const { qty, fat, clr } = updatedDetails[index];
+    // Update amount if qty & rate available
+    updatedDetails[index].amount =
+      qty && updatedDetails[index].rate
+        ? (parseFloat(qty) * parseFloat(updatedDetails[index].rate)).toFixed(2)
+        : ''
 
-    // ✅ Update amount if qty & rate available
-    if (qty && updatedDetails[index].rate) {
-      updatedDetails[index].amount = (parseFloat(qty) * parseFloat(updatedDetails[index].rate)).toFixed(2);
-    } else {
-      updatedDetails[index].amount = '';
-    }
-
-    // ✅ SNF Debounce Logic
+    // SNF -> rate lookup, debounced
     if (name === 'snf') {
-      clearTimeout(snfDebounceTimeout);
-
-      snfDebounceTimeout = setTimeout(() => {
-        const snfValue = value.includes('.') ? parseFloat(value) : parseFloat(`${value}.0`);
-        if (isNaN(snfValue)) return;
+      clearTimeout(snfDebounceRef.current)
+      snfDebounceRef.current = setTimeout(() => {
+        const snfValue = value.includes('.') ? parseFloat(value) : parseFloat(`${value}.0`)
+        if (isNaN(snfValue)) return
         if (!fat) {
-          CustomToast.error('⚠️ Please enter FAT value first');
-          return;
+          CustomToast.error('⚠️ Please enter FAT value first')
+          return
         }
-        fetchRateAndUpdate(index, fat, clr || '', snfValue, updatedDetails, qty);
-      }, 800);
+        fetchRateAndUpdate(index, fat, clr || '', snfValue, updatedDetails, qty)
+      }, 800)
     }
 
-    const updatedForm = { ...form, milk_details: updatedDetails };
-    setForm(updatedForm);
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(updatedForm));
-  };
-
+    const updatedForm = { ...form, milk_details: updatedDetails }
+    setForm(updatedForm)
+    saveDraft(updatedForm)
+  }
 
   const fetchRateAndUpdate = async (index, fat, clr, snf, updatedDetails, qty) => {
     try {
-      const result = await getMilkRate(fat, clr, snf);
-   
-
-      const updatedMilk = { ...updatedDetails[index] };
+      const result = await getMilkRate(fat, clr, snf)
+      const updatedMilk = { ...updatedDetails[index] }
 
       if (result?.rate) {
-        updatedMilk.rate = parseFloat(result.rate).toFixed(2);
-
-        if (qty) {
-          updatedMilk.amount = (parseFloat(qty) * result.rate).toFixed(2);
-        } else {
-          updatedMilk.amount = '';
-        }
-
-        CustomToast.success('✅ Rate updated');
+        updatedMilk.rate = parseFloat(result.rate).toFixed(2)
+        updatedMilk.amount = qty ? (parseFloat(qty) * result.rate).toFixed(2) : ''
+        CustomToast.success('✅ Rate updated')
       } else {
-        // ❌ No rate found — clear rate & amount
-        updatedMilk.rate = '';
-        updatedMilk.amount = '';
+        // No rate found — clear rate & amount
+        updatedMilk.rate = ''
+        updatedMilk.amount = ''
       }
 
-      // ✅ Update in form
-      setForm(prev => {
-        const updatedMilkDetails = [...prev.milk_details];
-        updatedMilkDetails[index] = updatedMilk;
-        return { ...prev, milk_details: updatedMilkDetails };
-      });
-
+      setForm((prev) => {
+        const updatedMilkDetails = [...prev.milk_details]
+        updatedMilkDetails[index] = updatedMilk
+        return { ...prev, milk_details: updatedMilkDetails }
+      })
     } catch (err) {
-      console.error('❌ Error fetching milk rate:', err);
-      CustomToast.error('❌ Error fetching milk rate');
+      console.error('❌ Error fetching milk rate:', err)
+      CustomToast.error('❌ Error fetching milk rate')
     }
-  };
-
-
-
+  }
 
   useEffect(() => {
-    const saved = localStorage.getItem(LOCAL_KEY);
+    const saved = localStorage.getItem(LOCAL_KEY)
     if (saved) {
-      const parsed = JSON.parse(saved);
-      setForm(parsed);
+      try {
+        setForm(JSON.parse(saved))
+      } catch {
+        localStorage.removeItem(LOCAL_KEY)
+      }
     }
-  }, []);
-
-
+    return () => clearTimeout(snfDebounceRef.current)
+  }, [])
 
   const addMilkDetailRow = () => {
-    setForm(prev => ({
-      ...prev,
-      milk_details: [
-        ...prev.milk_details,
-        { milk_type: '', qty: '', fat: '', snf: '', rate: '', amount: '' },
-      ],
-    }));
-  };
+    setForm((prev) => ({ ...prev, milk_details: [...prev.milk_details, emptyMilkRow()] }))
+  }
 
   const removeMilkDetailRow = (index) => {
     if (form.milk_details.length > 1) {
-      const updated = [...form.milk_details];
-      updated.splice(index, 1);
-      setForm(prev => ({ ...prev, milk_details: updated }));
+      setForm((prev) => ({
+        ...prev,
+        milk_details: prev.milk_details.filter((_, i) => i !== index)
+      }))
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    const found = validate(form)
+    setErrors(found)
+    setShowErrors(true)
+    if (Object.keys(found).length) {
+      setTimeout(() => document.querySelector('[aria-invalid="true"]')?.focus(), 0)
+      return
+    }
+
+    setLoading(true)
     try {
-      const res = await submitMilkDispatch(form);
+      const res = await submitMilkDispatch(form)
       if (res.status_code === 200) {
-        CustomToast.success(res.message);
-        fetchMilkCollectionDetails();
-
-        // ✅ Clear local storage
-        localStorage.removeItem(LOCAL_KEY);
-
-        // ✅ Reset form
-        setForm({
-          dispatch_date: today,
-          shift: '',
-          head_dairy_id: '',
-          vehicle_no: '',
-          total_qty: '',
-          total_amount: '',
-          notes: '',
-          milk_details: [
-            { milk_type: '', qty: '', fat: '', snf: '', rate: '', amount: '' },
-          ],
-        });
+        CustomToast.success(res.message)
+        fetchMilkCollectionDetails()
+        localStorage.removeItem(LOCAL_KEY)
+        setForm(emptyForm())
+        setShowErrors(false)
+        setErrors({})
       } else {
-        CustomToast.error(res.message);
+        CustomToast.error(res.message)
       }
     } catch (error) {
-      console.error("ERROR IN SUBMIT MILK DISPATCH", error);
-      CustomToast.error("❌ Failed to submit");
+      console.error('ERROR IN SUBMIT MILK DISPATCH', error)
+      CustomToast.error('❌ Failed to submit')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  // All Data Coming Through this API ////////////////////////////////////////////////
+  // All Data Coming Through this API
   const fetchMilkCollectionDetails = async (page = 1) => {
     try {
-      const res = await getHeadDairyMilkData(page);
-      console.log("Head Dairy milk collection data fetch success", res);
+      setListLoading(true)
+      const res = await getHeadDairyMilkData(page)
       if (res.status_code == 200) {
-        setCollections(res.data.data);
-        setCurrentPage(res.data.current_page);
-        setTotalPages(res.data.last_page);
+        setCollections(res.data.data)
+        setCurrentPage(res.data.current_page)
+        setTotalPages(res.data.last_page)
       } else {
-        CustomToast.error(res.message);
+        CustomToast.error(res.message)
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error('Error fetching data:', error)
+    } finally {
+      setListLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
     fetchMilkCollectionDetails()
   }, [isEditModalOpen])
 
-  // Delete Api/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Delete
   const confirmDeleteHeadDairyMilkDispatch = async () => {
+    setDeleting(true)
     try {
-      const res = await deleteHeadDairyMilkDispatch(headDairyToDelete?.id);
+      const res = await deleteHeadDairyMilkDispatch(headDairyToDelete?.id)
       if (res.status_code == 200) {
         CustomToast.success(res.message)
-        fetchMilkCollectionDetails();
+        fetchMilkCollectionDetails(currentPage)
       } else {
         CustomToast.error(res.message)
-
       }
-    } catch (error) {
-      CustomToast.error(res.message)
-  
+    } catch {
+      CustomToast.error('Failed to delete the dispatch')
     } finally {
-      setIsConfirmOpen(false); ``
-      setHeadDairyToDelete(null);
+      setDeleting(false)
+      setIsConfirmOpen(false)
+      setHeadDairyToDelete(null)
     }
-  };
+  }
 
+  const openView = (item) => {
+    setSelectedHeadDairy(item)
+    setIsModalOpen(true)
+  }
 
+  const headDairyName = headDairies.find(
+    (d) => String(d.id) === String(form.head_dairy_id)
+  )?.dairy_name
+  const first = (item) => item.milk_details?.[0] ?? {}
 
-
-
-
-
-
-
-
-
-
-
-
-
-  // REDNDER BUTTONS 
-  const renderPageButtons = () => {
-    const groupStart = Math.floor((currentPage - 1) / maxPageButtons) * maxPageButtons + 1;
-    const groupEnd = Math.min(groupStart + maxPageButtons - 1, totalPages);
-
-    const pages = [];
-    for (let i = groupStart; i <= groupEnd; i++) {
-      pages.push(
-        <button
-          key={i}
-          className={`px-3 py-1 border rounded text-sm ${currentPage === i ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
-          onClick={() => fetchMilkCollectionDetails(i)}
-        >
-          {i}
-        </button>
-      );
+  const columns = [
+    {
+      key: 'dairy_name',
+      header: 'Head Dairy',
+      render: (item) => <span className="font-semibold">{item.dairy_name || '--'}</span>
+    },
+    { key: 'dispatch_date', header: 'Date', render: (item) => item.dispatch_date || '--' },
+    {
+      key: 'shift',
+      header: 'Shift',
+      render: (item) =>
+        item.shift ? (
+          <Badge tone={item.shift === 'morning' ? 'accent' : 'primary'} dot={false}>
+            {item.shift}
+          </Badge>
+        ) : (
+          '--'
+        )
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (item) => <span className="capitalize">{first(item).milk_type || '--'}</span>
+    },
+    {
+      key: 'qty',
+      header: 'Qty',
+      className: 'text-right',
+      render: (item) => first(item).qty || '--'
+    },
+    {
+      key: 'fat',
+      header: 'Fat',
+      className: 'text-right',
+      render: (item) => first(item).fat || '--'
+    },
+    {
+      key: 'snf',
+      header: 'SNF',
+      className: 'text-right',
+      render: (item) => first(item).snf || '--'
+    },
+    {
+      key: 'rate',
+      header: 'Rate',
+      className: 'text-right',
+      render: (item) => (first(item).rate ? `₹${first(item).rate}` : '--')
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'text-right',
+      render: (item) =>
+        first(item).amount ? (
+          <span className="font-bold text-[color:var(--ui-success-600)]">
+            ₹{first(item).amount}
+          </span>
+        ) : (
+          '--'
+        )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (item) => (
+        <div className="flex justify-end gap-0.5">
+          <IconButton
+            icon={Eye}
+            label="View details"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => openView(item)}
+          />
+          <IconButton
+            icon={Pencil}
+            label="Edit"
+            iconSize={15}
+            className="!size-8"
+            onClick={() => {
+              setSelectedDairy(item)
+              setIsEditModalOpen(true)
+            }}
+          />
+          <IconButton
+            icon={Trash2}
+            label="Delete"
+            iconSize={15}
+            className="!size-8 hover:!text-[color:var(--ui-danger-600)]"
+            onClick={() => {
+              setHeadDairyToDelete(item)
+              setIsConfirmOpen(true)
+            }}
+          />
+        </div>
+      )
     }
-
-    return (
-      <div className="flex gap-1 flex-wrap justify-center mt-4 w-full">
-        {/* Previous Page Button */}
-        <button
-          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-          onClick={() => fetchMilkCollectionDetails(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <MdArrowBackIos size={18} />
-        </button>
-
-        {/* Page Number Buttons */}
-        {pages}
-
-        {/* Next Page Button */}
-        <button
-          className="px-3 py-1 border rounded text-sm text-white bg-gray-500 hover:bg-gray-600 disabled:opacity-50"
-          onClick={() => fetchMilkCollectionDetails(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <MdArrowForwardIos size={18} />
-        </button>
-      </div>
-    );
-  };
-
-
-
-
-
-
-
-
+  ]
 
   return (
-    <div className="w-full mx-auto p-6 mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Milk Dispatch Entry</h2>
+    <div className="w-full ui-text-primary">
+      <Breadcrumb
+        title="Milk Dispatch"
+        items={[{ label: 'Home', to: '/' }, { label: 'Milk Center' }, { label: 'Milk Dispatch' }]}
+      />
 
-      <div className="flex flex-col md:flex-row gap-6 w-full">
-        {/* Left Form */}
-        <form onSubmit={handleSubmit} className="w-full md:w-1/2 bg-white p-6 rounded shadow space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block font-medium">Dispatch Date</label>
-              <input
-                type="date"
-                name="dispatch_date"
-                value={form.dispatch_date}
-                onChange={handleFormChange}
-                className="w-full px-4 py-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Shift</label>
-              <select
-                name="shift"
-                value={form.shift}
-                onChange={handleFormChange}
-                className="w-full px-4 py-2 border rounded"
-              >
-                <option value="">Select</option>
-                <option value="morning">Morning</option>
-                <option value="evening">Evening</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium">Head Dairy ID</label>
-              <select
-                name="head_dairy_id"
-                value={form.head_dairy_id}
-                onChange={handleFormChange}
-                className="w-full px-4 py-2 border rounded"
-                required
-              >
-                <option value="">Choose Head Dairy</option>
-                {headDairies.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.dairy_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium">Vehicle No.</label>
-              <input
-                type="text"
-                name="vehicle_no"
-                value={form.vehicle_no}
-                onChange={handleFormChange}
-                className="w-full px-4 py-2 border rounded"
-              />
-            </div>
-          </div>
+      <div className="space-y-5 p-3 sm:p-4 lg:p-6">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5 lg:col-span-2">
+            <SectionCard
+              title="Dispatch Entry"
+              subtitle="Milk sent to a head dairy"
+              icon={Truck}
+              tone="primary"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Dispatch Date"
+                  required
+                  type="date"
+                  name="dispatch_date"
+                  value={form.dispatch_date}
+                  onChange={handleFormChange}
+                  error={errors.dispatch_date}
+                />
+                <SelectDropdown
+                  label="Shift"
+                  required
+                  name="shift"
+                  options={SHIFTS}
+                  value={form.shift}
+                  placeholder="Select shift"
+                  onChange={setField('shift')}
+                  error={errors.shift}
+                />
+                <SelectDropdown
+                  label="Head Dairy"
+                  required
+                  name="head_dairy_id"
+                  searchable
+                  options={headDairies.map((d) => ({ value: d.id, label: d.dairy_name }))}
+                  value={form.head_dairy_id}
+                  placeholder="Choose head dairy"
+                  onChange={setField('head_dairy_id')}
+                  error={errors.head_dairy_id}
+                />
+                <Input
+                  label="Vehicle No."
+                  type="text"
+                  name="vehicle_no"
+                  value={form.vehicle_no}
+                  onChange={handleFormChange}
+                />
+                <Textarea
+                  label="Notes"
+                  rows={2}
+                  name="notes"
+                  value={form.notes}
+                  onChange={handleFormChange}
+                  fieldClassName="sm:col-span-2"
+                />
+              </div>
+            </SectionCard>
 
-          <div>
-            <label className="block font-medium">Notes</label>
-            <textarea
-              name="notes"
-              value={form.notes}
-              onChange={handleFormChange}
-              rows="2"
-              className="w-full px-4 py-2 border rounded"
-            />
-          </div>
-
-          <hr />
-
-          <h3 className="text-lg font-semibold mb-1">Milk Details</h3>
-          {form.milk_details.map((item, index) => (
-            <div key={index} className="grid grid-cols-2 md:grid-cols-7 gap-2 mb-2 items-center">
-              <select
-                name="milk_type"
-                value={item.milk_type}
-                onChange={(e) => handleMilkDetailChange(index, e)}
-                className="px-2 py-1 border rounded"
-              >
-                <option value="">Type</option>
-                <option value="cow">Cow</option>
-                <option value="buffalo">Buffalo</option>
-                <option value="mixed">Mixed</option>
-              </select>
-              <input
-                type="number"
-                name="qty"
-                placeholder="Qty"
-                value={item.qty}
-                onChange={(e) => handleMilkDetailChange(index, e)}
-                className="px-2 py-1 border rounded"
-              />
-              <input
-                type="number"
-                name="fat"
-                placeholder="Fat"
-                value={item.fat}
-                onChange={(e) => handleMilkDetailChange(index, e)}
-                className="px-2 py-1 border rounded"
-              />
-              <input
-                type="text"
-                name="snf"
-                placeholder="SNF"
-                value={item.snf}
-                onChange={(e) => handleMilkDetailChange(index, e)}
-                className="px-2 py-1 border rounded"
-              />
-              <input
-                type="number"
-                name="rate"
-                placeholder="Rate"
-                value={item.rate}
-                onChange={(e) => handleMilkDetailChange(index, e)}
-                className="px-2 py-1 border rounded"
-              />
-              <input
-                type="number"
-                name="amount"
-                placeholder="Amount"
-                value={item.amount}
-                readOnly
-                className="px-2 py-1 border rounded bg-gray-100"
-              />
-              {form.milk_details.length > 1 && index > 0 && (
-                <button
+            <SectionCard
+              title="Milk Details"
+              subtitle="Add a row for each kind of milk in this dispatch"
+              icon={Receipt}
+              tone="accent"
+              action={
+                <Button
                   type="button"
-                  onClick={() => removeMilkDetailRow(index)}
-                  className="text-white bg-red-700 w-10 h-8 rounded-md hover:bg-red-900  font-bold text-xl flex items-center justify-center "
-                  title="Remove Row"
+                  size="sm"
+                  variant="secondary"
+                  icon={Plus}
+                  onClick={addMilkDetailRow}
                 >
-                  <IoMdClose size={25} />
-                </button>
+                  Add Row
+                </Button>
+              }
+            >
+              <div className="space-y-3">
+                {form.milk_details.map((item, index) => {
+                  const rowErrors = errors.rows?.[index] ?? {}
+                  return (
+                    <div
+                      key={index}
+                      className="ui-border-subtle grid grid-cols-2 items-start gap-3 rounded-lg border p-3 md:grid-cols-[1.3fr_1fr_1fr_1fr_1fr_1.2fr_auto]"
+                    >
+                      <SelectDropdown
+                        label="Type"
+                        name={`milk_type_${index}`}
+                        options={MILK_TYPES}
+                        value={item.milk_type}
+                        placeholder="Type"
+                        onChange={(value) =>
+                          handleMilkDetailChange(index, { target: { name: 'milk_type', value } })
+                        }
+                        error={rowErrors.milk_type}
+                      />
+                      <Input
+                        label="Qty"
+                        type="number"
+                        name="qty"
+                        min="0"
+                        step="any"
+                        value={item.qty}
+                        onChange={(e) => handleMilkDetailChange(index, e)}
+                        error={rowErrors.qty}
+                      />
+                      <Input
+                        label="Fat"
+                        type="number"
+                        name="fat"
+                        step="any"
+                        value={item.fat}
+                        onChange={(e) => handleMilkDetailChange(index, e)}
+                      />
+                      <Input
+                        label="SNF"
+                        type="text"
+                        name="snf"
+                        value={item.snf}
+                        onChange={(e) => handleMilkDetailChange(index, e)}
+                      />
+                      <Input
+                        label="Rate"
+                        type="number"
+                        name="rate"
+                        step="any"
+                        value={item.rate}
+                        onChange={(e) => handleMilkDetailChange(index, e)}
+                      />
+                      <Input
+                        label="Amount"
+                        type="number"
+                        name="amount"
+                        value={item.amount}
+                        readOnly
+                      />
+                      {form.milk_details.length > 1 && index > 0 ? (
+                        <IconButton
+                          icon={X}
+                          label="Remove row"
+                          iconSize={16}
+                          className="col-span-2 mt-0 w-full md:col-span-1 md:mt-6 hover:!text-[color:var(--ui-danger-600)]"
+                          onClick={() => removeMilkDetailRow(index)}
+                        />
+                      ) : (
+                        <span className="hidden md:block md:w-[2.375rem]" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {showErrors && Object.keys(errors).length > 0 && (
+                <div
+                  role="alert"
+                  className="ui-tint-danger mt-4 flex items-center gap-2 rounded-lg px-4 py-3 text-[13px] font-medium"
+                >
+                  <TriangleAlert size={16} aria-hidden="true" />
+                  Please fix the highlighted fields and try again.
+                </div>
               )}
-            </div>
-          ))}
 
-          <button
-            type="button"
-            onClick={addMilkDetailRow}
-            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+              <div className="ui-border-subtle mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                <div className="flex gap-8">
+                  <div>
+                    <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                      Total quantity
+                    </p>
+                    <p className="ui-font-display text-[20px] font-extrabold">
+                      {form.total_qty || 0} L
+                    </p>
+                  </div>
+                  <div>
+                    <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
+                      Total amount
+                    </p>
+                    <p className="ui-font-display text-[20px] font-extrabold text-[color:var(--ui-success-600)]">
+                      {money(form.total_amount)}
+                    </p>
+                  </div>
+                </div>
+                <Button type="submit" icon={Send} loading={loading}>
+                  Submit Dispatch
+                </Button>
+              </div>
+            </SectionCard>
+          </form>
+
+          <SectionCard
+            title="Dispatch Summary"
+            subtitle="Live preview"
+            icon={Receipt}
+            tone="accent"
+            className="lg:col-span-1"
           >
-            + Add Row
-          </button>
-
-          <div className="mt-4">
-            <label className="block font-medium">Total Quantity</label>
-            <input
-              type="text"
-              value={form.total_qty}
-              readOnly
-              className="w-full px-4 py-2 border rounded bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium">Total Amount</label>
-            <input
-              type="text"
-              value={form.total_amount}
-              readOnly
-              className="w-full px-4 py-2 border rounded bg-gray-100"
-            />
-          </div>
-
-          <button
-            disabled={loading}
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 mt-4"
-          >
-            {loading ? "Please waite..." : "Submit"}
-
-          </button>
-        </form>
-
-        {/* Right Summary Box */}
-        <div className="w-full md:w-1/2 bg-yellow-100 border border-yellow-300 p-6 rounded shadow">
-          <h3 className="text-xl font-semibold mb-4 text-center text-yellow-800">Dispatch Summary</h3>
-          <table className="w-full text-sm text-gray-700">
-            <tbody>
-              <tr className="border-b-2 border-black"><td className="py-2 font-medium">Dispatch Date:</td><td>{form.dispatch_date || '--'}</td></tr>
-              <tr className="border-b-2 border-black"><td className="py-2 font-medium">Shift:</td><td>{form.shift || '--'}</td></tr>
-              <tr className="border-b-2 border-black"><td className="py-2 font-medium">Head Dairy ID:</td><td>{form.head_dairy_id || '--'}</td></tr>
-              <tr className="border-b-2 border-black"><td className="py-2 font-medium">Vehicle No:</td><td>{form.vehicle_no || '--'}</td></tr>
-              <tr className="border-b-2 border-black font-bold text-green-700"><td className="py-1 font-bold">Total Qty:</td><td className='font-bold'>{form.total_qty || '0'}</td></tr>
-              <tr className="border-b-2 border-black font-bold text-green-700"><td className="py-1 font-bold">Total Amount:</td><td className='font-bold'>₹{form.total_amount || '0.00'}</td></tr>
-              <tr className="border-b-2 border-black"><td className="py-1 font-medium">Notes:</td><td>{form.notes || '--'}</td></tr>
-            </tbody>
-          </table>
-
-          <hr className="my-4" />
-          <h4 className="text-lg font-semibold mb-2">Milk Details</h4>
-          <table className="w-full border text-xs">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="p-1 border">Head Dairy</th>
-                <th className="p-1 border">Date</th>
-                <th className="p-1 border">Shift</th>
-                <th className="p-1 border">Type</th>
-                <th className="p-1 border">Qty</th>
-                <th className="p-1 border">Fat</th>
-                <th className="p-1 border">SNF</th>
-                <th className="p-1 border">Rate</th>
-                <th className="p-1 border">Amount</th>
-                <th className="p-1 border text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {collections.map((item, idx) => (
-                <tr key={idx}>
-                  <td className="p-1 border">{item.dairy_name || '--'}</td>
-                  <td className="p-1 border">{item.dispatch_date || '--'}</td>
-                  <td className="p-1 border">{item.shift || '--'}</td>
-                  <td className="p-1 border">{item.milk_details[0].milk_type || '--'}</td>
-                  <td className="p-1 border">{item.milk_details[0].qty || '--'}</td>
-                  <td className="p-1 border">{item.milk_details[0].fat || '--'}</td>
-                  <td className="p-1 border">{item.milk_details[0].snf || '--'}</td>
-                  <td className="p-1 border">₹{item.milk_details[0].rate || '--'}</td>
-                  <td className="p-1 border">₹{item.milk_details[0].amount || '--'}</td>
-                  <td className="p-1 border text-center space-x-1"> {/* Added space-x-1 for spacing */}
-                    <button
-                      className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition"
-                      onClick={() => {
-                        setIsModalOpen(true);
-                        setSelectedHeadDairy(item);
-                      }}
-
-                      title="View Details"
-                    >
-                      <FaEye />
-                    </button>
-                    <button
-                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-                      onClick={() => {
-                        setSelectedDairy(item);
-                        setIsEditModalOpen(true);
-                      }}
-                      title="Edit"
-                    >
-                      <FaPen />
-                    </button>
-                    <button
-                      className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                      onClick={() => {
-
-                        setHeadDairyToDelete(item); // Corrected: use 'item' instead of 'row.original'
-                        setIsConfirmOpen(true);
-                      }}
-                      title="Delete"
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  </td>
-
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {renderPageButtons()}
+            <dl>
+              <SummaryRow label="Dispatch Date">{form.dispatch_date}</SummaryRow>
+              <SummaryRow label="Shift">{form.shift}</SummaryRow>
+              <SummaryRow label="Head Dairy">{headDairyName}</SummaryRow>
+              <SummaryRow label="Vehicle No">{form.vehicle_no}</SummaryRow>
+              <SummaryRow label="Rows">{form.milk_details.length}</SummaryRow>
+              <SummaryRow label="Total Qty">
+                <span className="font-bold text-[color:var(--ui-success-600)]">
+                  {form.total_qty ? `${form.total_qty} L` : ''}
+                </span>
+              </SummaryRow>
+              <SummaryRow label="Total Amount">
+                <span className="font-bold text-[color:var(--ui-success-600)]">
+                  {Number(form.total_amount) ? money(form.total_amount) : ''}
+                </span>
+              </SummaryRow>
+              <SummaryRow label="Notes">{form.notes}</SummaryRow>
+            </dl>
+          </SectionCard>
         </div>
+
+        <SectionCard
+          title="Recent Dispatches"
+          subtitle="First milk row of each dispatch — open one to see all rows"
+          icon={Truck}
+          tone="info"
+        >
+          {listLoading && collections.length === 0 ? (
+            <div className="flex items-center justify-center gap-3 py-10">
+              <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
+              <span className="ui-text-secondary text-[13px]">Loading dispatches…</span>
+            </div>
+          ) : (
+            <>
+              <DataTable
+                className="px-1"
+                minWidth="980px"
+                columns={columns}
+                rows={collections}
+                onRowClick={openView}
+                emptyMessage="No dispatches yet"
+              />
+              <Pagination
+                page={currentPage}
+                pageCount={totalPages}
+                onPageChange={fetchMilkCollectionDetails}
+                className="mt-2"
+              />
+            </>
+          )}
+        </SectionCard>
       </div>
 
-
-
-
-      {/* EDIT MODAL  */}
-
+      {/* Edit */}
       <EditMilkDispatch
         milkDispatchData={selectedDairy}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-
       />
 
-      {/* THIS MODAL VIEW DETAILS  */}
-      {isModalOpen && selectedHeadDairy && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-6 relative overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">Milk Dispatch Entry Details</h2>
-
-            <table className="w-full text-sm text-left border border-gray-200">
-              <tbody>
-                {[
+      {/* View */}
+      <Modal
+        isOpen={isModalOpen && !!selectedHeadDairy}
+        onClose={() => setIsModalOpen(false)}
+        ariaLabel="Milk dispatch details"
+        maxWidth="44rem"
+        className="flex max-h-[90vh] flex-col overflow-hidden"
+      >
+        {selectedHeadDairy && (
+          <>
+            <div className="ui-border-subtle flex items-center gap-4 border-b px-6 py-5">
+              <IconBadge icon={Truck} tone="primary" size="lg" />
+              <div className="min-w-0 flex-1">
+                <h2 className="ui-font-display text-[17px] font-extrabold">
+                  Milk Dispatch Details
+                </h2>
+                <p className="ui-text-tertiary truncate text-[12.5px]">
+                  {selectedHeadDairy.dairy_name}
+                </p>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
+              <DetailList
+                items={[
                   ['Name', selectedHeadDairy.dairy_name],
                   ['Date', selectedHeadDairy.dispatch_date],
                   ['Shift', selectedHeadDairy.shift],
                   ['Vehicle No.', selectedHeadDairy.vehicle_no],
                   ['Total Qty', selectedHeadDairy.total_qty],
-                  ['Total Amount', selectedHeadDairy.total_amount],
-                  // ['Status', selectedHeadDairy.status === "1" ? 'Active' : 'Inactive'],
-                ].map(([label, value]) => (
-                  <tr key={label} className="border-b hover:bg-gray-50">
-                    <td className="font-medium text-gray-700 px-4 py-2 w-1/3 bg-gray-50">{label}</td>
-                    <td className="px-4 py-2">{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div className="mt-6 text-right">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-700 text-white px-5 py-2 rounded hover:bg-gray-800"
+                  ['Total Amount', money(selectedHeadDairy.total_amount)]
+                ]}
+              />
+              {selectedHeadDairy.milk_details?.length > 0 && (
+                <div>
+                  <p className="ui-text-tertiary mb-2 text-[11px] font-semibold uppercase tracking-wide">
+                    Milk details
+                  </p>
+                  <SurfaceCard className="overflow-hidden">
+                    <DataTable
+                      minWidth="460px"
+                      columns={[
+                        {
+                          key: 'milk_type',
+                          header: 'Type',
+                          render: (r) => <span className="capitalize">{r.milk_type}</span>
+                        },
+                        { key: 'qty', header: 'Qty', className: 'text-right' },
+                        { key: 'fat', header: 'Fat', className: 'text-right' },
+                        { key: 'snf', header: 'SNF', className: 'text-right' },
+                        { key: 'rate', header: 'Rate', className: 'text-right' },
+                        { key: 'amount', header: 'Amount', className: 'text-right' }
+                      ]}
+                      rows={selectedHeadDairy.milk_details.map((r, i) => ({ ...r, id: i }))}
+                    />
+                  </SurfaceCard>
+                </div>
+              )}
+            </div>
+            <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
+              <Button
+                icon={Pencil}
+                onClick={() => {
+                  setIsModalOpen(false)
+                  setSelectedDairy(selectedHeadDairy)
+                  setIsEditModalOpen(true)
+                }}
               >
+                Edit
+              </Button>
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
                 Close
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
-
-      {/* DELELTE MODAL */}
-      {isConfirmOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-sm mx-4 p-6 text-center relative">
-            <h2 className="text-lg font-semibold mb-4">Are you sure you want to delete?</h2>
-            <p className="text-gray-700 mb-6">This action cannot be undone.</p>
-
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setIsConfirmOpen(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDeleteHeadDairyMilkDispatch}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
+      {/* Delete */}
+      <DeleteConfirmModal
+        isOpen={isConfirmOpen}
+        loading={deleting}
+        onClose={() => {
+          setIsConfirmOpen(false)
+          setHeadDairyToDelete(null)
+        }}
+        onConfirm={confirmDeleteHeadDairyMilkDispatch}
+        title="Delete Dispatch"
+        message="Are you sure you want to delete this dispatch? This action cannot be undone."
+      />
     </div>
-  );
-};
+  )
+}
 
-export default MilkDispatchPage;
-
-
-// const handleMilkDetailChange = (index, e) => {
-//   const { name, value } = e.target;
-//   const updatedDetails = [...form.milk_details];
-//   updatedDetails[index][name] = value;
-
-//   const { qty, fat, clr, rate } = updatedDetails[index];
-
-//   // ✅ Calculate amount if qty & rate are present
-//   if (qty && rate) {
-//     updatedDetails[index].amount = (parseFloat(qty) * parseFloat(rate)).toFixed(2);
-//   } else {
-//     updatedDetails[index].amount = '';
-//   }
-
-//   // ✅ Debounce rate fetch on SNF input
-//   if (name === 'snf') {
-//     clearTimeout(snfRateFetchTimeout);
-
-//     // 👇 Only continue if SNF is a valid float
-//     const snfValue = parseFloat(value);
-//     const isValidSNF = !isNaN(snfValue) && value.includes('.');
-
-//     if (!fat) {
-//       CustomToast.error('⚠️ Please enter FAT value first to fetch rate');
-//     } else if (isValidSNF) {
-//       snfRateFetchTimeout = setTimeout(async () => {
-//         try {
-//           const result = await getMilkRate(fat, clr || '', snfValue);
-//           console.log("result print ====>", result);
-
-//           if (result?.rate) {
-//             updatedDetails[index].rate = parseFloat(result.rate).toFixed(2);
-//             if (qty) {
-//               updatedDetails[index].amount = (parseFloat(qty) * result.rate).toFixed(2);
-//             }
-
-//             // ✅ Set updated form after rate is fetched
-//             setForm(prev => {
-//               const updatedMilkDetails = [...prev.milk_details];
-//               updatedMilkDetails[index] = updatedDetails[index];
-//               return { ...prev, milk_details: updatedMilkDetails };
-//             });
-//           } else {
-//             CustomToast.error('❌ Rate not found for given values');
-//           }
-//         } catch (error) {
-//           console.error('❌ Error fetching milk rate:', error);
-//           CustomToast.error('❌ Error fetching milk rate');
-//         }
-//       }, 800);
-//     }
-//   }
-
-//   // ✅ Immediate form update for all cases
-//   setForm(prev => ({ ...prev, milk_details: updatedDetails }));
-// };
+export default MilkDispatchPage
