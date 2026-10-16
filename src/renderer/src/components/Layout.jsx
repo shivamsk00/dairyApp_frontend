@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import UpdateNotifier from './UpdateNotifier';
 import { Outlet } from 'react-router-dom';
+import { PageLoader } from './ui';
 
 const Layout = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -38,7 +39,10 @@ const Layout = () => {
             <div className="min-h-full">
               <div className="bg-white/80 backdrop-blur-sm overflow-hidden transition-all duration-300">
                 <div className="p-1 sm:p-2 lg:p-2">
-                  <Outlet />
+                  {/* Page chunks load lazily: keep the sidebar/header and show the loader here only */}
+                  <Suspense fallback={<PageLoader label="Loading page" hint="Just a moment" />}>
+                    <Outlet />
+                  </Suspense>
                 </div>
               </div>
             </div>

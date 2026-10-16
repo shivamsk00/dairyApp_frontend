@@ -5,6 +5,7 @@ import Login from './pages/auth/Login'
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
 import NavigatorSetter from './helper/NavigatorSetter';
+import { PageLoader } from './components/ui';
 // import Layout from './components/Layout';
 const Layout = lazy(() => import('./components/Layout'));
 // import Dashboard from './pages/dashboard/Dashboard';
@@ -90,6 +91,8 @@ function App() {
   useEffect(() => {
     const preloader = document.getElementById('preloader')
     if (preloader) {
+      // Short minimum so the splash never just flashes; the Suspense screen loader looks the same, so
+      // there is no visible jump if the first route is still loading.
       setTimeout(() => {
         preloader.style.opacity = '0'
         preloader.style.transition = 'opacity 0.3s ease'
@@ -98,7 +101,7 @@ function App() {
         setTimeout(() => {
           preloader.remove()
         }, 300)
-      }, 1000) // 3 seconds delay before starting fade-out
+      }, 500)
     }
   }, [])
 
@@ -107,7 +110,7 @@ function App() {
   return (
     <HashRouter>
       <NavigatorSetter /> {/* 👈 Set navigator once here */}
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<PageLoader variant="screen" brand="सरस डेयरी" label="Loading" hint="Preparing your workspace" />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

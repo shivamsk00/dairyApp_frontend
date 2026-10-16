@@ -819,3 +819,104 @@ select.ui-input {
   background: var(--ui-toast-tone) !important;
   opacity: 0.7;
 }
+
+/* ---- PageLoader (route / app loading) ---------------------------------------------------- */
+/* Hidden for the first 150 ms so fast loads never flash a loader. */
+@keyframes ui-loader-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ui-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ui-loader-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+@keyframes ui-loader-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes ui-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.ui-loader-delayed {
+  opacity: 0;
+  animation: ui-loader-appear 0.25s ease-out 0.15s forwards;
+}
+.ui-loader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 3px solid color-mix(in oklab, var(--ui-primary-500) 16%, transparent);
+  border-top-color: var(--ui-primary-500);
+  border-right-color: var(--ui-accent-400);
+  animation: ui-loader-spin 1s linear infinite;
+}
+.ui-loader-tile {
+  background: linear-gradient(155deg, var(--ui-primary-500), var(--ui-primary-700));
+  box-shadow: 0 8px 22px color-mix(in oklab, var(--ui-primary-600) 38%, transparent);
+  animation: ui-loader-breathe 1.8s ease-in-out infinite;
+}
+.ui-loader-track {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--ui-primary-500) 16%, transparent);
+}
+.ui-loader-track::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 30%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--ui-primary-500), var(--ui-accent-400));
+  animation: ui-loader-bar 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.ui-loader-screen {
+  background:
+    radial-gradient(60rem 30rem at 50% -10%, color-mix(in oklab, var(--ui-primary-500) 12%, transparent), transparent),
+    var(--ui-surface-canvas);
+}
+.ui-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--ui-surface-sunken);
+}
+.ui-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--ui-surface-base) 70%, transparent), transparent);
+  animation: ui-skeleton-shimmer 1.4s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-loader-ring,
+  .ui-loader-tile,
+  .ui-loader-track::after,
+  .ui-skeleton::after {
+    animation-duration: 3s;
+  }
+  .ui-loader-tile {
+    animation: none;
+  }
+}

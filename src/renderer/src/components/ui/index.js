@@ -24,6 +24,7 @@ export { default as CommandPalette } from './layout/CommandPalette'
 export { default as ScrollToTopButton } from './layout/ScrollToTopButton'
 
 // Feedback
+export { default as PageLoader } from './feedback/PageLoader'
 export { default as ToastHost } from './feedback/ToastHost'
 
 // Modals
