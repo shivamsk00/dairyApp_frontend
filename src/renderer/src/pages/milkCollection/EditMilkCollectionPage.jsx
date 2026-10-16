@@ -1,17 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import useHomeStore from '../../zustand/useHomeStore';
-import CustomToast from '../../helper/costomeToast';
-import { IoMdClose, IoMdCloseCircle } from 'react-icons/io';
-import { FiAlertTriangle } from 'react-icons/fi';
+/* eslint-disable react/prop-types -- props are documented by usage in DailyMilkCollectionPage */
+import { useEffect, useState } from 'react'
+import { Pencil, Save, TriangleAlert, X } from 'lucide-react'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Button,
+  ConfirmActionModal,
+  IconBadge,
+  IconButton,
+  Input,
+  Modal,
+  SelectDropdown
+} from '../../components/ui'
+
+const MILK_TYPES = ['cow', 'buffalo', 'other'].map((v) => ({
+  value: v,
+  label: v[0].toUpperCase() + v.slice(1)
+}))
+const SHIFTS = ['morning', 'evening', 'both'].map((v) => ({
+  value: v,
+  label: v[0].toUpperCase() + v.slice(1)
+}))
 
 const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
-  const editMilkCollectionDetail = useHomeStore(state => state.editMilkCollectionDetail);
-  const loading = useHomeStore(state => state.loading);
-  const fetchCustomerDetailsByAccount = useHomeStore(state => state.fetchCustomerDetailsByAccount);
-  const getMilkRate = useHomeStore(state => state.getMilkRate);
-  const [isCustomer, setIscustomer] = useState(true);
-  const [rateFieldsTouched, setRateFieldsTouched] = useState(false);
-  const [showConfirmChange, setShowConfirmChange] = useState(false);
+  const editMilkCollectionDetail = useHomeStore((state) => state.editMilkCollectionDetail)
+  const loading = useHomeStore((state) => state.loading)
+  const fetchCustomerDetailsByAccount = useHomeStore((state) => state.fetchCustomerDetailsByAccount)
+  const getMilkRate = useHomeStore((state) => state.getMilkRate)
+  const [isCustomer, setIscustomer] = useState(true)
+  const [rateFieldsTouched, setRateFieldsTouched] = useState(false)
+  const [showConfirmChange, setShowConfirmChange] = useState(false)
+  const [accountError, setAccountError] = useState('')
+  const [errors, setErrors] = useState({})
 
   const [form, setForm] = useState({
     milk_type: '',
@@ -28,7 +48,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
     rate: '',
     total_amount: '',
     shift: ''
-  });
+  })
 
   useEffect(() => {
     if (milkData) {
@@ -48,363 +68,393 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
         total_amount: milkData.quantity * milkData.base_rate || '',
         shift: milkData.shift || '',
         date: milkData.date
-      });
+      })
     }
-  }, [milkData]);
-
-
-
-
+  }, [milkData])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
+    setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev))
 
     if (['fat', 'snf', 'clr'].includes(name)) {
-      setRateFieldsTouched(true);
+      setRateFieldsTouched(true)
     }
 
-    setForm(prev => {
+    setForm((prev) => {
       const updated = {
         ...prev,
-        [name]: value,
-      };
+        [name]: value
+      }
+
+      if (name === 'base_rate') updated.rate = value
 
       // When quantity or base_rate changes, update total_amount
       if (name === 'quantity' || name === 'base_rate') {
-        const quantity = parseFloat(name === 'quantity' ? value : updated.quantity);
-        const baseRate = parseFloat(name === 'base_rate' ? value : updated.base_rate);
+        const quantity = parseFloat(name === 'quantity' ? value : updated.quantity)
+        const baseRate = parseFloat(name === 'base_rate' ? value : updated.base_rate)
 
         if (!isNaN(quantity) && !isNaN(baseRate)) {
-          updated.total_amount = (quantity * baseRate).toFixed(2);
+          updated.total_amount = (quantity * baseRate).toFixed(2)
         } else {
-          updated.total_amount = '';
+          updated.total_amount = ''
         }
       }
 
-      return updated;
-    });
-  };
-
-
-
-
-
-
-
+      return updated
+    })
+  }
 
   // FETCH ALL CUSTOMER
   const fetchCustomerDetailByAccountNumber = async (accountNo) => {
     try {
-      const res = await fetchCustomerDetailsByAccount(accountNo); // Your zustand API call
+      const res = await fetchCustomerDetailsByAccount(accountNo) // Your zustand API call
       if (res.status_code == 200) {
         setIscustomer(false)
+        setAccountError('')
         setForm((prev) => ({
           ...prev,
           name: res.data.name || '',
           careof: res.data.careof || '',
-          mobile: res.data.mobile || '',
-        }));
+          mobile: res.data.mobile || ''
+        }))
         // setCustomerWallet(res.data.wallet)
-
       } else {
         setIscustomer(true)
-        CustomToast.error(res.message)
+        setAccountError(res.message || 'Customer not found')
         setForm((prev) => ({
           ...prev,
           name: '',
           careof: '',
-          mobile: '',
-        }));
+          mobile: ''
+        }))
       }
     } catch (error) {
-      console.error('Error fetching customer details:', error);
+      console.error('Error fetching customer details:', error)
       setForm((prev) => ({
         ...prev,
         name: '',
         careof: '',
-        mobile: '',
-      }));
+        mobile: ''
+      }))
     }
-  };
+  }
 
   // Debounced fetch on account number input
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (form.customer_account_number) {
-        fetchCustomerDetailByAccountNumber(form.customer_account_number);
+        fetchCustomerDetailByAccountNumber(form.customer_account_number)
       } else {
         setForm((prev) => ({
           ...prev,
           name: '',
           careof: '',
-          mobile: '',
-        }));
+          mobile: ''
+        }))
       }
-    }, 500); // wait 500ms after user stops typing
+    }, 500) // wait 500ms after user stops typing
 
-    return () => clearTimeout(timeout); // cleanup on next input
-  }, [form.customer_account_number]);
-
-
+    return () => clearTimeout(timeout) // cleanup on next input
+  }, [form.customer_account_number])
 
   const executeUpdate = async () => {
     try {
-      const res = await editMilkCollectionDetail(milkData.id, form);
+      const res = await editMilkCollectionDetail(milkData.id, form)
       if (res.status_code === 200) {
-        CustomToast.success(res.message);
-        setShowConfirmChange(false);
-        await onUpdate();
-        onClose();
+        CustomToast.success(res.message)
+        setShowConfirmChange(false)
+        await onUpdate()
+        onClose()
       } else {
-        CustomToast.error(res.message);
+        CustomToast.error(res.message)
       }
     } catch (error) {
-      console.error("Error updating milk collection:", error);
+      console.error('Error updating milk collection:', error)
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+
+    const found = {}
+    if (!form.date) found.date = 'Select the date'
+    if (!form.customer_account_number) found.customer_account_number = 'Enter the account number'
+    if (!form.milk_type) found.milk_type = 'Select the milk type'
+    if (!form.shift) found.shift = 'Select a shift'
+    if (!(parseFloat(form.quantity) > 0)) found.quantity = 'Enter the quantity'
+    setErrors(found)
+    if (Object.keys(found).length) return
 
     // Check if account number has changed
-    const isAccountChanged = form.customer_account_number !== milkData.customer_account_number;
+    const isAccountChanged = form.customer_account_number !== milkData.customer_account_number
 
     if (isAccountChanged) {
-      setShowConfirmChange(true);
+      setShowConfirmChange(true)
     } else {
-      await executeUpdate();
+      await executeUpdate()
     }
-  };
-
+  }
 
   useEffect(() => {
-    const fat = form.fat?.toString().trim();
-    const clr = form.clr?.toString().trim();
-    const snfRaw = form.snf?.toString().trim();
-    
+    const fat = form.fat?.toString().trim()
+    const clr = form.clr?.toString().trim()
+    const snfRaw = form.snf?.toString().trim()
+
     // ✅ Keep user input clean, but send '.0' to API for integer values (e.g., 8 -> 8.0)
-    const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw;
+    const snfForApi = snfRaw && !snfRaw.includes('.') ? `${snfRaw}.0` : snfRaw
 
     // ✅ Trigger only when FAT is present, and either SNF or CLR is updated
     if ((snfForApi || clr) && fat) {
-
       // Check if values have actually changed from milkData
       // Convert to numbers for robust comparison
-      const currentFat = parseFloat(fat || '0');
-      const originalFat = parseFloat(milkData?.fat || '0');
-      const currentSnf = parseFloat(snfRaw || '0');
-      const originalSnf = parseFloat(milkData?.snf || '0');
-      const currentClr = parseFloat(clr || '0');
-      const originalClr = parseFloat(milkData?.clr || '0');
+      const currentFat = parseFloat(fat || '0')
+      const originalFat = parseFloat(milkData?.fat || '0')
+      const currentSnf = parseFloat(snfRaw || '0')
+      const originalSnf = parseFloat(milkData?.snf || '0')
+      const currentClr = parseFloat(clr || '0')
+      const originalClr = parseFloat(milkData?.clr || '0')
 
       // Check differences with a small epsilon for float safety, or just direct value check
-      const isFatChanged = milkData && Math.abs(currentFat - originalFat) > 0.001;
-      const isSnfChanged = milkData && Math.abs(currentSnf - originalSnf) > 0.001;
-      const isClrChanged = milkData && Math.abs(currentClr - originalClr) > 0.001;
+      const isFatChanged = milkData && Math.abs(currentFat - originalFat) > 0.001
+      const isSnfChanged = milkData && Math.abs(currentSnf - originalSnf) > 0.001
+      const isClrChanged = milkData && Math.abs(currentClr - originalClr) > 0.001
 
       console.log('Comparison:', {
-        currentFat, originalFat, isFatChanged,
-        currentSnf, originalSnf, isSnfChanged,
-        currentClr, originalClr, isClrChanged,
+        currentFat,
+        originalFat,
+        isFatChanged,
+        currentSnf,
+        originalSnf,
+        isSnfChanged,
+        currentClr,
+        originalClr,
+        isClrChanged,
         rateFieldsTouched
-      });
+      })
 
       // If we have milkData AND user has NOT touched the fields, skipt fetch.
-      // We rely on the touched state primarily. 
+      // We rely on the touched state primarily.
       if (milkData && !rateFieldsTouched) {
-        return;
+        return
       }
 
       const timeout = setTimeout(() => {
         const getBaseRateFetch = async () => {
           try {
-            const res = await getMilkRate(fat, clr, snfForApi);
-            console.log("milk rate fetch", res);
+            const res = await getMilkRate(fat, clr, snfForApi)
+            console.log('milk rate fetch', res)
 
-            setForm(prev => ({
+            setForm((prev) => ({
               ...prev,
               base_rate: res.rate || '',
-              rate: res.rate || '', // Update displayed rate as well
-            }));
+              rate: res.rate || '' // Update displayed rate as well
+            }))
 
             // 🎯 Prioritize meaningful feedback
             if (res.rate) {
               // CustomToast.success("Rate Found", "top-center");
             } else {
-              if (!res.fat) CustomToast.warn("FAT not found", "top-center");
-              if (!res.snf) CustomToast.warn("SNF not found", "top-center");
-              if (!res.clr) CustomToast.warn("CLR not found", "top-center");
-              CustomToast.warn("RATE not found", "top-center");
+              if (!res.fat) CustomToast.warn('FAT not found', 'top-center')
+              if (!res.snf) CustomToast.warn('SNF not found', 'top-center')
+              if (!res.clr) CustomToast.warn('CLR not found', 'top-center')
+              CustomToast.warn('RATE not found', 'top-center')
             }
           } catch (error) {
-            console.error("Error fetching milk rate:", error);
+            console.error('Error fetching milk rate:', error)
           }
-        };
+        }
 
-        getBaseRateFetch();
-      }, 800); // Slightly quicker feedback
+        getBaseRateFetch()
+      }, 800) // Slightly quicker feedback
 
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(timeout)
     }
-  }, [form.fat, form.snf, form.clr, milkData, rateFieldsTouched]);
-
-
+  }, [form.fat, form.snf, form.clr, milkData, rateFieldsTouched])
 
   // Calculate rate and total_amount automatically
   useEffect(() => {
-    const { fat, snf, base_rate, other_price, quantity } = form;
-    const f = parseFloat(fat) || 0;
-    const s = parseFloat(snf) || 0;
-    const b = parseFloat(base_rate) || 0;
-    const o = parseFloat(other_price) || 0;
-    const q = parseFloat(quantity) || 0;
-    const rate = q * b;
-    const total_amount = rate + o;
+    const { base_rate, other_price, quantity } = form
+    const b = parseFloat(base_rate) || 0
+    const o = parseFloat(other_price) || 0
+    const q = parseFloat(quantity) || 0
+    const rate = q * b
+    const total_amount = rate + o
 
     setForm((prev) => ({
       ...prev,
-      total_amount: total_amount.toFixed(2),
-    }));
-  }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity]);
+      total_amount: total_amount.toFixed(2)
+    }))
+  }, [form.fat, form.snf, form.base_rate, form.other_price, form.quantity])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  if (!isOpen) return null;
+  const pick = (name) => (value) => handleChange({ target: { name, value } })
+  const err = (name) => errors[name]
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white max-w-4xl w-full max-h-[70vh] overflow-y-scroll p-8 rounded-lg relative">
-        <button
-          className="absolute top-2 p-2 rounded-md right-4 text-xl"
-          onClick={onClose}
-        >
-          <IoMdClose />
-        </button>
-        <h2 className="text-2xl font-semibold mb-4 text-center">Edit Milk Collection</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-          {[
-            { label: 'Date', name: 'date', type: "date" },
-            { label: 'Account No', name: 'customer_account_number', },
-            { label: 'Name', name: 'name', readOnly: true },
-            { label: 'Care of', name: 'careof', readOnly: true },
-            { label: 'Milk Type', name: 'milk_type', type: 'select', options: ['cow', 'buffalo', 'other'] },
-            { label: 'Shift', name: 'shift', type: 'select', options: ['morning', 'evening', 'both'] },
-            { label: 'Mobile', name: 'mobile', readOnly: true },
-            { label: 'Quantity', name: 'quantity', type: 'number' },
-            { label: 'FAT', name: 'fat', type: 'number' },
-            { label: 'SNF', name: 'snf', type: 'number' },
-            // { label: 'Base Rate', name: 'base_rate', type: 'number' },
-            { label: 'Rate', name: 'rate', type: 'number' },
-            { label: 'Other Price', name: 'other_price', type: 'number' },
-            { label: 'Total Amount', name: 'total_amount', type: 'number' },
-          ].map(({ label, name, readOnly = false, type = 'text', options }) => (
-            <div key={name}>
-              <label className="block font-medium mb-1">{label}</label>
-              {type === 'select' ? (
-                <select
-                  name={name}
-                  value={form[name]}
-                  onChange={handleChange}
-                  className="w-full border px-3 py-2 rounded"
-                  readOnly={readOnly}
-                >
-                  <option value="">Select {label.toLowerCase()}</option>
-                  {options.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={type}
-                  name={name}
-                  value={form[name]}
-                  onChange={handleChange}
-                  className="w-full border px-3 py-2 rounded bg-white"
-                  readOnly={readOnly}
-                />
-              )}
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        ariaLabel="Edit milk collection"
+        maxWidth="52rem"
+        className="flex max-h-[90vh] flex-col overflow-hidden"
+      >
+        <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+          <div className="ui-border-subtle flex items-center gap-3 border-b px-6 py-4">
+            <IconBadge icon={Pencil} tone="primary" />
+            <div className="min-w-0 flex-1">
+              <h2 className="ui-font-display text-[16px] font-bold">Edit Milk Collection</h2>
+              <p className="ui-text-tertiary truncate text-[12px]">
+                {milkData?.name} · A/C {milkData?.customer_account_number}
+              </p>
             </div>
-          ))}
+            <IconButton icon={X} label="Close" onClick={onClose} />
+          </div>
 
-          <div className="col-span-2 mt-4 flex justify-end">
-            <button
-              type="submit"
-              className={`${isCustomer ? 'bg-gray-300' : 'bg-[#E6612A] hover:bg-orange-600'}   text-white px-6 py-2 rounded`}
-              disabled={loading || isCustomer}
-            >
-              {loading ? "Please wait..." : "Update"}
-            </button>
+          <div className="min-h-0 flex-1 overflow-y-auto p-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                label="Date"
+                required
+                type="date"
+                name="date"
+                value={form.date || ''}
+                onChange={handleChange}
+                error={err('date')}
+              />
+              <Input
+                label="Account No"
+                required
+                type="text"
+                name="customer_account_number"
+                value={form.customer_account_number}
+                onChange={handleChange}
+                error={
+                  err('customer_account_number') ||
+                  (form.customer_account_number && isCustomer ? accountError : '')
+                }
+                hint={
+                  form.customer_account_number && isCustomer && !accountError
+                    ? 'Looking up customer…'
+                    : undefined
+                }
+              />
+              <Input label="Name" type="text" name="name" value={form.name} readOnly disabled />
+              <Input
+                label="Care of"
+                type="text"
+                name="careof"
+                value={form.careof}
+                readOnly
+                disabled
+              />
+              <SelectDropdown
+                label="Milk Type"
+                required
+                name="milk_type"
+                options={MILK_TYPES}
+                value={form.milk_type}
+                placeholder="Select milk type"
+                onChange={pick('milk_type')}
+                error={err('milk_type')}
+              />
+              <SelectDropdown
+                label="Shift"
+                required
+                name="shift"
+                options={SHIFTS}
+                value={form.shift}
+                placeholder="Select shift"
+                onChange={pick('shift')}
+                error={err('shift')}
+              />
+              <Input
+                label="Mobile"
+                type="text"
+                name="mobile"
+                value={form.mobile}
+                readOnly
+                disabled
+              />
+              <Input
+                label="Quantity (Ltr)"
+                required
+                type="number"
+                step="any"
+                name="quantity"
+                value={form.quantity}
+                onChange={handleChange}
+                error={err('quantity')}
+              />
+              <Input
+                label="FAT"
+                type="number"
+                step="any"
+                name="fat"
+                value={form.fat}
+                onChange={handleChange}
+              />
+              <Input
+                label="SNF"
+                type="number"
+                step="any"
+                name="snf"
+                value={form.snf}
+                onChange={handleChange}
+              />
+              <Input
+                label="Rate (₹/Ltr)"
+                type="number"
+                step="any"
+                name="base_rate"
+                value={form.base_rate}
+                onChange={handleChange}
+              />
+              <Input
+                label="Other Price (₹)"
+                type="number"
+                step="any"
+                name="other_price"
+                value={form.other_price}
+                onChange={handleChange}
+              />
+              <Input
+                label="Total Amount"
+                type="number"
+                name="total_amount"
+                value={form.total_amount}
+                readOnly
+                className="!font-bold !text-[color:var(--ui-success-600)]"
+              />
+            </div>
+          </div>
+
+          <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" icon={Save} loading={loading} disabled={loading || isCustomer}>
+              {loading ? 'Please wait...' : 'Update'}
+            </Button>
           </div>
         </form>
+      </Modal>
 
-        {/* Enhanced Confirmation Modal */}
-        {showConfirmChange && (
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 animate-in zoom-in-95 duration-200">
+      <ConfirmActionModal
+        isOpen={showConfirmChange}
+        onClose={() => {
+          setShowConfirmChange(false)
+          onClose() // closes the main dialog too, as before
+        }}
+        onConfirm={executeUpdate}
+        tone="warning"
+        icon={TriangleAlert}
+        title="Confirm Account Update"
+        message={`You are changing the account number from ${milkData?.customer_account_number} to ${form.customer_account_number}. Are you sure you want to proceed with this update?`}
+        cancelLabel="No, Cancel"
+        confirmLabel="Yes, Update"
+      />
+    </>
+  )
+}
 
-              {/* Header / Icon */}
-              <div className="bg-amber-50 p-6 flex flex-col items-center justify-center border-b border-amber-100">
-                <div className="h-16 w-16 bg-amber-100 rounded-full flex items-center justify-center mb-4 text-amber-600">
-                  <FiAlertTriangle size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 text-center">Confirm Account Update</h3>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <p className="text-gray-600 text-center mb-6 leading-relaxed">
-                  You are changing the account number from{' '}
-                  <span className="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-lg border border-red-100">
-                    {milkData.customer_account_number}
-                  </span>{' '}
-                  to{' '}
-                  <span className="font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-lg border border-green-100">
-                    {form.customer_account_number}
-                  </span>
-                  .
-                  <br /><br />
-                  <span className="text-sm text-gray-500">Are you sure you want to proceed with this update?</span>
-                </p>
-
-                {/* Buttons */}
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => {
-                      setShowConfirmChange(false);
-                      onClose(); // Close the main modal as requested
-                    }}
-                    className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-colors duration-200"
-                  >
-                    NO, Cancel
-                  </button>
-                  <button
-                    onClick={executeUpdate}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl font-semibold shadow-lg shadow-orange-200 transition-all duration-200"
-                  >
-                    YES, Update
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-
-  );
-};
-
-export default EditMilkCollectionModal;
+export default EditMilkCollectionModal
