@@ -1,168 +1,192 @@
-import React, { useEffect, useState } from 'react';
-import useHomeStore from '../../zustand/useHomeStore';
-import CustomToast from '../../helper/costomeToast';
-import CommonBackButton from '../../components/CommonBackButton';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Package, Save } from 'lucide-react'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Breadcrumb,
+  Button,
+  FormActions,
+  FormSection,
+  Input,
+  PageLoader,
+  SelectDropdown,
+  useDocumentTitle
+} from '../../components/ui'
+
+const validate = (v) => {
+  const e = {}
+  if (!v.category) e.category = 'Select a category'
+  if (!String(v.name).trim()) e.name = 'Enter the product name'
+  if (!String(v.unit).trim()) e.unit = 'Enter the unit, e.g. 1 Ltr'
+  if (v.price === '' || !(parseFloat(v.price) >= 0)) e.price = 'Enter the price'
+  return e
+}
 
 const EditProductPage = () => {
-  const nav = useNavigate();
-  const { state } = useLocation();
-  const { productId } = state;
+  useDocumentTitle('Edit Product')
+  const nav = useNavigate()
+  const { state } = useLocation()
+  const productId = state?.productId
+  const fetchAllCategories = useHomeStore((s) => s.fetchAllCategories)
+  const editProductDetailsFetch = useHomeStore((s) => s.editProductDetailsFetch)
+  const updateProduct = useHomeStore((s) => s.updateProduct)
 
-  const fetchAllCategories = useHomeStore(state => state.fetchAllCategories);
-  const editProductDetailsFetch = useHomeStore(state => state.editProductDetailsFetch);
-  const updateProduct = useHomeStore(state => state.updateProduct);
-
-  const [categories, setCategories] = useState([]);
-
-  const [formData, setFormData] = useState({
-    category: '',
-    name: '',
-    unit: '',     // 🟢 Combined field for value + type
-    price: '',
-  });
-
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const fetchProductEditData = async () => {
-    try {
-      const res = await editProductDetailsFetch(productId);
-      setFormData({
-        category: res.data.category_id,
-        name: res.data.name,
-        unit: res.data.unit,     // 🟢 like '1 Ltr'
-        price: res.data.price,
-      });
-    } catch (error) {
-      console.error("ERROR FETCHING PRODUCT", error);
-    }
-  };
-
-  const getAllCategory = async () => {
-    try {
-      const res = await fetchAllCategories();
-      if (res.status_code == 200) {
-        setCategories(res.data.data);
-      } else {
-        CustomToast.error(res.message);
-      }
-    } catch (error) {
-      console.error("ERROR FETCHING CATEGORIES", error);
-    }
-  };
+  const [categories, setCategories] = useState([])
+  const [formData, setFormData] = useState({ category: '', name: '', unit: '', price: '' })
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    getAllCategory();
-    fetchProductEditData();
-  }, []);
+    if (!productId) {
+      nav('/inventory', { replace: true })
+      return
+    }
+    const load = async () => {
+      try {
+        const [catRes, res] = await Promise.all([
+          fetchAllCategories(),
+          editProductDetailsFetch(productId)
+        ])
+        if (catRes?.status_code == 200) setCategories(catRes.data.data)
+        else CustomToast.error(catRes?.message || 'Failed to load categories')
+        setFormData({
+          category: res.data.category_id,
+          name: res.data.name,
+          unit: res.data.unit, // like '1 Ltr'
+          price: res.data.price
+        })
+      } catch (error) {
+        console.error('ERROR FETCHING PRODUCT', error)
+        CustomToast.error('Failed to load the product')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const set = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: undefined }))
+  }
+  const handleChange = (e) => set(e.target.name, e.target.value)
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    const found = validate(formData)
+    setErrors(found)
+    if (Object.keys(found).length) {
+      setTimeout(() => document.querySelector('form [aria-invalid="true"]')?.focus(), 0)
+      return
+    }
+
+    setSubmitting(true)
     try {
-      const productData = {
+      const res = await updateProduct(productId, {
         category_id: formData.category,
         name: formData.name,
-        unit: formData.unit,  // 🟢 no combination needed
-        price: formData.price,
-      };
-
-      const res = await updateProduct(productId, productData);
-      if (res.status_code == 200) {
-        CustomToast.success(res.message);
-        nav(-1);
+        unit: formData.unit,
+        price: formData.price
+      })
+      if (res?.status_code == 200) {
+        CustomToast.success(res.message)
+        nav(-1)
+      } else {
+        CustomToast.error(res?.message || 'Failed to update the product')
       }
     } catch (error) {
-      console.log("ERROR IN UPDATE PRODUCT", error);
+      console.log('ERROR IN UPDATE PRODUCT', error)
+      CustomToast.error('Failed to update the product')
+    } finally {
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
-    <>
-      <div className="w-full px-4 md:px-6 py-3 text-left">
-        <CommonBackButton heading="Edit Product" />
-      </div>
-      <div className="w-full px-4 md:px-6 lg:w-1/2 mx-auto py-6 shadow-xl m-3 rounded-lg bg-slate-700">
-        <h2 className="text-2xl font-bold mb-6 text-white">Edit Product</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-6 w-full">
-          {/* Row 1: Category and Product Name */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium text-white">Category</label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium text-white">Product Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Product Unit and Price */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium text-white">Product Unit</label>
-              <input
-                type="text"
-                name="unit"
-                placeholder="e.g., 1 Ltr, 500 gm"
-                value={formData.unit}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium text-white">Product Price</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded px-3 py-2"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-            >
+    <div className="ui-text-primary w-full">
+      <Breadcrumb
+        title="Edit Product"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Inventory', to: '/inventory' },
+          { label: 'Edit Product' }
+        ]}
+        actions={
+          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => nav(-1)}>
+            Back
+          </Button>
+        }
+      />
+      {loading ? (
+        <PageLoader variant="inline" label="Loading product" />
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="w-full space-y-5 p-3 sm:p-4 lg:p-6"
+        >
+          <FormSection
+            title="Product Details"
+            subtitle="Update the product"
+            icon={Package}
+            tone="primary"
+            cols={3}
+          >
+            <SelectDropdown
+              label="Category"
+              required
+              name="category"
+              searchable
+              options={categories.map((c) => ({ value: c.id, label: c.name }))}
+              value={formData.category}
+              placeholder="Select Category"
+              onChange={(value) => set('category', value)}
+              error={errors.category}
+            />
+            <Input
+              label="Product Name"
+              required
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              error={errors.name}
+            />
+            <Input
+              label="Product Unit"
+              required
+              type="text"
+              name="unit"
+              hint="e.g. 1 Ltr, 500 gm"
+              value={formData.unit}
+              onChange={handleChange}
+              error={errors.unit}
+            />
+            <Input
+              label="Product Price"
+              required
+              type="number"
+              step="any"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              error={errors.price}
+            />
+          </FormSection>
+          <FormActions>
+            <Button variant="secondary" onClick={() => nav(-1)}>
+              Cancel
+            </Button>
+            <Button type="submit" icon={Save} loading={submitting}>
               Update Product
-            </button>
-          </div>
+            </Button>
+          </FormActions>
         </form>
-      </div>
-    </>
-  );
-};
+      )}
+    </div>
+  )
+}
 
-export default EditProductPage;
+export default EditProductPage

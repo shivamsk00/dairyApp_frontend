@@ -26,7 +26,8 @@ import '../ui.css'
  * @param {boolean} [required] Native required validation + asterisk.
  * @param {boolean} [requiredMark] Asterisk only.
  * @param {boolean} [disabled]
- * Also takes label, hint, error, fieldClassName, className and id like Input.
+ * Also takes label, hint, error, fieldClassName, className and id like Input. Pass `ariaLabel` when there
+ * is no visible label.
  */
 const SelectDropdown = ({
   options = [],
@@ -47,6 +48,7 @@ const SelectDropdown = ({
   error,
   fieldClassName,
   className,
+  ariaLabel,
   id
 }) => {
   const auto = useId()
@@ -226,6 +228,7 @@ const SelectDropdown = ({
           ref={triggerRef}
           id={controlId}
           role="combobox"
+          aria-label={ariaLabel}
           tabIndex={disabled ? -1 : 0}
           aria-haspopup="listbox"
           aria-expanded={open}

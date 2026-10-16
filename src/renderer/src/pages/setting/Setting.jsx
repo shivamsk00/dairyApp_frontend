@@ -1,78 +1,234 @@
-import React from 'react';
+/* eslint-disable react/prop-types -- FontScaleControl and PreviewSidebar are internal to this page */
+import { useState } from 'react'
+import { Building2, RotateCcw, Save, Type, UserRound } from 'lucide-react'
+import useAuthStore from '../../zustand/useAuthStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  DEFAULT_SCALES,
+  FONT_PRESETS,
+  MAX_SCALE,
+  MIN_SCALE,
+  resetFontScales,
+  setFontScales,
+  useFontScales
+} from '../../helper/fontScale'
+import { loadSettings, saveSettings } from './settingsStorage'
+import {
+  Avatar,
+  Badge,
+  Breadcrumb,
+  Button,
+  Input,
+  SectionCard,
+  SegmentedControl,
+  useDocumentTitle
+} from '../../components/ui'
+
+const percent = (scale) => Math.round(scale * 100)
+
+// Presets + a fine-tune slider for one scale (whole software, or the sidebar on top of it).
+const FontScaleControl = ({ title, hint, value, onChange, label }) => (
+  <div className="ui-border-subtle rounded-lg border p-4">
+    <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <p className="text-[13.5px] font-bold">{title}</p>
+        <p className="ui-text-tertiary text-[12px]">{hint}</p>
+      </div>
+      <Badge tone={value === 1 ? 'neutral' : 'primary'} dot={false}>
+        {percent(value)}%{value === 1 ? ' · Default' : ''}
+      </Badge>
+    </div>
+    <SegmentedControl
+      ariaLabel={`${title} size`}
+      options={FONT_PRESETS}
+      value={FONT_PRESETS.some((p) => p.value === value) ? value : ''}
+      onChange={onChange}
+    />
+    <div className="mt-4 flex items-center gap-3">
+      <span className="ui-text-tertiary text-[12px] font-semibold">A</span>
+      <input
+        type="range"
+        aria-label={`${label} (percent)`}
+        min={percent(MIN_SCALE)}
+        max={percent(MAX_SCALE)}
+        step={5}
+        value={percent(value)}
+        onChange={(e) => onChange(Number(e.target.value) / 100)}
+        className="ui-range flex-1 cursor-pointer"
+      />
+      <span className="ui-text-tertiary text-[18px] font-semibold">A</span>
+    </div>
+  </div>
+)
+
+const PreviewSidebar = () => (
+  <div className="ui-sidebar-scope w-full max-w-[16rem] rounded-lg bg-[color:var(--ui-sidebar-bg)] p-3">
+    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ui-sidebar-text)]">
+      Main
+    </p>
+    {['Dashboard', 'Milk Center', 'Customers'].map((item, i) => (
+      <div
+        key={item}
+        className={`rounded-md px-2.5 py-1.5 text-[13.5px] font-medium ${i === 0 ? 'bg-white/10 text-white' : 'text-[color:var(--ui-sidebar-text)]'}`}
+      >
+        {item}
+      </div>
+    ))}
+  </div>
+)
 
 const Setting = () => {
+  useDocumentTitle('Settings')
+  const user = useAuthStore((state) => state.user)
+  const scales = useFontScales()
+  const [settings, setSettings] = useState(loadSettings)
+
+  const owner = {
+    name: user?.name || '',
+    email: user?.email || '',
+    mobile: user?.mobile || ''
+  }
+
+  const set = (name, value) => setSettings((prev) => ({ ...prev, [name]: value }))
+  const handleChange = (e) => set(e.target.name, e.target.value)
+
+  const handleSave = (e) => {
+    e.preventDefault()
+    try {
+      saveSettings(settings)
+      CustomToast.success('Settings saved on this computer')
+    } catch {
+      CustomToast.error('Could not save the settings')
+    }
+  }
+
   return (
-    <div className="p-4 bg-gray-100 min-h-screen space-y-8">
-      <h1 className="text-3xl font-bold text-center text-gray-800">Milk Dairy Settings</h1>
+    <div className="ui-text-primary w-full">
+      <Breadcrumb title="Settings" items={[{ label: 'Home', to: '/' }, { label: 'Settings' }]} />
 
-      {/* Business Info Section */}
-      <section className="bg-blue-100 p-6 rounded-lg shadow-md w-full">
-        {/* <h2 className="text-xl font-semibold text-blue-900 mb-4">Power by Production House</h2> */}
-        <h2 className="text-xl font-semibold text-blue-900 mb-4">Business Info</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" placeholder="Dairy Name" className="input" />
-          <input type="text" placeholder="Owner Name" className="input" />
-          <input type="email" placeholder="Email Address" className="input" />
-          <input type="tel" placeholder="Contact Number" className="input" />
-          <input type="text" placeholder="Address" className="input col-span-1 md:col-span-2" />
-          <input type="file" className="input col-span-1 md:col-span-2 bg-white" />
+      <form
+        onSubmit={handleSave}
+        noValidate
+        className="mx-auto max-w-6xl space-y-5 p-3 sm:p-4 lg:p-6"
+      >
+        <SectionCard
+          title="Business Info"
+          subtitle="Owner details come from your account"
+          icon={Building2}
+          tone="primary"
+        >
+          <div className="mb-5 flex flex-wrap items-center gap-4">
+            <Avatar name={owner.name || owner.email || 'Owner'} className="size-14 text-[18px]" />
+            <div className="min-w-[8rem] flex-1">
+              <p className="ui-font-display text-[17px] font-extrabold">{owner.name || 'Owner'}</p>
+              <p className="ui-text-tertiary text-[12.5px]">Account owner</p>
+            </div>
+            <Badge tone="info" icon={UserRound} dot={false}>
+              From your account
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Input
+              label="Owner Name"
+              type="text"
+              value={owner.name}
+              readOnly
+              disabled
+              placeholder="—"
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              value={owner.email}
+              readOnly
+              disabled
+              placeholder="—"
+            />
+            <Input
+              label="Contact Number"
+              type="tel"
+              value={owner.mobile}
+              readOnly
+              disabled
+              placeholder="—"
+            />
+            <Input
+              label="Dairy Name"
+              type="text"
+              name="dairyName"
+              value={settings.dairyName}
+              onChange={handleChange}
+              placeholder="Dairy Name"
+            />
+            <Input
+              label="Address"
+              type="text"
+              name="address"
+              value={settings.address}
+              onChange={handleChange}
+              placeholder="Address"
+              fieldClassName="md:col-span-2"
+            />
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Font Size"
+          subtitle="Make the text bigger or smaller. Changes apply instantly and are remembered on this computer."
+          icon={Type}
+          tone="accent"
+          action={
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              icon={RotateCcw}
+              disabled={
+                scales.base === DEFAULT_SCALES.base && scales.sidebar === DEFAULT_SCALES.sidebar
+              }
+              onClick={() => {
+                resetFontScales()
+                CustomToast.success('Font sizes reset to default')
+              }}
+            >
+              Reset to default
+            </Button>
+          }
+        >
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="space-y-3">
+              <FontScaleControl
+                title="Whole software"
+                hint="Pages, forms, tables, header and footer"
+                label="Whole software font size"
+                value={scales.base}
+                onChange={(value) => setFontScales({ base: value })}
+              />
+              <p className="ui-text-secondary ui-bg-sunken rounded-lg p-4 text-[14px]">
+                The quick brown fox jumps over the lazy dog — ₹1,250.00 · 12.5 L · FAT 4.1 / SNF 8.6
+              </p>
+            </div>
+            <div className="space-y-3">
+              <FontScaleControl
+                title="Sidebar"
+                hint="The menu on the left, on top of the software size"
+                label="Sidebar font size"
+                value={scales.sidebar}
+                onChange={(value) => setFontScales({ sidebar: value })}
+              />
+              <PreviewSidebar />
+            </div>
+          </div>
+        </SectionCard>
+
+        <div className="flex justify-end">
+          <Button type="submit" icon={Save}>
+            Save All Settings
+          </Button>
         </div>
-      </section>
-
-      {/* Milk Rate Settings */}
-      <section className="bg-green-100 p-6 rounded-lg shadow-md w-full">
-        <h2 className="text-xl font-semibold text-green-900 mb-4">Milk Rate Settings</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select className="input">
-            <option>Rate Based on FAT & SNF</option>
-            <option>Rate Based on CLR</option>
-          </select>
-          <input type="number" placeholder="Default Cow Rate" className="input" />
-          <input type="number" placeholder="Default Buffalo Rate" className="input" />
-          <textarea placeholder="Rate Formula (if any)" className="input md:col-span-2" />
-        </div>
-      </section>
-
-      {/* Print Settings */}
-      <section className="bg-yellow-100 p-6 rounded-lg shadow-md w-full">
-        <h2 className="text-xl font-semibold text-yellow-900 mb-4">Print Settings</h2>
-        <div className="space-y-3">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" />
-            Auto Print after Entry
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" />
-            Include Dairy Info in Header
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" />
-            Include FAT/SNF/CLR in Print
-          </label>
-        </div>
-      </section>
-
-      {/* Notification Settings */}
-      <section className="bg-purple-100 p-6 rounded-lg shadow-md w-full">
-        <h2 className="text-xl font-semibold text-purple-900 mb-4">Notification Settings</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input type="text" placeholder="SMS API Key" className="input" />
-          <input type="text" placeholder="Sender ID" className="input" />
-          <label className="flex items-center gap-2 col-span-1 md:col-span-2">
-            <input type="checkbox" className="form-checkbox" />
-            Enable Daily Summary SMS
-          </label>
-        </div>
-      </section>
-
-      {/* Save Button */}
-      <div className="w-full text-center">
-        <button className="px-8 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition">
-          Save All Settings
-        </button>
-      </div>
+      </form>
     </div>
-  );
-};
+  )
+}
 
-export default Setting;
+export default Setting

@@ -15,7 +15,7 @@ import cx from '../utils/cx'
  */
 const SectionCard = ({ title, subtitle, icon, tone = 'primary', action, className, children }) => (
   <SurfaceCard as="section" className={cx('p-5 lg:p-6', className)}>
-    <div className="mb-3 flex items-start justify-between gap-3">
+    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
       <div className="flex items-center gap-2.5">
         {icon && <IconBadge icon={icon} tone={tone} />}
         <div>

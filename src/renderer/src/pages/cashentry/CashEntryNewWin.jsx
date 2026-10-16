@@ -1,9 +1,8 @@
-import React from 'react'
 import CashEntryPage from './CashEntryPage'
 
 const CashEntryNewWin = () => {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen">
       <CashEntryPage />
     </div>
   )

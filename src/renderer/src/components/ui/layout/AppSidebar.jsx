@@ -131,7 +131,7 @@ const AppSidebar = ({
           onMouseEnter={() => collapsed && setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           className={cx(
-            'fixed inset-y-0 left-0 z-40 flex w-[250px] flex-col border-r border-[color:var(--ui-sidebar-border)] bg-[color:var(--ui-sidebar-bg)] transition-[width,transform] duration-[250ms] lg:absolute',
+            'ui-sidebar-scope fixed inset-y-0 left-0 z-40 flex w-[250px] flex-col border-r border-[color:var(--ui-sidebar-border)] bg-[color:var(--ui-sidebar-bg)] transition-[width,transform] duration-[250ms] lg:absolute',
             mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             expanded ? 'lg:w-[250px]' : 'ui-sidebar-collapsed lg:w-[84px]',
             collapsed && hovered && 'ui-shadow-xl'
