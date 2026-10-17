@@ -1,5 +1,6 @@
 // axiosConfig.js
 import axios from 'axios'
+import { notifySessionExpired } from '../helper/sessionExpired'
 
 const api = axios.create({
   baseURL: 'https://productionhouse.space/api/' // 🟡 Yaha tumhari real API base URL daalo
@@ -15,5 +16,16 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+// 401 on a request that carried a token = the session ended (token expired or revoked): ask the user to log in again.
+// The error is still passed on, so the screen that made the request can handle its own failure.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const sentToken = Boolean(error?.config?.headers?.Authorization)
+    if (error?.response?.status === 401 && sentToken) notifySessionExpired()
+    return Promise.reject(error)
+  }
+)
 
 export default api

@@ -6,7 +6,6 @@ import {
   Download,
   FileText,
   IndianRupee,
-  Loader2,
   Milk,
   Phone,
   RotateCcw,
@@ -27,6 +26,7 @@ import {
   KpiCard,
   SectionCard,
   SelectDropdown,
+  PageLoader,
   SurfaceCard,
   useDocumentTitle
 } from '../../components/ui'
@@ -602,11 +602,14 @@ const CmSubsidyList = () => {
         )}
 
         {loading && (
-          <SurfaceCard className="flex items-center justify-center gap-3 p-12">
-            <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
-            <span className="ui-text-secondary text-[13px]">
-              {hasReport ? 'Generating report for all customers…' : 'Loading CM subsidy customers…'}
-            </span>
+          <SurfaceCard>
+            <PageLoader
+              variant="inline"
+              label={
+                hasReport ? 'Generating report for all customers' : 'Loading CM subsidy customers'
+              }
+              className="!py-12"
+            />
           </SurfaceCard>
         )}
 

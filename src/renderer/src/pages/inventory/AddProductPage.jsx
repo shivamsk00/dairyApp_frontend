@@ -1,187 +1,177 @@
-import React, { useEffect, useState } from 'react';
-import useHomeStore from '../../zustand/useHomeStore';
-import CustomToast from '../../helper/costomeToast';
-import CommonBackButton from '../../components/CommonBackButton';
-import { goBack } from '../../helper/navigation';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Package, Plus } from 'lucide-react'
+import useHomeStore from '../../zustand/useHomeStore'
+import CustomToast from '../../helper/costomeToast'
+import {
+  Breadcrumb,
+  Button,
+  FormActions,
+  FormSection,
+  Input,
+  SelectDropdown,
+  useDocumentTitle
+} from '../../components/ui'
+
+const UNIT_TYPES = ['Ltr', 'KG', 'gm', 'ml'].map((u) => ({ value: u, label: u }))
+const EMPTY = { category: '', name: '', unitValue: '', unitType: '', price: '' }
+
+const validate = (v) => {
+  const e = {}
+  if (!v.category) e.category = 'Select a category'
+  if (!v.name.trim()) e.name = 'Enter the product name'
+  if (!(parseFloat(v.unitValue) > 0)) e.unitValue = 'Enter the unit quantity'
+  if (!v.unitType) e.unitType = 'Select a unit'
+  if (v.price === '' || !(parseFloat(v.price) >= 0)) e.price = 'Enter the price'
+  return e
+}
 
 const AddProductPage = () => {
-    const fetchAllCategories = useHomeStore(state => state.fetchAllCategories);
-    const addProduct = useHomeStore(state => state.addProduct);
-    const [categories, setCategories] = useState([]);
+  useDocumentTitle('Add Product')
+  const nav = useNavigate()
+  const fetchAllCategories = useHomeStore((state) => state.fetchAllCategories)
+  const addProduct = useHomeStore((state) => state.addProduct)
 
-    const [formData, setFormData] = useState({
-        category: '',
-        name: '',
-        unitValue: '',
-        unitType: '',
-        price: '',
-    });
+  const [categories, setCategories] = useState([])
+  const [formData, setFormData] = useState(EMPTY)
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
 
-    const handleChange = (e) => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value
-        }));
-    };
-
+  useEffect(() => {
     const getAllCategory = async () => {
-        try {
-            const res = await fetchAllCategories();
-            if (res.status_code == 200) {
-                setCategories(res.data.data); 
-                
-            } else {
-                CustomToast.error(res.message);
-            }
-        } catch (error) {
-            console.log("ERROR IN FETCH CATEGORY IN ADD PRODUCT PAGE", error);
-        }
-    };
+      try {
+        const res = await fetchAllCategories()
+        if (res?.status_code == 200) setCategories(res.data.data)
+        else CustomToast.error(res?.message || 'Failed to load categories')
+      } catch (error) {
+        console.log('ERROR IN FETCH CATEGORY IN ADD PRODUCT PAGE', error)
+      }
+    }
+    getAllCategory()
+  }, [])
 
-    useEffect(() => {
-        getAllCategory();
-    }, []);
+  const set = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: undefined }))
+  }
+  const handleChange = (e) => set(e.target.name, e.target.value)
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const combinedUnit = `${formData.unitValue} ${formData.unitType}`;
-        const finalData = { ...formData, unit: combinedUnit };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const found = validate(formData)
+    setErrors(found)
+    if (Object.keys(found).length) {
+      setTimeout(() => document.querySelector('form [aria-invalid="true"]')?.focus(), 0)
+      return
+    }
 
-        const productData = {
-            "category_id": finalData.category,
-            "name": finalData.name,
-            "unit": finalData.unit,
-            "price": finalData.price
-        }
+    const productData = {
+      category_id: formData.category,
+      name: formData.name,
+      unit: `${formData.unitValue} ${formData.unitType}`,
+      price: formData.price
+    }
 
-        try {
-            const res = await addProduct(productData);
-            if (res.status_code == 200) {
-                CustomToast.success(res.message);
+    setSubmitting(true)
+    try {
+      const res = await addProduct(productData)
+      if (res?.status_code == 200) {
+        CustomToast.success(res.message)
+        setFormData(EMPTY)
+        nav(-1)
+      } else {
+        CustomToast.error(res?.message || 'Failed to add the product')
+      }
+    } catch (error) {
+      console.log('ERROR IN SAVE PRODUCT ', error)
+      CustomToast.error('Failed to add the product')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
-                goBack()
-                setFormData({
-                    category: '',
-                    name: '',
-                    unitValue: '',
-                    unitType: '',
-                    price: '',
-                })
-            } else {
+  return (
+    <div className="ui-text-primary w-full">
+      <Breadcrumb
+        title="Add Product"
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'Inventory', to: '/inventory' },
+          { label: 'Add Product' }
+        ]}
+        onBack={() => nav(-1)}
+      />
+      <form onSubmit={handleSubmit} noValidate className="w-full space-y-5 p-3 sm:p-4 lg:p-6">
+        <FormSection
+          title="Product Details"
+          subtitle="What you sell and how it is priced"
+          icon={Package}
+          tone="primary"
+          cols={3}
+        >
+          <SelectDropdown
+            label="Category"
+            required
+            name="category"
+            searchable
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            value={formData.category}
+            placeholder="Select Category"
+            onChange={(value) => set('category', value)}
+            error={errors.category}
+          />
+          <Input
+            label="Product Name"
+            required
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            error={errors.name}
+          />
+          <Input
+            label="Unit Quantity"
+            required
+            type="number"
+            step="any"
+            name="unitValue"
+            placeholder="e.g., 1, 500"
+            value={formData.unitValue}
+            onChange={handleChange}
+            error={errors.unitValue}
+          />
+          <SelectDropdown
+            label="Unit Type"
+            required
+            name="unitType"
+            options={UNIT_TYPES}
+            value={formData.unitType}
+            placeholder="Select Unit"
+            onChange={(value) => set('unitType', value)}
+            error={errors.unitType}
+          />
+          <Input
+            label="Product Price"
+            required
+            type="number"
+            step="any"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            error={errors.price}
+          />
+        </FormSection>
+        <FormActions>
+          <Button variant="secondary" onClick={() => nav(-1)}>
+            Cancel
+          </Button>
+          <Button type="submit" icon={Plus} loading={submitting}>
+            Add Product
+          </Button>
+        </FormActions>
+      </form>
+    </div>
+  )
+}
 
-                CustomToast.error(res.message);
-            }
-        } catch (error) {
-            console.log("ERROR IN SAVE PRODUCT ", error)
-        }
-
-        // API call here
-    };
-
-
-    return (
-        <>
-
-            <div className="w-full px-4 md:px-6 py-3 text-left">
-                <CommonBackButton heading="Add Product" />
-            </div>
-            <div className="w-full px-4 md:px-6 lg:w-1/2 mx-auto py-6 shadow-xl m-3 rounded-lg bg-slate-700">
-                <h2 className="text-2xl font-bold mb-6 text-white">Add Product</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-6 w-full">
-                    {/* Row 1: Category and Product Name */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-1 font-medium text-white">Category</label>
-                            <select
-                                name="category"
-                                value={formData.category}
-                                onChange={handleChange}
-                                required
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block mb-1 font-medium text-white">Product Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Row 2: Product Unit and Price */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-1 font-medium text-white">Product Unit</label>
-                            <div className="flex gap-2">
-                                {/* Unit Quantity */}
-                                <input
-                                    type="number"
-                                    name="unitValue"
-                                    placeholder="e.g., 1, 500"
-                                    value={formData.unitValue}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-1/2 border border-gray-300 rounded px-3 py-2"
-                                />
-
-                                {/* Unit Type */}
-                                <select
-                                    name="unitType"
-                                    value={formData.unitType}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-1/2 border border-gray-300 rounded px-3 py-2"
-                                >
-                                    <option value="">Select Unit</option>
-                                    <option value="Ltr">Ltr</option>
-                                    <option value="KG">KG</option>
-                                    <option value="gm">gm</option>
-                                    <option value="ml">ml</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block mb-1 font-medium text-white">Product Price</label>
-                            <input
-                                type="number"
-                                name="price"
-                                value={formData.price}
-                                onChange={handleChange}
-                                required
-                                className="w-full border border-gray-300 rounded px-3 py-2"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white px-6 py-2 rounded transition"
-                        >
-                            Add Product
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </>
-
-    );
-};
-
-export default AddProductPage;
+export default AddProductPage

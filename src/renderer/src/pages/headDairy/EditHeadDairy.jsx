@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, Save } from 'lucide-react'
+import { Building2, Save } from 'lucide-react'
 import { toast } from 'react-toastify'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
@@ -110,11 +110,7 @@ const EditHeadDairy = () => {
           { label: 'Head Dairy Master', to: '/alldairymaster' },
           { label: 'Edit' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => navigate(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => navigate(-1)}
       />
 
       <form

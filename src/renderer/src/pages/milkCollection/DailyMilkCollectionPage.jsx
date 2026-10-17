@@ -1,17 +1,6 @@
-/* eslint-disable react/prop-types -- LiveClock/SummaryTile are internal to this page */
+/* eslint-disable react/prop-types -- SummaryTile is internal to this page */
 import { useState, useEffect, useRef, useCallback } from 'react'
-import {
-  Clock,
-  Droplets,
-  Milk,
-  Printer,
-  RotateCcw,
-  Send,
-  Sun,
-  Moon,
-  Sigma,
-  Wallet
-} from 'lucide-react'
+import { Droplets, Milk, Printer, RotateCcw, Send, Sun, Moon, Sigma, Wallet } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import EditMilkCollectionModal from './EditMilkCollectionPage'
@@ -35,6 +24,7 @@ import {
   SegmentedControl,
   Switch,
   useDocumentTitle,
+  WindowHeader,
   todayISO
 } from '../../components/ui'
 
@@ -47,30 +37,6 @@ const SHIFT_OPTIONS = [
   { value: 'morning', label: 'Morning', icon: Sun },
   { value: 'evening', label: 'Evening', icon: Moon }
 ]
-
-// Ticks on its own so the page above doesn't re-render every second.
-const LiveClock = () => {
-  const [now, setNow] = useState(new Date())
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(timer)
-  }, [])
-  return (
-    <span className="ui-bg-sunken inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12.5px] font-semibold tabular-nums">
-      <Clock size={14} aria-hidden="true" />
-      {now.toLocaleString('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-      })}
-    </span>
-  )
-}
 
 const SummaryTile = ({ icon, tone, label, milk, amount }) => (
   <div className="ui-border-subtle flex items-center gap-3 rounded-lg border p-3">
@@ -743,15 +709,7 @@ const DairyMilkCollectionPage = () => {
 
   return (
     <div className="ui-text-primary flex min-h-screen w-full flex-col">
-      <div className="ui-bg-sunken ui-border-subtle flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-3">
-          <IconBadge icon={Milk} tone="primary" />
-          <h1 className="ui-font-display text-[16px] font-extrabold uppercase tracking-wide">
-            Daily Milk Collection
-          </h1>
-        </div>
-        <LiveClock />
-      </div>
+      <WindowHeader title="Daily Milk Collection" icon={Milk} />
 
       <div className="space-y-5 p-3 sm:p-4 lg:p-6">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">

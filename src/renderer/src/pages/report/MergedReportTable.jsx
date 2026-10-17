@@ -1,301 +1,136 @@
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const [year, month, day] = dateString.split('-')
-  return `${day}-${month}-${year}`
-}
+/* eslint-disable react/prop-types -- props are documented by usage in ReportsPage */
+import { Badge, DataTable } from '../../components/ui'
+import { formatDate, mergedEntries } from './reportUtils'
 
-const mergeAllEntriesByDate = (milk, products, payments) => {
-  const map = new Map()
+const money = (value) => `₹${parseFloat(value).toFixed(2)}`
 
-  milk.forEach((entry) => {
-    const key = entry.date
-    if (!map.has(key)) map.set(key, [])
-    map.get(key).push({ type: 'milk', ...entry })
-  })
-
-  products.forEach((entry) => {
-    const key = entry.date?.split('-').reverse().join('-')
-    if (!map.has(key)) map.set(key, [])
-    map.get(key).push({ type: 'product', ...entry })
-  })
-
-  payments.forEach((entry) => {
-    const key = entry.date?.split('-').reverse().join('-')
-    if (!map.has(key)) map.set(key, [])
-    map.get(key).push({ type: 'payment', ...entry })
-  })
-
-  return [...map.entries()]
-    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
-    .flatMap(([date, entries]) =>
-      entries.map((entry) => ({
-        ...entry,
-        date
-      }))
-    )
+const TYPE_BADGE = {
+  milk: { tone: 'primary', label: 'Milk' },
+  product: { tone: 'accent', label: 'Product' },
+  payment: { tone: 'success', label: 'Payment' }
 }
 
 const MergedTableExact = ({ summaryData }) => {
   if (!summaryData) return null
-  const entries = mergeAllEntriesByDate(
-    summaryData.milk_collections || [],
-    summaryData.product_sales || [],
-    summaryData.payments || [],
-    summaryData.customer_wallet || 0
-  )
+  const rows = mergedEntries(summaryData).map((entry, i) => ({ ...entry, sr: i + 1 }))
 
-  let totalMilkQty = 0
-  let totalMilkAmount = 0
-  let totalProductQty = 0
-  let totalProductAmount = 0
-  let totalDebit = 0
-  let totalCredit = 0
-  let totalFat = 0
-  let totalSNF = 0
-  let milkEntryCount = 0
+  const columns = [
+    { key: 'sr', header: 'Sr.' },
+    { key: 'date', header: 'Date', render: (e) => formatDate(e.date) },
+    {
+      key: 'type',
+      header: 'Entry',
+      render: (e) => (
+        <Badge tone={TYPE_BADGE[e.type].tone} dot={false}>
+          {TYPE_BADGE[e.type].label}
+        </Badge>
+      )
+    },
+    {
+      key: 'shift',
+      header: 'Shift',
+      render: (e) =>
+        e.type === 'milk' ? (
+          <Badge tone={e.shift === 'morning' ? 'warning' : 'info'} dot={false}>
+            {e.shift}
+          </Badge>
+        ) : (
+          ''
+        )
+    },
+    {
+      key: 'quantity',
+      header: 'Qty (L)',
+      className: 'text-right',
+      render: (e) => (e.type === 'milk' ? parseFloat(e.quantity).toFixed(2) : '')
+    },
+    {
+      key: 'fat',
+      header: 'Fat',
+      className: 'text-right',
+      render: (e) => (e.type === 'milk' ? parseFloat(e.fat).toFixed(1) : '')
+    },
+    {
+      key: 'snf',
+      header: 'SNF',
+      className: 'text-right',
+      render: (e) => (e.type === 'milk' ? parseFloat(e.snf).toFixed(1) : '')
+    },
+    {
+      key: 'base_rate',
+      header: 'Rate',
+      className: 'text-right',
+      render: (e) => (e.type === 'milk' ? money(e.base_rate) : '')
+    },
+    {
+      key: 'total_amount',
+      header: 'Amount',
+      className: 'text-right',
+      render: (e) =>
+        e.type === 'milk' ? (
+          <span className="font-semibold text-[color:var(--ui-success-600)]">
+            {money(e.total_amount)}
+          </span>
+        ) : (
+          ''
+        )
+    },
+    {
+      key: 'product',
+      header: 'Product + Qty',
+      render: (e) =>
+        e.type === 'product' ? (
+          <div>
+            <div className="font-medium">{e.product?.name || 'N/A'}</div>
+            <div className="ui-text-tertiary text-[11.5px]">Qty: {e.qty}</div>
+          </div>
+        ) : (
+          ''
+        )
+    },
+    {
+      key: 'total',
+      header: 'Product Amount',
+      className: 'text-right',
+      render: (e) => (e.type === 'product' ? money(e.total) : '')
+    },
+    {
+      key: 'credit',
+      header: 'Credit',
+      className: 'text-right',
+      render: (e) =>
+        e.type === 'payment' && e.credit_debit_mode === 'received' ? (
+          <span className="font-semibold text-[color:var(--ui-success-600)]">
+            {money(e.amount)}
+          </span>
+        ) : (
+          ''
+        )
+    },
+    {
+      key: 'debit',
+      header: 'Debit',
+      className: 'text-right',
+      render: (e) =>
+        e.type === 'payment' && e.credit_debit_mode === 'given' ? (
+          <span className="font-semibold text-[color:var(--ui-danger-600)]">{money(e.amount)}</span>
+        ) : (
+          ''
+        )
+    },
+    { key: 'note', header: 'Message', render: (e) => (e.type === 'payment' ? e.note : '') }
+  ]
 
   return (
-    <div className=" mt-2 overflow-x-auto">
-     
-
-      <div className="relative border rounded overflow-hidden max-h-[70vh]">
-        <div className="overflow-auto max-h-[calc(70vh-7rem)]">
-          <table className="min-w-full border border-white ">
-            <thead className="sticky top-0 z-10 bg-gray-800 text-white">
-              <tr className="text-center">
-                <th className="border  text-[12px]  w-10">Sr.</th>
-                <th className="border  text-[12px]  w-24">Date</th>
-                <th className="border  text-[12px]  w-20">Shift</th>
-                <th className="border  text-[12px]  w-16">Qty (L)</th>
-                <th className="border  text-[12px]  w-16">Fat</th>
-                <th className="border  text-[12px]  w-16">SNF</th>
-                <th className="border  text-[12px]  w-20">Rate</th>
-                <th className="border  text-[12px]  w-20">Amount</th>
-                <th className="border  text-[12px]  w-40">Product + Qty</th>
-                <th className="border  text-[12px]  w-24">Product Amount</th>
-                <th className="border  text-[12px]  w-20">Credit</th>
-                <th className="border  text-[12px]  w-20">Debit</th>
-                <th className="border  text-[12px]  w-32">Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry, idx) => {
-                const isMilk = entry.type === 'milk'
-                const isProduct = entry.type === 'product'
-                const isPayment = entry.type === 'payment'
-
-                if (isMilk) {
-                  totalMilkQty += parseFloat(entry.quantity || 0)
-                  totalMilkAmount += parseFloat(entry.total_amount || 0)
-                  totalFat += parseFloat(entry.fat || 0)
-                  totalSNF += parseFloat(entry.snf || 0)
-                  milkEntryCount++
-                }
-                if (isProduct) {
-                  totalProductQty += parseInt(entry.qty || 0)
-                  totalProductAmount += parseFloat(entry.total || 0)
-                }
-                if (isPayment) {
-                  if (entry.credit_debit_mode === 'received') {
-                    totalDebit += parseFloat(entry.amount || 0)
-                  } else {
-                    totalCredit += parseFloat(entry.amount || 0)
-                  }
-                }
-
-                return (
-                  <tr
-                    key={idx}
-                    className={`text-center border border-gray-600 ${isMilk ? 'bg-blue-50' :
-                        isProduct ? 'bg-orange-50' :
-                          isPayment ? 'bg-green-50' : 'bg-white'
-                      }`}
-                  >
-                    <td className="border px-2 py-1 text-black w-10 text-[12px] font-medium">{idx + 1}</td>
-                    <td className="border px-2 py-1 text-black w-24 text-[12px] font-medium">{formatDate(entry.date)}</td>
-                    <td className="border px-2 py-1 text-black w-20 text-[12px]">
-                      {isMilk ? (
-                        <span className={`px-2 py-1 rounded text-[12px] font-medium ${entry.shift === 'morning' ? 'bg-yellow-200 text-yellow-800' : 'bg-blue-200 text-blue-800'
-                          }`}>
-                          {entry.shift}
-                        </span>
-                      ) : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-blue-600 text-[12px] w-16 font-semibold">
-                      {isMilk ? parseFloat(entry.quantity).toFixed(2) : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-yellow-600 w-16 text-[12px] font-semibold">
-                      {isMilk ? `${parseFloat(entry.fat).toFixed(1)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-purple-600 w-16 text-[12px] font-semibold">
-                      {isMilk ? `${parseFloat(entry.snf).toFixed(1)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-gray-700 text-[12px] w-20">
-                      {isMilk ? `₹${parseFloat(entry.base_rate).toFixed(2)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-green-600 w-20 text-[12px] font-semibold">
-                      {isMilk ? `₹${parseFloat(entry.total_amount).toFixed(2)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-black w-40 text-[12px]">
-                      {isProduct ? (
-                        <div className="text-[12px]">
-                          <div className="font-medium">{entry.product?.name || 'N/A'}</div>
-                          <div className="text-gray-600">Qty: {entry.qty}</div>
-                        </div>
-                      ) : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-orange-600 w-24 text-[12px] font-semibold">
-                      {isProduct ? `₹${parseFloat(entry.total).toFixed(2)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-green-600 w-20 text-[12px] font-semibold">
-                      {isPayment && entry.credit_debit_mode === 'received' ? `₹${parseFloat(entry.amount).toFixed(2)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-red-600 w-20 text-[12px] font-semibold">
-                      {isPayment && entry.credit_debit_mode === 'given' ? `₹${parseFloat(entry.amount).toFixed(2)}` : ''}
-                    </td>
-                    <td className="border px-2 py-1 text-gray-700 w-32 text-[12px]">
-                      {isPayment ? entry.note : ''}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-
-            {/* Enhanced Footer with Fat and SNF Averages */}
-            <tfoot className="sticky bottom-0 bg-gray-800 text-white">
-              <tr className="font-semibold text-[12px]">
-                {/* Sr. No Column */}
-                <td className="border px-2 py-2 w-10 text-center">
-                  <div className="text-[12px] text-gray-300">#</div>
-                </td>
-
-                {/* Date Column */}
-                <td className="border px-2 py-2 w-24 text-center">
-                  <div className="text-[12px] text-gray-300">Date</div>
-                </td>
-
-                {/* Shift Column - Total Milk Quantity */}
-                <td className="border px-2 py-2 w-20 text-center">
-                  <div>
-                    <div className="text-blue-300 text-[12px]">Total Milk</div>
-                    <div className="font-bold text-[12px]">{totalMilkQty.toFixed(2)} L</div>
-                  </div>
-                </td>
-
-                {/* Qty Column - Total Milk Amount */}
-                <td className="border px-2 py-2 w-16 text-center">
-                  <div>
-                    <div className="text-green-300 text-[12px]">Amount</div>
-                    <div className="font-bold text-[12px]">₹{totalMilkAmount.toFixed(2)}</div>
-                  </div>
-                </td>
-
-                {/* Fat Column */}
-                <td className="border px-2 py-2 w-16 text-center">
-                  <div>
-                    <div className="text-yellow-300 text-[12px]">Avg Fat</div>
-                    <div className="font-bold text-[12px]">{milkEntryCount > 0 ? (totalFat / milkEntryCount).toFixed(1) : '0.0'}</div>
-                  </div>
-                </td>
-
-                {/* SNF Column */}
-                <td className="border px-2 py-2 w-16 text-center">
-                  <div>
-                    <div className="text-purple-300 text-[12px]">Avg SNF</div>
-                    <div className="font-bold text-[12px]">{milkEntryCount > 0 ? (totalSNF / milkEntryCount).toFixed(1) : '0.0'}</div>
-                  </div>
-                </td>
-
-                {/* Rate Column */}
-                <td className="border px-2 py-2 w-20 text-center">
-                  <div>
-                    <div className="text-gray-300 text-[12px]">Avg Rate</div>
-                    <div className="font-bold text-[12px]">
-                      ₹{milkEntryCount > 0 ? (totalMilkAmount / totalMilkQty).toFixed(2) : '0.00'}
-                    </div>
-                  </div>
-                </td>
-
-                {/* Amount Column - Collections */}
-                <td className="border px-2 py-2 w-20 text-center">
-                  <div>
-                    <div className="text-indigo-300 text-[12px]">Collections</div>
-                    <div className="font-bold text-[12px]">{milkEntryCount}</div>
-                  </div>
-                </td>
-
-                {/* Product Column */}
-                <td className="border px-2 py-2 w-40 text-center">
-                  <div>
-                    <div className="text-orange-300 text-[12px]">Products</div>
-                    <div className="font-bold text-[12px]">₹{totalProductAmount.toFixed(2)}</div>
-                  </div>
-                </td>
-
-                {/* Product Amount Column */}
-                <td className="border px-2 py-2 w-24 text-center">
-                  <div>
-                    <div className="text-orange-300 text-[12px]">Items</div>
-                    <div className="font-bold text-[12px]">{totalProductQty}</div>
-                  </div>
-                </td>
-
-                {/* Credit Column */}
-                <td className="border px-2 py-2 w-20 text-center">
-                  <div>
-                    <div className="text-green-300 text-[12px]">Received</div>
-                    <div className="font-bold text-[12px]">₹{totalDebit.toFixed(2)}</div>
-                  </div>
-                </td>
-
-                {/* Debit Column */}
-                <td className="border px-2 py-2 w-20 text-center">
-                  <div>
-                    <div className="text-red-300 text-[12px]">Given</div>
-                    <div className="font-bold text-[12px]">₹{totalCredit.toFixed(2)}</div>
-                  </div>
-                </td>
-
-                {/* Message Column - Net Balance */}
-                <td className="border px-2 py-2 w-32 text-center">
-                  <div>
-                    <div className="text-indigo-300 text-[12px]">Total Amount</div>
-                    {/* <div className="font-bold">
-                     
-                      ₹{parseFloat(summaryData.net_milk_balance || 0).toFixed(2)}
-                      </div> */}
-                       <div className={`font-bold ${
-          (totalMilkAmount + totalDebit - totalProductAmount - totalCredit) < 0 
-            ? 'text-red-300' 
-            : 'text-green-300'
-        }`}>
-          {/* ✅ CORRECT FORMULA: Milk + Received - Products - Given */}
-          ₹{(totalMilkAmount + totalDebit - totalProductAmount - totalCredit).toFixed(2)}
-        </div>
-                  </div>
-                </td>
-              </tr>
-
-              {/* Second Row for Current Balance (Optional) */}
-              <tr className="bg-gray-700">
-                <td className="border px-2 py-2 text-center" colSpan="13">
-                  <div className="flex justify-center items-center space-x-6 gap-4">
-                    <div>
-                      <span className="text-gray-300 text-xs mr-3">Current Wallet Balance: </span>
-                      <span className={`font-bold text-lg ${parseFloat(summaryData.customer_wallet || 0) < 0 ? 'text-red-300' : 'text-green-300'}`}>
-                        ₹{parseFloat(summaryData.customer_wallet || 0).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-    </div>
+    <DataTable
+      stickyHeader
+      className="max-h-[65vh] overflow-y-auto px-1"
+      minWidth="1150px"
+      columns={columns}
+      rows={rows}
+      rowKey={(e, i) => `${e.type}-${i}`}
+      emptyMessage="No entries in this period"
+    />
   )
 }
 

@@ -131,7 +131,7 @@ const AppSidebar = ({
           onMouseEnter={() => collapsed && setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           className={cx(
-            'fixed inset-y-0 left-0 z-40 flex w-[250px] flex-col border-r border-[color:var(--ui-sidebar-border)] bg-[color:var(--ui-sidebar-bg)] transition-[width,transform] duration-[250ms] lg:absolute',
+            'ui-sidebar-scope fixed inset-y-0 left-0 z-40 flex w-[250px] flex-col border-r border-[color:var(--ui-sidebar-border)] ui-sidebar-surface transition-[width,transform] duration-[250ms] lg:absolute',
             mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             expanded ? 'lg:w-[250px]' : 'ui-sidebar-collapsed lg:w-[84px]',
             collapsed && hovered && 'ui-shadow-xl'
@@ -154,7 +154,7 @@ const AppSidebar = ({
                   setHovered(false)
                   onCollapsedChange(!collapsed)
                 }}
-                className="ui-icon-btn hidden !size-8 shrink-0 !text-white/60 hover:!bg-white/10 hover:!text-white lg:inline-flex"
+                className="ui-icon-btn hidden !size-8 shrink-0 !text-[color:var(--ui-sidebar-fg-60)] hover:!bg-[color:var(--ui-sidebar-tint-12)] hover:!text-[color:var(--ui-sidebar-text-active)] lg:inline-flex"
               >
                 {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
               </button>
@@ -167,7 +167,7 @@ const AppSidebar = ({
           >
             {expanded && favoriteItems.length > 0 && (
               <div className="pt-2">
-                <p className="px-1.5 py-2 text-[10.5px] font-semibold uppercase tracking-wide text-white/40">
+                <p className="px-1.5 py-2 text-[10.5px] font-semibold uppercase tracking-wide text-[color:var(--ui-sidebar-fg-40)]">
                   {favorites.title ?? 'Favorites'}
                 </p>
                 <div className="grid grid-cols-2 gap-2 pb-1">
@@ -284,9 +284,9 @@ const AppSidebar = ({
 
           {expanded && usage && (
             <div className="shrink-0 px-3 pb-2">
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
+              <div className="rounded-xl border border-[color:var(--ui-sidebar-border)] bg-[color:var(--ui-sidebar-tint-4)] p-3">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-white">
+                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[color:var(--ui-sidebar-text-active)]">
                     <Database size={12} className="text-[color:var(--ui-primary-400)]" />
                     {usage.label}
                   </span>
@@ -294,7 +294,7 @@ const AppSidebar = ({
                     {usage.valueLabel ?? `${usage.value} / ${usage.max}`}
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:var(--ui-sidebar-tint-8)]">
                   <div
                     className="h-full rounded-full bg-[linear-gradient(90deg,var(--ui-primary-400),var(--ui-accent-500))]"
                     style={{ width: `${Math.min(100, (usage.value / usage.max) * 100 || 0)}%` }}
@@ -318,7 +318,7 @@ const AppSidebar = ({
             <div className="shrink-0 border-t border-[color:var(--ui-sidebar-border)] p-3">
               <div
                 className={cx(
-                  'flex w-full items-center gap-2.5 rounded-lg bg-white/[0.04] p-2',
+                  'flex w-full items-center gap-2.5 rounded-lg bg-[color:var(--ui-sidebar-tint-4)] p-2',
                   !expanded && 'justify-center'
                 )}
               >
@@ -338,7 +338,7 @@ const AppSidebar = ({
                   {expanded && (
                     <span className="min-w-0">
                       <span className="flex items-center gap-1.5">
-                        <span className="block truncate text-[12.5px] font-semibold text-white">
+                        <span className="block truncate text-[12.5px] font-semibold text-[color:var(--ui-sidebar-text-active)]">
                           {user.name}
                         </span>
                         {user.badge && (
@@ -361,7 +361,7 @@ const AppSidebar = ({
                     onClick={onSignOut}
                     title="Sign out"
                     aria-label="Sign out"
-                    className="ui-icon-btn inline-flex !size-7 shrink-0 !text-white/60 hover:!bg-white/10 hover:!text-white"
+                    className="ui-icon-btn inline-flex !size-7 shrink-0 !text-[color:var(--ui-sidebar-fg-60)] hover:!bg-[color:var(--ui-sidebar-tint-12)] hover:!text-[color:var(--ui-sidebar-text-active)]"
                   >
                     <LogOut size={14} />
                   </button>

@@ -16,6 +16,7 @@ import '../ui.css'
  * @param {(row) => string | undefined} [rowClassName] Extra classes per row (e.g. highlight one being edited).
  * @param {boolean} [stickyHeader] Keeps the header row visible while the table scrolls vertically (give the
  *   table a max height through `className`, e.g. 'max-h-[60vh] overflow-y-auto').
+ * @param {boolean} [striped] Zebra rows (every second row gets a faint tint).
  * @param {(row) => void} [onRowClick] Makes rows clickable (and keyboard-focusable: Enter/Space). Clicks on
  *   links, buttons and form controls inside a row are ignored, so cell actions keep working.
  */
@@ -29,13 +30,18 @@ const DataTable = ({
   rowClassName,
   onRowClick,
   stickyHeader = false,
+  striped = false,
   emptyMessage = 'No records',
   minWidth,
   className
 }) => (
   <div className={cx('ui-scroll-thin -mx-1 overflow-x-auto', className)}>
     <table
-      className={cx('ui-data-table w-full', stickyHeader && 'ui-data-table-sticky')}
+      className={cx(
+        'ui-data-table w-full',
+        stickyHeader && 'ui-data-table-sticky',
+        striped && 'ui-data-table-striped'
+      )}
       style={minWidth ? { minWidth } : undefined}
     >
       <thead>

@@ -11,6 +11,11 @@
  */
 
 :root {
+  /* Font-size setting (Settings -> Appearance). 1 = original size. Set by helper/fontScale.js. */
+  --ui-font-base: 1;
+  --ui-sidebar-font: 1;
+  --ui-font-scale: var(--ui-font-base);
+
   --ui-font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   --ui-neutral-0: #fff;
@@ -81,10 +86,28 @@
   --ui-text-secondary: var(--ui-neutral-600);
   --ui-text-tertiary: var(--ui-neutral-500);
 
+  /* Zebra stripe for striped tables (a faint cyan tint) */
+  --ui-stripe: color-mix(in oklab, var(--ui-primary-500) 9%, var(--ui-surface-raised));
+
   --ui-sidebar-bg: hsl(214 32% 7%);
+  --ui-sidebar-bg-image: none;
   --ui-sidebar-border: #ffffff12;
   --ui-sidebar-text: #ffffff9e;
   --ui-sidebar-text-active: #fff;
+  /* Extra sidebar tokens so the menu can also be a light theme (see the [data-sidebar-theme] blocks) */
+  --ui-sidebar-fg-60: rgb(255 255 255 / 0.6);
+  --ui-sidebar-fg-40: rgb(255 255 255 / 0.4);
+  --ui-sidebar-group: #ffffff52;
+  --ui-sidebar-tint-4: rgb(255 255 255 / 0.04);
+  --ui-sidebar-tint-8: rgb(255 255 255 / 0.08);
+  --ui-sidebar-tint-12: rgb(255 255 255 / 0.12);
+  --ui-sidebar-hover: #ffffff0d;
+  --ui-sidebar-hover-soft: #ffffff0b;
+  --ui-sidebar-tile: #ffffff08;
+  --ui-sidebar-tile-hover: #ffffff14;
+  --ui-sidebar-dashed: #ffffff24;
+  --ui-sidebar-dot: #ffffff38;
+  --ui-sidebar-dot-hover: #ffffff8c;
 
   --ui-shadow-sm: 0 1px 3px 0 hsl(214 32% 10% / 0.06), 0 1px 2px -1px hsl(214 32% 10% / 0.05);
   --ui-shadow-md: 0 4px 10px -2px hsl(214 32% 10% / 0.07), 0 2px 6px -3px hsl(214 32% 10% / 0.06);
@@ -405,9 +428,12 @@
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-align: start;
   text-transform: uppercase;
   white-space: nowrap;
+}
+/* Default alignment at zero specificity, so a column's `text-center` / `text-right` class also moves its header. */
+:where(.ui-data-table) th {
+  text-align: start;
 }
 .ui-data-table td {
   padding: 0.7rem 0.75rem;
@@ -418,6 +444,12 @@
 }
 .ui-data-table tbody tr:last-child td {
   border-bottom: none;
+}
+/* Zebra rows. Declared before the hover rule so hover still wins. `.ui-stripe-rows` is the same thing for
+   hand-built tables; their first column keeps its own background. */
+.ui-data-table-striped tbody tr:nth-child(even) td,
+.ui-stripe-rows tbody tr:nth-child(even) td:not(:first-child) {
+  background: var(--ui-stripe);
 }
 .ui-data-table tbody tr:hover td {
   background: var(--ui-surface-sunken);
@@ -523,7 +555,7 @@
     padding-left 0.15s;
 }
 .ui-sidebar-link:hover {
-  background: #ffffff0d;
+  background: var(--ui-sidebar-hover);
   color: var(--ui-sidebar-text-active);
   padding-inline-start: 0.9rem;
 }
@@ -551,7 +583,7 @@
 
 .ui-sidebar-group-title {
   padding: 1rem 0.9rem 0.35rem;
-  color: #ffffff52;
+  color: var(--ui-sidebar-group);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -574,7 +606,7 @@
   gap: 0.15rem;
   margin: 0.3rem 0 0.4rem 1.55rem;
   padding: 0.15rem 0 0.15rem 1rem;
-  border-inline-start: 1.5px dashed #ffffff24;
+  border-inline-start: 1.5px dashed var(--ui-sidebar-dashed);
 }
 .ui-sidebar-submenu > li {
   position: relative;
@@ -587,7 +619,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ffffff38;
+  background: var(--ui-sidebar-dot);
   transform: translateY(-50%);
   transition:
     background-color 0.2s,
@@ -595,7 +627,7 @@
     transform 0.2s;
 }
 .ui-sidebar-submenu > li:hover::before {
-  background: #ffffff8c;
+  background: var(--ui-sidebar-dot-hover);
   transform: translateY(-50%) scale(1.1);
 }
 .ui-sidebar-submenu > li.is-active::before {
@@ -610,7 +642,7 @@
   font-size: 0.78125rem;
 }
 .ui-sidebar-submenu .ui-sidebar-link:hover {
-  background: #ffffff0b;
+  background: var(--ui-sidebar-hover-soft);
   padding-inline-start: 0.85rem;
 }
 .ui-sidebar-submenu .ui-sidebar-link.is-active {
@@ -626,7 +658,7 @@
   gap: 0.4rem;
   border-radius: 5px;
   padding: 0.65rem 0.4rem 0.55rem;
-  background: #ffffff08;
+  background: var(--ui-sidebar-tile);
   color: var(--ui-sidebar-text);
   text-align: center;
   transition:
@@ -635,7 +667,7 @@
     transform 0.15s;
 }
 .ui-favorite-tile:hover {
-  background: #ffffff14;
+  background: var(--ui-sidebar-tile-hover);
   color: var(--ui-sidebar-text-active);
   transform: translateY(-1px);
 }
@@ -919,4 +951,234 @@ select.ui-input {
   .ui-loader-tile {
     animation: none;
   }
+}
+
+/* The sidebar has its own font-size setting on top of the app-wide one. */
+.ui-sidebar-scope {
+  --ui-font-scale: calc(var(--ui-font-base) * var(--ui-sidebar-font));
+}
+
+/* Range slider (font-size setting) */
+.ui-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 1.5rem;
+}
+.ui-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--ui-neutral-200);
+}
+.ui-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  background: var(--ui-primary-500);
+  box-shadow: 0 1px 4px hsl(214 32% 10% / 0.3);
+}
+.ui-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ui-primary-500) 30%, transparent);
+}
+
+/* Glassmorphism surface: frosted panel over an image or gradient (login screen). */
+.ui-glass {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.66), rgb(255 255 255 / 0.5));
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 24px 60px -18px hsl(214 40% 14% / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.85);
+}
+/* Fields on glass read better with a slightly opaque fill. */
+.ui-glass .ui-input {
+  background: rgb(255 255 255 / 0.72);
+  border-color: rgb(255 255 255 / 0.9);
+}
+.ui-glass .ui-input:focus {
+  background: #fff;
+}
+
+/* ---- Frosted glass, rich variant (login). White text on a tinted, blurred, light-edged panel. ---- */
+.ui-glass-frost {
+  --ui-text-primary: #fff;
+  --ui-text-secondary: rgb(255 255 255 / 0.84);
+  --ui-text-tertiary: rgb(255 255 255 / 0.66);
+  position: relative;
+  isolation: isolate;
+  color: #fff;
+  border-radius: 1.75rem;
+  background:
+    linear-gradient(150deg, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0.05) 55%, rgb(255 255 255 / 0.12)),
+    rgb(12 28 44 / 0.34);
+  -webkit-backdrop-filter: blur(30px) saturate(1.8) brightness(1.05);
+  backdrop-filter: blur(30px) saturate(1.8) brightness(1.05);
+  box-shadow:
+    0 34px 90px -24px rgb(0 0 0 / 0.6),
+    0 8px 24px -8px rgb(0 0 0 / 0.25),
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08);
+}
+/* Luminous edge: bright at the top-left and bottom-right corners, almost clear in between. */
+.ui-glass-frost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    140deg,
+    rgb(255 255 255 / 0.9),
+    rgb(255 255 255 / 0.12) 35%,
+    rgb(255 255 255 / 0.05) 65%,
+    rgb(255 255 255 / 0.6)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+/* Specular sheen across the top and a faint diagonal streak. */
+.ui-glass-frost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 55% at 12% -8%, rgb(255 255 255 / 0.34), transparent 55%),
+    linear-gradient(115deg, transparent 42%, rgb(255 255 255 / 0.07) 50%, transparent 58%);
+}
+.ui-glass-frost .ui-field-label {
+  color: rgb(255 255 255 / 0.92);
+}
+.ui-glass-frost .ui-input {
+  color: #fff;
+  background: rgb(255 255 255 / 0.12);
+  border-color: rgb(255 255 255 / 0.3);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.14);
+}
+.ui-glass-frost .ui-input::placeholder {
+  color: rgb(255 255 255 / 0.55);
+}
+.ui-glass-frost .ui-input:hover {
+  border-color: rgb(255 255 255 / 0.55);
+}
+.ui-glass-frost .ui-input:focus,
+.ui-glass-frost .ui-input:focus-visible {
+  background: rgb(255 255 255 / 0.2);
+  border-color: rgb(255 255 255 / 0.9);
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 0.16),
+    0 0 26px rgb(103 232 249 / 0.35);
+}
+.ui-glass-frost .ui-input[aria-invalid='true'] {
+  border-color: #ff9d9d;
+}
+.ui-glass-frost .ui-field-label span {
+  color: #ffb3b3;
+}
+.ui-glass-frost [role='alert'] {
+  color: #ffd2d2;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+/* Browser autofill would paint the field yellow/white; keep it glassy. */
+.ui-glass-frost .ui-input:-webkit-autofill {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  transition: background-color 9999s ease-out;
+  box-shadow: 0 0 0 1000px rgb(30 60 85 / 0.55) inset;
+}
+.ui-glass-frost .ui-btn-primary {
+  border: 1px solid rgb(255 255 255 / 0.38);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.38), rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, var(--ui-primary-500), var(--ui-primary-700));
+  box-shadow:
+    0 12px 32px -10px rgb(34 187 207 / 0.75),
+    inset 0 1px 0 rgb(255 255 255 / 0.55);
+}
+.ui-glass-frost .ui-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+/* react-modal marks <body> while a dialog is open: lock the page behind it so the wheel cannot scroll it. */
+body.ReactModal__Body--open {
+  overflow: hidden;
+}
+
+/* ---------- Sidebar colour themes (Settings -> Sidebar colour) ----------
+   The default is `cyan`; `dark` is the original dark menu (also what :root holds). The attribute can sit on <html> (the real sidebar) or on
+   any element (the previews in Settings). */
+.ui-sidebar-surface {
+  background-color: var(--ui-sidebar-bg);
+  background-image: var(--ui-sidebar-bg-image, none);
+}
+[data-sidebar-theme='cyan'],
+[data-sidebar-theme='cloud'] {
+  --ui-sidebar-border: hsl(214 20% 86%);
+  --ui-sidebar-text: hsl(214 18% 34%);
+  --ui-sidebar-text-active: hsl(214 32% 11%);
+  --ui-sidebar-fg-60: hsl(214 18% 38%);
+  --ui-sidebar-fg-40: hsl(214 14% 48%);
+  --ui-sidebar-group: hsl(214 14% 46%);
+  --ui-sidebar-tint-4: rgb(14 52 74 / 0.045);
+  --ui-sidebar-tint-8: rgb(14 52 74 / 0.09);
+  --ui-sidebar-tint-12: rgb(14 52 74 / 0.12);
+  --ui-sidebar-hover: rgb(14 52 74 / 0.06);
+  --ui-sidebar-hover-soft: rgb(14 52 74 / 0.05);
+  --ui-sidebar-tile: rgb(14 52 74 / 0.05);
+  --ui-sidebar-tile-hover: rgb(14 52 74 / 0.09);
+  --ui-sidebar-dashed: rgb(14 52 74 / 0.2);
+  --ui-sidebar-dot: rgb(14 52 74 / 0.22);
+  --ui-sidebar-dot-hover: rgb(14 52 74 / 0.45);
+}
+/* Light cyan fading to white */
+[data-sidebar-theme='cyan'] {
+  --ui-sidebar-bg: #fff;
+  --ui-sidebar-bg-image: linear-gradient(180deg, hsl(187 92% 95.5%) 0%, hsl(187 85% 98%) 36%, #fff 74%);
+}
+/* White, with a few soft clouds */
+[data-sidebar-theme='cloud'] {
+  --ui-sidebar-bg: hsl(210 40% 98.5%);
+  --ui-sidebar-bg-image:
+    radial-gradient(70% 22% at 18% 6%, #fff 0%, rgb(255 255 255 / 0) 70%),
+    radial-gradient(60% 18% at 88% 30%, hsl(210 60% 95%) 0%, rgb(255 255 255 / 0) 72%),
+    radial-gradient(80% 20% at 10% 62%, hsl(210 55% 96%) 0%, rgb(255 255 255 / 0) 72%),
+    radial-gradient(70% 22% at 92% 92%, hsl(208 70% 94%) 0%, rgb(255 255 255 / 0) 72%);
+}
+
+/* The original dark menu, as an explicit choice (the :root values above are the same). */
+[data-sidebar-theme='dark'] {
+  --ui-sidebar-bg: hsl(214 32% 7%);
+  --ui-sidebar-bg-image: none;
+  --ui-sidebar-border: #ffffff12;
+  --ui-sidebar-text: #ffffff9e;
+  --ui-sidebar-text-active: #fff;
+  --ui-sidebar-fg-60: rgb(255 255 255 / 0.6);
+  --ui-sidebar-fg-40: rgb(255 255 255 / 0.4);
+  --ui-sidebar-group: #ffffff52;
+  --ui-sidebar-tint-4: rgb(255 255 255 / 0.04);
+  --ui-sidebar-tint-8: rgb(255 255 255 / 0.08);
+  --ui-sidebar-tint-12: rgb(255 255 255 / 0.12);
+  --ui-sidebar-hover: #ffffff0d;
+  --ui-sidebar-hover-soft: #ffffff0b;
+  --ui-sidebar-tile: #ffffff08;
+  --ui-sidebar-tile-hover: #ffffff14;
+  --ui-sidebar-dashed: #ffffff24;
+  --ui-sidebar-dot: #ffffff38;
+  --ui-sidebar-dot-hover: #ffffff8c;
 }
