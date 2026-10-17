@@ -86,10 +86,28 @@
   --ui-text-secondary: var(--ui-neutral-600);
   --ui-text-tertiary: var(--ui-neutral-500);
 
+  /* Zebra stripe for striped tables (a faint cyan tint) */
+  --ui-stripe: color-mix(in oklab, var(--ui-primary-500) 9%, var(--ui-surface-raised));
+
   --ui-sidebar-bg: hsl(214 32% 7%);
+  --ui-sidebar-bg-image: none;
   --ui-sidebar-border: #ffffff12;
   --ui-sidebar-text: #ffffff9e;
   --ui-sidebar-text-active: #fff;
+  /* Extra sidebar tokens so the menu can also be a light theme (see the [data-sidebar-theme] blocks) */
+  --ui-sidebar-fg-60: rgb(255 255 255 / 0.6);
+  --ui-sidebar-fg-40: rgb(255 255 255 / 0.4);
+  --ui-sidebar-group: #ffffff52;
+  --ui-sidebar-tint-4: rgb(255 255 255 / 0.04);
+  --ui-sidebar-tint-8: rgb(255 255 255 / 0.08);
+  --ui-sidebar-tint-12: rgb(255 255 255 / 0.12);
+  --ui-sidebar-hover: #ffffff0d;
+  --ui-sidebar-hover-soft: #ffffff0b;
+  --ui-sidebar-tile: #ffffff08;
+  --ui-sidebar-tile-hover: #ffffff14;
+  --ui-sidebar-dashed: #ffffff24;
+  --ui-sidebar-dot: #ffffff38;
+  --ui-sidebar-dot-hover: #ffffff8c;
 
   --ui-shadow-sm: 0 1px 3px 0 hsl(214 32% 10% / 0.06), 0 1px 2px -1px hsl(214 32% 10% / 0.05);
   --ui-shadow-md: 0 4px 10px -2px hsl(214 32% 10% / 0.07), 0 2px 6px -3px hsl(214 32% 10% / 0.06);
@@ -410,9 +428,12 @@
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  text-align: start;
   text-transform: uppercase;
   white-space: nowrap;
+}
+/* Default alignment at zero specificity, so a column's `text-center` / `text-right` class also moves its header. */
+:where(.ui-data-table) th {
+  text-align: start;
 }
 .ui-data-table td {
   padding: 0.7rem 0.75rem;
@@ -423,6 +444,12 @@
 }
 .ui-data-table tbody tr:last-child td {
   border-bottom: none;
+}
+/* Zebra rows. Declared before the hover rule so hover still wins. `.ui-stripe-rows` is the same thing for
+   hand-built tables; their first column keeps its own background. */
+.ui-data-table-striped tbody tr:nth-child(even) td,
+.ui-stripe-rows tbody tr:nth-child(even) td:not(:first-child) {
+  background: var(--ui-stripe);
 }
 .ui-data-table tbody tr:hover td {
   background: var(--ui-surface-sunken);
@@ -528,7 +555,7 @@
     padding-left 0.15s;
 }
 .ui-sidebar-link:hover {
-  background: #ffffff0d;
+  background: var(--ui-sidebar-hover);
   color: var(--ui-sidebar-text-active);
   padding-inline-start: 0.9rem;
 }
@@ -556,7 +583,7 @@
 
 .ui-sidebar-group-title {
   padding: 1rem 0.9rem 0.35rem;
-  color: #ffffff52;
+  color: var(--ui-sidebar-group);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -579,7 +606,7 @@
   gap: 0.15rem;
   margin: 0.3rem 0 0.4rem 1.55rem;
   padding: 0.15rem 0 0.15rem 1rem;
-  border-inline-start: 1.5px dashed #ffffff24;
+  border-inline-start: 1.5px dashed var(--ui-sidebar-dashed);
 }
 .ui-sidebar-submenu > li {
   position: relative;
@@ -592,7 +619,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ffffff38;
+  background: var(--ui-sidebar-dot);
   transform: translateY(-50%);
   transition:
     background-color 0.2s,
@@ -600,7 +627,7 @@
     transform 0.2s;
 }
 .ui-sidebar-submenu > li:hover::before {
-  background: #ffffff8c;
+  background: var(--ui-sidebar-dot-hover);
   transform: translateY(-50%) scale(1.1);
 }
 .ui-sidebar-submenu > li.is-active::before {
@@ -615,7 +642,7 @@
   font-size: 0.78125rem;
 }
 .ui-sidebar-submenu .ui-sidebar-link:hover {
-  background: #ffffff0b;
+  background: var(--ui-sidebar-hover-soft);
   padding-inline-start: 0.85rem;
 }
 .ui-sidebar-submenu .ui-sidebar-link.is-active {
@@ -631,7 +658,7 @@
   gap: 0.4rem;
   border-radius: 5px;
   padding: 0.65rem 0.4rem 0.55rem;
-  background: #ffffff08;
+  background: var(--ui-sidebar-tile);
   color: var(--ui-sidebar-text);
   text-align: center;
   transition:
@@ -640,7 +667,7 @@
     transform 0.15s;
 }
 .ui-favorite-tile:hover {
-  background: #ffffff14;
+  background: var(--ui-sidebar-tile-hover);
   color: var(--ui-sidebar-text-active);
   transform: translateY(-1px);
 }
@@ -1086,4 +1113,72 @@ select.ui-input {
 }
 .ui-glass-frost .ui-btn-primary:hover {
   filter: brightness(1.08);
+}
+
+/* react-modal marks <body> while a dialog is open: lock the page behind it so the wheel cannot scroll it. */
+body.ReactModal__Body--open {
+  overflow: hidden;
+}
+
+/* ---------- Sidebar colour themes (Settings -> Sidebar colour) ----------
+   The default is `cyan`; `dark` is the original dark menu (also what :root holds). The attribute can sit on <html> (the real sidebar) or on
+   any element (the previews in Settings). */
+.ui-sidebar-surface {
+  background-color: var(--ui-sidebar-bg);
+  background-image: var(--ui-sidebar-bg-image, none);
+}
+[data-sidebar-theme='cyan'],
+[data-sidebar-theme='cloud'] {
+  --ui-sidebar-border: hsl(214 20% 86%);
+  --ui-sidebar-text: hsl(214 18% 34%);
+  --ui-sidebar-text-active: hsl(214 32% 11%);
+  --ui-sidebar-fg-60: hsl(214 18% 38%);
+  --ui-sidebar-fg-40: hsl(214 14% 48%);
+  --ui-sidebar-group: hsl(214 14% 46%);
+  --ui-sidebar-tint-4: rgb(14 52 74 / 0.045);
+  --ui-sidebar-tint-8: rgb(14 52 74 / 0.09);
+  --ui-sidebar-tint-12: rgb(14 52 74 / 0.12);
+  --ui-sidebar-hover: rgb(14 52 74 / 0.06);
+  --ui-sidebar-hover-soft: rgb(14 52 74 / 0.05);
+  --ui-sidebar-tile: rgb(14 52 74 / 0.05);
+  --ui-sidebar-tile-hover: rgb(14 52 74 / 0.09);
+  --ui-sidebar-dashed: rgb(14 52 74 / 0.2);
+  --ui-sidebar-dot: rgb(14 52 74 / 0.22);
+  --ui-sidebar-dot-hover: rgb(14 52 74 / 0.45);
+}
+/* Light cyan fading to white */
+[data-sidebar-theme='cyan'] {
+  --ui-sidebar-bg: #fff;
+  --ui-sidebar-bg-image: linear-gradient(180deg, hsl(187 92% 95.5%) 0%, hsl(187 85% 98%) 36%, #fff 74%);
+}
+/* White, with a few soft clouds */
+[data-sidebar-theme='cloud'] {
+  --ui-sidebar-bg: hsl(210 40% 98.5%);
+  --ui-sidebar-bg-image:
+    radial-gradient(70% 22% at 18% 6%, #fff 0%, rgb(255 255 255 / 0) 70%),
+    radial-gradient(60% 18% at 88% 30%, hsl(210 60% 95%) 0%, rgb(255 255 255 / 0) 72%),
+    radial-gradient(80% 20% at 10% 62%, hsl(210 55% 96%) 0%, rgb(255 255 255 / 0) 72%),
+    radial-gradient(70% 22% at 92% 92%, hsl(208 70% 94%) 0%, rgb(255 255 255 / 0) 72%);
+}
+
+/* The original dark menu, as an explicit choice (the :root values above are the same). */
+[data-sidebar-theme='dark'] {
+  --ui-sidebar-bg: hsl(214 32% 7%);
+  --ui-sidebar-bg-image: none;
+  --ui-sidebar-border: #ffffff12;
+  --ui-sidebar-text: #ffffff9e;
+  --ui-sidebar-text-active: #fff;
+  --ui-sidebar-fg-60: rgb(255 255 255 / 0.6);
+  --ui-sidebar-fg-40: rgb(255 255 255 / 0.4);
+  --ui-sidebar-group: #ffffff52;
+  --ui-sidebar-tint-4: rgb(255 255 255 / 0.04);
+  --ui-sidebar-tint-8: rgb(255 255 255 / 0.08);
+  --ui-sidebar-tint-12: rgb(255 255 255 / 0.12);
+  --ui-sidebar-hover: #ffffff0d;
+  --ui-sidebar-hover-soft: #ffffff0b;
+  --ui-sidebar-tile: #ffffff08;
+  --ui-sidebar-tile-hover: #ffffff14;
+  --ui-sidebar-dashed: #ffffff24;
+  --ui-sidebar-dot: #ffffff38;
+  --ui-sidebar-dot-hover: #ffffff8c;
 }

@@ -160,19 +160,27 @@ const Sidebar = () => {
         onMobileClose={() => setIsMobileMenuOpen(false)}
         logo={
           <div>
-            <h1 className="text-lg font-bold leading-tight text-white">सरस डेयरी</h1>
-            <p className="text-[10.5px] text-white/60">Dairy Management</p>
+            <h1 className="text-lg font-bold leading-tight text-[color:var(--ui-sidebar-text-active)]">
+              सरस डेयरी
+            </h1>
+            <p className="text-[10.5px] text-[color:var(--ui-sidebar-fg-60)]">Dairy Management</p>
           </div>
         }
-        logoCollapsed={<Milk size={22} className="text-white" />}
+        logoCollapsed={<Milk size={22} className="text-[color:var(--ui-sidebar-text-active)]" />}
         footer={
           <div className="space-y-1">
-            {version && <p className="text-[11px] text-white/60">Version {version}</p>}
-            <p className="text-[10.5px] text-white/40">© 2025 | Powered by Production House</p>
+            {version && (
+              <p className="text-[11px] text-[color:var(--ui-sidebar-fg-60)]">Version {version}</p>
+            )}
+            <p className="text-[10.5px] text-[color:var(--ui-sidebar-fg-40)]">
+              © 2025 | Powered by Production House
+            </p>
           </div>
         }
         footerCollapsed={
-          version ? <p className="text-[11px] font-bold text-white/60">{version}</p> : null
+          version ? (
+            <p className="text-[11px] font-bold text-[color:var(--ui-sidebar-fg-60)]">{version}</p>
+          ) : null
         }
       />
     </>

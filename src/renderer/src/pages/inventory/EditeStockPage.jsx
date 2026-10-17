@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Boxes, Save } from 'lucide-react'
+import { Boxes, Save } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -123,11 +123,7 @@ const EditeStockPage = () => {
           { label: 'Inventory', to: '/inventory' },
           { label: 'Edit Stock' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => navigate(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => navigate(-1)}
       />
       {loading ? (
         <PageLoader variant="inline" label="Loading stock data" />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Layers, Plus } from 'lucide-react'
+import { Layers, Plus } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -56,17 +56,9 @@ const AddCategoriesPage = () => {
           { label: 'Inventory', to: '/inventory' },
           { label: 'Add Category' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => nav(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => nav(-1)}
       />
-      <form
-        onSubmit={handleAddCategory}
-        noValidate
-        className="w-full space-y-5 p-3 sm:p-4 lg:p-6"
-      >
+      <form onSubmit={handleAddCategory} noValidate className="w-full space-y-5 p-3 sm:p-4 lg:p-6">
         <FormSection
           title="New Category"
           subtitle="Group your products"

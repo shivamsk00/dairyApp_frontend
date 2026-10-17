@@ -501,7 +501,7 @@ const RateChartPage = () => {
 
         <SurfaceCard className="overflow-hidden">
           <div className="ui-scroll-thin max-h-[68vh] overflow-auto">
-            <table className="w-full border-separate border-spacing-0 text-[12.5px]">
+            <table className="ui-stripe-rows w-full border-separate border-spacing-0 text-[12.5px]">
               <thead>
                 <tr>
                   <th className="ui-bg-sunken ui-border-subtle ui-text-secondary sticky left-0 top-0 z-30 min-w-[84px] border-b border-r px-3 py-2.5 text-center text-[11px] font-bold uppercase tracking-wide">

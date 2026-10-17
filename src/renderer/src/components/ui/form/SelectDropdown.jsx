@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types -- React 19 ignores propTypes; props are documented below */
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Check, ChevronDown, Search, X } from 'lucide-react'
 import Field from './Field'
 import cx from '../utils/cx'
@@ -59,7 +60,10 @@ const SelectDropdown = ({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
-  const [openUp, setOpenUp] = useState(false)
+  // Where the floating list sits (viewport coordinates). The list is rendered in a portal so it is never
+  // clipped by, or stretches the scroll area of, a dialog or scrolling card around the field.
+  const [pos, setPos] = useState(null)
+  const panelRef = useRef(null)
   const rootRef = useRef(null)
   const triggerRef = useRef(null)
   const searchRef = useRef(null)
@@ -90,14 +94,26 @@ const SelectDropdown = ({
     return -1
   }
 
+  const place = useCallback(() => {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const margin = 8
+    const gap = 6
+    const spaceBelow = window.innerHeight - rect.bottom - gap - margin
+    const spaceAbove = rect.top - gap - margin
+    // Open upwards when there is little room below and more above.
+    const up = spaceBelow < 280 && spaceAbove > spaceBelow
+    setPos({
+      left: rect.left,
+      width: rect.width,
+      ...(up ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
+      maxHeight: Math.max(160, Math.min(up ? spaceAbove : spaceBelow, 340))
+    })
+  }, [])
+
   const openList = () => {
     if (disabled || open) return
-    // Open upwards when there is little room below and more above.
-    const rect = triggerRef.current?.getBoundingClientRect()
-    if (rect) {
-      const below = window.innerHeight - rect.bottom
-      setOpenUp(below < 280 && rect.top > below)
-    }
+    place()
     setQuery('')
     const firstSelected = options.findIndex(
       (option) => isSelected(option.value) && !option.disabled
@@ -121,11 +137,20 @@ const SelectDropdown = ({
   useEffect(() => {
     if (!open) return undefined
     const onPointerDown = (event) => {
-      if (rootRef.current && !rootRef.current.contains(event.target)) setOpen(false)
+      const inside =
+        rootRef.current?.contains(event.target) || panelRef.current?.contains(event.target)
+      if (!inside) setOpen(false)
     }
     document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
-  }, [open])
+    // Follow the field if the window is resized or something around it scrolls.
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  }, [open, place])
 
   useEffect(() => {
     if (open && searchable) searchRef.current?.focus()
@@ -303,108 +328,110 @@ const SelectDropdown = ({
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px w-full opacity-0"
         />
 
-        {open && (
-          <div
-            className={cx(
-              'ui-card ui-shadow-xl absolute inset-x-0 z-50 overflow-hidden',
-              openUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-            )}
-          >
-            {searchable && (
-              <div className="ui-border-subtle flex items-center gap-2 border-b px-3 py-2">
-                <Search size={14} className="ui-text-tertiary shrink-0" aria-hidden="true" />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.target.value)
-                    setActive(0)
-                  }}
-                  placeholder={searchPlaceholder}
-                  aria-label={searchPlaceholder}
-                  aria-controls={listId}
-                  aria-activedescendant={visible.length ? optionId(active) : undefined}
-                  autoComplete="off"
-                  className="w-full border-0 bg-transparent text-[13px] outline-none"
-                />
-              </div>
-            )}
-            <ul
-              ref={listRef}
-              id={listId}
-              role="listbox"
-              aria-multiselectable={multiple || undefined}
-              className="ui-scroll-thin max-h-60 overflow-y-auto p-1"
+        {open &&
+          pos &&
+          createPortal(
+            <div
+              ref={panelRef}
+              style={{ position: 'fixed', zIndex: 200, ...pos }}
+              className="ui-card ui-shadow-xl flex flex-col overflow-hidden"
             >
-              {visible.length === 0 && (
-                <li className="ui-text-tertiary px-3 py-6 text-center text-[12.5px]">
-                  {emptyText}
-                </li>
+              {searchable && (
+                <div className="ui-border-subtle flex items-center gap-2 border-b px-3 py-2">
+                  <Search size={14} className="ui-text-tertiary shrink-0" aria-hidden="true" />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value)
+                      setActive(0)
+                    }}
+                    placeholder={searchPlaceholder}
+                    aria-label={searchPlaceholder}
+                    aria-controls={listId}
+                    aria-activedescendant={visible.length ? optionId(active) : undefined}
+                    autoComplete="off"
+                    className="w-full border-0 bg-transparent text-[13px] outline-none"
+                  />
+                </div>
               )}
-              {visible.map((option, index) => {
-                const chosen = isSelected(option.value)
-                return (
-                  <li
-                    key={option.value}
-                    id={optionId(index)}
-                    role="option"
-                    aria-selected={chosen}
-                    aria-disabled={option.disabled || undefined}
-                    onMouseEnter={() => !option.disabled && setActive(index)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => choose(option)}
-                    className={cx(
-                      'flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px]',
-                      index === active && 'ui-bg-sunken',
-                      option.disabled && 'cursor-not-allowed opacity-45',
-                      chosen && 'font-semibold'
-                    )}
-                  >
-                    {multiple && (
-                      <span
-                        className={cx(
-                          'grid size-4 shrink-0 place-items-center rounded border',
-                          chosen
-                            ? 'ui-bg-brand border-transparent'
-                            : 'ui-border-default bg-transparent'
-                        )}
-                        aria-hidden="true"
-                      >
-                        {chosen && <Check size={11} strokeWidth={3} />}
-                      </span>
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{option.label}</span>
-                      {option.description && (
-                        <span className="ui-text-tertiary block truncate text-[11.5px] font-normal">
-                          {option.description}
+              <ul
+                ref={listRef}
+                id={listId}
+                role="listbox"
+                aria-multiselectable={multiple || undefined}
+                className="ui-scroll-thin max-h-60 min-h-0 flex-1 overflow-y-auto p-1"
+              >
+                {visible.length === 0 && (
+                  <li className="ui-text-tertiary px-3 py-6 text-center text-[12.5px]">
+                    {emptyText}
+                  </li>
+                )}
+                {visible.map((option, index) => {
+                  const chosen = isSelected(option.value)
+                  return (
+                    <li
+                      key={option.value}
+                      id={optionId(index)}
+                      role="option"
+                      aria-selected={chosen}
+                      aria-disabled={option.disabled || undefined}
+                      onMouseEnter={() => !option.disabled && setActive(index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => choose(option)}
+                      className={cx(
+                        'flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px]',
+                        index === active && 'ui-bg-sunken',
+                        option.disabled && 'cursor-not-allowed opacity-45',
+                        chosen && 'font-semibold'
+                      )}
+                    >
+                      {multiple && (
+                        <span
+                          className={cx(
+                            'grid size-4 shrink-0 place-items-center rounded border',
+                            chosen
+                              ? 'ui-bg-brand border-transparent'
+                              : 'ui-border-default bg-transparent'
+                          )}
+                          aria-hidden="true"
+                        >
+                          {chosen && <Check size={11} strokeWidth={3} />}
                         </span>
                       )}
-                    </span>
-                    {!multiple && chosen && (
-                      <Check size={14} className="ui-text-brand shrink-0" aria-hidden="true" />
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            {multiple && (
-              <div className="ui-border-subtle ui-text-tertiary flex items-center justify-between border-t px-3 py-1.5 text-[11.5px]">
-                <span>{selected.length} selected</span>
-                {selected.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => onChange([])}
-                    className="ui-text-brand font-semibold"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">{option.label}</span>
+                        {option.description && (
+                          <span className="ui-text-tertiary block truncate text-[11.5px] font-normal">
+                            {option.description}
+                          </span>
+                        )}
+                      </span>
+                      {!multiple && chosen && (
+                        <Check size={14} className="ui-text-brand shrink-0" aria-hidden="true" />
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+              {multiple && (
+                <div className="ui-border-subtle ui-text-tertiary flex items-center justify-between border-t px-3 py-1.5 text-[11.5px]">
+                  <span>{selected.length} selected</span>
+                  {selected.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => onChange([])}
+                      className="ui-text-brand font-semibold"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>,
+            document.body
+          )}
       </div>
     </Field>
   )

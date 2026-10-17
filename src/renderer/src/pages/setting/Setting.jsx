@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types -- FontScaleControl and PreviewSidebar are internal to this page */
 import { useState } from 'react'
-import { Building2, RotateCcw, Save, Type, UserRound } from 'lucide-react'
+import { Building2, Check, Palette, RotateCcw, Save, Type, UserRound } from 'lucide-react'
 import useAuthStore from '../../zustand/useAuthStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -12,6 +12,7 @@ import {
   setFontScales,
   useFontScales
 } from '../../helper/fontScale'
+import { SIDEBAR_THEMES, setSidebarTheme, useSidebarTheme } from '../../helper/sidebarTheme'
 import { loadSettings, saveSettings } from './settingsStorage'
 import {
   Avatar,
@@ -62,14 +63,14 @@ const FontScaleControl = ({ title, hint, value, onChange, label }) => (
 )
 
 const PreviewSidebar = () => (
-  <div className="ui-sidebar-scope w-full max-w-[16rem] rounded-lg bg-[color:var(--ui-sidebar-bg)] p-3">
-    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ui-sidebar-text)]">
+  <div className="ui-sidebar-scope ui-sidebar-surface w-full max-w-[16rem] rounded-lg border border-[color:var(--ui-sidebar-border)] p-3">
+    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--ui-sidebar-group)]">
       Main
     </p>
     {['Dashboard', 'Milk Center', 'Customers'].map((item, i) => (
       <div
         key={item}
-        className={`rounded-md px-2.5 py-1.5 text-[13.5px] font-medium ${i === 0 ? 'bg-white/10 text-white' : 'text-[color:var(--ui-sidebar-text)]'}`}
+        className={`rounded-md px-2.5 py-1.5 text-[13.5px] font-medium ${i === 0 ? 'bg-[color:var(--ui-sidebar-tint-8)] text-[color:var(--ui-sidebar-text-active)]' : 'text-[color:var(--ui-sidebar-text)]'}`}
       >
         {item}
       </div>
@@ -77,10 +78,32 @@ const PreviewSidebar = () => (
   </div>
 )
 
+// A small sidebar drawn in the given theme (the colours come from the data-sidebar-theme attribute).
+const ThemePreview = ({ theme }) => (
+  <div
+    data-sidebar-theme={theme}
+    className="ui-sidebar-surface w-full rounded-lg border border-[color:var(--ui-sidebar-border)] p-2.5"
+  >
+    <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--ui-sidebar-group)]">
+      Main
+    </p>
+    <div className="rounded-md bg-[color:var(--ui-sidebar-tint-8)] px-2 py-1 text-[12px] font-semibold text-[color:var(--ui-sidebar-text-active)]">
+      Dashboard
+    </div>
+    <div className="px-2 py-1 text-[12px] font-medium text-[color:var(--ui-sidebar-text)]">
+      Milk Center
+    </div>
+    <div className="px-2 py-1 text-[12px] font-medium text-[color:var(--ui-sidebar-text)]">
+      Customers
+    </div>
+  </div>
+)
+
 const Setting = () => {
   useDocumentTitle('Settings')
   const user = useAuthStore((state) => state.user)
   const scales = useFontScales()
+  const sidebarTheme = useSidebarTheme()
   const [settings, setSettings] = useState(loadSettings)
 
   const owner = {
@@ -218,6 +241,46 @@ const Setting = () => {
               />
               <PreviewSidebar />
             </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Sidebar Colour"
+          subtitle="Choose the colour of the menu on the left. Applies instantly."
+          icon={Palette}
+          tone="info"
+        >
+          <div
+            role="radiogroup"
+            aria-label="Sidebar colour"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          >
+            {SIDEBAR_THEMES.map((theme) => {
+              const selected = sidebarTheme === theme.value
+              return (
+                <button
+                  key={theme.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setSidebarTheme(theme.value)}
+                  className={`rounded-xl border-2 p-3 text-left transition-colors ${selected ? 'border-[color:var(--ui-primary-500)] bg-[color:var(--ui-primary-50)]' : 'ui-border-subtle hover:border-[color:var(--ui-border-strong)]'}`}
+                >
+                  <ThemePreview theme={theme.value} />
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[13.5px] font-bold">{theme.label}</p>
+                      <p className="ui-text-tertiary text-[12px]">{theme.hint}</p>
+                    </div>
+                    {selected && (
+                      <Badge tone="primary" icon={Check} dot={false}>
+                        Selected
+                      </Badge>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </SectionCard>
 

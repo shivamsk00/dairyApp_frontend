@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types -- Var is an internal helper */
 import { useEffect, useState } from 'react'
 import { Calculator, RotateCcw, Save } from 'lucide-react'
 import Chart from './Chart'
@@ -26,6 +27,21 @@ const validate = (values) => {
   if (!errors.A && Number(values.A) === 0) errors.A = 'A cannot be 0 (the formula divides by A)'
   return errors
 }
+
+// Each value has its own colour, reused in the formula so it is obvious which input does what.
+const VARIABLES = [
+  { name: 'A', tone: 'primary', title: 'Divisor', hint: 'CLR is divided by this' },
+  { name: 'B', tone: 'accent', title: 'FAT factor', hint: 'Multiplies the FAT' },
+  { name: 'C', tone: 'info', title: 'Constant', hint: 'Added at the end' }
+]
+
+const Var = ({ tone, children }) => (
+  <span
+    className={`ui-soft-${tone} inline-flex items-center rounded-md px-2 py-0.5 font-extrabold`}
+  >
+    {children}
+  </span>
+)
 
 const SnfChartPage = () => {
   useDocumentTitle('SNF Chart')
@@ -99,10 +115,12 @@ const SnfChartPage = () => {
   // Worked example so the effect of A, B and C is visible while editing.
   const exampleClr = 26
   const exampleFat = 4
-  const example =
-    Object.keys(errors).length === 0
-      ? exampleClr / Number(formValues.A) + Number(formValues.B) * exampleFat + Number(formValues.C)
-      : null
+  const valid = Object.keys(errors).length === 0
+  const part1 = valid ? exampleClr / Number(formValues.A) : null
+  const part2 = valid ? Number(formValues.B) * exampleFat : null
+  const part3 = valid ? Number(formValues.C) : null
+  const example = valid ? part1 + part2 + part3 : null
+  const fix = (n, d = 2) => (Math.round(n * 10 ** d) / 10 ** d).toFixed(d)
 
   return (
     <div className="w-full ui-text-primary">
@@ -111,80 +129,131 @@ const SnfChartPage = () => {
         items={[{ label: 'Home', to: '/' }, { label: 'Milk Center' }, { label: 'SNF Chart' }]}
       />
 
-      <div className="grid grid-cols-1 gap-5 p-3 sm:p-4 lg:grid-cols-3 lg:p-6">
-        <form onSubmit={handleSave} noValidate className="lg:col-span-1">
+      <div className="space-y-5 p-3 sm:p-4 lg:p-6">
+        <form onSubmit={handleSave} noValidate>
           <SectionCard
             title="SNF Formula Settings"
-            subtitle="Used to build the chart on the right"
+            subtitle="Used to build the chart below"
             icon={Calculator}
             tone="primary"
           >
-            <div className="ui-bg-sunken mb-4 rounded-lg px-4 py-3 text-center">
-              <p className="ui-text-tertiary text-[11px] font-semibold uppercase tracking-wide">
-                Formula
-              </p>
-              <p className="ui-font-display mt-1 text-[16px] font-bold">
-                (CLR / A) + (B × FAT) + C
-              </p>
-            </div>
+            <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              {/* Left: the three values */}
+              <div className="ui-border-subtle flex flex-col rounded-xl border p-5">
+                <p className="ui-text-tertiary mb-4 text-[11px] font-bold uppercase tracking-wider">
+                  Formula values
+                </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {VARIABLES.map(({ name, tone, title, hint }) => (
+                    <Input
+                      key={name}
+                      label={
+                        <span className="inline-flex items-center gap-2">
+                          <Badge
+                            tone={tone}
+                            dot={false}
+                            className="!px-2 !py-0.5 !text-[11px] !font-extrabold"
+                          >
+                            {name}
+                          </Badge>
+                          {title}
+                        </span>
+                      }
+                      type="number"
+                      name={name}
+                      step="any"
+                      value={formValues[name]}
+                      onChange={handleChange}
+                      error={shown(name)}
+                      hint={hint}
+                    />
+                  ))}
+                </div>
+                <div className="ui-border-subtle mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                  <span className="ui-text-tertiary text-[12px]">
+                    The chart below previews your values. Save to keep them.
+                  </span>
+                  <div className="flex gap-2">
+                    <Button type="submit" icon={Save} loading={saving}>
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      icon={RotateCcw}
+                      onClick={handleReset}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
-            <div className="space-y-4">
-              <Input
-                label="Value for A"
-                type="number"
-                name="A"
-                step="any"
-                value={formValues.A}
-                onChange={handleChange}
-                error={shown('A')}
-              />
-              <Input
-                label="Value for B"
-                type="number"
-                name="B"
-                step="any"
-                value={formValues.B}
-                onChange={handleChange}
-                error={shown('B')}
-              />
-              <Input
-                label="Value for C"
-                type="number"
-                name="C"
-                step="any"
-                value={formValues.C}
-                onChange={handleChange}
-                error={shown('C')}
-              />
-            </div>
+              {/* Right: the formula with colour-matched variables and a worked example */}
+              <div className="flex flex-col rounded-xl border border-[color:var(--ui-primary-100)] bg-gradient-to-br from-[color:var(--ui-primary-50)] to-white p-5">
+                <p className="ui-text-tertiary mb-3 text-[11px] font-bold uppercase tracking-wider">
+                  Formula
+                </p>
+                <p className="ui-font-display flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[19px] font-extrabold">
+                  <span>(CLR</span>
+                  <span className="ui-text-tertiary">/</span>
+                  <Var tone="primary">A</Var>
+                  <span>)</span>
+                  <span className="ui-text-tertiary">+</span>
+                  <span>(</span>
+                  <Var tone="accent">B</Var>
+                  <span className="ui-text-tertiary">×</span>
+                  <span>FAT)</span>
+                  <span className="ui-text-tertiary">+</span>
+                  <Var tone="info">C</Var>
+                </p>
 
-            <div className="ui-border-subtle mt-4 flex items-center justify-between rounded-lg border px-4 py-3">
-              <span className="ui-text-tertiary text-[12px]">
-                Example: CLR {exampleClr}, FAT {exampleFat.toFixed(1)}
-              </span>
-              {example === null ? (
-                <span className="ui-text-tertiary text-[12px]">—</span>
-              ) : (
-                <Badge tone="primary" dot={false}>
-                  SNF {(Math.round(example * 10) / 10).toFixed(1)}
-                </Badge>
-              )}
-            </div>
+                <div className="ui-border-subtle mt-4 border-t pt-4">
+                  <p className="ui-text-tertiary mb-2 text-[11px] font-semibold uppercase tracking-wide">
+                    Example · CLR {exampleClr}, FAT {exampleFat.toFixed(1)}
+                  </p>
+                  {valid ? (
+                    <div className="space-y-1.5 text-[13px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="ui-text-secondary">
+                          {exampleClr} ÷ <Var tone="primary">{formValues.A}</Var>
+                        </span>
+                        <span className="font-semibold tabular-nums">{fix(part1)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="ui-text-secondary">
+                          <Var tone="accent">{formValues.B}</Var> × {exampleFat.toFixed(1)}
+                        </span>
+                        <span className="font-semibold tabular-nums">+ {fix(part2)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="ui-text-secondary">
+                          <Var tone="info">{formValues.C}</Var>
+                        </span>
+                        <span className="font-semibold tabular-nums">+ {fix(part3)}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="ui-text-tertiary text-[12.5px]">
+                      Enter valid values for A, B and C to see an example.
+                    </p>
+                  )}
+                </div>
 
-            <div className="mt-5 flex gap-2">
-              <Button type="submit" className="flex-1" icon={Save} loading={saving}>
-                Save
-              </Button>
-              <Button variant="secondary" className="flex-1" icon={RotateCcw} onClick={handleReset}>
-                Reset
-              </Button>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-4">
+                  <span className="text-[12px] font-bold uppercase tracking-wide">
+                    Result · SNF
+                  </span>
+                  <span className="ui-font-display text-[26px] font-extrabold leading-none text-[color:var(--ui-primary-700)]">
+                    {example === null ? '—' : fix(example, 1)}
+                  </span>
+                </div>
+              </div>
             </div>
           </SectionCard>
         </form>
 
-        <div className="lg:col-span-2">
-          <Chart formValues={formValues} trigger={saveTrigger} />
-        </div>
+        <Chart formValues={formValues} trigger={saveTrigger} />
       </div>
     </div>
   )

@@ -96,6 +96,7 @@ const Chart = ({ formValues, trigger }) => {
     >
       <DataTable
         stickyHeader
+        striped
         className="max-h-[64vh] overflow-y-auto"
         minWidth="760px"
         columns={columns}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, TriangleAlert, Plus } from 'lucide-react'
+import { Building2, TriangleAlert, Plus } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -107,11 +107,7 @@ const AddHeadDairy = () => {
           { label: 'Head Dairy Master', to: '/alldairymaster' },
           { label: 'Add' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => navigate(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => navigate(-1)}
       />
 
       <form

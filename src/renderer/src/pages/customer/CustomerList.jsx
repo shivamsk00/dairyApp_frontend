@@ -8,7 +8,6 @@ import {
   CreditCard,
   Eye,
   IndianRupee,
-  Loader2,
   Mail,
   MapPin,
   Milk,
@@ -39,6 +38,7 @@ import {
   Input,
   KpiCard,
   Modal,
+  PageLoader,
   Pagination,
   SelectDropdown,
   SurfaceCard,
@@ -773,9 +773,8 @@ const CustomerList = () => {
         </SurfaceCard>
 
         {loading && (
-          <SurfaceCard className="flex items-center justify-center gap-3 p-12">
-            <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
-            <span className="ui-text-secondary text-[13px]">Loading customers…</span>
+          <SurfaceCard>
+            <PageLoader variant="inline" label="Loading customers" className="!py-12" />
           </SurfaceCard>
         )}
 
@@ -1000,10 +999,7 @@ const CustomerList = () => {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-6">
           {editModalLoading ? (
-            <div className="flex items-center justify-center gap-3 py-16">
-              <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
-              <span className="ui-text-secondary text-[13px]">Loading customer data…</span>
-            </div>
+            <PageLoader variant="inline" label="Loading customer data" className="!py-16" />
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {editFields.map(({ label, name, type, isSelect, disabled }) =>

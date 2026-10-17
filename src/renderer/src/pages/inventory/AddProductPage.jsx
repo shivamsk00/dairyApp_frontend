@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, Plus } from 'lucide-react'
+import { Package, Plus } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -99,17 +99,9 @@ const AddProductPage = () => {
           { label: 'Inventory', to: '/inventory' },
           { label: 'Add Product' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => nav(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => nav(-1)}
       />
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        className="w-full space-y-5 p-3 sm:p-4 lg:p-6"
-      >
+      <form onSubmit={handleSubmit} noValidate className="w-full space-y-5 p-3 sm:p-4 lg:p-6">
         <FormSection
           title="Product Details"
           subtitle="What you sell and how it is priced"

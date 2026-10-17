@@ -6,6 +6,7 @@ import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute';
 import NavigatorSetter from './helper/NavigatorSetter';
 import { PageLoader } from './components/ui';
+import SessionExpiredModal from './components/SessionExpiredModal';
 // import Layout from './components/Layout';
 const Layout = lazy(() => import('./components/Layout'));
 // import Dashboard from './pages/dashboard/Dashboard';
@@ -110,6 +111,7 @@ function App() {
   return (
     <HashRouter>
       <NavigatorSetter /> {/* 👈 Set navigator once here */}
+      <SessionExpiredModal />
       <Suspense fallback={<PageLoader variant="screen" brand="सरस डेयरी" label="Loading" hint="Preparing your workspace" />}>
       <Routes>
         <Route path="/login" element={<Login />} />

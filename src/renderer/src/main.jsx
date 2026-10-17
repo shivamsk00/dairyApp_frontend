@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import { ToastHost } from './components/ui';
 import { initFontScale } from './helper/fontScale';
+import { initSidebarTheme } from './helper/sidebarTheme';
 
 // Electron webFrame के लिए check करें कि environment Electron है या नहीं
 if (typeof window !== 'undefined' && window.electronAPI) {
@@ -33,7 +34,9 @@ style.textContent = `
   
   body, html {
     zoom: 1 !important;
-    transform: scale(1) !important;
+    /* Not scale(1): any transform on html/body becomes the containing block of position:fixed
+       elements, which pushed dialogs to the middle of the whole page instead of the window. */
+    transform: none !important;
   }
 
   /* rem stays fixed; the text that has no size class of its own follows the font-size setting */
@@ -48,6 +51,7 @@ document.head.appendChild(style);
 
 // Apply the saved font-size setting before the first paint
 initFontScale();
+initSidebarTheme();
 
 createRoot(document.getElementById('root')).render(
   <>

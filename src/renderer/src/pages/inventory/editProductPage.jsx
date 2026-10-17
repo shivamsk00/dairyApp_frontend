@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Package, Save } from 'lucide-react'
+import { Package, Save } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -113,20 +113,12 @@ const EditProductPage = () => {
           { label: 'Inventory', to: '/inventory' },
           { label: 'Edit Product' }
         ]}
-        actions={
-          <Button variant="secondary" size="sm" icon={ArrowLeft} onClick={() => nav(-1)}>
-            Back
-          </Button>
-        }
+        onBack={() => nav(-1)}
       />
       {loading ? (
         <PageLoader variant="inline" label="Loading product" />
       ) : (
-        <form
-          onSubmit={handleSubmit}
-          noValidate
-          className="w-full space-y-5 p-3 sm:p-4 lg:p-6"
-        >
+        <form onSubmit={handleSubmit} noValidate className="w-full space-y-5 p-3 sm:p-4 lg:p-6">
           <FormSection
             title="Product Details"
             subtitle="Update the product"
