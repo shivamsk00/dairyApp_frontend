@@ -251,7 +251,7 @@ const Setting = () => {
             <div
               role="radiogroup"
               aria-label="Sidebar colour"
-              className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+              className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10.5rem),1fr))] gap-4"
             >
               {SIDEBAR_THEMES.map((theme) => {
                 const selected = sidebarTheme === theme.value
@@ -262,16 +262,16 @@ const Setting = () => {
                     role="radio"
                     aria-checked={selected}
                     onClick={() => setSidebarTheme(theme.value)}
-                    className={`rounded-xl border-2 p-3 text-left transition-colors ${selected ? 'border-[color:var(--ui-primary-500)] bg-[color:var(--ui-primary-50)]' : 'ui-border-subtle hover:border-[color:var(--ui-border-strong)]'}`}
+                    className={`flex min-w-0 flex-col rounded-xl border-2 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ui-primary-400)] focus-visible:ring-offset-2 ${selected ? 'border-[color:var(--ui-primary-500)] bg-[color:var(--ui-primary-50)]' : 'ui-border-subtle hover:border-[color:var(--ui-border-strong)]'}`}
                   >
                     <ThemePreview theme={theme.value} />
-                    <div className="mt-3 flex items-center justify-between gap-2">
-                      <div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
                         <p className="text-[13.5px] font-bold">{theme.label}</p>
                         <p className="ui-text-tertiary text-[12px]">{theme.hint}</p>
                       </div>
                       {selected && (
-                        <Badge tone="primary" icon={Check} dot={false}>
+                        <Badge tone="primary" icon={Check} dot={false} className="shrink-0">
                           Selected
                         </Badge>
                       )}
