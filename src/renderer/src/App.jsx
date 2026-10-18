@@ -59,7 +59,6 @@ const PaymentLedgerPage = lazy(() => import('./pages/paymetLedger/PaymentLedgerP
 const ReportsPage = lazy(() => import('./pages/report/ReportsPage'))
 const InventoryPage = lazy(() => import('./pages/inventory/InventoryPage'))
 const AddCustomerPage = lazy(() => import('./pages/customer/AddCustomerPage'))
-const ChangePassword = lazy(() => import('./pages/auth/ChangePassword'))
 const SnfChartPage = lazy(() => import('./pages/snfchart/SnfChartPage'))
 const CategoreisPage = lazy(() => import('./pages/categories/CategoreisPage'))
 const AddCategoriesPage = lazy(() => import('./pages/categories/AddCategoriesPage'))
@@ -144,7 +143,6 @@ function App() {
           <Route path="settings" element={<Setting />} />
           <Route path="addCustomer" element={<AddCustomerPage />} />
           <Route path="editCustomer" element={<EditCustomerPage />} />
-          <Route path="changePassword" element={<ChangePassword />} />
           <Route path="snfchart" element={<SnfChartPage />} />
           <Route path="AddProductPage" element={<AddProductPage />} />
           <Route path="editProduct" element={<EditProductPage />} />

@@ -129,11 +129,7 @@ const Setting = () => {
     <div className="ui-text-primary w-full">
       <Breadcrumb title="Settings" items={[{ label: 'Home', to: '/' }, { label: 'Settings' }]} />
 
-      <form
-        onSubmit={handleSave}
-        noValidate
-        className="mx-auto max-w-6xl space-y-5 p-3 sm:p-4 lg:p-6"
-      >
+      <form onSubmit={handleSave} noValidate className="w-full space-y-5 p-3 sm:p-4 lg:p-6">
         <SectionCard
           title="Business Info"
           subtitle="Owner details come from your account"
@@ -195,94 +191,97 @@ const Setting = () => {
           </div>
         </SectionCard>
 
-        <SectionCard
-          title="Font Size"
-          subtitle="Make the text bigger or smaller. Changes apply instantly and are remembered on this computer."
-          icon={Type}
-          tone="accent"
-          action={
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              icon={RotateCcw}
-              disabled={
-                scales.base === DEFAULT_SCALES.base && scales.sidebar === DEFAULT_SCALES.sidebar
-              }
-              onClick={() => {
-                resetFontScales()
-                CustomToast.success('Font sizes reset to default')
-              }}
-            >
-              Reset to default
-            </Button>
-          }
-        >
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="space-y-3">
-              <FontScaleControl
-                title="Whole software"
-                hint="Pages, forms, tables, header and footer"
-                label="Whole software font size"
-                value={scales.base}
-                onChange={(value) => setFontScales({ base: value })}
-              />
-              <p className="ui-text-secondary ui-bg-sunken rounded-lg p-4 text-[14px]">
-                The quick brown fox jumps over the lazy dog — ₹1,250.00 · 12.5 L · FAT 4.1 / SNF 8.6
-              </p>
-            </div>
-            <div className="space-y-3">
-              <FontScaleControl
-                title="Sidebar"
-                hint="The menu on the left, on top of the software size"
-                label="Sidebar font size"
-                value={scales.sidebar}
-                onChange={(value) => setFontScales({ sidebar: value })}
-              />
-              <PreviewSidebar />
-            </div>
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Sidebar Colour"
-          subtitle="Choose the colour of the menu on the left. Applies instantly."
-          icon={Palette}
-          tone="info"
-        >
-          <div
-            role="radiogroup"
-            aria-label="Sidebar colour"
-            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+        <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-2">
+          <SectionCard
+            title="Font Size"
+            subtitle="Make the text bigger or smaller. Changes apply instantly and are remembered on this computer."
+            icon={Type}
+            tone="accent"
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                icon={RotateCcw}
+                disabled={
+                  scales.base === DEFAULT_SCALES.base && scales.sidebar === DEFAULT_SCALES.sidebar
+                }
+                onClick={() => {
+                  resetFontScales()
+                  CustomToast.success('Font sizes reset to default')
+                }}
+              >
+                Reset to default
+              </Button>
+            }
           >
-            {SIDEBAR_THEMES.map((theme) => {
-              const selected = sidebarTheme === theme.value
-              return (
-                <button
-                  key={theme.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => setSidebarTheme(theme.value)}
-                  className={`rounded-xl border-2 p-3 text-left transition-colors ${selected ? 'border-[color:var(--ui-primary-500)] bg-[color:var(--ui-primary-50)]' : 'ui-border-subtle hover:border-[color:var(--ui-border-strong)]'}`}
-                >
-                  <ThemePreview theme={theme.value} />
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-[13.5px] font-bold">{theme.label}</p>
-                      <p className="ui-text-tertiary text-[12px]">{theme.hint}</p>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-3">
+                <FontScaleControl
+                  title="Whole software"
+                  hint="Pages, forms, tables, header and footer"
+                  label="Whole software font size"
+                  value={scales.base}
+                  onChange={(value) => setFontScales({ base: value })}
+                />
+                <p className="ui-text-secondary ui-bg-sunken rounded-lg p-4 text-[14px]">
+                  The quick brown fox jumps over the lazy dog — ₹1,250.00 · 12.5 L · FAT 4.1 / SNF
+                  8.6
+                </p>
+              </div>
+              <div className="space-y-3">
+                <FontScaleControl
+                  title="Sidebar"
+                  hint="The menu on the left, on top of the software size"
+                  label="Sidebar font size"
+                  value={scales.sidebar}
+                  onChange={(value) => setFontScales({ sidebar: value })}
+                />
+                <PreviewSidebar />
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Sidebar Colour"
+            subtitle="Choose the colour of the menu on the left. Applies instantly."
+            icon={Palette}
+            tone="info"
+          >
+            <div
+              role="radiogroup"
+              aria-label="Sidebar colour"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+            >
+              {SIDEBAR_THEMES.map((theme) => {
+                const selected = sidebarTheme === theme.value
+                return (
+                  <button
+                    key={theme.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setSidebarTheme(theme.value)}
+                    className={`rounded-xl border-2 p-3 text-left transition-colors ${selected ? 'border-[color:var(--ui-primary-500)] bg-[color:var(--ui-primary-50)]' : 'ui-border-subtle hover:border-[color:var(--ui-border-strong)]'}`}
+                  >
+                    <ThemePreview theme={theme.value} />
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-[13.5px] font-bold">{theme.label}</p>
+                        <p className="ui-text-tertiary text-[12px]">{theme.hint}</p>
+                      </div>
+                      {selected && (
+                        <Badge tone="primary" icon={Check} dot={false}>
+                          Selected
+                        </Badge>
+                      )}
                     </div>
-                    {selected && (
-                      <Badge tone="primary" icon={Check} dot={false}>
-                        Selected
-                      </Badge>
-                    )}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </SectionCard>
+                  </button>
+                )
+              })}
+            </div>
+          </SectionCard>
+        </div>
 
         <div className="flex justify-end">
           <Button type="submit" icon={Save}>

@@ -5,3 +5,16 @@ out
 .eslintcache
 *.log*
 dist.zip
+graphify-out
+# Added by code-review-graph
+.code-review-graph/
+
+# AI tool configs (code-review-graph install)
+.claude/
+.codebuddy/
+.cursor/
+.gemini/
+.qoder/
+.mcp.json
+opencode.jsonc
+opencode.json

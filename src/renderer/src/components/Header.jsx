@@ -1,4 +1,4 @@
-import { FolderPlus, KeyRound, Package, PackagePlus, RefreshCw, UserPlus } from 'lucide-react'
+import { FolderPlus, Package, PackagePlus, RefreshCw, UserPlus } from 'lucide-react'
 import useAuthStore from '../zustand/useAuthStore'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -58,7 +58,6 @@ const Header = () => {
       showFullscreen
       user={{ name: email.split('@')[0] || 'User', email }}
       userMenu={[
-        { label: 'Change Password', icon: KeyRound, tone: 'info', to: '/changePassword' },
         { label: 'Login Again', icon: RefreshCw, tone: 'warning', onClick: handleLoginAgain }
       ]}
       onSignOut={handleLogout}

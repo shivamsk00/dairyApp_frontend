@@ -116,7 +116,7 @@ const EditHeadDairy = () => {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="mx-auto max-w-4xl space-y-5 p-3 sm:p-4 lg:p-6"
+        className="w-full space-y-5 p-3 sm:p-4 lg:p-6"
       >
         <FormSection
           title={headDairy?.dairy_name || 'Head Dairy'}
