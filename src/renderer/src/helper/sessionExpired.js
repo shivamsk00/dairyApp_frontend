@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { clearApiError } from './friendlyErrors'
 
 /**
  * "Session expired" state. The axios response interceptor calls notifySessionExpired() on a 401, and
@@ -18,7 +19,10 @@ export const notifySessionExpired = () => {
   emit()
 }
 
+export const isSessionExpiredOpen = () => open
+
 export const dismissSessionExpired = () => {
+  clearApiError()
   if (!open) return
   open = false
   emit()
