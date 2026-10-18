@@ -1,6 +1,7 @@
 // axiosConfig.js
 import axios from 'axios'
 import { notifySessionExpired } from '../helper/sessionExpired'
+import { rememberApiError } from '../helper/friendlyErrors'
 
 const api = axios.create({
   baseURL: 'https://productionhouse.space/api/' // 🟡 Yaha tumhari real API base URL daalo
@@ -22,6 +23,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    rememberApiError(error)
     const sentToken = Boolean(error?.config?.headers?.Authorization)
     if (error?.response?.status === 401 && sentToken) notifySessionExpired()
     return Promise.reject(error)

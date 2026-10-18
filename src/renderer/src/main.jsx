@@ -6,6 +6,8 @@ import App from './App'
 import { ToastHost } from './components/ui';
 import { initFontScale } from './helper/fontScale';
 import { initSidebarTheme } from './helper/sidebarTheme';
+import { installFriendlyToasts } from './helper/friendlyErrors';
+import { isSessionExpiredOpen } from './helper/sessionExpired';
 
 // Electron webFrame के लिए check करें कि environment Electron है या नहीं
 if (typeof window !== 'undefined' && window.electronAPI) {
@@ -52,6 +54,7 @@ document.head.appendChild(style);
 // Apply the saved font-size setting before the first paint
 initFontScale();
 initSidebarTheme();
+installFriendlyToasts(isSessionExpiredOpen);
 
 createRoot(document.getElementById('root')).render(
   <>
