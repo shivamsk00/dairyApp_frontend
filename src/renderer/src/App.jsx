@@ -79,6 +79,7 @@ const EditHeadDairy = lazy(() => import('./pages/headDairy/EditHeadDairy'))
 const HeadDairyPage = lazy(() => import('./pages/headDairy/HeadDairyPage'))
 const CashEntryPage = lazy(() => import('./pages/cashentry/CashEntryPage'))
 const MilkCorrectionPage = lazy(() => import('./pages/milkCorrection/MilkCorrectionPage'))
+const AuditLogsPage = lazy(() => import('./pages/logs/AuditLogsPage'))
 const UpdateHistoryPage = lazy(() => import('./pages/updatehistory/UpdateHistoryPage'))
 const LastMonthAccounting = lazy(() => import('./pages/lastMonthAccounting/LastMonthAccounting'))
 const CmSubsidyList = lazy(() => import('./pages/cmSubsidyList/CmSubsidyList'))
@@ -160,6 +161,7 @@ function App() {
           <Route path="milkCorrection" element={<MilkCorrectionPage />} />
           <Route path="productCorrection" element={<ProductCorrection />} />
           <Route path="cashCorrection" element={<CashCorrection />} />
+          <Route path="auditlogs" element={<AuditLogsPage />} />
           <Route path="update-history" element={<UpdateHistoryPage />} />
 
           {/* Last Month Accounting */}

@@ -30,6 +30,7 @@ import {
   SurfaceCard,
   useDocumentTitle
 } from '../../components/ui'
+import logExport from '../../helper/auditExport'
 
 // Helper functions for date handling
 // Local calendar date as YYYY-MM-DD. (toISOString() is UTC, which is the previous day before 5:30 AM IST.)
@@ -304,6 +305,7 @@ const CmSubsidyList = () => {
     const fileName = `CM_Subsidy_List_${getToday()}.xlsx`
 
     XLSX.writeFile(workbook, fileName)
+    logExport('CM Subsidy List', 'xlsx')
     toast.success('Excel file downloaded successfully')
   }
 

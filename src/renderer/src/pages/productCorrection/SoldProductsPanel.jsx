@@ -28,6 +28,7 @@ import {
   SectionCard,
   SelectDropdown
 } from '../../components/ui'
+import logExport from '../../helper/auditExport'
 
 const FILTER_TYPES = [
   { value: 'all', label: 'All Fields' },
@@ -168,6 +169,7 @@ const SoldProductsPanel = ({
 
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Product Sales')
     XLSX.writeFile(workbook, exportFileName)
+    logExport('Product Sales', 'xlsx')
     CustomToast.success('Report exported successfully')
   }
 

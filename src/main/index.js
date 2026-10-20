@@ -272,6 +272,7 @@
 
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
+import { networkInterfaces } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { format } from 'url'
@@ -493,6 +494,15 @@ app.whenReady().then(() => {
   ipcMain.on('open-cutomer-win', () => customerCollection())
   ipcMain.on('open-cash-entry-window', () => createCashEntryWindow())
   ipcMain.handle('get-app-version', () => app.getVersion())
+  // This computer's address on its network (e.g. 192.168.1.20): the first external IPv4 found.
+  ipcMain.handle('get-system-ip', () => {
+    for (const list of Object.values(networkInterfaces())) {
+      for (const net of list || []) {
+        if (net.family === 'IPv4' && !net.internal) return net.address
+      }
+    }
+    return null
+  })
 
   // Update related IPC handlers
   ipcMain.handle('check-for-update', async () => {

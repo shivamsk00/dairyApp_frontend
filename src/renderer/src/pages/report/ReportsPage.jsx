@@ -29,6 +29,7 @@ import {
   toLocalISO,
   useDocumentTitle
 } from '../../components/ui'
+import logExport from '../../helper/auditExport'
 
 const TERMS = [
   { value: 'date_range', label: 'Date Range' },
@@ -264,6 +265,7 @@ const ReportsPage = () => {
     const dateRange =
       `${formatInputDate(form.start_date)}_to_${formatInputDate(form.end_date)}`.replace(/\//g, '-')
     XLSX.writeFile(workbook, `${customerName}_Report_${dateRange}.xlsx`)
+    logExport('Customer Report', 'xlsx')
     CustomToast.success('Report exported successfully')
   }
 
