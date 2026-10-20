@@ -1,355 +1,269 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-    FaArrowLeft,
-    FaDownload,
-    FaCheckCircle,
-    FaClock,
-    FaInfoCircle,
-    FaExclamationTriangle,
-    FaCalendarAlt,
-    FaCode,
-    FaBug,
-    FaPlus,
-    FaTrash
-} from 'react-icons/fa';
-import { FaShield } from 'react-icons/fa6';
+  ArrowDownToLine,
+  CircleCheck,
+  History,
+  Loader2,
+  PauseCircle,
+  RefreshCw,
+  Rocket,
+  Undo2
+} from 'lucide-react'
+import {
+  Badge,
+  Breadcrumb,
+  Button,
+  ConfirmActionModal,
+  DataTable,
+  KpiCard,
+  SurfaceCard,
+  useDocumentTitle
+} from '../../components/ui'
 
+const formatDate = (iso) =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '-'
+const formatSize = (bytes) => (bytes ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : '-')
+const shorten = (text, max = 110) => {
+  const clean = (text || '').replace(/[#*`>_-]+/g, ' ').replace(/\s+/g, ' ').trim()
+  return clean.length > max ? `${clean.slice(0, max)}…` : clean || 'No release notes'
+}
+
+/**
+ * Version control: every version published on GitHub, with a button to install any of them. Moving
+ * back to an older version is a "roll back" and keeps the app on that version until updates are resumed.
+ */
 const UpdateHistoryPage = () => {
-    const [updateHistory, setUpdateHistory] = useState([]);
-    const [currentVersion, setCurrentVersion] = useState('1.0.0');
-    const [loading, setLoading] = useState(true);
+  useDocumentTitle('Version Control')
 
-    // Mock data - Replace with actual API call
-    useEffect(() => {
-        const mockHistory = [
-            {
-                id: 1,
-                version: '1.2.1',
-                releaseDate: '2025-09-20',
-                status: 'current',
-                size: '45.2 MB',
-                type: 'patch',
-                priority: 'medium',
-                changelog: [
-                    { type: 'fixed', text: 'Fixed dashboard loading issue on startup' },
-                    { type: 'fixed', text: 'Resolved chart rendering bug in Safari' },
-                    { type: 'changed', text: 'Improved notification banner design' }
-                ],
-                downloadUrl: 'https://example.com/v1.2.1',
-                releaseNotes: 'This patch release focuses on bug fixes and minor UI improvements.'
-            },
-            {
-                id: 2,
-                version: '1.2.0',
-                releaseDate: '2025-09-15',
-                status: 'installed',
-                size: '46.8 MB',
-                type: 'minor',
-                priority: 'high',
-                changelog: [
-                    { type: 'added', text: 'New status card grid component' },
-                    { type: 'added', text: 'Enhanced update notification system' },
-                    { type: 'changed', text: 'Updated chart library to latest version' },
-                    { type: 'fixed', text: 'Memory leak in dashboard components' }
-                ],
-                downloadUrl: 'https://example.com/v1.2.0',
-                releaseNotes: 'Major feature update with new components and performance improvements.'
-            },
-            {
-                id: 3,
-                version: '1.1.5',
-                releaseDate: '2025-09-10',
-                status: 'installed',
-                size: '44.1 MB',
-                type: 'patch',
-                priority: 'low',
-                changelog: [
-                    { type: 'security', text: 'Security patches for data handling' },
-                    { type: 'fixed', text: 'Fixed CSV export functionality' },
-                    { type: 'changed', text: 'Updated dependencies to latest versions' }
-                ],
-                downloadUrl: 'https://example.com/v1.1.5',
-                releaseNotes: 'Security update with important fixes for data export.'
-            },
-            {
-                id: 4,
-                version: '1.1.0',
-                releaseDate: '2025-09-01',
-                status: 'installed',
-                size: '42.3 MB',
-                type: 'minor',
-                priority: 'high',
-                changelog: [
-                    { type: 'added', text: 'New dashboard analytics features' },
-                    { type: 'added', text: 'User preference settings' },
-                    { type: 'removed', text: 'Deprecated legacy chart components' },
-                    { type: 'changed', text: 'Redesigned user interface' }
-                ],
-                downloadUrl: 'https://example.com/v1.1.0',
-                releaseNotes: 'Major UI overhaul with new analytics dashboard and user settings.'
-            },
-            {
-                id: 5,
-                version: '1.0.8',
-                releaseDate: '2025-08-25',
-                status: 'installed',
-                size: '41.7 MB',
-                type: 'patch',
-                priority: 'medium',
-                changelog: [
-                    { type: 'fixed', text: 'Database connection timeout issues' },
-                    { type: 'fixed', text: 'Notification sound not playing' },
-                    { type: 'changed', text: 'Optimized application startup time' }
-                ],
-                downloadUrl: 'https://example.com/v1.0.8',
-                releaseNotes: 'Performance improvements and critical bug fixes.'
-            }
-        ];
+  const [versions, setVersions] = useState([])
+  const [currentVersion, setCurrentVersion] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [stale, setStale] = useState(false)
+  const [pin, setPin] = useState(null)
+  const [target, setTarget] = useState(null) // version waiting for confirmation
+  const [install, setInstall] = useState({ state: 'idle' })
+  const [checking, setChecking] = useState(false)
+  const [checkMessage, setCheckMessage] = useState('')
 
-        setTimeout(() => {
-            setUpdateHistory(mockHistory);
-            setCurrentVersion(mockHistory[0]?.version || '1.0.0');
-            setLoading(false);
-        }, 1000);
-    }, []);
-
-    const getStatusBadge = (status) => {
-        const statusConfig = {
-            current: { color: 'bg-green-100 text-green-800', icon: <FaCheckCircle className="w-3 h-3" />, text: 'Current' },
-            installed: { color: 'bg-blue-100 text-blue-800', icon: <FaDownload className="w-3 h-3" />, text: 'Installed' },
-            available: { color: 'bg-yellow-100 text-yellow-800', icon: <FaClock className="w-3 h-3" />, text: 'Available' },
-            downloading: { color: 'bg-orange-100 text-orange-800', icon: <FaClock className="w-3 h-3 animate-spin" />, text: 'Downloading' }
-        };
-
-        const config = statusConfig[status] || statusConfig.installed;
-        return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-                {config.icon}
-                <span className="ml-1">{config.text}</span>
-            </span>
-        );
-    };
-
-    const getTypeIcon = (type) => {
-        const typeIcons = {
-            major: <FaExclamationTriangle className="w-4 h-4 text-red-500" />,
-            minor: <FaInfoCircle className="w-4 h-4 text-blue-500" />,
-            patch: <FaBug className="w-4 h-4 text-green-500" />
-        };
-        return typeIcons[type] || typeIcons.patch;
-    };
-
-    const getChangeIcon = (changeType) => {
-        const changeIcons = {
-            added: <FaPlus className="w-3 h-3 text-green-500" />,
-            changed: <FaCode className="w-3 h-3 text-blue-500" />,
-            fixed: <FaBug className="w-3 h-3 text-yellow-500" />,
-            removed: <FaTrash className="w-3 h-3 text-red-500" />,
-            security: <FaShield className="w-3 h-3 text-purple-500" />
-        };
-        return changeIcons[changeType] || changeIcons.changed;
-    };
-
-    const getPriorityColor = (priority) => {
-        const priorityColors = {
-            high: 'border-l-red-500 bg-red-50',
-            medium: 'border-l-yellow-500 bg-yellow-50',
-            low: 'border-l-green-500 bg-green-50'
-        };
-        return priorityColors[priority] || priorityColors.medium;
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span className="text-gray-600">Loading update history...</span>
-                </div>
-            </div>
-        );
+  const load = useCallback(async () => {
+    setLoading(true)
+    setLoadError('')
+    const api = window.api
+    const [result, pinned] = await Promise.all([api?.listVersions?.(), api?.getVersionPin?.()])
+    if (result?.success) {
+      setVersions(result.versions)
+      setStale(!!result.stale)
+    } else {
+      setVersions([])
+      setLoadError(result?.message || 'Could not load versions.')
     }
+    setCurrentVersion(result?.currentVersion || (await api?.getAppVersion?.()) || '')
+    setPin(pinned || null)
+    setLoading(false)
+  }, [])
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => window.history.back()}
-                                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                            >
-                                <FaArrowLeft className="w-5 h-5" />
-                            </button>
-                            <h1 className="text-2xl font-bold text-gray-900">Update History</h1>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <FaCode className="w-4 h-4" />
-                            <span>Current Version: {currentVersion}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  useEffect(() => {
+    load()
+    return window.api?.onVersionInstallStatus?.(setInstall)
+  }, [load])
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-3 bg-blue-100 rounded-lg">
-                                <FaCheckCircle className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Total Updates</p>
-                                <p className="text-2xl font-bold text-gray-900">{updateHistory.length}</p>
-                            </div>
-                        </div>
-                    </div>
+  const busy = install.state === 'downloading' || install.state === 'launching'
 
-                    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-3 bg-green-100 rounded-lg">
-                                <FaDownload className="w-6 h-6 text-green-600" />
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Installed</p>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    {updateHistory.filter(u => u.status === 'installed' || u.status === 'current').length}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+  const confirmInstall = async () => {
+    const version = target.version
+    setTarget(null)
+    setInstall({ state: 'downloading', version, percent: 0 })
+    const result = await window.api.installVersion(version)
+    if (!result?.success) setInstall({ state: 'error', version, message: result?.message })
+  }
 
-                    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-3 bg-yellow-100 rounded-lg">
-                                <FaClock className="w-6 h-6 text-yellow-600" />
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Available</p>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    {updateHistory.filter(u => u.status === 'available').length}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+  const resumeUpdates = async () => {
+    await window.api.clearVersionPin()
+    setPin(null)
+  }
 
-                    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-3 bg-purple-100 rounded-lg">
-                                <FaCalendarAlt className="w-6 h-6 text-purple-600" />
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm font-medium text-gray-600">Last Update</p>
-                                <p className="text-sm font-bold text-gray-900">
-                                    {new Date(updateHistory[0]?.releaseDate).toLocaleDateString()}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  const checkForUpdates = async () => {
+    setChecking(true)
+    setCheckMessage('')
+    const res = await window.api?.checkForUpdate?.()
+    const state = res?.status?.state
+    setCheckMessage(
+      state === 'up-to-date'
+        ? 'You are on the latest version.'
+        : state === 'error'
+          ? res.status.message
+          : 'Looking for a newer version…'
+    )
+    setChecking(false)
+  }
 
-                {/* Timeline */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-lg font-semibold text-gray-900">Version History</h2>
-                    </div>
+  const latest = useMemo(() => versions.find((v) => v.isLatest), [versions])
+  const isRollback = target && target.relation === 'older'
 
-                    <div className="p-6">
-                        <div className="flow-root">
-                            <ul className="-mb-8">
-                                {updateHistory.map((update, updateIdx) => (
-                                    <li key={update.id}>
-                                        <div className="relative pb-8">
-                                            {updateIdx !== updateHistory.length - 1 ? (
-                                                <span
-                                                    className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
-                                                    aria-hidden="true"
-                                                />
-                                            ) : null}
-
-                                            <div className="relative flex items-start space-x-3">
-                                                {/* Timeline icon */}
-                                                <div className={`relative px-1`}>
-                                                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center ring-8 ring-white">
-                                                        {getTypeIcon(update.type)}
-                                                    </div>
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className={`min-w-0 flex-1 border-l-4 ${getPriorityColor(update.priority)} rounded-lg p-6`}>
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <div className="flex items-center space-x-3">
-                                                            <h3 className="text-lg font-semibold text-gray-900">
-                                                                Version {update.version}
-                                                            </h3>
-                                                            {getStatusBadge(update.status)}
-                                                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                                {update.type}
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-sm text-gray-500 flex items-center space-x-4">
-                                                            <span className="flex items-center">
-                                                                <FaCalendarAlt className="w-4 h-4 mr-1" />
-                                                                {new Date(update.releaseDate).toLocaleDateString()}
-                                                            </span>
-                                                            <span>{update.size}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <p className="text-gray-600 mb-4">{update.releaseNotes}</p>
-
-                                                    {/* Changelog */}
-                                                    <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                                        <h4 className="font-medium text-gray-900 mb-3">Changes:</h4>
-                                                        <ul className="space-y-2">
-                                                            {update.changelog.map((change, changeIdx) => (
-                                                                <li key={changeIdx} className="flex items-start space-x-2">
-                                                                    {getChangeIcon(change.type)}
-                                                                    <span className="text-sm text-gray-700 capitalize">
-                                                                        <span className="font-medium">{change.type}:</span> {change.text}
-                                                                    </span>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </div>
-
-                                                    {/* Actions */}
-                                                    <div className="mt-4 flex items-center space-x-3">
-                                                        {update.status === 'available' && (
-                                                            <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                                                <FaDownload className="w-4 h-4 mr-2" />
-                                                                Download
-                                                            </button>
-                                                        )}
-                                                        <button className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                                            View Details
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-8 text-center">
-                    <p className="text-sm text-gray-500">
-                        Updates are automatically checked daily.
-                        <button className="ml-1 text-blue-600 hover:text-blue-800 underline">
-                            Check for updates now
-                        </button>
-                    </p>
-                </div>
-            </div>
+  const columns = [
+    {
+      key: 'version',
+      header: 'Version',
+      render: (v) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-bold">v{v.version}</span>
+          {v.isCurrent && <Badge tone="success">Installed</Badge>}
+          {v.isLatest && <Badge tone="primary" dot={false}>Latest</Badge>}
+          {v.prerelease && <Badge tone="warning" dot={false}>Pre-release</Badge>}
         </div>
-    );
-};
+      )
+    },
+    { key: 'publishedAt', header: 'Released', render: (v) => formatDate(v.publishedAt) },
+    { key: 'size', header: 'Size', render: (v) => formatSize(v.size) },
+    {
+      key: 'notes',
+      header: "What's new",
+      render: (v) => (
+        <span className="ui-text-secondary text-[12.5px]" title={v.notes}>
+          {shorten(v.notes)}
+        </span>
+      )
+    },
+    {
+      key: 'action',
+      header: '',
+      className: 'text-right',
+      render: (v) =>
+        v.isCurrent ? (
+          <span className="ui-text-tertiary text-[12px]">In use</span>
+        ) : (
+          <Button
+            size="sm"
+            variant={v.relation === 'older' ? 'secondary' : 'primary'}
+            icon={v.relation === 'older' ? Undo2 : ArrowDownToLine}
+            disabled={busy}
+            onClick={() => setTarget(v)}
+          >
+            {v.relation === 'older' ? 'Roll back' : 'Update'}
+          </Button>
+        )
+    }
+  ]
 
-export default UpdateHistoryPage;
+  return (
+    <div className="w-full">
+      <Breadcrumb
+        title="Version Control"
+        items={[{ label: 'Home', to: '/' }, { label: 'Version Control' }]}
+        actions={
+          <>
+            <Button size="sm" variant="secondary" icon={RefreshCw} onClick={load} disabled={loading || busy}>
+              Refresh
+            </Button>
+            <Button size="sm" icon={Rocket} onClick={checkForUpdates} loading={checking} disabled={busy}>
+              Check for updates
+            </Button>
+          </>
+        }
+      />
+
+      <div className="space-y-5 p-3 sm:p-4 lg:p-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <KpiCard label="Installed version" value={currentVersion ? `v${currentVersion}` : '-'} icon={CircleCheck} tone="success" />
+          <KpiCard label="Latest version" value={latest ? `v${latest.version}` : '-'} icon={Rocket} tone="primary" />
+          <KpiCard label="Published versions" value={versions.length} icon={History} tone="info" />
+          <KpiCard
+            label="Automatic updates"
+            value={pin ? 'Paused' : 'On'}
+            icon={PauseCircle}
+            tone={pin ? 'warning' : 'success'}
+          />
+        </div>
+
+        {checkMessage && <p className="ui-text-secondary text-[13px]">{checkMessage}</p>}
+
+        {pin && (
+          <SurfaceCard className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[14px] font-bold">Automatic updates are paused on v{pin.version}</p>
+              <p className="ui-text-secondary text-[12.5px]">
+                You rolled back to this version, so the app will not update itself until you resume.
+              </p>
+            </div>
+            <Button variant="secondary" onClick={resumeUpdates} disabled={busy}>
+              Resume automatic updates
+            </Button>
+          </SurfaceCard>
+        )}
+
+        {install.state !== 'idle' && (
+          <SurfaceCard className="p-4">
+            {install.state === 'error' ? (
+              <p className="text-[13px] text-[color:var(--ui-danger-600)]">{install.message}</p>
+            ) : (
+              <>
+                <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold">
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                  {install.state === 'launching'
+                    ? `Opening the v${install.version} installer… the app will close.`
+                    : `Downloading v${install.version}… ${install.percent ?? 0}%`}
+                </div>
+                <div className="ui-bg-sunken h-2 overflow-hidden rounded-full">
+                  <div
+                    className="h-full rounded-full bg-[color:var(--ui-primary-600)] transition-all"
+                    style={{ width: `${install.percent ?? 0}%` }}
+                  />
+                </div>
+              </>
+            )}
+          </SurfaceCard>
+        )}
+
+        <SurfaceCard className="overflow-hidden">
+          <div className="ui-border-subtle border-b p-4">
+            <h2 className="ui-font-display text-[15px] font-bold">All versions</h2>
+            <p className="ui-text-tertiary text-[12px]">
+              Published on GitHub. You can move to any version, newer or older, at any time.
+              {stale && ' (Offline: showing the last loaded list.)'}
+            </p>
+          </div>
+          {loading ? (
+            <div className="flex items-center justify-center gap-3 p-12">
+              <Loader2 size={20} className="ui-text-brand animate-spin" aria-hidden="true" />
+              <span className="ui-text-secondary text-[13px]">Loading versions…</span>
+            </div>
+          ) : loadError ? (
+            <p className="ui-text-secondary p-8 text-center text-[13px]">{loadError}</p>
+          ) : (
+            <DataTable
+              className="px-2"
+              minWidth="760px"
+              striped
+              columns={columns}
+              rows={versions}
+              rowKey={(v) => v.tag}
+              emptyMessage="No published versions found"
+            />
+          )}
+        </SurfaceCard>
+      </div>
+
+      <ConfirmActionModal
+        isOpen={!!target}
+        onClose={() => setTarget(null)}
+        onConfirm={confirmInstall}
+        title={isRollback ? `Roll back to v${target?.version}?` : `Update to v${target?.version}?`}
+        tone={isRollback ? 'warning' : 'primary'}
+        confirmLabel={isRollback ? 'Roll back' : 'Update'}
+        message={
+          <>
+            The installer for <strong>v{target?.version}</strong> will be downloaded and opened, and this app
+            will close. Your saved data is kept.
+            {isRollback &&
+              ' Automatic updates will stay paused on that version until you resume them on this page.'}
+          </>
+        }
+      />
+    </div>
+  )
+}
+
+export default UpdateHistoryPage

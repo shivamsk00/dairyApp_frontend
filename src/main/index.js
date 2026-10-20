@@ -279,6 +279,7 @@ import { format } from 'url'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 import { createUpdateManager } from './updater'
+import { createVersionManager } from './versions'
 
 // Configure logging for debugging
 log.transports.file.level = 'info'
@@ -471,6 +472,23 @@ const updater = createUpdateManager({
   }
 })
 
+// Version control: list every published version and install any of them (including older ones).
+const versions = createVersionManager({
+  app,
+  shell,
+  repo: 'shivamsk00/dairyApp_frontend',
+  log,
+  send: (status) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('version-install-status', status)
+  }
+})
+
+// Background update checks stay off while the app is deliberately pinned on an older version.
+const backgroundUpdateCheck = () => {
+  if (versions.getPin()) return
+  updater.check()
+}
+
 // App Ready
 app.whenReady().then(() => {
   createWindow()
@@ -481,11 +499,12 @@ app.whenReady().then(() => {
   })
 
   updater.registerEvents()
+  versions.reconcilePin(app.getVersion())
 
   // Quiet background checks: they only surface something when an update is actually found.
-  setTimeout(() => updater.check(), 5000)
+  setTimeout(() => backgroundUpdateCheck(), 5000)
   if (!is.dev) {
-    updateCheckInterval = setInterval(() => updater.check(), 30 * 60 * 1000) // every 30 minutes
+    updateCheckInterval = setInterval(() => backgroundUpdateCheck(), 30 * 60 * 1000) // every 30 minutes
   }
 
   // IPC Events
@@ -516,6 +535,15 @@ app.whenReady().then(() => {
   ipcMain.handle('restart-and-install', () => updater.install())
   ipcMain.handle('get-update-status', () => updater.getStatus())
   ipcMain.handle('dismiss-update-status', () => updater.dismiss())
+
+  // Version control IPC
+  ipcMain.handle('versions:list', () => versions.list())
+  ipcMain.handle('versions:install', (_event, version) => versions.install(String(version)))
+  ipcMain.handle('versions:get-pin', () => versions.getPin())
+  ipcMain.handle('versions:clear-pin', () => {
+    versions.clearPin()
+    return { success: true }
+  })
 
   ////////////////////////////////// CLOSE ALL WINDOW AFTER LOGOUT /////////////////////////////////////////////////////
   ipcMain.on('logout_close_all', () => {

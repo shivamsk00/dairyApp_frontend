@@ -1,0 +1,73 @@
+name: Release
+
+# Publishes a new version of the app to GitHub Releases. Installed apps find it by themselves
+# (auto-update), and it appears in the app under Version Control, where any version can be installed.
+#
+# Two ways to start it:
+#   1. GitHub > Actions > Release > "Run workflow", pick patch / minor / major. This raises the version
+#      in package.json, commits it, tags it (v1.4.1), then builds and publishes. Easiest.
+#   2. Push a tag yourself after changing the version:  git tag v1.4.1 && git push origin v1.4.1
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: How much to raise the version
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Manual run: raise the version, commit it and tag it. (A tag pushed by this workflow does not start
+      # a second run, so there is no double release.)
+      - name: Bump version
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          npm version "${{ inputs.bump }}" -m "release: v%s"
+          git push origin HEAD --follow-tags
+
+      # Tag run: the tag must match package.json, otherwise the installer would carry the wrong version.
+      - name: Check tag matches package.json
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag v$TAG does not match package.json version $PKG. Change the version, commit, and tag again."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build installer and publish release
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
