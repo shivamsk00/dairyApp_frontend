@@ -86,14 +86,24 @@ const canvasToBytes = (canvas) =>
 
 /**
  * @param {File} file the picture
+ * @param {{x:number,y:number,w:number,h:number}} [crop] part of the picture to read, as shares of its size (0 to 1)
  * @param {(stage: {step: 'prepare'|'read'|'check', done?: number, total?: number}) => void} onStage
  * @returns {Promise<{error?: string, snfColumns?: number[], rows?: object[], flagged?: Set<string>, missing?: number[]}>}
  */
-export async function scanRateImage(file, onStage = () => {}) {
+export async function scanRateImage(file, onStage = () => {}, crop = null) {
   if (!window.api?.ocrRecognize) return { error: 'Scanning is only available in the installed desktop app.' }
 
   onStage({ step: 'prepare' })
-  const bitmap = await loadBitmap(file)
+  let bitmap = await loadBitmap(file)
+  if (crop && (crop.w < 0.999 || crop.h < 0.999)) {
+    const sx = Math.round(crop.x * bitmap.width)
+    const sy = Math.round(crop.y * bitmap.height)
+    const sw = Math.max(1, Math.min(bitmap.width - sx, Math.round(crop.w * bitmap.width)))
+    const sh = Math.max(1, Math.min(bitmap.height - sy, Math.round(crop.h * bitmap.height)))
+    const whole = bitmap
+    bitmap = await createImageBitmap(whole, sx, sy, sw, sh)
+    whole.close?.()
+  }
   const { canvas, gray, W, H, scale } = prepare(bitmap)
   bitmap.close?.()
   const lines = findTextLines(gray, W, H, scale)

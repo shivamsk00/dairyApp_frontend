@@ -27,6 +27,7 @@ import {
 } from '../../components/ui'
 import logExport from '../../helper/auditExport'
 import { scanRateImage } from '../../helper/ocrRateChart'
+import ImageCropper, { FULL_CROP } from '../../components/ImageCropper'
 import { UNREADABLE } from '../../helper/ocrParse'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
@@ -84,6 +85,13 @@ const RateChartPage = () => {
   const [scan, setScan] = useState({ state: 'idle' })
   const [marks, setMarks] = useState({})
   const beforeScanRef = useRef(null)
+  // The picture chosen for scanning, shown with a crop box before it is read.
+  const [picture, setPicture] = useState(null) // { file, url, width, height }
+  const [crop, setCrop] = useState(FULL_CROP)
+
+  // Release the preview address only when the picture changes or goes away (not when its size loads).
+  const pictureUrl = picture?.url
+  useEffect(() => () => pictureUrl && URL.revokeObjectURL(pictureUrl), [pictureUrl])
 
   // Utility function to safely convert value to number
   const safeToNumber = (value) => {
@@ -114,7 +122,7 @@ const RateChartPage = () => {
   }, [])
 
   // Fill the grid from a picture of a price list. Nothing is saved until the user presses Save.
-  const handleScan = async (event) => {
+  const handlePickPicture = (event) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
@@ -126,6 +134,20 @@ const RateChartPage = () => {
       CustomToast.error('That picture is too large (limit 25 MB).')
       return
     }
+    setPicture({ file, url: URL.createObjectURL(file), width: 0, height: 0 })
+    setCrop(FULL_CROP)
+    setScan({ state: 'crop' })
+  }
+
+  const cancelPicture = () => {
+    setPicture(null)
+    setScan({ state: 'idle' })
+  }
+
+  // Step 2: read the (cropped) picture.
+  const handleScan = async () => {
+    if (!picture) return
+    const { file } = picture
     setScan({ state: 'working', percent: 3, text: 'Preparing the picture…' })
     try {
       const result = await scanRateImage(file, (stage) => {
@@ -137,9 +159,10 @@ const RateChartPage = () => {
             text: stage.total ? `Reading the table… ${stage.done || 0} of ${stage.total}` : 'Reading the table…'
           })
         if (stage.step === 'check') setScan({ state: 'working', percent: 98, text: 'Checking the numbers…' })
-      })
+      }, crop)
       if (result.error) {
-        setScan({ state: 'error', message: result.error })
+        // Stay on the picture, so the box can be adjusted and the scan tried again.
+        setScan({ state: 'crop', message: result.error })
         return
       }
 
@@ -164,6 +187,7 @@ const RateChartPage = () => {
         })
       }
       beforeScanRef.current = rateData
+      setPicture(null)
       setRateData(next)
       setMarks(nextMarks)
       setScan({
@@ -175,7 +199,7 @@ const RateChartPage = () => {
       })
     } catch (error) {
       console.error('Scan failed:', error)
-      setScan({ state: 'error', message: 'The picture could not be read. Try a clearer or larger picture.' })
+      setScan({ state: 'crop', message: 'The picture could not be read. Adjust the box, or try a clearer or larger picture.' })
     }
   }
 
@@ -538,7 +562,7 @@ const RateChartPage = () => {
               type="file"
               accept="image/png,image/jpeg,image/webp"
               className="hidden"
-              onChange={handleScan}
+              onChange={handlePickPicture}
               id="ocr-input"
             />
             <Button
@@ -613,6 +637,43 @@ const RateChartPage = () => {
 
         {scan.state !== 'idle' && (
           <SurfaceCard className="p-4" role="status" aria-live="polite">
+            {scan.state === 'crop' && picture && (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-bold">Choose the part to read</p>
+                  <p className="ui-text-secondary text-[12px]">
+                    Drag the box to move it, drag its corners or sides to resize it, or drag on the picture to draw a new
+                    one. Keep the row of SNF numbers (8.3, 8.4, …) at the top and the FAT numbers on the left, and leave
+                    out the title and the notes at the bottom.
+                  </p>
+                </div>
+                <ImageCropper
+                  src={picture.url}
+                  crop={crop}
+                  onChange={setCrop}
+                  onLoad={(size) => setPicture((p) => (p ? { ...p, ...size } : p))}
+                />
+                {scan.message && <p className="text-[13px] text-[color:var(--ui-danger-600)]">{scan.message}</p>}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="ui-text-tertiary text-[12px]">
+                    {picture.width
+                      ? `Selected: ${Math.round(crop.w * picture.width)} × ${Math.round(crop.h * picture.height)} px of ${picture.width} × ${picture.height}`
+                      : ' '}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => setCrop(FULL_CROP)}>
+                      Whole picture
+                    </Button>
+                    <Button size="sm" variant="secondary" icon={X} onClick={cancelPicture}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" icon={ScanText} onClick={handleScan}>
+                      Read table
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             {scan.state === 'working' && (
               <>
                 <div className="flex items-center gap-2 text-[13px] font-semibold">
