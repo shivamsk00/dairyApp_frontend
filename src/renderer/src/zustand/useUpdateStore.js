@@ -17,7 +17,8 @@ const useUpdateStore = create((set, get) => ({
     let received = false
     api.onUpdateStatus((status) => {
       received = true
-      set({ status })
+      // A new kind of status (e.g. available -> downloading) always shows the full card again.
+      set((state) => ({ status, dismissed: state.status.state === status.state ? state.dismissed : false }))
     })
     // A check may already have finished (e.g. at startup, before the user logged in).
     const current = await api.getUpdateStatus?.()
@@ -35,10 +36,16 @@ const useUpdateStore = create((set, get) => ({
     }
   },
 
+  // The user pressed Update: download the new version, then install it.
+  startUpdate: async () => {
+    set({ dismissed: false })
+    await window.api?.upadateStartDownload?.()
+  },
+
   restartAndInstall: () => window.api?.restartAndInstall?.(),
 
   dismiss: () => {
-    if (get().status.state === 'downloaded') set({ dismissed: true })
+    if (get().status.state === 'downloaded' || get().status.state === 'available') set({ dismissed: true })
     else window.api?.dismissUpdateStatus?.()
   },
 

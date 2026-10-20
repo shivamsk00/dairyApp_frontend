@@ -20,6 +20,9 @@ import {
   useDocumentTitle
 } from '../../components/ui'
 
+// Roll back offers the 2 most recent older versions only (plus the newest one to update to).
+const MAX_OLDER_VERSIONS = 2
+
 const formatDate = (iso) =>
   iso
     ? new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -101,6 +104,13 @@ const UpdateHistoryPage = () => {
   }
 
   const latest = useMemo(() => versions.find((v) => v.isLatest), [versions])
+  // The list is newest first: the newest newer version, the one in use, then the closest older ones.
+  const visible = useMemo(() => {
+    const newer = versions.filter((v) => v.relation === 'newer').slice(0, 1)
+    const current = versions.filter((v) => v.relation === 'current')
+    const older = versions.filter((v) => v.relation === 'older').slice(0, MAX_OLDER_VERSIONS)
+    return [...newer, ...current, ...older]
+  }, [versions])
   const isRollback = target && target.relation === 'older'
 
   const columns = [
@@ -221,7 +231,7 @@ const UpdateHistoryPage = () => {
           <div className="ui-border-subtle border-b p-4">
             <h2 className="ui-font-display text-[15px] font-bold">All versions</h2>
             <p className="ui-text-tertiary text-[12px]">
-              Published on GitHub. You can move to any version, newer or older, at any time.
+              Shows the newest version, the one you are using, and the {MAX_OLDER_VERSIONS} versions before it. You can move to any of them at any time.
               {stale && ' (Offline: showing the last loaded list.)'}
             </p>
           </div>
@@ -238,7 +248,7 @@ const UpdateHistoryPage = () => {
               minWidth="760px"
               striped
               columns={columns}
-              rows={versions}
+              rows={visible}
               rowKey={(v) => v.tag}
               emptyMessage="No published versions found"
             />
