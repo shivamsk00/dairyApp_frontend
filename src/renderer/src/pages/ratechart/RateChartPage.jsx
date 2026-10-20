@@ -21,6 +21,7 @@ import {
   Button,
   KpiCard,
   Modal,
+  SegmentedControl,
   SurfaceCard,
   todayISO,
   useDocumentTitle
@@ -88,6 +89,7 @@ const RateChartPage = () => {
   // The picture chosen for scanning, shown with a crop box before it is read.
   const [picture, setPicture] = useState(null) // { file, url, width, height }
   const [crop, setCrop] = useState(FULL_CROP)
+  const [zoom, setZoom] = useState('fit') // 'fit' | 1 | 1.5 | 2
 
   // Release the preview address only when the picture changes or goes away (not when its size loads).
   const pictureUrl = picture?.url
@@ -136,6 +138,7 @@ const RateChartPage = () => {
     }
     setPicture({ file, url: URL.createObjectURL(file), width: 0, height: 0 })
     setCrop(FULL_CROP)
+    setZoom('fit')
     setScan({ state: 'crop' })
   }
 
@@ -720,7 +723,7 @@ const RateChartPage = () => {
         isOpen={scan.state === 'crop' && !!picture}
         onClose={cancelPicture}
         title="Choose the part to read"
-        maxWidth="56rem"
+        maxWidth="min(80rem, 96vw)"
         className="space-y-3"
       >
         {picture && (
@@ -730,10 +733,26 @@ const RateChartPage = () => {
               one. Keep the row of SNF numbers (8.3, 8.4, …) at the top and the FAT numbers on the left, and leave out
               the title and the notes at the bottom.
             </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="ui-text-tertiary text-[12px]">Zoom in to see small numbers while you set the box.</span>
+              <SegmentedControl
+                ariaLabel="Zoom"
+                value={String(zoom)}
+                onChange={(v) => setZoom(v === 'fit' ? 'fit' : Number(v))}
+                options={[
+                  { value: 'fit', label: 'Fit' },
+                  { value: '1', label: '100%' },
+                  { value: '1.5', label: '150%' },
+                  { value: '2', label: '200%' }
+                ]}
+              />
+            </div>
             <ImageCropper
               src={picture.url}
               crop={crop}
               onChange={setCrop}
+              zoom={zoom}
+              naturalWidth={picture.width}
               onLoad={(size) => setPicture((p) => (p ? { ...p, ...size } : p))}
             />
             {scan.message && <p className="text-[13px] text-[color:var(--ui-danger-600)]">{scan.message}</p>}

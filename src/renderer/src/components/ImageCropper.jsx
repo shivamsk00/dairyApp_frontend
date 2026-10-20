@@ -27,8 +27,11 @@ export const FULL_CROP = { x: 0, y: 0, w: 1, h: 1 }
  * @param {{x:number,y:number,w:number,h:number}} crop current box
  * @param {(crop) => void} onChange
  * @param {(size: {width:number,height:number}) => void} [onLoad] natural size of the picture
+ * @param {'fit'|number} [zoom] 'fit' shows the whole picture within the available space; a number shows it
+ *   at that share of its real size (1 = 100%) inside a scrolling area, for reading small print.
+ * @param {number} [naturalWidth] real width of the picture in pixels (needed for numeric zoom)
  */
-const ImageCropper = ({ src, crop, onChange, onLoad }) => {
+const ImageCropper = ({ src, crop, onChange, onLoad, zoom = 'fit', naturalWidth = 0 }) => {
   const frameRef = useRef(null)
   const dragRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -97,23 +100,28 @@ const ImageCropper = ({ src, crop, onChange, onLoad }) => {
 
   useEffect(() => () => (dragRef.current = null), [])
 
+  const fit = zoom === 'fit' || !naturalWidth
   return (
-    <div className="flex justify-center">
+    // The area is as tall as the window allows; a zoomed picture scrolls inside it.
+    <div
+      className="ui-scroll-thin max-h-[calc(100vh-17rem)] min-h-[16rem] overflow-auto rounded-lg bg-[color:var(--ui-neutral-100)] p-2"
+      style={{ textAlign: 'center' }}
+    >
       <div
         ref={frameRef}
         onPointerDown={start('draw')}
         onPointerMove={move}
         onPointerUp={end}
         onPointerCancel={end}
-        className="relative inline-block max-w-full touch-none select-none overflow-hidden rounded-lg"
-        style={{ cursor: dragging ? 'grabbing' : 'crosshair' }}
+        className="relative inline-block touch-none select-none overflow-hidden rounded-md shadow-md"
+        style={{ cursor: dragging ? 'grabbing' : 'crosshair', ...(fit ? { maxWidth: '100%' } : { width: naturalWidth * zoom }) }}
       >
         <img
           src={src}
           alt="Picture to scan"
           draggable={false}
           onLoad={(e) => onLoad?.({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })}
-          className="block max-h-[58vh] max-w-full"
+          className={fit ? 'block max-h-[calc(100vh-19rem)] max-w-full' : 'block h-auto w-full max-w-none'}
         />
         <div
           onPointerDown={start('move')}
