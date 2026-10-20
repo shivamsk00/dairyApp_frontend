@@ -73,6 +73,14 @@ const api = {
   getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
   dismissUpdateStatus: () => ipcRenderer.invoke('dismiss-update-status'),
 
+  // 🔎 OCR: read a price list picture (works offline)
+  ocrRecognize: (chunks) => ipcRenderer.invoke('ocr:recognize', chunks),
+  onOcrProgress: (callback) => {
+    const handler = (_event, progress) => callback(progress)
+    ipcRenderer.on('ocr-progress', handler)
+    return () => ipcRenderer.removeListener('ocr-progress', handler)
+  },
+
   // 🗂️ Version control: list published versions, install any (also older ones), manage the pin
   listVersions: () => ipcRenderer.invoke('versions:list'),
   installVersion: (version) => ipcRenderer.invoke('versions:install', version),

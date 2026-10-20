@@ -8,7 +8,10 @@ import {
   Loader2,
   Rows3,
   Save,
-  Upload
+  ScanText,
+  Undo2,
+  Upload,
+  X
 } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
@@ -23,6 +26,8 @@ import {
   useDocumentTitle
 } from '../../components/ui'
 import logExport from '../../helper/auditExport'
+import { scanRateImage } from '../../helper/ocrRateChart'
+import { UNREADABLE } from '../../helper/ocrParse'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = []
@@ -40,7 +45,8 @@ const isInvalidRate = (value) =>
   value !== '' && value !== null && value !== undefined && isNaN(Number(value))
 
 // One FAT row of the grid. Memoised: typing in a cell re-renders only that row, not all 71.
-const RateRow = memo(function RateRow({ row, fatIndex, onChange }) {
+// `marks` says which cells a scan filled ('ocr') or wants checked ('check'); editing a cell clears its mark.
+const RateRow = memo(function RateRow({ row, fatIndex, marks, onChange }) {
   return (
     <tr className="hover:bg-[color:var(--ui-surface-sunken)]">
       <td className="ui-bg-sunken ui-border-subtle sticky left-0 z-10 border-b border-r px-3 py-1.5 text-center font-bold">
@@ -55,8 +61,9 @@ const RateRow = memo(function RateRow({ row, fatIndex, onChange }) {
             onChange={(e) => onChange(fatIndex, snfIndex, e.target.value)}
             aria-label={`Rate for FAT ${row.fat.toFixed(1)}, SNF ${cell.snf.toFixed(1)}`}
             aria-invalid={isInvalidRate(cell.rate) || undefined}
+            data-mark={marks?.[snfIndex]}
             placeholder="0"
-            className="h-9 w-full min-w-[64px] border-0 bg-transparent px-1 text-center outline-none transition-colors placeholder:text-[color:var(--ui-neutral-300)] focus:bg-[color:var(--ui-primary-50)] focus:shadow-[inset_0_0_0_2px_var(--ui-primary-500)] aria-[invalid=true]:bg-[color:var(--ui-danger-50)] aria-[invalid=true]:text-[color:var(--ui-danger-700)]"
+            className="h-9 w-full min-w-[64px] border-0 bg-transparent px-1 text-center outline-none transition-colors placeholder:text-[color:var(--ui-neutral-300)] focus:bg-[color:var(--ui-primary-50)] focus:shadow-[inset_0_0_0_2px_var(--ui-primary-500)] data-[mark=ocr]:bg-[color:var(--ui-warning-50)] data-[mark=check]:bg-[color:var(--ui-danger-50)] data-[mark=check]:font-bold aria-[invalid=true]:bg-[color:var(--ui-danger-50)] aria-[invalid=true]:text-[color:var(--ui-danger-700)]"
           />
         </td>
       ))}
@@ -72,6 +79,11 @@ const RateChartPage = () => {
   const rateChartDataFetch = useHomeStore((state) => state.rateChartDataFetch)
   const fetchRateChartData = useHomeStore((state) => state.fetchRateChartData)
   const fileInputRef = useRef(null)
+  const scanInputRef = useRef(null)
+  // Picture scan: progress, the result summary, the grid before the scan (for Undo) and the cell marks.
+  const [scan, setScan] = useState({ state: 'idle' })
+  const [marks, setMarks] = useState({})
+  const beforeScanRef = useRef(null)
 
   // Utility function to safely convert value to number
   const safeToNumber = (value) => {
@@ -82,6 +94,11 @@ const RateChartPage = () => {
   }
 
   const handleChange = useCallback((fatIndex, snfIndex, value) => {
+    setMarks((prev) => {
+      if (!prev[fatIndex]?.[snfIndex]) return prev
+      const { [snfIndex]: _reviewed, ...rest } = prev[fatIndex]
+      return { ...prev, [fatIndex]: rest }
+    })
     setRateData((prev) =>
       prev.map((row, i) =>
         i !== fatIndex
@@ -95,6 +112,79 @@ const RateChartPage = () => {
       )
     )
   }, [])
+
+  // Fill the grid from a picture of a price list. Nothing is saved until the user presses Save.
+  const handleScan = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      CustomToast.error('Please choose a picture (JPG or PNG).')
+      return
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      CustomToast.error('That picture is too large (limit 25 MB).')
+      return
+    }
+    setScan({ state: 'working', percent: 3, text: 'Preparing the picture…' })
+    try {
+      const result = await scanRateImage(file, (stage) => {
+        if (stage.step === 'prepare') setScan({ state: 'working', percent: 5, text: 'Preparing the picture…' })
+        if (stage.step === 'read')
+          setScan({
+            state: 'working',
+            percent: 8 + Math.round(((stage.done || 0) / (stage.total || 1)) * 88),
+            text: stage.total ? `Reading the table… ${stage.done || 0} of ${stage.total}` : 'Reading the table…'
+          })
+        if (stage.step === 'check') setScan({ state: 'working', percent: 98, text: 'Checking the numbers…' })
+      })
+      if (result.error) {
+        setScan({ state: 'error', message: result.error })
+        return
+      }
+
+      // Put the prices into the grid (only SNF columns and FAT rows the grid has).
+      const nextMarks = {}
+      let filled = 0
+      let needCheck = 0
+      const next = rateData.map((row) => ({ ...row, snfRates: row.snfRates.map((c) => ({ ...c })) }))
+      for (const scanned of result.rows) {
+        const fatIndex = Math.round((scanned.fat - FAT_VALUES[0]) * 10)
+        if (fatIndex < 0 || fatIndex >= next.length) continue
+        scanned.cells.forEach((value, j) => {
+          const snfIndex = SNF_VALUES.findIndex((v) => Math.abs(v - result.snfColumns[j]) < 0.01)
+          if (snfIndex === -1 || value === null) return
+          const flagged = value === UNREADABLE || result.flagged.has(`${scanned.fat}|${j}`)
+          if (value !== UNREADABLE) {
+            next[fatIndex].snfRates[snfIndex].rate = value
+            filled++
+          }
+          if (flagged) needCheck++
+          nextMarks[fatIndex] = { ...(nextMarks[fatIndex] || {}), [snfIndex]: flagged ? 'check' : 'ocr' }
+        })
+      }
+      beforeScanRef.current = rateData
+      setRateData(next)
+      setMarks(nextMarks)
+      setScan({
+        state: 'done',
+        filled,
+        needCheck,
+        missing: result.missing,
+        range: `${result.rows[0].fat.toFixed(1)} – ${result.rows[result.rows.length - 1].fat.toFixed(1)}`
+      })
+    } catch (error) {
+      console.error('Scan failed:', error)
+      setScan({ state: 'error', message: 'The picture could not be read. Try a clearer or larger picture.' })
+    }
+  }
+
+  const undoScan = () => {
+    if (beforeScanRef.current) setRateData(beforeScanRef.current)
+    beforeScanRef.current = null
+    setMarks({})
+    setScan({ state: 'idle' })
+  }
 
   const handleSave = async () => {
     // A non-numeric cell would otherwise be silently saved as empty.
@@ -133,6 +223,9 @@ const RateChartPage = () => {
         }))
 
         setRateData(transformedData)
+        setMarks({})
+        beforeScanRef.current = null
+        setScan((s) => (s.state === 'done' ? { state: 'idle' } : s))
         CustomToast.success('Rates saved and updated!')
       } else {
         CustomToast.error('Failed to fetch updated data.')
@@ -440,6 +533,23 @@ const RateChartPage = () => {
               onChange={handleImport}
               id="excel-input"
             />
+            <input
+              ref={scanInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleScan}
+              id="ocr-input"
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={ScanText}
+              disabled={scan.state === 'working'}
+              onClick={() => scanInputRef.current?.click()}
+            >
+              Scan picture
+            </Button>
             <Button
               size="sm"
               variant="secondary"
@@ -501,6 +611,58 @@ const RateChartPage = () => {
           />
         </div>
 
+        {scan.state !== 'idle' && (
+          <SurfaceCard className="p-4" role="status" aria-live="polite">
+            {scan.state === 'working' && (
+              <>
+                <div className="flex items-center gap-2 text-[13px] font-semibold">
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" /> {scan.text}
+                </div>
+                <div className="ui-bg-sunken mt-2 h-2 overflow-hidden rounded-full">
+                  <div className="ui-bg-brand h-full rounded-full transition-all duration-300" style={{ width: `${scan.percent}%` }} />
+                </div>
+              </>
+            )}
+            {scan.state === 'error' && (
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[13px] text-[color:var(--ui-danger-600)]">{scan.message}</p>
+                <Button size="sm" variant="secondary" icon={X} onClick={() => setScan({ state: 'idle' })}>
+                  Close
+                </Button>
+              </div>
+            )}
+            {scan.state === 'done' && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1 text-[13px]">
+                  <p className="font-bold">
+                    Scan finished: {scan.filled} prices filled (FAT {scan.range}). Nothing is saved yet.
+                  </p>
+                  <p className="ui-text-secondary">
+                    <span className="mr-1 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-warning-50)] ring-1 ring-[color:var(--ui-warning-500)]" />
+                    yellow = read from the picture.{' '}
+                    <span className="mr-1 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-danger-50)] ring-1 ring-[color:var(--ui-danger-500)]" />
+                    red = please check
+                    {scan.needCheck ? ` (${scan.needCheck} price${scan.needCheck === 1 ? '' : 's'})` : ''}. Editing a price clears its colour.
+                  </p>
+                  {scan.missing.length > 0 && (
+                    <p className="text-[color:var(--ui-danger-600)]">
+                      Rows not read, fill them by hand: FAT {scan.missing.map((f) => f.toFixed(1)).join(', ')}.
+                    </p>
+                  )}
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button size="sm" variant="secondary" icon={Undo2} onClick={undoScan}>
+                    Undo scan
+                  </Button>
+                  <Button size="sm" variant="secondary" icon={X} onClick={() => setScan({ state: 'idle' })}>
+                    Hide
+                  </Button>
+                </div>
+              </div>
+            )}
+          </SurfaceCard>
+        )}
+
         <SurfaceCard className="overflow-hidden">
           <div className="ui-scroll-thin max-h-[68vh] overflow-auto">
             <table className="ui-stripe-rows w-full border-separate border-spacing-0 text-[12.5px]">
@@ -521,7 +683,7 @@ const RateChartPage = () => {
               </thead>
               <tbody>
                 {rateData.map((row, fatIndex) => (
-                  <RateRow key={row.fat} row={row} fatIndex={fatIndex} onChange={handleChange} />
+                  <RateRow key={row.fat} row={row} fatIndex={fatIndex} marks={marks[fatIndex]} onChange={handleChange} />
                 ))}
               </tbody>
             </table>

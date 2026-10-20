@@ -280,6 +280,7 @@ import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 import { createUpdateManager } from './updater'
 import { createVersionManager } from './versions'
+import { createOcrService } from './ocr'
 
 // Configure logging for debugging
 log.transports.file.level = 'info'
@@ -483,6 +484,16 @@ const versions = createVersionManager({
   }
 })
 
+// Offline OCR (reads a price list from a picture). Loaded only while a scan runs.
+const ocr = createOcrService({
+  app,
+  isDev: is.dev,
+  log,
+  send: (progress) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('ocr-progress', progress)
+  }
+})
+
 // Background update checks stay off while the app is deliberately pinned on an older version.
 const backgroundUpdateCheck = () => {
   if (versions.getPin()) return
@@ -535,6 +546,15 @@ app.whenReady().then(() => {
   ipcMain.handle('restart-and-install', () => updater.install())
   ipcMain.handle('get-update-status', () => updater.getStatus())
   ipcMain.handle('dismiss-update-status', () => updater.dismiss())
+
+  // OCR IPC: receives the prepared image blocks, answers with the text of each
+  ipcMain.handle('ocr:recognize', async (_event, chunks) => {
+    try {
+      return { success: true, texts: await ocr.recognize(chunks) }
+    } catch (error) {
+      return { success: false, message: error?.message || 'Could not read the image.' }
+    }
+  })
 
   // Version control IPC
   ipcMain.handle('versions:list', () => versions.list())
