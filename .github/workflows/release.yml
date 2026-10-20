@@ -3,13 +3,21 @@ name: Release
 # Publishes a new version of the app to GitHub Releases. Installed apps find it by themselves
 # (auto-update), and it appears in the app under Version Control, where any version can be installed.
 #
-# Two ways to start it:
-#   1. GitHub > Actions > Release > "Run workflow", pick patch / minor / major. This raises the version
-#      in package.json, commits it, tags it (v1.4.1), then builds and publishes. Easiest.
-#   2. Push a tag yourself after changing the version:  git tag v1.4.1 && git push origin v1.4.1
+# It starts by itself in three ways:
+#   1. AUTOMATIC: every push / merge to master that changes the app. The version is raised from the
+#      commit messages (see "Decide version bump" below), committed, tagged, built and published.
+#      Changes that only touch docs (*.md), .github/ or .vscode/ do not release.
+#   2. MANUAL: GitHub > Actions > Release > "Run workflow", pick patch / minor / major.
+#   3. TAG: push a tag yourself after changing the version:  git tag v1.4.5 && git push origin v1.4.5
 on:
   push:
+    branches: [master]
     tags: ['v*']
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - '.vscode/**'
+      - 'docs/**'
   workflow_dispatch:
     inputs:
       bump:
@@ -21,6 +29,7 @@ on:
 permissions:
   contents: write
 
+# One release at a time; a second push waits instead of racing the first.
 concurrency:
   group: release
   cancel-in-progress: false
@@ -28,6 +37,8 @@ concurrency:
 jobs:
   release:
     runs-on: windows-latest
+    # The workflow's own version commit ("release: v1.4.1") must never start another release.
+    if: "${{ !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'release: v')) }}"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,20 +49,44 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Manual run: raise the version, commit it and tag it. (A tag pushed by this workflow does not start
-      # a second run, so there is no double release.)
+      # Automatic run: read the commit messages in this push and choose how far to raise the version.
+      #   "feat!:" / "fix!:" or "BREAKING CHANGE"  -> major
+      #   "feat:" / "feat(scope):"                 -> minor
+      #   anything else                            -> patch
+      - name: Decide version bump
+        id: decide
+        shell: bash
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~1..HEAD"
+          else
+            RANGE="$BEFORE..${{ github.sha }}"
+          fi
+          MESSAGES="$(git log --format='%s%n%b' "$RANGE" || true)"
+          BUMP=patch
+          if echo "$MESSAGES" | grep -qE '^feat(\(.+\))?:'; then BUMP=minor; fi
+          if echo "$MESSAGES" | grep -qE '^[a-z]+(\(.+\))?!:|BREAKING CHANGE'; then BUMP=major; fi
+          echo "Commits: $RANGE  ->  bump: $BUMP"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          git log --format='- %s' --no-merges "$RANGE" > "$RUNNER_TEMP/notes.md" || true
+        if: github.event_name == 'push' && github.ref_type == 'branch'
+
+      # Raise the version, commit it and tag it. (A commit or tag pushed by this workflow does not start
+      # another run, so there is no double release.)
       - name: Bump version
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_type == 'branch')
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          npm version "${{ inputs.bump }}" -m "release: v%s"
+          BUMP="${{ inputs.bump || steps.decide.outputs.bump }}"
+          npm version "$BUMP" -m "release: v%s"
           git push origin HEAD --follow-tags
 
       # Tag run: the tag must match package.json, otherwise the installer would carry the wrong version.
       - name: Check tag matches package.json
-        if: github.event_name == 'push'
+        if: github.ref_type == 'tag'
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME#v}"
@@ -69,5 +104,18 @@ jobs:
 
       - name: Build installer and publish release
         run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Put the commit messages in the release, so the app's Version Control page can show "What's new".
+      - name: Add release notes
+        continue-on-error: true
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then
+            git log -10 --no-merges --format='- %s' > "$RUNNER_TEMP/notes.md"
+          fi
+          gh release edit "v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

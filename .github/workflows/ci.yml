@@ -1,10 +1,8 @@
 name: CI
 
-# Builds the app on every push to master and on every pull request, so a broken change shows up as a
-# red check before it is merged. Nothing is published here: releases are made by release.yml.
+# Builds the app on every pull request, so a broken change shows up as a red check before it is merged.
+# (Pushes to master are built by release.yml, which publishes them.) Nothing is published here.
 on:
-  push:
-    branches: [master]
   pull_request:
 
 concurrency:
