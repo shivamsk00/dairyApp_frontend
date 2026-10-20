@@ -90,6 +90,8 @@ const RateChartPage = () => {
   const [picture, setPicture] = useState(null) // { file, url, width, height }
   const [crop, setCrop] = useState(FULL_CROP)
   const [zoom, setZoom] = useState('fit') // 'fit' | 1 | 1.5 | 2
+  // What the scan read, shown for checking before anything goes into the table.
+  const [preview, setPreview] = useState(null) // { snfColumns, rows: [{ fat, cells, flags }] }
 
   // Release the preview address only when the picture changes or goes away (not when its size loads).
   const pictureUrl = picture?.url
@@ -169,41 +171,89 @@ const RateChartPage = () => {
         return
       }
 
-      // Put the prices into the grid (only SNF columns and FAT rows the grid has).
-      const nextMarks = {}
-      let filled = 0
-      let needCheck = 0
-      const next = rateData.map((row) => ({ ...row, snfRates: row.snfRates.map((c) => ({ ...c })) }))
-      for (const scanned of result.rows) {
-        const fatIndex = Math.round((scanned.fat - FAT_VALUES[0]) * 10)
-        if (fatIndex < 0 || fatIndex >= next.length) continue
-        scanned.cells.forEach((value, j) => {
-          const snfIndex = SNF_VALUES.findIndex((v) => Math.abs(v - result.snfColumns[j]) < 0.01)
-          if (snfIndex === -1 || value === null) return
-          const flagged = value === UNREADABLE || result.flagged.has(`${scanned.fat}|${j}`)
-          if (value !== UNREADABLE) {
-            next[fatIndex].snfRates[snfIndex].rate = value
-            filled++
-          }
-          if (flagged) needCheck++
-          nextMarks[fatIndex] = { ...(nextMarks[fatIndex] || {}), [snfIndex]: flagged ? 'check' : 'ocr' }
-        })
+      // Show what was read in a preview. The table is not touched until the user saves it.
+      const n = result.snfColumns.length
+      const rows = result.rows.map((r) => ({
+        fat: r.fat,
+        // null = blank in the printed list; '' = a price to fill by hand
+        cells: r.cells.map((v) => (v === null ? null : v === UNREADABLE ? '' : v)),
+        flags: r.cells.map((v, j) => v !== null && (v === UNREADABLE || result.flagged.has(`${r.fat}|${j}`)))
+      }))
+      // Rows that could not be read are added as empty rows, so they can be typed in here.
+      for (const fat of result.missing) {
+        rows.push({ fat, cells: Array(n).fill(''), flags: Array(n).fill(true) })
       }
-      beforeScanRef.current = rateData
-      setPicture(null)
-      setRateData(next)
-      setMarks(nextMarks)
-      setScan({
-        state: 'done',
-        filled,
-        needCheck,
-        missing: result.missing,
-        range: `${result.rows[0].fat.toFixed(1)} – ${result.rows[result.rows.length - 1].fat.toFixed(1)}`
-      })
+      rows.sort((x, y) => x.fat - y.fat)
+      setPreview({ snfColumns: result.snfColumns, rows })
+      setScan({ state: 'preview' })
     } catch (error) {
       console.error('Scan failed:', error)
       setScan({ state: 'crop', message: 'The picture could not be read. Adjust the box, or try a clearer or larger picture.' })
     }
+  }
+
+  const editPreviewCell = (rowIndex, colIndex, value) => {
+    setPreview((prev) => ({
+      ...prev,
+      rows: prev.rows.map((row, i) =>
+        i !== rowIndex
+          ? row
+          : {
+              ...row,
+              cells: row.cells.map((c, j) => (j === colIndex ? value : c)),
+              flags: row.flags.map((f, j) => (j === colIndex ? false : f)) // edited = checked by the user
+            }
+      )
+    }))
+  }
+
+  // Save: now the checked prices go into the table.
+  const applyPreview = () => {
+    const bad = preview.rows.reduce(
+      (count, row) => count + row.cells.filter((c) => c !== null && c !== '' && isNaN(Number(c))).length,
+      0
+    )
+    if (bad > 0) {
+      CustomToast.error(`${bad} ${bad === 1 ? 'price is' : 'prices are'} not a number (shown in red). Fix or clear them.`)
+      return
+    }
+    const nextMarks = {}
+    let filled = 0
+    const next = rateData.map((row) => ({ ...row, snfRates: row.snfRates.map((c) => ({ ...c })) }))
+    for (const row of preview.rows) {
+      const fatIndex = Math.round((row.fat - FAT_VALUES[0]) * 10)
+      if (fatIndex < 0 || fatIndex >= next.length) continue
+      row.cells.forEach((value, j) => {
+        const snfIndex = SNF_VALUES.findIndex((v) => Math.abs(v - preview.snfColumns[j]) < 0.01)
+        if (snfIndex === -1 || value === null || value === '') return
+        next[fatIndex].snfRates[snfIndex].rate = String(value)
+        nextMarks[fatIndex] = { ...(nextMarks[fatIndex] || {}), [snfIndex]: 'ocr' }
+        filled++
+      })
+    }
+    beforeScanRef.current = rateData
+    setRateData(next)
+    setMarks(nextMarks)
+    setScan({
+      state: 'done',
+      filled,
+      needCheck: 0,
+      missing: [],
+      range: `${preview.rows[0].fat.toFixed(1)} – ${preview.rows[preview.rows.length - 1].fat.toFixed(1)}`
+    })
+    setPreview(null)
+    setPicture(null)
+  }
+
+  const backToPicture = () => {
+    setPreview(null)
+    setScan({ state: 'crop' })
+  }
+
+  const discardPreview = () => {
+    setPreview(null)
+    setPicture(null)
+    setScan({ state: 'idle' })
   }
 
   const undoScan = () => {
@@ -638,7 +688,7 @@ const RateChartPage = () => {
           />
         </div>
 
-        {scan.state !== 'idle' && scan.state !== 'crop' && (
+        {scan.state !== 'idle' && scan.state !== 'crop' && scan.state !== 'preview' && (
           <SurfaceCard className="p-4" role="status" aria-live="polite">
             {scan.state === 'working' && (
               <>
@@ -662,14 +712,11 @@ const RateChartPage = () => {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1 text-[13px]">
                   <p className="font-bold">
-                    Scan finished: {scan.filled} prices filled (FAT {scan.range}). Nothing is saved yet.
+                    {scan.filled} prices added to the table (FAT {scan.range}). Press Save at the top to store them.
                   </p>
                   <p className="ui-text-secondary">
                     <span className="mr-1 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-warning-50)] ring-1 ring-[color:var(--ui-warning-500)]" />
-                    yellow = read from the picture.{' '}
-                    <span className="mr-1 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-danger-50)] ring-1 ring-[color:var(--ui-danger-500)]" />
-                    red = please check
-                    {scan.needCheck ? ` (${scan.needCheck} price${scan.needCheck === 1 ? '' : 's'})` : ''}. Editing a price clears its colour.
+                    yellow = added from the picture. Editing a price clears its colour.
                   </p>
                   {scan.missing.length > 0 && (
                     <p className="text-[color:var(--ui-danger-600)]">
@@ -724,7 +771,7 @@ const RateChartPage = () => {
         onClose={cancelPicture}
         title="Choose the part to read"
         maxWidth="min(80rem, 96vw)"
-        className="space-y-3"
+        className="space-y-3 p-5"
       >
         {picture && (
           <>
@@ -771,6 +818,89 @@ const RateChartPage = () => {
                 </Button>
                 <Button size="sm" icon={ScanText} onClick={handleScan}>
                   Read table
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      {/* What the scan read, for checking. Nothing reaches the table until Save is pressed here. */}
+      <Modal
+        isOpen={scan.state === 'preview' && !!preview}
+        onClose={discardPreview}
+        title="Check the scanned prices"
+        maxWidth="min(72rem, 96vw)"
+        className="space-y-3 p-5"
+      >
+        {preview && (
+          <>
+            <p className="ui-text-secondary text-[12.5px]">
+              This is what was read from the picture. Fix anything wrong, then press <strong>Save</strong> to add it to
+              the table.
+              <span className="mr-1 ml-2 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-danger-50)] ring-1 ring-[color:var(--ui-danger-500)]" />
+              red = please check or fill in. A dash means the printed list leaves that price blank.
+            </p>
+            <div className="ui-scroll-thin ui-border-subtle max-h-[calc(100vh-20rem)] overflow-auto rounded-lg border">
+              <table className="w-full border-separate border-spacing-0 text-[12.5px]">
+                <thead>
+                  <tr>
+                    <th className="ui-bg-sunken ui-border-subtle sticky left-0 top-0 z-20 min-w-[70px] border-b border-r px-3 py-2 text-center text-[11px] font-bold uppercase">
+                      FAT / SNF
+                    </th>
+                    {preview.snfColumns.map((snf) => (
+                      <th
+                        key={snf}
+                        className="ui-bg-sunken ui-border-subtle sticky top-0 z-10 min-w-[72px] border-b px-2 py-2 text-center text-[11px] font-bold"
+                      >
+                        {snf.toFixed(1)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.rows.map((row, i) => (
+                    <tr key={row.fat}>
+                      <td className="ui-bg-sunken ui-border-subtle sticky left-0 z-10 border-b border-r px-3 py-1 text-center font-bold">
+                        {row.fat.toFixed(1)}
+                      </td>
+                      {row.cells.map((cell, j) => (
+                        <td key={j} className="ui-border-subtle border-b p-0">
+                          {cell === null ? (
+                            <span className="ui-text-tertiary block text-center">—</span>
+                          ) : (
+                            <input
+                              type="text"
+                              inputMode="decimal"
+                              value={cell}
+                              onChange={(e) => editPreviewCell(i, j, e.target.value)}
+                              aria-label={`FAT ${row.fat.toFixed(1)}, SNF ${preview.snfColumns[j].toFixed(1)}`}
+                              aria-invalid={(cell !== '' && isNaN(Number(cell))) || undefined}
+                              data-flag={row.flags[j] || undefined}
+                              placeholder="?"
+                              className="h-8 w-full border-0 bg-transparent px-1 text-center outline-none focus:bg-[color:var(--ui-primary-50)] focus:shadow-[inset_0_0_0_2px_var(--ui-primary-500)] data-[flag=true]:bg-[color:var(--ui-danger-50)] data-[flag=true]:font-bold aria-[invalid=true]:bg-[color:var(--ui-danger-50)] aria-[invalid=true]:text-[color:var(--ui-danger-700)]"
+                            />
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="ui-text-tertiary text-[12px]">
+                {preview.rows.length} rows · {preview.rows.reduce((n, r) => n + r.flags.filter(Boolean).length, 0)} prices to check
+              </span>
+              <div className="flex gap-2">
+                <Button size="sm" variant="secondary" onClick={backToPicture}>
+                  Back to picture
+                </Button>
+                <Button size="sm" variant="secondary" icon={X} onClick={discardPreview}>
+                  Cancel
+                </Button>
+                <Button size="sm" icon={Save} onClick={applyPreview}>
+                  Save
                 </Button>
               </div>
             </div>

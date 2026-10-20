@@ -104,7 +104,7 @@ const ImageCropper = ({ src, crop, onChange, onLoad, zoom = 'fit', naturalWidth 
   return (
     // The area is as tall as the window allows; a zoomed picture scrolls inside it.
     <div
-      className="ui-scroll-thin max-h-[calc(100vh-17rem)] min-h-[16rem] overflow-auto rounded-lg bg-[color:var(--ui-neutral-100)] p-2"
+      className="ui-scroll-thin max-h-[calc(100vh-21rem)] min-h-[14rem] overflow-auto rounded-lg bg-[color:var(--ui-neutral-100)] p-2"
       style={{ textAlign: 'center' }}
     >
       <div
@@ -121,7 +121,7 @@ const ImageCropper = ({ src, crop, onChange, onLoad, zoom = 'fit', naturalWidth 
           alt="Picture to scan"
           draggable={false}
           onLoad={(e) => onLoad?.({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })}
-          className={fit ? 'block max-h-[calc(100vh-19rem)] max-w-full' : 'block h-auto w-full max-w-none'}
+          className={fit ? 'block max-h-[calc(100vh-23rem)] max-w-full' : 'block h-auto w-full max-w-none'}
         />
         <div
           onPointerDown={start('move')}
