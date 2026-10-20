@@ -48,6 +48,7 @@ import {
   SurfaceCard,
   useDocumentTitle
 } from '../../components/ui'
+import logExport from '../../helper/auditExport'
 
 const DashboardChart = lazy(() => import('./DashboardChart'))
 
@@ -255,12 +256,14 @@ const Dashboard = () => {
       link.download = `${name}.json`
       link.click()
       URL.revokeObjectURL(url)
+      logExport('Dashboard - Last 7 Days (JSON)', 'csv', rows.length)
       return
     }
     const XLSX = await import('xlsx')
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), 'Last 7 Days')
     XLSX.writeFile(workbook, `${name}.${format === 'CSV' ? 'csv' : 'xlsx'}`)
+    logExport('Dashboard - Last 7 Days', format === 'CSV' ? 'csv' : 'xlsx', rows.length)
   }
 
   const startQuickExport = async () => {

@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 import useHomeStore from '../../zustand/useHomeStore'
 import { toast } from 'react-toastify'
 import MergedReportTable from './MergedReportTable'
+import logExport from '../../helper/auditExport'
 
 // 🔹 Helpers: must come before usage
 const getToday = () => {
@@ -135,6 +136,7 @@ const AllMilkCorrection = () => {
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Milk Collection Report')
     XLSX.writeFile(workbook, 'milk_collection_report.xlsx')
+    logExport('Milk Collection Report', 'xlsx', dataToExport.length)
     toast.success('Report exported successfully')
   }
 

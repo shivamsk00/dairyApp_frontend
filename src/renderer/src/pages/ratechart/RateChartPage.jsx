@@ -22,6 +22,7 @@ import {
   todayISO,
   useDocumentTitle
 } from '../../components/ui'
+import logExport from '../../helper/auditExport'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = []
@@ -380,6 +381,7 @@ const RateChartPage = () => {
 
       const filename = `SNF_Rate_Chart_${todayISO()}.xlsx`
       XLSX.writeFile(workbook, filename)
+      logExport('Rate Chart', 'xlsx')
 
       CustomToast.success(`Data exported successfully as ${filename}!`)
     } catch (error) {

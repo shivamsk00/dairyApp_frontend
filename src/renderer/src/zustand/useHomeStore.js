@@ -6,6 +6,30 @@ const useHomeStore = create((set, get) => ({
   loading: false,
   error: null,
 
+  // Audit logs ///////////////////////////////////////////////////////////////////////////////////
+  // Both return the response body, or null when the request failed.
+  getAuditLogs: async (params = {}) => {
+    try {
+      const clean = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+      )
+      const res = await api.get('/audit-logs', { params: clean })
+      return res.data
+    } catch (error) {
+      console.error('Error fetching audit logs:', error)
+      return null
+    }
+  },
+  getAuditLogDetail: async (id) => {
+    try {
+      const res = await api.get(`/audit-logs/${id}`)
+      return res.data
+    } catch (error) {
+      console.error('Error fetching audit log detail:', error)
+      return null
+    }
+  },
+
   // Dahboard Api Data Fetch//////////////////////////////////////////////////////////////////////////
   fetchDashboardData: async () => {
     try {

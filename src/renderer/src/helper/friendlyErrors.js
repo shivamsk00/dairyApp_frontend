@@ -12,7 +12,7 @@ import { toast } from 'react-toastify'
  */
 const RECENT_MS = 20000
 const TECHNICAL =
-  /cannot read propert|cannot destructure|is not a function|is not iterable|is not defined|undefined is not|null is not|of undefined|of null|unexpected token|failed to fetch|network ?error|request failed with status|timeout of \d+ms/i
+  /sqlstate|connection refused|select \* from|cannot read propert|cannot destructure|is not a function|is not iterable|is not defined|undefined is not|null is not|of undefined|of null|unexpected token|failed to fetch|network ?error|request failed with status|timeout of \d+ms/i
 
 let last = null // { status, message, sessionLost, at }
 

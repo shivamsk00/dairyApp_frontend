@@ -3,6 +3,7 @@ import {
   Calculator,
   FileEdit,
   FileText,
+  History,
   LayoutDashboard,
   Menu,
   Milk,
@@ -136,6 +137,7 @@ const Sidebar = () => {
           ]
         },
         { to: '/reports', label: 'Reports', icon: FileText },
+        { to: '/auditlogs', label: 'Audit Logs', icon: History },
         { to: '/settings', label: 'Settings', icon: Settings }
       ]
     }
