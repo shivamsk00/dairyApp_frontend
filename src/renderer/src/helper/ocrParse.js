@@ -7,6 +7,8 @@
  * position, and any label that WAS read re-anchors the position after a lost row.
  */
 
+import { resolveLowSnfRate } from './lowSnfRule'
+
 const round1 = (n) => Math.round(n * 10) / 10
 
 /** Marks a price that was there but could not be read. It keeps its place so the others do not shift. */
@@ -156,4 +158,71 @@ export function interpretRateText(texts) {
   }
   const rows = placeRows(lines, startFat, snfColumns.length)
   return { snfColumns, rows, flagged: checkRows(rows, snfColumns.length), missing: missingFats(rows), startFat }
+}
+
+/**
+ * Rows for the "check the scanned prices" preview, from the first SNF column the chart shows (8.1) up to
+ * the last printed one. A price the list prints is used as read. The columns the list leaves out are worked
+ * out with rule 3 (see lowSnfRule.js); where milk is not accepted the cell is blank.
+ *
+ * Each cell is a string, '' (a price to type in) or null (nothing to enter here).
+ * Each flag is 'check' (please check or fill in), 'rule' (worked out by rule 3) or false.
+ *
+ * @param {{snfColumns:number[], rows:{fat:number,cells:(string|null)[]}[], flagged:Set<string>, missing:number[]}} result
+ */
+export function buildPreviewRows(result, firstSnf = 8.1) {
+  const last = result.snfColumns[result.snfColumns.length - 1]
+  const columns = []
+  for (let t = Math.round(firstSnf * 10); t <= Math.round(last * 10); t++) columns.push(t / 10)
+  const printedAt = new Map(result.snfColumns.map((snf, j) => [snf, j]))
+
+  const rowFor = (scanned) => {
+    const read = (snf) => {
+      const j = printedAt.get(snf)
+      if (j === undefined) return { kind: 'absent' }
+      const value = scanned.cells[j]
+      if (value === null) return { kind: 'blank' }
+      if (value === UNREADABLE) return { kind: 'unreadable' }
+      return { kind: 'value', value, flagged: result.flagged.has(`${scanned.fat}|${j}`) }
+    }
+    // printed price (as a number) or null, for the rule
+    const printedNumber = (snf) => {
+      const r = read(snf)
+      return r.kind === 'value' ? parseFloat(r.value) : null
+    }
+    const cells = []
+    const flags = []
+    for (const snf of columns) {
+      const r = read(snf)
+      if (r.kind === 'value') {
+        cells.push(r.value)
+        flags.push(r.flagged ? 'check' : false)
+      } else if (r.kind === 'unreadable') {
+        cells.push('')
+        flags.push('check')
+      } else {
+        // the list prints nothing here: rule 3 decides
+        const res = resolveLowSnfRate(scanned.fat, snf, printedNumber)
+        if (!res.accepted) {
+          cells.push(null)
+          flags.push(false)
+        } else if (res.rate !== null) {
+          cells.push(res.rate.toFixed(2))
+          flags.push('rule')
+        } else {
+          cells.push('')
+          flags.push('check') // the price it is worked out from could not be read
+        }
+      }
+    }
+    return { fat: scanned.fat, cells, flags }
+  }
+
+  const rows = result.rows.map(rowFor)
+  // Rows that could not be read at all are added empty, so they can be typed in.
+  for (const fat of result.missing) {
+    rows.push({ fat, cells: columns.map(() => ''), flags: columns.map(() => 'check') })
+  }
+  rows.sort((a, b) => a.fat - b.fat)
+  return { snfColumns: columns, rows }
 }

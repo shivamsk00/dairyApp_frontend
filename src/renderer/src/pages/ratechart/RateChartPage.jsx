@@ -29,7 +29,7 @@ import {
 import logExport from '../../helper/auditExport'
 import { scanRateImage } from '../../helper/ocrRateChart'
 import ImageCropper, { FULL_CROP } from '../../components/ImageCropper'
-import { UNREADABLE } from '../../helper/ocrParse'
+import { buildPreviewRows } from '../../helper/ocrParse'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = []
@@ -172,20 +172,10 @@ const RateChartPage = () => {
         return
       }
 
-      // Show what was read in a preview. The table is not touched until the user saves it.
-      const n = result.snfColumns.length
-      const rows = result.rows.map((r) => ({
-        fat: r.fat,
-        // null = blank in the printed list; '' = a price to fill by hand
-        cells: r.cells.map((v) => (v === null ? null : v === UNREADABLE ? '' : v)),
-        flags: r.cells.map((v, j) => v !== null && (v === UNREADABLE || result.flagged.has(`${r.fat}|${j}`)))
-      }))
-      // Rows that could not be read are added as empty rows, so they can be typed in here.
-      for (const fat of result.missing) {
-        rows.push({ fat, cells: Array(n).fill(''), flags: Array(n).fill(true) })
-      }
-      rows.sort((x, y) => x.fat - y.fat)
-      setPreview({ snfColumns: result.snfColumns, rows })
+      // Show what was read in a preview. The table is not touched until the user saves it. The columns start
+      // at SNF 8.1; the ones the printed list leaves out are worked out with rule 3.
+      const { snfColumns, rows } = buildPreviewRows(result, SNF_VALUES[0])
+      setPreview({ snfColumns, rows })
       setScan({ state: 'preview' })
     } catch (error) {
       console.error('Scan failed:', error)
@@ -839,8 +829,10 @@ const RateChartPage = () => {
             <p className="ui-text-secondary text-[12.5px]">
               This is what was read from the picture. Fix anything wrong, then press <strong>Save</strong> to add it to
               the table.
+              <span className="mr-1 ml-2 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-info-50)] ring-1 ring-[color:var(--ui-info-500)]" />
+              blue = worked out by rule 3 (SNF 8.1 / 8.2 at 92% / 94% of the 8.5 price; 8.3 / 8.4 at 87% / 93% of the 9.0 price where the list has none).
               <span className="mr-1 ml-2 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-danger-50)] ring-1 ring-[color:var(--ui-danger-500)]" />
-              red = please check or fill in. A dash means the printed list leaves that price blank.
+              red = please check or fill in. A dash = not accepted at that SNF (FAT 5.1 and above).
             </p>
             <div className="ui-scroll-thin ui-border-subtle max-h-[calc(100vh-20rem)] overflow-auto rounded-lg border">
               <table className="w-full border-separate border-spacing-0 text-[12.5px]">
@@ -879,7 +871,7 @@ const RateChartPage = () => {
                               aria-invalid={(cell !== '' && isNaN(Number(cell))) || undefined}
                               data-flag={row.flags[j] || undefined}
                               placeholder="?"
-                              className="h-8 w-full border-0 bg-transparent px-1 text-center outline-none focus:bg-[color:var(--ui-primary-50)] focus:shadow-[inset_0_0_0_2px_var(--ui-primary-500)] data-[flag=true]:bg-[color:var(--ui-danger-50)] data-[flag=true]:font-bold aria-[invalid=true]:bg-[color:var(--ui-danger-50)] aria-[invalid=true]:text-[color:var(--ui-danger-700)]"
+                              className="h-8 w-full border-0 bg-transparent px-1 text-center outline-none focus:bg-[color:var(--ui-primary-50)] focus:shadow-[inset_0_0_0_2px_var(--ui-primary-500)] data-[flag=check]:bg-[color:var(--ui-danger-50)] data-[flag=check]:font-bold data-[flag=rule]:bg-[color:var(--ui-info-50)] data-[flag=rule]:text-[color:var(--ui-info-600)] aria-[invalid=true]:bg-[color:var(--ui-danger-50)] aria-[invalid=true]:text-[color:var(--ui-danger-700)]"
                             />
                           )}
                         </td>
@@ -891,7 +883,7 @@ const RateChartPage = () => {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="ui-text-tertiary text-[12px]">
-                {preview.rows.length} rows · {preview.rows.reduce((n, r) => n + r.flags.filter(Boolean).length, 0)} prices to check
+                {preview.rows.length} rows · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'check').length, 0)} prices to check · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'rule').length, 0)} worked out by rule 3
               </span>
               <div className="flex gap-2">
                 <Button size="sm" variant="secondary" onClick={backToPicture}>
