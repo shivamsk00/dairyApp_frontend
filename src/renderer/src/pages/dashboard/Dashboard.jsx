@@ -28,6 +28,7 @@ import {
 import useHomeStore from '../../zustand/useHomeStore'
 import useAuthStore from '../../zustand/useAuthStore'
 import useUpdateStore from '../../zustand/useUpdateStore'
+import UpdateAvailableBanner from '../../components/UpdateAvailableBanner'
 import {
   ActionLink,
   Badge,
@@ -474,6 +475,7 @@ const Dashboard = () => {
         />
 
         <div className="space-y-6 p-3 sm:p-4 lg:p-6">
+          <UpdateAvailableBanner />
           <PageHero
             title={`Welcome back, ${displayName}`}
             description={

@@ -8,6 +8,9 @@
  *
  *   state: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error'
  *
+ * Nothing is ever downloaded on its own: a check that finds a newer version only reports 'available'.
+ * The user presses Update; that starts the download and, once it has finished, the install.
+ *
  * It also guards against overlapping checks / double downloads, and keeps background checks quiet
  * (a failed or empty background check never shows anything; only a user-started check does).
  */
@@ -54,6 +57,7 @@ export function createUpdateManager({ autoUpdater, currentVersion, send, log = c
   let status = { ...BASE, currentVersion: currentVersion() }
   let busy = false // a check or a download is in flight
   let userStarted = false // the in-flight check was started by the user
+  let installAfterDownload = false // the user pressed Update: install as soon as the download ends
   let idleTimer = null
 
   const publish = (state, extra = {}) => {
@@ -65,6 +69,7 @@ export function createUpdateManager({ autoUpdater, currentVersion, send, log = c
   const fail = (error) => {
     if (!busy) return // already handled (the updater reports errors twice: rejection + event)
     busy = false
+    installAfterDownload = false
     log.error('Update error:', error)
     const quiet = status.state === 'checking' && !userStarted
     if (quiet) {
@@ -76,13 +81,15 @@ export function createUpdateManager({ autoUpdater, currentVersion, send, log = c
 
   function download() {
     if (status.state === 'downloading' || status.state === 'downloaded') return
+    installAfterDownload = true
     busy = true
     publish('downloading', { version: status.version })
     autoUpdater.downloadUpdate().catch(fail)
   }
 
   async function check({ manual = false } = {}) {
-    if (busy || status.state === 'downloaded') return status
+    // An update is already waiting for the user's decision (or is being installed): keep showing it.
+    if (busy || status.state === 'downloaded' || status.state === 'available') return status
     busy = true
     userStarted = manual
     publish('checking')
@@ -108,8 +115,8 @@ export function createUpdateManager({ autoUpdater, currentVersion, send, log = c
       // A download is already running (or finished): don't reset it or start a second one.
       if (status.state === 'downloading' || status.state === 'downloaded') return
       log.info('Update available:', info.version)
+      busy = false
       publish('available', { version: info.version })
-      download()
     })
 
     autoUpdater.on('update-not-available', () => {
@@ -136,7 +143,12 @@ export function createUpdateManager({ autoUpdater, currentVersion, send, log = c
     autoUpdater.on('update-downloaded', (info) => {
       log.info('Update downloaded:', info.version)
       busy = false
-      publish('downloaded', { version: info.version, percent: 100 })
+      publish('downloaded', { version: info.version, percent: 100, autoInstall: installAfterDownload })
+      if (installAfterDownload) {
+        installAfterDownload = false
+        // A short pause so the "Installing…" message is seen before the app closes.
+        setTimeout(() => autoUpdater.quitAndInstall(false, true), 1500)
+      }
     })
 
     autoUpdater.on('error', fail)

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types -- internal component; props are documented inline */
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { AlertTriangle, Check, Download, Loader2, RefreshCw, X } from 'lucide-react'
 import useUpdateStore from '../zustand/useUpdateStore'
 import { Button, IconBadge, IconButton, SurfaceCard } from './ui'
@@ -47,8 +48,8 @@ const describe = (status) => {
         icon: Download,
         tone: 'info',
         title: 'Update available',
-        text: `${version} was found. Starting the download…`,
-        progress: null
+        text: `${version} is ready. Nothing is downloaded until you press Update.`,
+        offer: true
       }
     case 'downloading': {
       const known = status.total > 0
@@ -70,8 +71,11 @@ const describe = (status) => {
         icon: Check,
         tone: 'success',
         title: 'Update ready to install',
-        text: `${version} has been downloaded. Restart the app to finish updating.`,
-        ready: true
+        text: status.autoInstall
+          ? `${version} has been downloaded. Installing now, the app will restart.`
+          : `${version} has been downloaded. Restart the app to finish updating.`,
+        ready: !status.autoInstall,
+        progress: status.autoInstall ? null : undefined
       }
     case 'error':
       return {
@@ -91,7 +95,8 @@ const describe = (status) => {
 const UpdateNotifier = () => {
   const status = useUpdateStore((state) => state.status)
   const dismissed = useUpdateStore((state) => state.dismissed)
-  const { init, checkNow, dismiss, restartAndInstall, showReadyCard } = useUpdateStore.getState()
+  const { init, checkNow, dismiss, restartAndInstall, showReadyCard, startUpdate } = useUpdateStore.getState()
+  const { pathname } = useLocation()
 
   useEffect(() => {
     init()
@@ -99,6 +104,20 @@ const UpdateNotifier = () => {
 
   const view = describe(status)
   if (!view) return null
+
+  // On the dashboard the "Update available" notice is a banner at the top of the page instead.
+  if (view.offer && (pathname === '/' || pathname === '/dashboard')) return null
+
+  // "Later" on an available update shrinks it to a pill, so updating is still one click away.
+  if (view.offer && dismissed) {
+    return (
+      <div className="fixed bottom-4 right-4 z-[80]">
+        <Button size="sm" icon={Download} className="!rounded-full shadow-lg" onClick={showReadyCard}>
+          Update available · v{status.version}
+        </Button>
+      </div>
+    )
+  }
 
   // "Later" shrinks the ready card to a pill, so installing is still one click away.
   if (view.ready && dismissed) {
@@ -137,7 +156,7 @@ const UpdateNotifier = () => {
             </div>
             <p className="ui-text-tertiary mt-0.5 text-[12px] leading-snug">{view.text}</p>
           </div>
-          {(view.dismissible || view.ready) && (
+          {(view.dismissible || view.ready || view.offer) && (
             <IconButton
               icon={X}
               label="Dismiss"
@@ -150,6 +169,16 @@ const UpdateNotifier = () => {
 
         {view.progress !== undefined && <ProgressBar percent={view.progress} />}
 
+        {view.offer && (
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" icon={Download} className="flex-1" onClick={startUpdate}>
+              Update
+            </Button>
+            <Button size="sm" variant="secondary" onClick={dismiss}>
+              Later
+            </Button>
+          </div>
+        )}
         {view.ready && (
           <div className="mt-3 flex gap-2">
             <Button size="sm" icon={RefreshCw} className="flex-1" onClick={restartAndInstall}>
