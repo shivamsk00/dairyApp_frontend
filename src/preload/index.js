@@ -73,6 +73,17 @@ const api = {
   getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
   dismissUpdateStatus: () => ipcRenderer.invoke('dismiss-update-status'),
 
+  // 🗂️ Version control: list published versions, install any (also older ones), manage the pin
+  listVersions: () => ipcRenderer.invoke('versions:list'),
+  installVersion: (version) => ipcRenderer.invoke('versions:install', version),
+  getVersionPin: () => ipcRenderer.invoke('versions:get-pin'),
+  clearVersionPin: () => ipcRenderer.invoke('versions:clear-pin'),
+  onVersionInstallStatus: (callback) => {
+    const handler = (_event, status) => callback(status)
+    ipcRenderer.on('version-install-status', handler)
+    return () => ipcRenderer.removeListener('version-install-status', handler)
+  },
+
   // 📦 App Info
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getSystemIp: () => ipcRenderer.invoke('get-system-ip'),

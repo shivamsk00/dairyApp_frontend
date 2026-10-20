@@ -9,6 +9,7 @@ import {
   Menu,
   Milk,
   Package,
+  Rocket,
   Settings,
   Users,
   X
@@ -139,6 +140,7 @@ const Sidebar = () => {
         },
         { to: '/reports', label: 'Reports', icon: FileText },
         { to: '/auditlogs', label: 'Audit Logs', icon: History },
+        { to: '/update-history', label: 'Version Control', icon: Rocket },
         { to: '/settings', label: 'Settings', icon: Settings }
       ]
     }
