@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import logoImg from '../assets/logo.png'
 import {
   Calculator,
   FileEdit,
@@ -161,14 +162,17 @@ const Sidebar = () => {
         mobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
         logo={
-          <div>
-            <h1 className="text-lg font-bold leading-tight text-[color:var(--ui-sidebar-text-active)]">
-              सरस डेयरी
+          <div className="flex min-w-0 items-center gap-2">
+            <img src={logoImg} alt="Logo" className="size-9 shrink-0 object-contain" />
+            <div>
+            <h1 className="whitespace-nowrap text-[17px] font-bold leading-tight text-[color:var(--ui-sidebar-text-active)]">
+              Milvo Dairy
             </h1>
-            <p className="text-[10.5px] text-[color:var(--ui-sidebar-fg-60)]">Dairy Management</p>
+            <p className="whitespace-nowrap text-[10px] text-[color:var(--ui-sidebar-fg-60)]">Solution</p>
+            </div>
           </div>
         }
-        logoCollapsed={<Milk size={22} className="text-[color:var(--ui-sidebar-text-active)]" />}
+        logoCollapsed={<img src={logoImg} alt="Logo" className="size-8 object-contain" />}
         footer={
           <div className="space-y-1">
             {version && (

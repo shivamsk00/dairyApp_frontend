@@ -112,7 +112,7 @@ function App() {
     <HashRouter>
       <NavigatorSetter /> {/* 👈 Set navigator once here */}
       <SessionExpiredModal />
-      <Suspense fallback={<PageLoader variant="screen" brand="सरस डेयरी" label="Loading" hint="Preparing your workspace" />}>
+      <Suspense fallback={<PageLoader variant="screen" brand="Milvo Dairy Solution" label="Loading" hint="Preparing your workspace" />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

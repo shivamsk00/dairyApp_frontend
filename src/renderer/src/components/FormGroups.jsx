@@ -23,7 +23,7 @@ const ClassicWindowsForm = () => {
             {/* Classic Windows Title Bar [web:263] */}
             <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white p-2 mb-4 
                             border-2 border-t-blue-400 border-l-blue-400 border-r-blue-900 border-b-blue-900">
-                <h1 className="text-sm font-bold">User Registration - DairyApp v1.1.2</h1>
+                <h1 className="text-sm font-bold">User Registration - Milvo Dairy Solution v1.1.2</h1>
             </div>
 
             {/* Classic Windows Panel [web:247] */}

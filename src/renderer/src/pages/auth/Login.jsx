@@ -6,12 +6,12 @@ import CustomToast from '../../helper/costomeToast'
 import { clearAllCustomersFromDB } from '../../helper/db'
 // Sunrise over a wheat field (Unsplash photo, free to use under the Unsplash License).
 // To change the background, replace this file or point the import at another image.
+import logoImg from '../../assets/logo.png'
 import loginBackground from '../../assets/login-nature-bg.jpg'
 import {
   Button,
   Field,
   GlassCard,
-  IconBadge,
   Input,
   Switch,
   useDocumentTitle
@@ -130,14 +130,9 @@ const Login = () => {
         {/* Brand story (wide screens) */}
         <section className="hidden text-white lg:block">
           <div className="mb-10 flex items-center gap-3">
-            <IconBadge
-              icon={Milk}
-              tone="primary"
-              size="lg"
-              className="shadow-[0_10px_30px_-6px_rgb(34_211_238/0.7)] ring-1 ring-white/40"
-            />
+            <img src={logoImg} alt="Milvo Dairy Solution" className="size-16 shrink-0 object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)]" />
             <div>
-              <p className="ui-font-display text-[24px] font-extrabold leading-tight">सरस डेयरी</p>
+              <p className="ui-font-display text-[24px] font-extrabold leading-tight">Milvo Dairy Solution</p>
               <p className="text-[12px] font-medium text-white/65">Dairy Management</p>
             </div>
           </div>
@@ -172,12 +167,7 @@ const Login = () => {
           className="ui-animate-rise-in w-full max-w-[26rem] justify-self-center p-7 sm:p-10 lg:justify-self-end"
         >
           <div className="mb-7 flex flex-col items-center text-center">
-            <IconBadge
-              icon={Milk}
-              tone="primary"
-              size="xl"
-              className="mb-4 shadow-[0_10px_34px_-6px_rgb(34_211_238/0.7)] ring-1 ring-white/50 lg:hidden"
-            />
+            <img src={logoImg} alt="Milvo Dairy Solution" className="mb-4 size-24 object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.3)] lg:hidden" />
             <h1 className="ui-font-display text-[26px] font-extrabold tracking-tight">
               Welcome back
             </h1>

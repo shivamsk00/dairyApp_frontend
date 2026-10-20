@@ -93,7 +93,7 @@
       "perMachine": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "DairyApp",
+      "shortcutName": "Milvo Dairy Solution",
       "installerIcon": "resources/icon1.ico",
       "uninstallerIcon": "resources/icon1.ico",
       "installerHeaderIcon": "resources/icon1.ico",
