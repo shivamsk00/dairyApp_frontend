@@ -611,7 +611,7 @@ const RateChartPage = () => {
             />
             <Button
               size="sm"
-              variant="secondary"
+              variant="success"
               icon={ScanText}
               disabled={scan.state === 'working'}
               onClick={() => scanInputRef.current?.click()}
