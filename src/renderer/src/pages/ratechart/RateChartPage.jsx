@@ -33,8 +33,9 @@ import { UNREADABLE } from '../../helper/ocrParse'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = []
-for (let i = 8.0; i <= 9.5; i += 0.1) {
-  SNF_VALUES.push(parseFloat(i.toFixed(1)))
+// SNF columns start at 8.1 (built from whole numbers so 9.5 is never lost to a rounding slip).
+for (let tenths = 81; tenths <= 95; tenths++) {
+  SNF_VALUES.push(tenths / 10)
 }
 const FAT_VALUES = Array.from({ length: 71 }, (_, i) => parseFloat((3.0 + i * 0.1).toFixed(1)))
 
