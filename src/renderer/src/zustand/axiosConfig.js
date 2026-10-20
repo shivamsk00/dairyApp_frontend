@@ -4,8 +4,8 @@ import { notifySessionExpired } from '../helper/sessionExpired'
 import { rememberApiError } from '../helper/friendlyErrors'
 
 const api = axios.create({
-  // baseURL: 'https://productionhouse.space/api/' // 🟡 Yaha tumhari real API base URL daalo
-  baseURL: 'http://127.0.0.1:8000/api/' // 🟡 Yaha tumhari real API base URL daalo
+  baseURL: 'https://productionhouse.space/api/' // 🟡 Yaha tumhari real API base URL daalo
+  // baseURL: 'http://127.0.0.1:8000/api/' // 🟡 Yaha tumhari real API base URL daalo
   
   // baseURL: 'https://test.productionhouse.store/api/' // 🟡 Yaha tumhari real API base URL daalo
 })
