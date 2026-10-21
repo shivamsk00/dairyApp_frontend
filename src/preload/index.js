@@ -92,6 +92,13 @@ const api = {
     return () => ipcRenderer.removeListener('version-install-status', handler)
   },
 
+  // 🖨️ Answer to printSlip: { success, error }. Returns a function that stops listening.
+  onPrintResult: (callback) => {
+    const handler = (_event, result) => callback(result)
+    ipcRenderer.on('print-slip-result', handler)
+    return () => ipcRenderer.removeListener('print-slip-result', handler)
+  },
+
   // 📦 App Info
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getSystemIp: () => ipcRenderer.invoke('get-system-ip'),

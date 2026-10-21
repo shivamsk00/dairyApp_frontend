@@ -507,6 +507,13 @@ const DairyMilkCollectionPage = () => {
     }
   }, [])
 
+  // Say so when a slip could not be printed (no printer, template missing...), instead of failing silently.
+  useEffect(() => {
+    return window.api?.onPrintResult?.((result) => {
+      if (!result?.success) CustomToast.error(`Slip not printed: ${result?.error || 'check the printer.'}`)
+    })
+  }, [])
+
   useEffect(() => {
     checkTimeOfDay()
 
