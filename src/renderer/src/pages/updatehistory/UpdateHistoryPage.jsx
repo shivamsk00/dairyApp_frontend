@@ -20,8 +20,8 @@ import {
   useDocumentTitle
 } from '../../components/ui'
 
-// Roll back offers the 2 most recent older versions only (plus the newest one to update to).
-const MAX_OLDER_VERSIONS = 2
+// The list shows the latest published updates, newest first.
+const MAX_VERSIONS_SHOWN = 10
 
 const formatDate = (iso) =>
   iso
@@ -104,12 +104,11 @@ const UpdateHistoryPage = () => {
   }
 
   const latest = useMemo(() => versions.find((v) => v.isLatest), [versions])
-  // The list is newest first: the newest newer version, the one in use, then the closest older ones.
+  // The 10 latest updates, newest first. The version in use is always listed, even if it is older than that.
   const visible = useMemo(() => {
-    const newer = versions.filter((v) => v.relation === 'newer').slice(0, 1)
-    const current = versions.filter((v) => v.relation === 'current')
-    const older = versions.filter((v) => v.relation === 'older').slice(0, MAX_OLDER_VERSIONS)
-    return [...newer, ...current, ...older]
+    const latestTen = versions.slice(0, MAX_VERSIONS_SHOWN)
+    const current = versions.find((v) => v.relation === 'current')
+    return current && !latestTen.includes(current) ? [...latestTen, current] : latestTen
   }, [versions])
   const isRollback = target && target.relation === 'older'
 
@@ -229,9 +228,9 @@ const UpdateHistoryPage = () => {
 
         <SurfaceCard className="overflow-hidden">
           <div className="ui-border-subtle border-b p-4">
-            <h2 className="ui-font-display text-[15px] font-bold">All versions</h2>
+            <h2 className="ui-font-display text-[15px] font-bold">Latest updates</h2>
             <p className="ui-text-tertiary text-[12px]">
-              Shows the newest version, the one you are using, and the {MAX_OLDER_VERSIONS} versions before it. You can move to any of them at any time.
+              The last {MAX_VERSIONS_SHOWN} updates, newest first. You can move to any of them at any time.
               {stale && ' (Offline: showing the last loaded list.)'}
             </p>
           </div>

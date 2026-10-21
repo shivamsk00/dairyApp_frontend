@@ -271,6 +271,7 @@
 // NEW CODE HERE
 
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { networkInterfaces } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -489,6 +490,10 @@ const backgroundUpdateCheck = () => {
   updater.check()
 }
 
+// Blank paper fed out below the printed slip so it clears the printer and can be torn off, in millimetres.
+// Raise it if the slip still does not come out far enough; lower it to save paper.
+const SLIP_FEED_MM = 20
+
 // App Ready
 app.whenReady().then(() => {
   createWindow()
@@ -566,14 +571,28 @@ app.whenReady().then(() => {
 
   // 🖨️ Slip printing
   ipcMain.on('print-slip', (event, slipData) => {
+    // The slip page: out/milk-slip.html is used when it exists (it is the file edited by hand). A build made
+    // on a clean checkout (such as the GitHub release) does not have it, so resources/milk-slip.html, which
+    // ships with the app, is the fallback.
+    const filePath = [
+      join(__dirname, '../../out/milk-slip.html'),
+      join(is.dev ? app.getAppPath() : process.resourcesPath, 'resources', 'milk-slip.html')
+    ].find((candidate) => existsSync(candidate))
+    const reply = (result) => {
+      if (!event.sender.isDestroyed()) event.sender.send('print-slip-result', result)
+    }
+    if (!filePath) {
+      log.error('Print slip: template not found (out/milk-slip.html or resources/milk-slip.html)')
+      reply({ success: false, error: 'The slip template is missing from the app. Please reinstall or update the app.' })
+      return
+    }
+
     const slipWindow = new BrowserWindow({
       show: false,
       webPreferences: {
         sandbox: false
       }
     })
-
-    const filePath = join(__dirname, '../../out/milk-slip.html')
 
     const queryParams = new URLSearchParams({
       account_no: slipData.account_no,
@@ -602,7 +621,20 @@ app.whenReady().then(() => {
 
     slipWindow.loadURL(finalUrl)
 
-    slipWindow.webContents.on('did-finish-load', () => {
+    slipWindow.webContents.on('did-fail-load', (_e, code, description) => {
+      log.error('Print slip: page failed to load', code, description)
+      reply({ success: false, error: `The slip could not be opened (${description}).` })
+      if (!slipWindow.isDestroyed()) slipWindow.close()
+    })
+
+    slipWindow.webContents.on('did-finish-load', async () => {
+      // The roll is as long as the slip plus a feed margin below it, so the paper comes out far enough to
+      // tear off. (A fixed 300 mm page ignores the real length of the slip.)
+      const contentPx = await slipWindow.webContents
+        .executeJavaScript('document.body.offsetHeight')
+        .catch(() => 0)
+      const pageHeightMicrons =
+        contentPx > 0 ? Math.ceil(((contentPx * 25.4) / 96 + SLIP_FEED_MM) * 1000) : 300000
       slipWindow.webContents.print(
         {
           silent: true,
@@ -610,12 +642,14 @@ app.whenReady().then(() => {
           margins: { marginType: 'none' },
           pageSize: {
             width: 50000,
-            height: 300000
+            height: pageHeightMicrons
           }
         },
         (success, error) => {
-          if (!success) console.error('Print failed:', error)
-          slipWindow.close()
+          if (!success) log.error('Print failed:', error)
+          const hint = 'The printer did not accept the slip. Check that a printer is installed, turned on and set as the default.'
+          reply({ success, error: success ? undefined : /cancel|fail/i.test(error || '') || !error ? hint : error })
+          if (!slipWindow.isDestroyed()) slipWindow.close()
         }
       )
     })
