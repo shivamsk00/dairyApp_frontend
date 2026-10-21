@@ -490,10 +490,6 @@ const backgroundUpdateCheck = () => {
   updater.check()
 }
 
-// Blank paper fed out below the printed slip so it clears the printer and can be torn off, in millimetres.
-// Raise it if the slip still does not come out far enough; lower it to save paper.
-const SLIP_FEED_MM = 20
-
 // App Ready
 app.whenReady().then(() => {
   createWindow()
@@ -627,14 +623,7 @@ app.whenReady().then(() => {
       if (!slipWindow.isDestroyed()) slipWindow.close()
     })
 
-    slipWindow.webContents.on('did-finish-load', async () => {
-      // The roll is as long as the slip plus a feed margin below it, so the paper comes out far enough to
-      // tear off. (A fixed 300 mm page ignores the real length of the slip.)
-      const contentPx = await slipWindow.webContents
-        .executeJavaScript('document.body.offsetHeight')
-        .catch(() => 0)
-      const pageHeightMicrons =
-        contentPx > 0 ? Math.ceil(((contentPx * 25.4) / 96 + SLIP_FEED_MM) * 1000) : 300000
+    slipWindow.webContents.on('did-finish-load', () => {
       slipWindow.webContents.print(
         {
           silent: true,
@@ -642,7 +631,7 @@ app.whenReady().then(() => {
           margins: { marginType: 'none' },
           pageSize: {
             width: 50000,
-            height: pageHeightMicrons
+            height: 300000 // 300 mm, as in release 1.3.2 ("Slip size perfect"); do not change
           }
         },
         (success, error) => {
