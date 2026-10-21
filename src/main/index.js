@@ -490,6 +490,10 @@ const backgroundUpdateCheck = () => {
   updater.check()
 }
 
+// Blank paper fed out below the printed slip so it clears the printer and can be torn off, in millimetres.
+// Raise it if the slip still does not come out far enough; lower it to save paper.
+const SLIP_FEED_MM = 20
+
 // App Ready
 app.whenReady().then(() => {
   createWindow()
@@ -567,14 +571,18 @@ app.whenReady().then(() => {
 
   // 🖨️ Slip printing
   ipcMain.on('print-slip', (event, slipData) => {
-    // The slip page ships in resources/ (a build only creates out/main, out/preload and out/renderer, so a
-    // slip kept in out/ is missing from every build made on a clean checkout, such as the GitHub release).
-    const filePath = join(is.dev ? app.getAppPath() : process.resourcesPath, 'resources', 'milk-slip.html')
+    // The slip page: out/milk-slip.html is used when it exists (it is the file edited by hand). A build made
+    // on a clean checkout (such as the GitHub release) does not have it, so resources/milk-slip.html, which
+    // ships with the app, is the fallback.
+    const filePath = [
+      join(__dirname, '../../out/milk-slip.html'),
+      join(is.dev ? app.getAppPath() : process.resourcesPath, 'resources', 'milk-slip.html')
+    ].find((candidate) => existsSync(candidate))
     const reply = (result) => {
       if (!event.sender.isDestroyed()) event.sender.send('print-slip-result', result)
     }
-    if (!existsSync(filePath)) {
-      log.error('Print slip: template not found at', filePath)
+    if (!filePath) {
+      log.error('Print slip: template not found (out/milk-slip.html or resources/milk-slip.html)')
       reply({ success: false, error: 'The slip template is missing from the app. Please reinstall or update the app.' })
       return
     }
@@ -619,7 +627,14 @@ app.whenReady().then(() => {
       if (!slipWindow.isDestroyed()) slipWindow.close()
     })
 
-    slipWindow.webContents.on('did-finish-load', () => {
+    slipWindow.webContents.on('did-finish-load', async () => {
+      // The roll is as long as the slip plus a feed margin below it, so the paper comes out far enough to
+      // tear off. (A fixed 300 mm page ignores the real length of the slip.)
+      const contentPx = await slipWindow.webContents
+        .executeJavaScript('document.body.offsetHeight')
+        .catch(() => 0)
+      const pageHeightMicrons =
+        contentPx > 0 ? Math.ceil(((contentPx * 25.4) / 96 + SLIP_FEED_MM) * 1000) : 300000
       slipWindow.webContents.print(
         {
           silent: true,
@@ -627,7 +642,7 @@ app.whenReady().then(() => {
           margins: { marginType: 'none' },
           pageSize: {
             width: 50000,
-            height: 300000
+            height: pageHeightMicrons
           }
         },
         (success, error) => {
