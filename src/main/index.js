@@ -271,6 +271,7 @@
 // NEW CODE HERE
 
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { networkInterfaces } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -566,14 +567,24 @@ app.whenReady().then(() => {
 
   // 🖨️ Slip printing
   ipcMain.on('print-slip', (event, slipData) => {
+    // The slip page ships in resources/ (a build only creates out/main, out/preload and out/renderer, so a
+    // slip kept in out/ is missing from every build made on a clean checkout, such as the GitHub release).
+    const filePath = join(is.dev ? app.getAppPath() : process.resourcesPath, 'resources', 'milk-slip.html')
+    const reply = (result) => {
+      if (!event.sender.isDestroyed()) event.sender.send('print-slip-result', result)
+    }
+    if (!existsSync(filePath)) {
+      log.error('Print slip: template not found at', filePath)
+      reply({ success: false, error: 'The slip template is missing from the app. Please reinstall or update the app.' })
+      return
+    }
+
     const slipWindow = new BrowserWindow({
       show: false,
       webPreferences: {
         sandbox: false
       }
     })
-
-    const filePath = join(__dirname, '../../out/milk-slip.html')
 
     const queryParams = new URLSearchParams({
       account_no: slipData.account_no,
@@ -602,6 +613,12 @@ app.whenReady().then(() => {
 
     slipWindow.loadURL(finalUrl)
 
+    slipWindow.webContents.on('did-fail-load', (_e, code, description) => {
+      log.error('Print slip: page failed to load', code, description)
+      reply({ success: false, error: `The slip could not be opened (${description}).` })
+      if (!slipWindow.isDestroyed()) slipWindow.close()
+    })
+
     slipWindow.webContents.on('did-finish-load', () => {
       slipWindow.webContents.print(
         {
@@ -614,8 +631,10 @@ app.whenReady().then(() => {
           }
         },
         (success, error) => {
-          if (!success) console.error('Print failed:', error)
-          slipWindow.close()
+          if (!success) log.error('Print failed:', error)
+          const hint = 'The printer did not accept the slip. Check that a printer is installed, turned on and set as the default.'
+          reply({ success, error: success ? undefined : /cancel|fail/i.test(error || '') || !error ? hint : error })
+          if (!slipWindow.isDestroyed()) slipWindow.close()
         }
       )
     })
