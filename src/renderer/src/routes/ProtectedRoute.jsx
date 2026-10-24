@@ -5,7 +5,7 @@ import useAuthStore from '../zustand/useAuthStore';
 
 const ProtectedRoute = ({ children }) => {
   const token = useAuthStore(state => state.token)
-  console.log("token print in protected route", token)
+ 
 
   if (!token) {
     return <Navigate to="/login" replace />;

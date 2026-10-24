@@ -1,19 +1,18 @@
-import React from 'react'
+import { AppFooter } from './ui'
 
-const Footer = () => {
-    return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color:'#fff'
-        }}>
-            <h2 style={{
-                fontWeight:'semibold',
-                opacity:0.5
-            }}>Developed by Shivam & Akshay</h2>
-        </div>
-    )
-}
+const Footer = () => (
+  <AppFooter
+    compact
+    bare
+    copyright={
+      <>
+        © 2025 | Powered by{' '}
+        <span className="font-semibold text-[color:var(--ui-text-secondary)]">
+          Production House
+        </span>
+      </>
+    }
+  />
+)
 
 export default Footer

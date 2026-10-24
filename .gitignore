@@ -1,6 +1,22 @@
 node_modules
 dist
-out
+out/*
+# the print slip is edited by hand and must be in every build, so it is tracked
+!out/milk-slip.html
 .DS_Store
 .eslintcache
 *.log*
+dist.zip
+graphify-out
+# Added by code-review-graph
+.code-review-graph/
+
+# AI tool configs (code-review-graph install)
+.claude/
+.codebuddy/
+.cursor/
+.gemini/
+.qoder/
+.mcp.json
+opencode.jsonc
+opencode.json
