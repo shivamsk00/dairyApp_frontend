@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types -- React 19 ignores propTypes */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Eye, History, RefreshCw, RotateCcw } from 'lucide-react'
+import { Eye, History, RefreshCw, RotateCcw } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import {
@@ -10,12 +10,15 @@ import {
   DataTable,
   Input,
   Modal,
+  Pagination,
   SectionCard,
   SelectDropdown,
   useDocumentTitle
 } from '../../components/ui'
 
 const PAGE_SIZE = 20
+const BATCH_SIZE = 100 // entries asked from the server at a time while counting
+const MAX_ENTRIES = 10000 // stop counting here so a huge log does not load forever
 
 const EVENTS = {
   created: { label: 'Created', tone: 'success' },
@@ -88,40 +91,51 @@ const AuditLogsPage = () => {
   const [filters, setFilters] = useState(emptyFilters)
   const [applied, setApplied] = useState(emptyFilters)
   const [errors, setErrors] = useState({})
-  const [rows, setRows] = useState([])
+  // The server answers with the next-page cursor only, never a total. So the entries are read in big batches
+  // from the start, in the background, until the end: then the number of pages (and the last page) is known.
+  const [all, setAll] = useState([])
+  const [finished, setFinished] = useState(false)
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
-  // Cursor paging: cursors[i] is the cursor that opens page i+1 (the first is null).
-  const [cursors, setCursors] = useState([null])
-  const [pageIndex, setPageIndex] = useState(0)
-  const [nextCursor, setNextCursor] = useState(null)
+  const [page, setPage] = useState(1)
 
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const latest = useRef(0)
 
   const load = useCallback(
-    async (cursor, f) => {
+    async (f) => {
       const ticket = ++latest.current
       setLoading(true)
-      const res = await getAuditLogs({ ...f, per_page: PAGE_SIZE, cursor })
-      if (ticket !== latest.current) return // a newer request replaced this one
-      if (res && Array.isArray(res.data)) {
-        setRows(res.data)
-        setNextCursor(res.meta?.next_cursor || null)
+      setFinished(false)
+      let loaded = []
+      let cursor = null
+      for (;;) {
+        const res = await getAuditLogs({ ...f, per_page: BATCH_SIZE, cursor })
+        if (ticket !== latest.current) return // a newer request replaced this one
+        if (!res || !Array.isArray(res.data)) {
+          setFailed(loaded.length === 0)
+          break
+        }
+        loaded = loaded.concat(res.data)
+        setAll(loaded)
         setFailed(false)
-      } else {
-        setRows([])
-        setNextCursor(null)
-        setFailed(true)
+        setLoading(false)
+        cursor = res.meta?.next_cursor || null
+        if (!cursor) {
+          setFinished(true)
+          break
+        }
+        if (loaded.length >= MAX_ENTRIES) break
       }
+      if (loaded.length === 0) setAll([])
       setLoading(false)
     },
     [getAuditLogs]
   )
 
   useEffect(() => {
-    load(null, emptyFilters)
+    load(emptyFilters)
   }, [load])
 
   const apply = (e) => {
@@ -132,36 +146,24 @@ const AuditLogsPage = () => {
     setErrors(found)
     if (Object.keys(found).length) return
     setApplied(filters)
-    setCursors([null])
-    setPageIndex(0)
-    load(null, filters)
+    setPage(1)
+    load(filters)
   }
 
   const reset = () => {
     setFilters(emptyFilters)
     setApplied(emptyFilters)
     setErrors({})
-    setCursors([null])
-    setPageIndex(0)
-    load(null, emptyFilters)
+    setPage(1)
+    load(emptyFilters)
   }
 
-  // Reload the page being viewed (same filters, same position) to pick up new activity.
-  const refresh = () => load(cursors[pageIndex], applied)
+  // Reload with the same filters to pick up new activity.
+  const refresh = () => load(applied)
 
-  const goNext = () => {
-    if (!nextCursor) return
-    const next = [...cursors.slice(0, pageIndex + 1), nextCursor]
-    setCursors(next)
-    setPageIndex(pageIndex + 1)
-    load(nextCursor, applied)
-  }
-
-  const goPrev = () => {
-    if (pageIndex === 0) return
-    setPageIndex(pageIndex - 1)
-    load(cursors[pageIndex - 1], applied)
-  }
+  const pageCount = Math.max(1, Math.ceil(all.length / PAGE_SIZE))
+  const shownPage = Math.min(page, pageCount)
+  const rows = all.slice((shownPage - 1) * PAGE_SIZE, shownPage * PAGE_SIZE)
 
   const openDetail = async (row) => {
     setDetail({ ...row })
@@ -327,32 +329,14 @@ const AuditLogsPage = () => {
                   : 'No activity found'
             }
           />
-          <nav
-            aria-label="Pagination"
-            className="ui-border-subtle mt-3 flex items-center justify-between gap-3 border-t pt-3"
-          >
-            <p className="ui-text-tertiary text-[12px]">Page {pageIndex + 1}</p>
-            <div className="flex gap-1.5">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={ChevronLeft}
-                disabled={pageIndex === 0 || loading}
-                onClick={goPrev}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={!nextCursor || loading}
-                onClick={goNext}
-              >
-                Next
-                <ChevronRight size={13} aria-hidden="true" />
-              </Button>
-            </div>
-          </nav>
+          <Pagination
+            page={shownPage}
+            pageSize={PAGE_SIZE}
+            {...(finished ? { total: all.length } : { pageCount })}
+            onPageChange={setPage}
+            itemLabel="events"
+            className="mt-3 px-0"
+          />
         </SectionCard>
       </div>
 

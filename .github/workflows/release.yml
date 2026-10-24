@@ -69,7 +69,6 @@ jobs:
           if echo "$MESSAGES" | grep -qE '^[a-z]+(\(.+\))?!:|BREAKING CHANGE'; then BUMP=major; fi
           echo "Commits: $RANGE  ->  bump: $BUMP"
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
-          git log --format='- %s' --no-merges "$RANGE" > "$RUNNER_TEMP/notes.md" || true
         if: github.event_name == 'push' && github.ref_type == 'branch'
 
       # Raise the version, commit it and tag it. (A commit or tag pushed by this workflow does not start
@@ -107,15 +106,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Put the commit messages in the release, so the app's Version Control page can show "What's new".
+      # Release notes shown to users (GitHub release page and the app's Version Control page). They are plain,
+      # friendly sentences, never commit messages. A bigger version bump gets a bigger sentence.
       - name: Add release notes
         continue-on-error: true
         shell: bash
         run: |
           VERSION="$(node -p "require('./package.json').version")"
-          if [ ! -s "$RUNNER_TEMP/notes.md" ]; then
-            git log -10 --no-merges --format='- %s' > "$RUNNER_TEMP/notes.md"
-          fi
+          BUMP="${{ inputs.bump || steps.decide.outputs.bump }}"
+          case "$BUMP" in
+            major) printf '%s\n' '- A big update with new features and a better look' '- Faster and smoother to use' '- Bug fixes and improvements' > "$RUNNER_TEMP/notes.md" ;;
+            minor) printf '%s\n' '- New features and improvements' '- Smoother, faster performance' '- Bug fixes' > "$RUNNER_TEMP/notes.md" ;;
+            *)     printf '%s\n' '- Improved performance and stability' '- Bug fixes and small improvements' > "$RUNNER_TEMP/notes.md" ;;
+          esac
           gh release edit "v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

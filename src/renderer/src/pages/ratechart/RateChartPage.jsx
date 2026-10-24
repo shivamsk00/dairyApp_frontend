@@ -804,6 +804,9 @@ const RateChartPage = () => {
                 <Button size="sm" variant="secondary" onClick={() => setCrop(FULL_CROP)}>
                   Whole picture
                 </Button>
+                <Button size="sm" variant="secondary" icon={Upload} onClick={() => scanInputRef.current?.click()}>
+                  Change picture
+                </Button>
                 <Button size="sm" variant="secondary" icon={X} onClick={cancelPicture}>
                   Cancel
                 </Button>

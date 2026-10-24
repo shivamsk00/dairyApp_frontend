@@ -163,7 +163,8 @@ export function interpretRateText(texts) {
 /**
  * Rows for the "check the scanned prices" preview, from the first SNF column the chart shows (8.1) up to
  * the last printed one. A price the list prints is used as read. The columns the list leaves out are worked
- * out with rule 3 (see lowSnfRule.js); where milk is not accepted the cell is blank.
+ * out with rule 3 (see lowSnfRule.js). SNF 8.1 and 8.2 are filled on every row, even above FAT 5.0; the other
+ * columns the rule does not accept stay blank.
  *
  * Each cell is a string, '' (a price to type in) or null (nothing to enter here).
  * Each flag is 'check' (please check or fill in), 'rule' (worked out by rule 3) or false.
@@ -202,7 +203,7 @@ export function buildPreviewRows(result, firstSnf = 8.1) {
         flags.push('check')
       } else {
         // the list prints nothing here: rule 3 decides
-        const res = resolveLowSnfRate(scanned.fat, snf, printedNumber)
+        const res = resolveLowSnfRate(scanned.fat, snf, printedNumber, { fillLowColumns: true })
         if (!res.accepted) {
           cells.push(null)
           flags.push(false)
