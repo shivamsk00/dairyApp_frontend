@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx'
 import {
   Banknote,
   Download,
+  FileText,
   HandCoins,
   IndianRupee,
   Pencil,
@@ -26,9 +27,11 @@ import {
   PageLoader,
   Pagination,
   SectionCard,
-  SelectDropdown
+  SelectDropdown,
+  todayISO
 } from '../../components/ui'
 import logExport from '../../helper/auditExport'
+import { exportTablePdf, niceDate, rupees } from '../../helper/tablePdf'
 
 const FILTER_TYPES = [
   { value: 'all', label: 'All Fields' },
@@ -173,6 +176,35 @@ const SoldProductsPanel = ({
     CustomToast.success('Report exported successfully')
   }
 
+  // Same rows as the Excel export: everything the search shows, not only the current page.
+  const exportToPdf = () =>
+    exportTablePdf({
+      report: 'Product Sales',
+      fileName: `${exportFileName.replace(/\.xlsx$/i, '')}_${todayISO()}.pdf`,
+      title: 'Product Sales Report',
+      details: searchQuery ? [['Search', searchQuery]] : [],
+      cards: [
+        ['Entries', String(filteredProducts.length)],
+        ['Total sales', rupees(stats.total)],
+        ['Cash sales', String(stats.cash)],
+        ['Borrowed', String(stats.borrow)]
+      ],
+      columns: [
+        { header: 'Sr.', get: (_, i) => i + 1 },
+        { header: 'Account', get: (e) => e.customer_account_number },
+        { header: 'Customer', get: (e) => e.customer?.name || '' },
+        { header: 'Product', get: (e) => e.product?.name || '' },
+        { header: 'Category', get: (e) => e.category?.name || '' },
+        { header: 'Price', align: 'r', get: (e) => Number(e.product_price || 0).toFixed(2) },
+        { header: 'Qty', align: 'r', get: (e) => e.qty },
+        { header: 'Total', align: 'r', key: true, get: (e) => Number(e.total || 0).toFixed(2) },
+        { header: 'Date', get: (e) => niceDate(e.date) },
+        { header: 'Type', get: (e) => (e.transaction_type === 'cash' ? 'Cash' : 'Borrow') }
+      ],
+      rows: filteredProducts,
+      totals: ['Total', '', '', '', '', '', '', stats.total.toFixed(2), '', '']
+    })
+
   const openEdit = (item) => {
     setSelectedCustomer(item)
     setIsEditeModal(true)
@@ -275,9 +307,14 @@ const SoldProductsPanel = ({
         icon={ShoppingCart}
         tone="info"
         action={
-          <Button size="sm" icon={Download} variant="secondary" onClick={exportToExcel}>
-            Export Excel
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" icon={FileText} variant="secondary" onClick={exportToPdf}>
+              Export PDF
+            </Button>
+            <Button size="sm" icon={Download} variant="secondary" onClick={exportToExcel}>
+              Export Excel
+            </Button>
+          </div>
         }
       >
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_14rem]">

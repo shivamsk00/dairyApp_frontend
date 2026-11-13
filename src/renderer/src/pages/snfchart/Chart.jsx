@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types -- internal component; props are documented by usage */
 import { useEffect, useState } from 'react'
-import { Grid3x3 } from 'lucide-react'
+import { FileText, Grid3x3 } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
-import { Badge, DataTable, SectionCard } from '../../components/ui'
+import { Badge, Button, DataTable, SectionCard } from '../../components/ui'
+import { exportTablePdf } from '../../helper/tablePdf'
 
 const clrValues = Array.from({ length: 9 }, (_, i) => 22 + i) // 22 to 30
 const fatValues = Array.from({ length: 71 }, (_, i) => (3.0 + i * 0.1).toFixed(1)) // 3.0 to 10.0
@@ -67,6 +68,24 @@ const Chart = ({ formValues, trigger }) => {
     }
   }, [trigger])
 
+  // The chart as shown (the saved values are not needed: it is worked out from A, B and C)
+  const exportPdf = () =>
+    exportTablePdf({
+      report: 'SNF Chart',
+      landscape: false,
+      dense: true,
+      title: 'SNF Chart',
+      details: [
+        ['Formula', '(CLR / A) + (B x FAT) + C'],
+        ['A, B, C', `${formValues.A}, ${formValues.B}, ${formValues.C}`]
+      ],
+      columns: [
+        { header: 'FAT / CLR', key: true, get: (row) => row.fat },
+        ...clrValues.map((clr, j) => ({ header: String(clr), align: 'c', get: (row) => row.cells[j] ?? '' }))
+      ],
+      rows: snfTable.length ? rows : []
+    })
+
   const rows = fatValues.map((fat, rowIdx) => ({ id: fat, fat, cells: snfTable[rowIdx] ?? [] }))
   const columns = [
     {
@@ -89,9 +108,14 @@ const Chart = ({ formValues, trigger }) => {
       icon={Grid3x3}
       tone="info"
       action={
-        <Badge tone="neutral" dot={false}>
-          {fatValues.length} × {clrValues.length}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge tone="neutral" dot={false}>
+            {fatValues.length} × {clrValues.length}
+          </Badge>
+          <Button size="sm" variant="secondary" icon={FileText} onClick={exportPdf}>
+            Export PDF
+          </Button>
+        </div>
       }
     >
       <DataTable

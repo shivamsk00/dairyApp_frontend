@@ -4,6 +4,7 @@ import {
   CircleCheck,
   Columns3,
   Download,
+  FileText,
   IndianRupee,
   Loader2,
   Rows3,
@@ -27,6 +28,7 @@ import {
   useDocumentTitle
 } from '../../components/ui'
 import logExport from '../../helper/auditExport'
+import { exportTablePdf } from '../../helper/tablePdf'
 import { scanRateImage } from '../../helper/ocrRateChart'
 import ImageCropper, { FULL_CROP } from '../../components/ImageCropper'
 import { buildPreviewRows } from '../../helper/ocrParse'
@@ -515,6 +517,29 @@ const RateChartPage = () => {
     reader.readAsArrayBuffer(file)
   }
 
+  // The whole chart (FAT down, SNF across) on A4 portrait; a price not filled in stays blank.
+  const handleExportPdf = () =>
+    exportTablePdf({
+      report: 'Rate Chart',
+      fileName: `SNF_Rate_Chart_${todayISO()}.pdf`,
+      landscape: false,
+      dense: true,
+      title: 'SNF Rate Chart',
+      details: [['FAT', `${FAT_VALUES[0].toFixed(1)} to ${FAT_VALUES[FAT_VALUES.length - 1].toFixed(1)}`], ['SNF', `${SNF_VALUES[0].toFixed(1)} to ${SNF_VALUES[SNF_VALUES.length - 1].toFixed(1)}`]],
+      columns: [
+        { header: 'FAT / SNF', key: true, get: (row) => row.fat.toFixed(1) },
+        ...SNF_VALUES.map((snf, j) => ({
+          header: snf.toFixed(1),
+          align: 'r',
+          get: (row) => {
+            const rate = row.snfRates[j]?.rate
+            return rate === '' || rate == null ? '' : Number(rate).toFixed(2)
+          }
+        }))
+      ],
+      rows: rateData
+    })
+
   const handleExport = () => {
     try {
       // Prepare data for export
@@ -626,6 +651,9 @@ const RateChartPage = () => {
               onClick={() => fileInputRef.current?.click()}
             >
               {debugging ? 'Processing…' : 'Import Excel'}
+            </Button>
+            <Button size="sm" variant="secondary" icon={FileText} onClick={handleExportPdf}>
+              Export PDF
             </Button>
             <Button size="sm" variant="secondary" icon={Download} onClick={handleExport}>
               Export Excel

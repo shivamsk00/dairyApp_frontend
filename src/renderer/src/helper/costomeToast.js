@@ -5,7 +5,7 @@ const CustomToast = {
   success: (message, position = "top-right") =>
     toast.success(message, {
       position,
-      autoClose: 2000,
+      autoClose: 3500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -16,7 +16,7 @@ const CustomToast = {
   error: (message, position = "top-right") =>
     toast.error(message, {
       position,
-      autoClose: 2000,
+      autoClose: 3500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -27,7 +27,7 @@ const CustomToast = {
   info: (message, position = "top-right") =>
     toast.info(message, {
       position,
-      autoClose: 2000,
+      autoClose: 3500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -38,7 +38,7 @@ const CustomToast = {
   warn: (message, position = "top-right") =>
     toast.warn(message, {
       position,
-      autoClose: 2000,
+      autoClose: 3500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,

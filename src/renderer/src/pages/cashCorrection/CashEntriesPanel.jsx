@@ -1,9 +1,23 @@
 /* eslint-disable react/prop-types -- EditCashModal is internal to this page */
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowDownLeft, ArrowUpRight, Banknote, Pencil, Save, Scale, Trash2, X } from 'lucide-react'
+import * as XLSX from 'xlsx'
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Banknote,
+  Download,
+  FileText,
+  Pencil,
+  Save,
+  Scale,
+  Trash2,
+  X
+} from 'lucide-react'
 import CustomToast from '../../helper/costomeToast'
 import useHomeStore from '../../zustand/useHomeStore'
 import DateFormate from '../../helper/DateFormate'
+import logExport from '../../helper/auditExport'
+import { exportTablePdf, niceDate, rupees } from '../../helper/tablePdf'
 import {
   Badge,
   Button,
@@ -18,7 +32,8 @@ import {
   Pagination,
   SectionCard,
   SelectDropdown,
-  toInputDate
+  toInputDate,
+  todayISO
 } from '../../components/ui'
 
 const MODES = [
@@ -305,6 +320,69 @@ const CashEntriesPanel = ({ refreshToken = 0, showWallet = false, onLoadingChang
     }
   }
 
+  // What the filters show right now, as text for the exports
+  const filterText = [
+    filters.accountNumber && `Account contains ${filters.accountNumber}`,
+    filters.customerName && `Name contains ${filters.customerName}`,
+    filters.date && `Date ${DateFormate(filters.date)}`
+  ].filter(Boolean)
+
+  const modeLabel = (entry) => (entry.credit_debit_mode === 'received' ? 'Received' : 'Given')
+
+  // Both exports hold every entry the filters show, not only the current page.
+  const exportToExcel = () => {
+    if (!filteredEntries.length) {
+      CustomToast.warn('No data to export')
+      return
+    }
+    const rows = filteredEntries.map((entry, i) => ({
+      'Sr. No': i + 1,
+      'Account No': entry.customer_account_number,
+      'Customer Name': entry.customer?.name || '',
+      ...(showWallet ? { Wallet: Number(entry.customer?.wallet || 0) } : {}),
+      Date: niceDate(entry.date),
+      Amount: Number(entry.amount || 0),
+      Type: modeLabel(entry),
+      Note: entry.note || ''
+    }))
+    rows.push({})
+    rows.push({ 'Account No': 'Received', Amount: stats.received })
+    rows.push({ 'Account No': 'Given', Amount: stats.given })
+    rows.push({ 'Account No': 'Net', Amount: stats.net })
+
+    const worksheet = XLSX.utils.json_to_sheet(rows)
+    worksheet['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 22 }, ...(showWallet ? [{ wch: 12 }] : []), { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 32 }]
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Cash Entries')
+    XLSX.writeFile(workbook, `Cash_Entries_${todayISO()}.xlsx`)
+    logExport('Cash Entries', 'xlsx', filteredEntries.length)
+    CustomToast.success('Report exported successfully')
+  }
+
+  const exportToPdf = () =>
+    exportTablePdf({
+      report: 'Cash Entries',
+      title: 'Cash Entries Report',
+      details: filterText.length ? [['Filters', filterText.join(', ')]] : [],
+      cards: [
+        ['Entries', String(filteredEntries.length)],
+        ['Received', rupees(stats.received), 'pos'],
+        ['Given', rupees(stats.given), 'neg'],
+        ['Net', rupees(stats.net), stats.net < 0 ? 'neg' : '']
+      ],
+      columns: [
+        { header: 'Sr.', get: (_, i) => i + 1 },
+        { header: 'Account', get: (e) => e.customer_account_number },
+        { header: 'Customer', get: (e) => e.customer?.name || '' },
+        ...(showWallet ? [{ header: 'Wallet', align: 'r', get: (e) => Number(e.customer?.wallet || 0).toFixed(2) }] : []),
+        { header: 'Date', get: (e) => niceDate(e.date) },
+        { header: 'Amount', align: 'r', key: true, get: (e) => Number(e.amount || 0).toFixed(2) },
+        { header: 'Type', get: modeLabel, tone: (e) => (e.credit_debit_mode === 'received' ? 'pos' : 'neg') },
+        { header: 'Note', get: (e) => e.note || '' }
+      ],
+      rows: filteredEntries
+    })
+
   const columns = [
     { key: 'sr', header: '#' },
     {
@@ -406,6 +484,16 @@ const CashEntriesPanel = ({ refreshToken = 0, showWallet = false, onLoadingChang
           subtitle="Filter, then edit or delete an entry"
           icon={Banknote}
           tone="info"
+          action={
+            <div className="flex gap-2">
+              <Button size="sm" icon={FileText} variant="secondary" onClick={exportToPdf}>
+                Export PDF
+              </Button>
+              <Button size="sm" icon={Download} variant="secondary" onClick={exportToExcel}>
+                Export Excel
+              </Button>
+            </div>
+          }
         >
           <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
             <Input

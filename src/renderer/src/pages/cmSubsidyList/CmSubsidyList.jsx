@@ -31,6 +31,7 @@ import {
   useDocumentTitle
 } from '../../components/ui'
 import logExport from '../../helper/auditExport'
+import { exportTablePdf, rupees } from '../../helper/tablePdf'
 
 // Helper functions for date handling
 // Local calendar date as YYYY-MM-DD. (toISOString() is UTC, which is the previous day before 5:30 AM IST.)
@@ -309,6 +310,42 @@ const CmSubsidyList = () => {
     toast.success('Excel file downloaded successfully')
   }
 
+  // Same rows and totals as the Excel export, with the period and the estimated subsidy
+  const handleExportPdf = () => {
+    const rowsQty = reportData.reduce((sum, item) => sum + (parseFloat(item.milk_qty) || 0), 0)
+    const qty = summaryData?.total_qty !== undefined ? parseFloat(summaryData.total_qty) || 0 : rowsQty
+    const rate = parseFloat(subsidyAmount) || 0
+    return exportTablePdf({
+      report: 'CM Subsidy List',
+      fileName: `CM_Subsidy_List_${getToday()}.pdf`,
+      title: 'CM Subsidy Milk Collection Report',
+      details: [['Period', `${formatInputDate(dateForm.start_date)} to ${formatInputDate(dateForm.end_date)}`]],
+      cards: [
+        ['Entries', String(reportData.length)],
+        ['Total milk', `${qty.toFixed(2)} ${reportData[0]?.uom || 'LTR'}`],
+        ['Average FAT', String(summaryData?.avg_fat ?? '-')],
+        ['Average SNF', String(summaryData?.avg_snf ?? '-')],
+        ...(rate > 0 ? [['Estimated subsidy', rupees(qty * rate)]] : [])
+      ],
+      columns: [
+        { header: 'Sr.', get: (_, i) => i + 1 },
+        { header: 'Customer Name', get: (r) => r.customer_name || '-' },
+        { header: 'Bank Account', get: (r) => r.bank_account || '-' },
+        { header: 'Document Date', get: (r) => r.document_date },
+        { header: 'Shift', get: (r) => (r.shift === 'Morning' ? 'M' : 'E'), align: 'c' },
+        { header: 'Uploader Code', get: (r) => subsidyByAccount.get(String(r.farmer_code)) || r.uploader_code || '' },
+        { header: 'Farmer Code', get: (r) => r.farmer_code },
+        { header: 'UOM', get: (r) => r.uom },
+        { header: 'Milk Type', get: (r) => (r.milk_type === 'cow' ? 'C' : 'B'), align: 'c' },
+        { header: 'Milk Qty', get: (r) => r.milk_qty, align: 'r', key: true },
+        { header: 'Fat %', get: (r) => r.fat, align: 'r' },
+        { header: 'SNF %', get: (r) => r.snf, align: 'r' }
+      ],
+      rows: reportData,
+      totals: ['Total', '', '', '', '', '', '', '', '', qty.toFixed(2), summaryData?.avg_fat ?? '', summaryData?.avg_snf ?? '']
+    })
+  }
+
   const isDateFormValid = dateForm.start_date && dateForm.end_date
 
   // account number -> subsidy code, for the report's "Uploader Code" column
@@ -450,6 +487,9 @@ const CmSubsidyList = () => {
         ]}
         actions={
           <>
+            <Button size="sm" variant="success" icon={FileText} onClick={handleExportPdf}>
+              Export PDF
+            </Button>
             <Button size="sm" variant="success" icon={Download} onClick={handleExportExcel}>
               Export Excel
             </Button>

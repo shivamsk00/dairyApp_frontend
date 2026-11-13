@@ -18,6 +18,8 @@ import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
 import MergedReportTable from './MergedReportTable'
 import { computeTotals, formatDate, mergedEntries } from './reportUtils'
+import { buildReportHtml } from './reportPdf'
+import { loadSettings } from '../setting/settingsStorage'
 import {
   Badge,
   Breadcrumb,
@@ -73,6 +75,7 @@ const ReportsPage = () => {
   useDocumentTitle('Reports')
   const [summaryData, setSummaryData] = useState(null)
   const [isLoading, setLoading] = useState(false)
+  const [isPdfSaving, setPdfSaving] = useState(false)
   const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
     term: 'date_range',
@@ -269,6 +272,36 @@ const ReportsPage = () => {
     CustomToast.success('Report exported successfully')
   }
 
+  // Save the report as a PDF: the page's HTML is printed by the main process, the user picks the file.
+  const exportToPdf = async () => {
+    if (isPdfSaving) return
+    if (!window.api?.exportPdf) {
+      CustomToast.error('PDF export is only available in the installed desktop app.')
+      return
+    }
+    setPdfSaving(true)
+    try {
+      const { dairyName, address } = loadSettings()
+      const customer = summaryData.customer_name?.replace(/[^a-zA-Z0-9]/g, '_') || 'Customer'
+      const range = `${formatInputDate(form.start_date)}_to_${formatInputDate(form.end_date)}`
+      const res = await window.api.exportPdf({
+        html: buildReportHtml(summaryData, form, { dairyName, address }),
+        fileName: `${customer}_Report_${range}.pdf`
+      })
+      if (res?.success) {
+        logExport('Customer Report', 'pdf')
+        CustomToast.success('PDF saved')
+      } else if (!res?.canceled) {
+        CustomToast.error(res?.message || 'Could not create the PDF')
+      }
+    } catch (error) {
+      console.error('PDF export failed:', error)
+      CustomToast.error('Could not create the PDF')
+    } finally {
+      setPdfSaving(false)
+    }
+  }
+
   const totals = computeTotals(summaryData)
   const milkQty =
     Number.isFinite(Number(summaryData?.total_milk_collections)) &&
@@ -289,9 +322,14 @@ const ReportsPage = () => {
         items={[{ label: 'Home', to: '/' }, { label: 'Reports' }]}
         actions={
           summaryData && (
-            <Button icon={Download} variant="secondary" onClick={exportToExcel}>
-              Export Excel
-            </Button>
+            <>
+              <Button icon={FileText} variant="secondary" loading={isPdfSaving} onClick={exportToPdf}>
+                Export PDF
+              </Button>
+              <Button icon={Download} variant="secondary" onClick={exportToExcel}>
+                Export Excel
+              </Button>
+            </>
           )
         }
       />

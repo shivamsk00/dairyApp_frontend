@@ -9,10 +9,13 @@ export const formatDate = (dateString) => {
 
 const num = (value) => parseFloat(value || 0)
 
-/**
- * Milk entries carry ISO dates, product sales and payments carry DD-MM-YYYY. Everything is grouped by
- * ISO date and returned oldest first.
- */
+/** A date as YYYY-MM-DD, whether the server wrote it YYYY-MM-DD or DD-MM-YYYY (it uses both). */
+const toIso = (value) => {
+  const text = String(value ?? '').slice(0, 10)
+  return /^\d{2}-\d{2}-\d{4}$/.test(text) ? text.split('-').reverse().join('-') : text
+}
+
+/** Entries of every kind, grouped by ISO date and returned oldest first. */
 export const mergeAllEntriesByDate = (milk, products, payments) => {
   const map = new Map()
   const push = (key, entry) => {
@@ -20,13 +23,9 @@ export const mergeAllEntriesByDate = (milk, products, payments) => {
     map.get(key).push(entry)
   }
 
-  milk.forEach((entry) => push(entry.date, { type: 'milk', ...entry }))
-  products.forEach((entry) =>
-    push(entry.date?.split('-').reverse().join('-'), { type: 'product', ...entry })
-  )
-  payments.forEach((entry) =>
-    push(entry.date?.split('-').reverse().join('-'), { type: 'payment', ...entry })
-  )
+  milk.forEach((entry) => push(toIso(entry.date), { type: 'milk', ...entry }))
+  products.forEach((entry) => push(toIso(entry.date), { type: 'product', ...entry }))
+  payments.forEach((entry) => push(toIso(entry.date), { type: 'payment', ...entry }))
 
   return [...map.entries()]
     .sort((a, b) => new Date(a[0]) - new Date(b[0]))

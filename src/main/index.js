@@ -280,6 +280,7 @@ import { format } from 'url'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 import { createUpdateManager } from './updater'
+import { exportPdf } from './pdf'
 import { createVersionManager } from './versions'
 import { createOcrService } from './ocr'
 
@@ -525,6 +526,12 @@ app.whenReady().then(() => {
   ipcMain.on('open-cutomer-win', () => customerCollection())
   ipcMain.on('open-cash-entry-window', () => createCashEntryWindow())
   ipcMain.handle('get-app-version', () => app.getVersion())
+  // Save a report as PDF (the page sends its HTML; the user picks the file)
+  ipcMain.handle('report:export-pdf', (event, request) =>
+    // the save dialog belongs to the window that asked (also the Product Sales and Cash Entry windows)
+    exportPdf(BrowserWindow.fromWebContents(event.sender) ?? mainWindow, request || {})
+  )
+
   // This computer's address on its network (e.g. 192.168.1.20): the first external IPv4 found.
   ipcMain.handle('get-system-ip', () => {
     for (const list of Object.values(networkInterfaces())) {

@@ -776,34 +776,35 @@ select.ui-input {
    and existing call sites choose those themes. */
 
 .Toastify__toast-container {
-  --toastify-toast-width: 22rem;
+  --toastify-toast-width: 24rem;
   font-family: inherit;
 }
 .Toastify__toast.ui-toast {
-  position: relative;
+  /* No `position` or `margin` here: they belong to react-toastify's stacking. */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 0.75rem;
+  row-gap: 0.1rem;
+  align-content: start;
+  align-items: start;
   min-height: 0;
-  margin-bottom: 0.6rem;
-  padding: 0.7rem 0.6rem 0.7rem 1rem;
-  align-items: center;
-  gap: 0.7rem;
-  overflow: hidden;
+  padding: 0.85rem 0.75rem 0.9rem 0.95rem;
   border: 1px solid var(--ui-border-subtle);
-  border-radius: 5px;
+  border-top: 3px solid var(--ui-toast-tone);
+  border-radius: 3px;
   background: var(--ui-surface-raised) !important;
-  color: var(--ui-text-primary) !important;
+  /* the message itself is a bare text node, so it takes its look from here */
+  color: var(--ui-text-secondary) !important;
   box-shadow: var(--ui-shadow-xl);
   font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 400;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
-.ui-toast::before {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 3px;
-  background: var(--ui-toast-tone);
+/* Behind the newest toast of a stack only the card shows, not its text */
+.Toastify__toast.ui-toast.Toastify__toast--stacked[data-collapsed='true']:not(:last-child) {
+  color: transparent !important;
 }
 .ui-toast-success {
   --ui-toast-tone: var(--ui-success-500);
@@ -820,23 +821,42 @@ select.ui-input {
 .ui-toast-default {
   --ui-toast-tone: var(--ui-primary-500);
 }
-.ui-toast-icon {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  place-items: center;
-  border-radius: 6px;
-  box-shadow: none !important;
+
+/* Icon and title are children of the icon wrapper: let them be grid items of the toast itself */
+.ui-toast .Toastify__toast-icon {
+  display: contents;
 }
+.ui-toast-title {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--ui-text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+/* Round icon: tinted disc inside a soft ring, in the colour of the toast */
+.ui-toast-icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--ui-toast-tone) 14%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ui-toast-tone) 12%, transparent);
+  color: var(--ui-toast-tone);
+}
+
 .ui-toast-close {
   display: inline-grid;
+  grid-column: 3;
+  grid-row: 1 / span 2;
   width: 1.5rem;
   height: 1.5rem;
-  flex-shrink: 0;
-  margin-inline-start: auto;
   place-items: center;
-  border-radius: 5px;
-  color: var(--ui-text-tertiary) !important;
+  border-radius: 4px;
+  color: var(--ui-text-secondary) !important;
   opacity: 1 !important;
   transition:
     background-color 0.15s,
@@ -846,10 +866,10 @@ select.ui-input {
   background: var(--ui-surface-sunken);
   color: var(--ui-text-primary) !important;
 }
-.Toastify__progress-bar.ui-toast-progress {
-  height: 2px;
-  background: var(--ui-toast-tone) !important;
-  opacity: 0.7;
+/* Like the design: no progress bar. It stays in the page but invisible, because react-toastify closes
+   the toast when this bar's animation ends (display:none would stop the toast from ever closing). */
+.ui-toast .Toastify__progress-bar--wrp {
+  opacity: 0;
 }
 
 /* ---- PageLoader (route / app loading) ---------------------------------------------------- */

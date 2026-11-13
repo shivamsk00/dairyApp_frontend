@@ -102,6 +102,7 @@ const api = {
   // 📦 App Info
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getSystemIp: () => ipcRenderer.invoke('get-system-ip'),
+  exportPdf: (request) => ipcRenderer.invoke('report:export-pdf', request),
 
   // 🔔 Update Event Listeners - Proper callback handling [web:122][web:125]
   onUpdateMessage: (callback) => {
