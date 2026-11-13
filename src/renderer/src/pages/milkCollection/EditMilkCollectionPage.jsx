@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types -- props are documented by usage in DailyMilkCollectionPage */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pencil, Save, TriangleAlert, X } from 'lucide-react'
 import useHomeStore from '../../zustand/useHomeStore'
 import CustomToast from '../../helper/costomeToast'
@@ -24,7 +24,19 @@ const SHIFTS = ['morning', 'evening', 'both'].map((v) => ({
 
 const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   const editMilkCollectionDetail = useHomeStore((state) => state.editMilkCollectionDetail)
-  const loading = useHomeStore((state) => state.loading)
+  // Set while the update is on its way. The ref stops a second Enter/click before React has re-rendered
+  // (a second call would save the entry twice); the state disables the buttons and shows the spinner.
+  const [saving, setSaving] = useState(false)
+  const savingRef = useRef(false)
+
+  // A fresh window starts unlocked. After a successful update it stays locked, because the window fades out
+  // for a moment and its form would still take another Enter.
+  useEffect(() => {
+    if (isOpen) {
+      savingRef.current = false
+      setSaving(false)
+    }
+  }, [isOpen])
   const fetchCustomerDetailsByAccount = useHomeStore((state) => state.fetchCustomerDetailsByAccount)
   const getMilkRate = useHomeStore((state) => state.getMilkRate)
   const [isCustomer, setIscustomer] = useState(true)
@@ -158,23 +170,36 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
   }, [form.customer_account_number])
 
   const executeUpdate = async () => {
+    if (savingRef.current) return
+    savingRef.current = true
+    setSaving(true)
+    let saved = false
     try {
       const res = await editMilkCollectionDetail(milkData.id, form)
       if (res.status_code === 200) {
         CustomToast.success(res.message)
         setShowConfirmChange(false)
-        await onUpdate()
+        saved = true
+        // the entry is saved: close the window even if reloading the list fails
+        await Promise.resolve(onUpdate()).catch((error) => console.error('Could not reload the list:', error))
         onClose()
       } else {
         CustomToast.error(res.message)
       }
     } catch (error) {
       console.error('Error updating milk collection:', error)
+      CustomToast.error('Could not update the entry. Please try again.')
+    } finally {
+      if (!saved) {
+        savingRef.current = false
+        setSaving(false)
+      }
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (savingRef.current) return
 
     const found = {}
     if (!form.date) found.date = 'Select the date'
@@ -296,6 +321,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
         onClose={onClose}
         ariaLabel="Edit milk collection"
         maxWidth="52rem"
+        returnFocus={false}
         className="flex max-h-[90vh] flex-col overflow-hidden"
       >
         <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
@@ -429,11 +455,11 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
           </div>
 
           <div className="ui-border-subtle flex justify-end gap-2 border-t px-6 py-4">
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
-            <Button type="submit" icon={Save} loading={loading} disabled={loading || isCustomer}>
-              {loading ? 'Please wait...' : 'Update'}
+            <Button type="submit" icon={Save} loading={saving} disabled={saving || isCustomer}>
+              {saving ? 'Updating...' : 'Update'}
             </Button>
           </div>
         </form>
@@ -446,6 +472,7 @@ const EditMilkCollectionModal = ({ isOpen, onClose, milkData, onUpdate }) => {
           onClose() // closes the main dialog too, as before
         }}
         onConfirm={executeUpdate}
+        loading={saving}
         tone="warning"
         icon={TriangleAlert}
         title="Confirm Account Update"

@@ -22,6 +22,8 @@ if (typeof document !== 'undefined' && document.getElementById('root')) {
  * @param {string} [maxWidth='28rem'] Any CSS length.
  * @param {boolean} [dismissible=true] Allow Esc / overlay click / close button.
  * @param {string} [className] Classes for the dialog body (padding, alignment).
+ * @param {boolean} [returnFocus=true] Give focus back to the button that opened the dialog when it closes.
+ *   Turn off where Enter would otherwise press that button again and reopen the dialog.
  */
 const Modal = ({
   isOpen,
@@ -30,6 +32,7 @@ const Modal = ({
   ariaLabel,
   maxWidth = '28rem',
   dismissible = true,
+  returnFocus = true,
   className,
   children
 }) => (
@@ -38,6 +41,7 @@ const Modal = ({
     onRequestClose={dismissible ? onClose : undefined}
     shouldCloseOnEsc={dismissible}
     shouldCloseOnOverlayClick={dismissible}
+    shouldReturnFocusAfterClose={returnFocus}
     closeTimeoutMS={200}
     contentLabel={title || ariaLabel}
     overlayClassName={{
