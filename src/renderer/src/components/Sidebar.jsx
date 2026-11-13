@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import logoImg from '../assets/logo.png'
 import {
+  Bot,
   Calculator,
   FileEdit,
   FileText,
@@ -139,6 +140,7 @@ const Sidebar = () => {
           ]
         },
         { to: '/reports', label: 'Reports', icon: FileText },
+        { to: '/assistant', label: 'Ask Assistant', icon: Bot },
         { to: '/auditlogs', label: 'Audit Logs', icon: History },
         { to: '/update-history', label: 'Version Control', icon: Rocket },
         { to: '/settings', label: 'Settings', icon: Settings }

@@ -81,6 +81,22 @@ const api = {
     return () => ipcRenderer.removeListener('ocr-progress', handler)
   },
 
+  // Ask Assistant: offline chat model (status, one-time download, questions; answers stream as tokens)
+  assistantStatus: () => ipcRenderer.invoke('assistant:status'),
+  assistantDownload: () => ipcRenderer.invoke('assistant:download'),
+  assistantCancelDownload: () => ipcRenderer.invoke('assistant:cancel-download'),
+  assistantAsk: (request) => ipcRenderer.invoke('assistant:ask', request),
+  onAssistantStatus: (callback) => {
+    const handler = (_event, status) => callback(status)
+    ipcRenderer.on('assistant:status', handler)
+    return () => ipcRenderer.removeListener('assistant:status', handler)
+  },
+  onAssistantToken: (callback) => {
+    const handler = (_event, text) => callback(text)
+    ipcRenderer.on('assistant:token', handler)
+    return () => ipcRenderer.removeListener('assistant:token', handler)
+  },
+
   // 🗂️ Version control: list published versions, install any (also older ones), manage the pin
   listVersions: () => ipcRenderer.invoke('versions:list'),
   installVersion: (version) => ipcRenderer.invoke('versions:install', version),

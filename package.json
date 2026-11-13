@@ -34,7 +34,13 @@
       "out/**/*",
       "resources/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/@node-llama-cpp/*cuda*/**",
+      "!node_modules/@node-llama-cpp/*vulkan*/**",
+      "!node_modules/@node-llama-cpp/linux-*/**",
+      "!node_modules/@node-llama-cpp/mac-*/**",
+      "!node_modules/@node-llama-cpp/win-arm64/**",
+      "!node_modules/node-llama-cpp/llama/gitRelease.bundle"
     ],
     "extraResources": [
       {
@@ -123,7 +129,11 @@
     "generateUpdatesFilesForAllChannels": true,
     "releaseInfo": {
       "releaseNotesFile": "CHANGELOG.md"
-    }
+    },
+    "asarUnpack": [
+      "node_modules/node-llama-cpp/**",
+      "node_modules/@node-llama-cpp/**"
+    ]
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -135,6 +145,7 @@
     "electron-log": "^5.0.0",
     "electron-updater": "^6.6.2",
     "lucide-react": "^0.515.0",
+    "node-llama-cpp": "3.22.3",
     "react-apexcharts": "^1.7.0",
     "react-chartjs-2": "^5.3.1",
     "react-data-table-component": "^7.7.0",

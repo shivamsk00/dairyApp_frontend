@@ -282,6 +282,7 @@ import log from 'electron-log'
 import { createUpdateManager } from './updater'
 import { createVersionManager } from './versions'
 import { createOcrService } from './ocr'
+import { createAssistantService } from './assistant'
 
 // Configure logging for debugging
 log.transports.file.level = 'info'
@@ -486,6 +487,15 @@ const versions = createVersionManager({
 })
 
 // Offline OCR (reads a price list from a picture). Loaded only while a scan runs.
+// Offline chat model for the Ask Assistant page. Loaded only while it is used.
+const assistant = createAssistantService({
+  app,
+  log,
+  send: (channel, payload) => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload)
+  }
+})
+
 const ocr = createOcrService({
   app,
   isDev: is.dev,
@@ -556,6 +566,12 @@ app.whenReady().then(() => {
       return { success: false, message: error?.message || 'Could not read the image.' }
     }
   })
+
+  // Assistant IPC
+  ipcMain.handle('assistant:status', () => assistant.status())
+  ipcMain.handle('assistant:download', () => assistant.startDownload())
+  ipcMain.handle('assistant:cancel-download', () => assistant.cancelDownload())
+  ipcMain.handle('assistant:ask', (_event, request) => assistant.ask(request))
 
   // Version control IPC
   ipcMain.handle('versions:list', () => versions.list())
@@ -668,6 +684,7 @@ app.whenReady().then(() => {
 
 // App Quit
 app.on('window-all-closed', () => {
+  assistant.unload()
   if (updateCheckInterval) {
     clearInterval(updateCheckInterval)
   }
