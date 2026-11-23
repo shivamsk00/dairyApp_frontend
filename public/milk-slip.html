@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Milk Received Slip</title>
+  <style>
+    @media print {
+      @page {
+        size: 58mm auto;
+        margin: 0;
+      }
+
+      /* body {
+        margin: 0;
+        width: 58mm;
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: bold;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      } */
+    }
+
+    body {
+      font-family: monospace;
+      font-size: 11px;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .center {
+      text-align: center;
+      line-height: 0.4;
+    }
+
+    .dashed {
+      border-top: 1px dashed #000;
+      margin: 4px 0;
+    }
+
+    .footer {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 10px;
+      border-top: 1px dashed #000;
+      padding-top: 3px;
+    }
+  </style>
+</head>
+
+
+<body>
+  <div class="center">
+    <p>MS, PACCA SAHARANA, 1187</p>
+    <p style="font-size: 10px;">Pala ram. 9413289512</p>
+    <p><strong>Milk Received Slip</strong></p>
+  </div>
+
+  <div class="dashed"></div>
+
+  <table style=" font-size: 11px; border-spacing: 0;">
+    <tr>
+      <td>A/c No:</td>
+      <td id="account-no">02374025</td>
+    </tr>
+    <tr>
+      <td>Name:</td>
+      <td id="customer"></td>
+    </tr>
+    <tr>
+
+      <td>Date:</td>
+      <td id="date"></td>
+    </tr>
+
+    <tr>
+
+      <td>Time:</td>
+      <td id="time"></td>
+    </tr>
+    <!-- <tr>
+
+      <td>Shift:</td>
+      <td id="shift"></td>
+    </tr> -->
+
+    <!-- <tr>
+
+      <td>Milk Type:</td>
+      <td id="milk_type"></td>
+    </tr> -->
+
+    <tr>
+
+      <td>Qty: 5.05</td>
+      <td id="qty"></td>
+    </tr>
+
+    <tr>
+
+      <td>FAT(%): 3.4</td>
+      <td id="fat"></td>
+    </tr>
+
+    <tr>
+
+      <td>SNF(%):</td>
+      <td id="snf"></td>
+    </tr>
+
+    <!-- <tr>
+
+      <td>Oth Rs/Ltr:</td>
+      <td id="oth_rate"></td>
+    </tr> -->
+
+    <!-- <tr>
+
+      <td>Base Rate/Ltr:</td>
+      <td id="base_rate"></td>
+    </tr> -->
+    <tr>
+
+      <td style="font-size: 10px; font-weight: bold;">Rate/Ltr:</td>
+      <td style="font-size: 12px; font-weight: bold;" id="rate">35</td>
+    </tr>
+    <tr>
+      <td style="font-size: 10px; font-weight: bold;">Total Amount:</td>
+      <td style="font-size: 13px; font-weight: bold;" colspan="3" id="total">210.00</td>
+    </tr>
+  </table>
+
+  <div class="footer">
+    <p style="text-align: center; font-size: 9px;">Powered by Production House 🏠</p>
+  </div>
+</body>
+
+
+<!-- <body>
+  <div class="center">
+    <div>MS, PACCA SAHARANA, 1187</div>
+    <div style="font-size: 10px;">Pala ram. 9413289512</div>
+    <div><strong>Milk Received Slip</strong></div>
+  </div>
+
+  <div class="dashed"></div>
+
+  <div class="row">
+    <span>A/c No:</span><span id="account-no"></span>
+    <span>Name:</span><span id="customer"></span>
+    <span>Date:</span><span id="date"></span>
+    <span>Time:</span><span id="time"></span>
+    <span>Shift:</span><span id="shift"></span>
+    <span>Milk Type:</span><span id="milk_type"></span>
+  </div>
+  <div class="row">
+    <span>Qty:</span><span id="qty"></span>
+    <span>FAT(%):</span><span id="fat"></span>
+    <span>SNF(%):</span><span id="snf"></span>
+    <span>Oth Rs/Ltr:</span><span id="oth_rate"></span>
+    <span>Base Rate/Ltr:</span><span id="base_rate"></span>
+    <span>Rate/Ltr.:</span><span id="rate"></span>
+    <span>Total Amount:</span><span id="total"></span>
+  </div>
+
+
+
+  <div class="footer">
+    Powered by Production House 🏠
+  </div>
+</body> -->
+<script>
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    document.getElementById('account-no').innerText = params.get('account_no') || 'N/A';
+    document.getElementById('customer').innerText = params.get('customer') || 'N/A';
+    document.getElementById('date').innerText = params.get('date') || new Date().toLocaleString();
+    document.getElementById('time').innerText = params.get('time') || 'N/A';
+    // document.getElementById('shift').innerText = params.get('shift') || 'N/A';
+
+    // document.getElementById('milk_type').innerText = params.get('milk_type') || 'N/A';
+    document.getElementById('qty').innerText = params.get('qty') || 'N/A';
+    document.getElementById('fat').innerText = params.get('fat') || 'N/A';
+    document.getElementById('snf').innerText = params.get('snf') || 'N/A';
+    // document.getElementById('oth_rate').innerText = params.get('oth_rate') || '0.00';
+    // document.getElementById('base_rate').innerText = params.get('base_rate') || 'N/A';
+
+    document.getElementById('rate').innerText = params.get('rate') || 'N/A';
+    document.getElementById('total').innerText = params.get('total') || 'N/A';
+  };
+</script>
+
+</html>

@@ -22,17 +22,95 @@ const useAuthStore = create((set) => ({
     try {
       const loginData = { email, password }
       const res = await api.post('/login-admin', loginData)
-      console.log('jjkjhgfjf', res)
 
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.admin))
+      const token = res?.data?.token
+      const admin = res?.data?.admin
+
+      if (!token || !admin) {
+        set({ error: 'Login failed: invalid server response', loading: false })
+        return null
+      }
+
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(admin))
+
+      set({ user: admin, token, loading: false })
+      return res.data
+    } catch (err) {
+      // When CSP blocks the request, err.response can be undefined.
+      const message = err?.response?.data?.message || err?.message || 'Invalid credentials'
+      const data = err?.response?.data
+
+      set({ error: message, loading: false })
+      return data || { message }
+    }
+  },
+  register_sendOtp: async (adminData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/create-admin', adminData)
+      
 
       set({ user: res.data.admin, token: res.data.token, loading: false })
       return res.data
-    } catch (err) {
-      set({ error: 'Invalid credentials', loading: false })
+    } catch (error) {
+      set({ loading: false })
+      return error.response.data
+    }
+  },
 
+  register_otpVerify: async (verifyData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/verify-otp', verifyData)
+      
+      set({ loading: false })
+      localStorage.setItem('rememberEmail',"")
+      return res.data
+    } catch (error) {
+      set({ loading: false })
       return err.response.data
+    } finally {
+      set({ loading: false })
+    }
+  },
+  sendOtpForgotPassword: async (email) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/send-otp-forget-password', email)
+      set({ loading: false, error: null })
+      return res.data
+    } catch (error) {
+      set({ loading: false })
+      return err.response.data
+    } finally {
+      set({ loading: false })
+    }
+  },
+  // CHAN
+  changeForgotPassword: async (newPasswordData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await api.post('/forget-password', newPasswordData)
+      set({ loading: false })
+      return res.data
+    } catch (error) {
+      set({ loading: false })
+      return err.response.data
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  changePassword: async (changePasswordData) => {
+    set({ loading: true })
+    try {
+      const res = await api.post('/change-password', changePasswordData)
+      set({ loading: false })
+      return res.data
+    } catch (error) {
+      console.error('ERROR IN CHANGE PASSWORD', error)
+      set({ loading: false, error: 'Password change failed' })
     }
   },
 
@@ -48,18 +126,6 @@ const useAuthStore = create((set) => ({
     } catch (error) {
       console.error('ERROR IN LOGOUT API', error)
       set({ error, loading: false })
-    }
-  },
-
-  changePassword: async (changePasswordData) => {
-    set({ loading: true })
-    try {
-      const res = await api.post('/change-password', changePasswordData)
-      set({ loading: false })
-      return res.data
-    } catch (error) {
-      console.error('ERROR IN CHANGE PASSWORD', error)
-      set({ loading: false, error: 'Password change failed' })
     }
   }
 }))
