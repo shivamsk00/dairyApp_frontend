@@ -44,7 +44,7 @@ export function readPriceLines(texts) {
       const parts = splitLine(raw)
       if (!parts.length) continue
       const label = smallNumber(parts[0])
-      const hasLabel = label !== null && label >= 3 && label <= 10
+      const hasLabel = label !== null && label >= 2.5 && label <= 10
       const prices = (hasLabel ? parts.slice(1) : parts).flatMap(priceTokens)
       if (prices.filter((p) => p !== UNREADABLE).length < 3) continue // headings, notes, empty lines
       out.push({ label: hasLabel ? label : null, prices })
@@ -161,69 +161,127 @@ export function interpretRateText(texts) {
 }
 
 /**
- * Rows for the "check the scanned prices" preview, from the first SNF column the chart shows (8.1) up to
- * the last printed one. A price the list prints is used as read. The columns the list leaves out are worked
- * out with rule 3 (see lowSnfRule.js). SNF 8.1 and 8.2 are filled on every row, even above FAT 5.0; the other
- * columns the rule does not accept stay blank.
+ * Rows for the "check the scanned prices" preview, from the first SNF column the chart shows up to the last
+ * printed one. A price the list prints is used as read; every cell the list leaves empty is worked out (see
+ * recalcPreviewRows). FAT rows above the first scanned one (down to firstFat) are added and worked out too.
  *
- * Each cell is a string, '' (a price to type in) or null (nothing to enter here).
- * Each flag is 'check' (please check or fill in), 'rule' (worked out by rule 3) or false.
+ * Each row: { fat, cells, flags, kinds, stepped? }. A cell is a string, '' (a price to type in) or null
+ * (nothing to enter). A flag is 'check' (please check or fill in), 'rule' (worked out) or false.
+ * A kind is 'read' (scanned or typed by the user), 'rule' (low SNF rule) or 'step' (stepped down from the
+ * first two scanned rows).
  *
  * @param {{snfColumns:number[], rows:{fat:number,cells:(string|null)[]}[], flagged:Set<string>, missing:number[]}} result
  */
-export function buildPreviewRows(result, firstSnf = 8.1) {
+export function buildPreviewRows(result, firstSnf = 8.1, firstFat = null) {
   const last = result.snfColumns[result.snfColumns.length - 1]
   const columns = []
   for (let t = Math.round(firstSnf * 10); t <= Math.round(last * 10); t++) columns.push(t / 10)
   const printedAt = new Map(result.snfColumns.map((snf, j) => [snf, j]))
 
   const rowFor = (scanned) => {
-    const read = (snf) => {
-      const j = printedAt.get(snf)
-      if (j === undefined) return { kind: 'absent' }
-      const value = scanned.cells[j]
-      if (value === null) return { kind: 'blank' }
-      if (value === UNREADABLE) return { kind: 'unreadable' }
-      return { kind: 'value', value, flagged: result.flagged.has(`${scanned.fat}|${j}`) }
-    }
-    // printed price (as a number) or null, for the rule
-    const printedNumber = (snf) => {
-      const r = read(snf)
-      return r.kind === 'value' ? parseFloat(r.value) : null
-    }
-    const cells = []
-    const flags = []
+    const row = { fat: scanned.fat, cells: [], flags: [], kinds: [] }
     for (const snf of columns) {
-      const r = read(snf)
-      if (r.kind === 'value') {
-        cells.push(r.value)
-        flags.push(r.flagged ? 'check' : false)
-      } else if (r.kind === 'unreadable') {
-        cells.push('')
-        flags.push('check')
+      const j = printedAt.get(snf)
+      const value = j === undefined ? null : scanned.cells[j]
+      if (value === null) {
+        row.cells.push('') // the list prints nothing here: worked out below
+        row.flags.push(false)
+        row.kinds.push('rule')
       } else {
-        // the list prints nothing here: rule 3 decides
-        const res = resolveLowSnfRate(scanned.fat, snf, printedNumber, { fillLowColumns: true })
-        if (!res.accepted) {
-          cells.push(null)
-          flags.push(false)
-        } else if (res.rate !== null) {
-          cells.push(res.rate.toFixed(2))
-          flags.push('rule')
-        } else {
-          cells.push('')
-          flags.push('check') // the price it is worked out from could not be read
-        }
+        row.cells.push(value === UNREADABLE ? '' : value)
+        row.flags.push(value === UNREADABLE || result.flagged.has(`${scanned.fat}|${j}`) ? 'check' : false)
+        row.kinds.push('read')
       }
     }
-    return { fat: scanned.fat, cells, flags }
+    return row
   }
 
   const rows = result.rows.map(rowFor)
-  // Rows that could not be read at all are added empty, so they can be typed in.
+  // Rows that could not be read at all: the printed columns are typed in, the low ones then follow the rule.
   for (const fat of result.missing) {
-    rows.push({ fat, cells: columns.map(() => ''), flags: columns.map(() => 'check') })
+    rows.push({
+      fat,
+      cells: columns.map(() => ''),
+      flags: columns.map(() => 'check'),
+      kinds: columns.map((snf) => (snf < 8.5 ? 'rule' : 'read'))
+    })
   }
   rows.sort((a, b) => a.fat - b.fat)
-  return { snfColumns: columns, rows }
+
+  if (firstFat !== null) {
+    const [first, second] = rows
+    const extra = []
+    for (let f = firstFat; f < first.fat - 0.05; f = round1(f + 0.1)) {
+      extra.push({
+        fat: f,
+        stepped: true,
+        cells: columns.map(() => ''),
+        flags: columns.map(() => false),
+        // a printed column steps down; a column the rule fills is worked out from the stepped prices
+        kinds: columns.map((_, j) => (first.kinds[j] === 'read' && second?.kinds[j] === 'read' ? 'step' : 'rule'))
+      })
+    }
+    rows.unshift(...extra)
+  }
+  return { snfColumns: columns, rows: recalcPreviewRows(rows, columns) }
+}
+
+const toPaise = (c) => (c === null || c === '' || c === UNREADABLE || isNaN(Number(c)) ? null : Math.round(parseFloat(c) * 100))
+
+/**
+ * Works out every 'step' and 'rule' cell again from the current 'read' prices, so fixing a price in the
+ * preview also fixes every price worked out from it. All sums are in whole paise.
+ *   - 'step' (FAT rows above the first scanned row): first row price - n x (second row price - first row price),
+ *     n = number of 0.1 FAT steps above the first scanned row.
+ *   - 'rule': resolveLowSnfRate, a percent of the same row's 8.5 price (8.4 98%, 8.3 96% ... 8.0 90% ... 7.5 80%),
+ *     using only a read or stepped 8.5 price.
+ * A worked-out price whose source is marked 'check' is marked 'check' too.
+ */
+export function recalcPreviewRows(rows, columns) {
+  const out = rows.map((r) => ({ ...r, cells: [...r.cells], flags: [...r.flags] }))
+  const colOf = new Map(columns.map((snf, j) => [Math.round(snf * 10), j]))
+
+  const [first, second] = out.filter((r) => !r.stepped)
+  for (const row of out) {
+    if (!row.stepped) continue
+    const n = Math.round((first.fat - row.fat) * 10)
+    row.kinds.forEach((kind, j) => {
+      if (kind !== 'step') return
+      const a = toPaise(first.cells[j])
+      const b = second ? toPaise(second.cells[j]) : null
+      if (a === null || b === null) {
+        row.cells[j] = ''
+        row.flags[j] = 'check'
+        return
+      }
+      row.cells[j] = (Math.max(0, a - n * (b - a)) / 100).toFixed(2)
+      row.flags[j] = first.flags[j] === 'check' || second.flags[j] === 'check' ? 'check' : 'rule'
+    })
+  }
+
+  for (const row of out) {
+    const chartRate = (snf) => {
+      const j = colOf.get(Math.round(snf * 10))
+      if (j === undefined || row.kinds[j] === 'rule') return null
+      const p = toPaise(row.cells[j])
+      return p === null ? null : p / 100
+    }
+    row.kinds.forEach((kind, j) => {
+      if (kind !== 'rule') return
+      const snf = columns[j]
+      const res = resolveLowSnfRate(row.fat, snf, chartRate)
+      if (!res.accepted) {
+        row.cells[j] = null
+        row.flags[j] = false
+      } else if (res.rate === null) {
+        row.cells[j] = ''
+        row.flags[j] = 'check' // the price it is worked out from is missing
+      } else {
+        row.cells[j] = res.rate.toFixed(2)
+        const base = res.percent ? colOf.get(85) : undefined
+        row.flags[j] = base !== undefined && row.flags[base] === 'check' ? 'check' : 'rule'
+      }
+    })
+  }
+  return out
 }

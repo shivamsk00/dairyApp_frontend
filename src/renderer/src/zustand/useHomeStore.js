@@ -75,6 +75,27 @@ const useHomeStore = create((set, get) => ({
     }
   },
 
+  // Earlier rate charts: every save keeps the chart it replaced. Both return null when the request failed.
+  fetchRateHistory: async () => {
+    try {
+      const res = await api.get('/milk-rate-history')
+      return res.data.data
+    } catch (error) {
+      console.log('Error fetching rate chart history:', error)
+      return null
+    }
+  },
+  // Makes an earlier chart the current one; returns the new chart in the GET /milk-rates shape.
+  restoreRateHistory: async (id) => {
+    try {
+      const res = await api.post(`/milk-rate-history/${id}/restore`)
+      return res.data.data
+    } catch (error) {
+      console.log('Error restoring rate chart:', error)
+      return null
+    }
+  },
+
   // Snf Formula Save Api
   snfFormulaDataFetch: async (snfFormulaData) => {
     console.log('SNF FORMULA DATA IN FRONT SNF TABLE====>', snfFormulaData)

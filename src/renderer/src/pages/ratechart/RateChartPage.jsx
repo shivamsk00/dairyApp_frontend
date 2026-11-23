@@ -4,6 +4,7 @@ import {
   CircleCheck,
   Columns3,
   Download,
+  History,
   IndianRupee,
   Loader2,
   Rows3,
@@ -19,6 +20,7 @@ import * as XLSX from 'xlsx'
 import {
   Breadcrumb,
   Button,
+  ConfirmActionModal,
   KpiCard,
   Modal,
   SegmentedControl,
@@ -29,20 +31,35 @@ import {
 import logExport from '../../helper/auditExport'
 import { scanRateImage } from '../../helper/ocrRateChart'
 import ImageCropper, { FULL_CROP } from '../../components/ImageCropper'
-import { buildPreviewRows } from '../../helper/ocrParse'
+import { buildPreviewRows, recalcPreviewRows } from '../../helper/ocrParse'
 
 // Constants - Fixed to handle 7.2 to 10.2 range properly
 const SNF_VALUES = []
-// SNF columns start at 8.1 (built from whole numbers so 9.5 is never lost to a rounding slip).
-for (let tenths = 81; tenths <= 95; tenths++) {
+// SNF columns start at 7.5 (built from whole numbers so 9.5 is never lost to a rounding slip).
+for (let tenths = 75; tenths <= 95; tenths++) {
   SNF_VALUES.push(tenths / 10)
 }
-const FAT_VALUES = Array.from({ length: 71 }, (_, i) => parseFloat((3.0 + i * 0.1).toFixed(1)))
+const FAT_VALUES = Array.from({ length: 76 }, (_, i) => parseFloat((2.5 + i * 0.1).toFixed(1)))
 
 const initialData = FAT_VALUES.map((fat) => ({
   fat,
   snfRates: SNF_VALUES.map((snf) => ({ snf, rate: '' }))
 }))
+
+// Server rows ({ fat, snf_8_5, ... }) -> the grid, always FAT 2.5-10.0 x SNF 7.5-9.5.
+const toRateData = (data) =>
+  FAT_VALUES.map((fat) => {
+    const match = data.find((item) => Math.abs(parseFloat(item.fat) - fat) < 0.01)
+    return {
+      fat,
+      snfRates: SNF_VALUES.map((snf) => {
+        const key = `snf_${snf.toFixed(1).replace('.', '_')}`
+        return { snf, rate: match ? (match[key] ?? '') : '' }
+      })
+    }
+  })
+
+const HISTORY_REASON = { scan: 'Before a scan was saved', manual: 'Before a save', restore: 'Before a restore' }
 
 const isInvalidRate = (value) =>
   value !== '' && value !== null && value !== undefined && isNaN(Number(value))
@@ -81,6 +98,13 @@ const RateChartPage = () => {
   const [debugging, setDebugging] = useState(false)
   const rateChartDataFetch = useHomeStore((state) => state.rateChartDataFetch)
   const fetchRateChartData = useHomeStore((state) => state.fetchRateChartData)
+  const fetchRateHistory = useHomeStore((state) => state.fetchRateHistory)
+  const restoreRateHistory = useHomeStore((state) => state.restoreRateHistory)
+  // Earlier charts: null while loading; the one picked to restore waits for a confirm.
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [history, setHistory] = useState(null)
+  const [restoreTarget, setRestoreTarget] = useState(null)
+  const [restoring, setRestoring] = useState(false)
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   // Picture scan: progress, the result summary, the grid before the scan (for Undo) and the cell marks.
@@ -173,8 +197,8 @@ const RateChartPage = () => {
       }
 
       // Show what was read in a preview. The table is not touched until the user saves it. The columns start
-      // at SNF 8.1; the ones the printed list leaves out are worked out with rule 3.
-      const { snfColumns, rows } = buildPreviewRows(result, SNF_VALUES[0])
+      // at SNF 7.5; the ones the printed list leaves out are worked out from the 8.5 price.
+      const { snfColumns, rows } = buildPreviewRows(result, SNF_VALUES[0], FAT_VALUES[0])
       setPreview({ snfColumns, rows })
       setScan({ state: 'preview' })
     } catch (error) {
@@ -184,18 +208,20 @@ const RateChartPage = () => {
   }
 
   const editPreviewCell = (rowIndex, colIndex, value) => {
-    setPreview((prev) => ({
-      ...prev,
-      rows: prev.rows.map((row, i) =>
+    setPreview((prev) => {
+      const rows = prev.rows.map((row, i) =>
         i !== rowIndex
           ? row
           : {
               ...row,
               cells: row.cells.map((c, j) => (j === colIndex ? value : c)),
-              flags: row.flags.map((f, j) => (j === colIndex ? false : f)) // edited = checked by the user
+              flags: row.flags.map((f, j) => (j === colIndex ? false : f)), // edited = checked by the user
+              kinds: row.kinds.map((k, j) => (j === colIndex ? 'read' : k)) // a typed price is kept as typed
             }
       )
-    }))
+      // every price worked out from the edited one follows it
+      return { ...prev, rows: recalcPreviewRows(rows, prev.snfColumns) }
+    })
   }
 
   // Save: now the checked prices go into the table.
@@ -276,7 +302,11 @@ const RateChartPage = () => {
         }))
       }))
 
-      const updatedData = await rateChartDataFetch({ rateData: cleanedData })
+      // 'scan' labels the history copy of the chart this save replaces
+      const updatedData = await rateChartDataFetch({
+        rateData: cleanedData,
+        reason: beforeScanRef.current ? 'scan' : 'manual'
+      })
 
       if (updatedData) {
         const transformedData = updatedData.map((item) => ({
@@ -304,6 +334,31 @@ const RateChartPage = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const openHistory = async () => {
+    setHistoryOpen(true)
+    setHistory(null)
+    const list = await fetchRateHistory()
+    if (list === null) CustomToast.error('Could not load the earlier rate charts.')
+    setHistory(list ?? [])
+  }
+
+  const confirmRestore = async () => {
+    setRestoring(true)
+    const data = await restoreRateHistory(restoreTarget.id)
+    setRestoring(false)
+    if (!data) {
+      CustomToast.error('Could not restore that rate chart. Nothing was changed.')
+      return
+    }
+    setRateData(toRateData(data))
+    setMarks({})
+    beforeScanRef.current = null
+    setScan((s) => (s.state === 'done' ? { state: 'idle' } : s))
+    setRestoreTarget(null)
+    setHistoryOpen(false)
+    CustomToast.success('Earlier rate chart restored. The one it replaced is kept in history.')
   }
 
   // Flexible import function that works with any SNF columns
@@ -557,17 +612,7 @@ const RateChartPage = () => {
       try {
         const data = await fetchRateChartData()
         if (data && data.length > 0) {
-          const merged = FAT_VALUES.map((fat) => {
-            const match = data.find((item) => Math.abs(parseFloat(item.fat) - fat) < 0.01)
-            return {
-              fat,
-              snfRates: SNF_VALUES.map((snf) => {
-                const key = `snf_${snf.toFixed(1).replace('.', '_')}`
-                return { snf, rate: match ? (match[key] ?? '') : '' }
-              })
-            }
-          })
-          setRateData(merged)
+          setRateData(toRateData(data))
         }
       } catch (error) {
         console.error('Error loading data:', error)
@@ -629,6 +674,9 @@ const RateChartPage = () => {
             </Button>
             <Button size="sm" variant="secondary" icon={Download} onClick={handleExport}>
               Export Excel
+            </Button>
+            <Button size="sm" variant="secondary" icon={History} onClick={openHistory}>
+              History
             </Button>
             <Button size="sm" icon={Save} loading={loading} onClick={handleSave}>
               Save
@@ -833,9 +881,11 @@ const RateChartPage = () => {
               This is what was read from the picture. Fix anything wrong, then press <strong>Save</strong> to add it to
               the table.
               <span className="mr-1 ml-2 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-info-50)] ring-1 ring-[color:var(--ui-info-500)]" />
-              blue = worked out by rule 3 (SNF 8.1 / 8.2 at 92% / 94% of the 8.5 price; 8.3 / 8.4 at 87% / 93% of the 9.0 price where the list has none).
+              blue = worked out (an empty cell below SNF 8.5 is a percent of that row&apos;s 8.5 price, 2% less per 0.1
+              SNF: 8.4 98%, 8.3 96%, 8.2 94%, 8.1 92%, 8.0 90% … 7.5 80%; FAT rows above the list stepped down from its
+              first two rows). Fixing a price updates the blue prices worked out from it.
               <span className="mr-1 ml-2 inline-block size-3 rounded-sm align-middle bg-[color:var(--ui-danger-50)] ring-1 ring-[color:var(--ui-danger-500)]" />
-              red = please check or fill in. A dash = not accepted at that SNF (FAT 5.1 and above).
+              red = please check or fill in.
             </p>
             <div className="ui-scroll-thin ui-border-subtle max-h-[calc(100vh-20rem)] overflow-auto rounded-lg border">
               <table className="w-full border-separate border-spacing-0 text-[12.5px]">
@@ -886,7 +936,7 @@ const RateChartPage = () => {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="ui-text-tertiary text-[12px]">
-                {preview.rows.length} rows · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'check').length, 0)} prices to check · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'rule').length, 0)} worked out by rule 3
+                {preview.rows.length} rows · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'check').length, 0)} prices to check · {preview.rows.reduce((n, r) => n + r.flags.filter((f) => f === 'rule').length, 0)} worked out
               </span>
               <div className="flex gap-2">
                 <Button size="sm" variant="secondary" onClick={backToPicture}>
@@ -903,6 +953,61 @@ const RateChartPage = () => {
           </>
         )}
       </Modal>
+
+      <Modal
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        title="Earlier rate charts"
+        maxWidth="min(40rem, 96vw)"
+        className="space-y-3 p-5"
+      >
+        <p className="ui-text-secondary text-[12.5px]">
+          Every time the rate chart is saved, the chart it replaces is kept here. Restore one to use it again; the
+          chart in use now is kept too, so you can switch back.
+        </p>
+        {history === null ? (
+          <div className="flex items-center gap-2 py-6 text-[13px]">
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" /> Loading…
+          </div>
+        ) : history.length === 0 ? (
+          <p className="ui-text-tertiary py-6 text-center text-[13px]">
+            No earlier rate charts yet. One is kept the next time you save.
+          </p>
+        ) : (
+          <ul className="ui-scroll-thin ui-border-subtle max-h-[60vh] divide-y overflow-auto rounded-lg border">
+            {history.map((item) => (
+              <li key={item.id} className="ui-border-subtle flex items-center justify-between gap-3 px-3 py-2">
+                <div>
+                  <p className="text-[13px] font-semibold">
+                    {new Date(item.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </p>
+                  <p className="ui-text-tertiary text-[12px]">
+                    {HISTORY_REASON[item.reason] ?? item.reason} · {item.rows} FAT rows · {item.filled} prices
+                  </p>
+                </div>
+                <Button size="sm" variant="secondary" icon={Undo2} onClick={() => setRestoreTarget(item)}>
+                  Restore
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Modal>
+
+      <ConfirmActionModal
+        isOpen={!!restoreTarget}
+        onClose={() => setRestoreTarget(null)}
+        onConfirm={confirmRestore}
+        loading={restoring}
+        icon={History}
+        tone="warning"
+        title="Restore this rate chart?"
+        message={
+          restoreTarget &&
+          `The chart that was in use until ${new Date(restoreTarget.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })} becomes the rate chart in use. The current one is kept in history. Changes on screen that are not saved are lost.`
+        }
+        confirmLabel="Restore"
+      />
 
       <Modal
         isOpen={loading}
